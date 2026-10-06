@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { createRef } from "react";
 import { I18nextProvider } from "react-i18next";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Editor } from "~/components/Editor/Editor";
+import { Editor, type EditorHandle } from "~/components/Editor/Editor";
 
 import { testI18n } from "../support/render";
 
@@ -24,6 +25,8 @@ interface FakeCrepe {
     root: HTMLElement;
   };
   emit: (markdown: string) => void;
+  /** 에디터 안의 지금 내용(입력 알림 markdownUpdated는 늦게 올 수 있다) */
+  markdown: string;
   destroyed: boolean;
 }
 
@@ -35,6 +38,7 @@ vi.mock("@milkdown/crepe", () => ({
       this.instance = {
         config,
         emit: (markdown) => this.listener?.(null, markdown, ""),
+        markdown: config.defaultValue,
         destroyed: false,
       };
       crepe.instances.push(this.instance);
@@ -46,6 +50,9 @@ vi.mock("@milkdown/crepe", () => ({
     async create() {
       if (crepe.failCreate) throw new Error("load failed");
       return {};
+    }
+    getMarkdown() {
+      return this.instance.markdown;
     }
     async destroy() {
       this.instance.destroyed = true;
@@ -122,6 +129,17 @@ describe("Editor", () => {
     expect(onChange).toHaveBeenCalledWith("# 바뀐 글");
   });
 
+  it("ref.getMarkdown()은 입력 알림을 기다리지 않고 에디터의 지금 내용을 준다(불러오기 전에는 null)", async () => {
+    const ref = createRef<EditorHandle>();
+    renderEditor({ ref });
+
+    expect(ref.current?.getMarkdown()).toBeNull();
+    await vi.waitFor(() => expect(screen.queryByText("에디터를 불러오는 중입니다.")).toBeNull());
+
+    crepe.instances[0].markdown = "# 방금 친 글";
+    expect(ref.current?.getMarkdown()).toBe("# 방금 친 글");
+  });
+
   it("업로드 함수를 주면 이미지 블록을 켜고 그 함수로 올린다", async () => {
     const onUploadImage = vi.fn(async () => "/media/k3Jd9fQ2xLmA7pZ0bR5tYw");
     renderEditor({ onUploadImage });
@@ -152,5 +170,14 @@ describe("Editor", () => {
     expect(textarea).toHaveValue("# 처음");
     fireEvent.change(textarea, { target: { value: "직접 입력" } });
     expect(onChange).toHaveBeenCalledWith("직접 입력");
+  });
+
+  it("기본 입력란은 onChange가 바로 오므로 getMarkdown()은 null", async () => {
+    crepe.failCreate = true;
+    const ref = createRef<EditorHandle>();
+    renderEditor({ ref });
+
+    await screen.findByRole("textbox", { name: "본문" });
+    expect(ref.current?.getMarkdown()).toBeNull();
   });
 });

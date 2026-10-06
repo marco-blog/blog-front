@@ -109,18 +109,21 @@ test.describe("US1 가입 → 글 발행 → 공개 화면", () => {
     expect(await page.evaluate(() => (globalThis as { __xss?: number }).__xss)).toBeUndefined();
   });
 
-  test("java 코드 블록은 서버에서 hljs 강조, 언어 없는 블록은 강조 없음 (#17)", async ({
+  test("java·c++ 코드 블록은 서버에서 hljs 강조, 언어 없는 블록은 강조 없음 (#17)", async ({
     page,
     request,
   }) => {
     await logIn(page, owner);
     const id = await publishPost(page.request, owner.handle, {
       title: "코드 강조",
-      contentMarkdown: "```java\npublic class A {}\n```\n\n```\nplain text\n```",
+      contentMarkdown:
+        "```java\npublic class A {}\n```\n\n```c++\nint main() {}\n```\n\n```\nplain text\n```",
     });
 
     const html = await (await request.get(`/${owner.handle}/${id}`)).text();
     expect(html).toMatch(/<code class="[^"]*language-java[^"]*"><span class="hljs-/);
+    // backend 살균기는 class의 +를 &#43;로 인코딩한다. front가 풀어서 c++로 알아봐야 한다.
+    expect(html).toMatch(/<code class="language-c&#43;&#43; hljs"><span class="hljs-/);
     expect(html).toMatch(/<code>plain text\n?<\/code>/);
   });
 

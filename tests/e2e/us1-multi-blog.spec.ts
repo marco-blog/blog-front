@@ -97,13 +97,13 @@ test.describe("US1 여러 블로그", () => {
       const deleted = await callApi(page.request, "DELETE", `/blogs/${handle}`, {
         password: PASSWORD,
       });
-      expect(deleted.status).toBe(204);
+      expect(deleted.status).toBe(200);
     }
     const last = await callApi(page.request, "DELETE", `/blogs/${owner.handle}`, {
       password: PASSWORD,
     });
     expect(last.status).toBe(409);
-    expect(last.body.resultCode).toBe("LAST_BLOG_CANNOT_BE_DELETED");
+    expect(last.body.header.resultCode).toBe("LAST_BLOG_CANNOT_BE_DELETED");
 
     await page.goto("/settings/blogs");
     await expect(page.getByText("블로그 1 / 3")).toBeVisible();
