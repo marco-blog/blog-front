@@ -65,6 +65,10 @@ export interface Blog {
   subscribedByMe: boolean | null;
   feedItemCount: 10 | 20 | 30 | 50;
   feedContentMode: FeedContentMode;
+  /** "포털에 내 글 노출"(003 FR-089, 기본 true) */
+  portalEnabled?: boolean;
+  /** 블로그 기본 주제(소분류, 003 FR-077) */
+  defaultTopicId?: number | null;
 }
 
 /** GET /me/blogs */
@@ -129,6 +133,8 @@ export interface PostDetail {
   likeCount: number;
   /** 로그인 회원이 눌렀으면 true, 아니면 false, 비로그인이면 null */
   likedByMe: boolean | null;
+  /** 글의 주제(소분류, 003). 이름은 GET /topics 트리로 찾는다 */
+  topicId?: number | null;
 }
 
 /** 작성 화면의 내용(DraftWrite). 카테고리·태그는 US2에서 채운다. */
@@ -137,6 +143,8 @@ export interface DraftWrite {
   contentMarkdown: string;
   categoryId?: number | null;
   tags?: string[];
+  /** 작성 중 주제(소분류, 003). 저장 때는 검증하지 않는다 */
+  topicId?: number | null;
 }
 
 /** GET /posts/{id}/draft */
@@ -164,6 +172,8 @@ export interface PublishSettings {
   thumbnailMediaKey?: string | null;
   categoryId?: number | null;
   tags?: string[];
+  /** 값이 있으면 그 주제, null·생략이면 작성 중 사본의 값(003) */
+  topicId?: number | null;
 }
 
 /** GET /me/login-history 한 줄(IP는 backend가 일부 가림) */
@@ -325,4 +335,187 @@ export interface BulkNotificationRequest {
 }
 export interface BulkNotificationResult {
   updated: number;
+}
+
+// ---- 003 포털(003 contracts/api.md) ----
+
+/** 화면 언어별 이름(4개 언어 모두 온다) */
+export type TopicNames = Record<"ko" | "en" | "ja" | "zh-CN", string>;
+
+/** GET /topics: 대분류 순서대로, 각 children은 소분류 순서대로(소분류의 children은 늘 []) */
+export interface TopicNode {
+  id: number;
+  slug: string;
+  /** 대분류면 null(응답에서 빠질 수 있다) */
+  parentId?: number | null;
+  names: TopicNames;
+  /** `#RRGGBB`. 소분류가 null이면 대분류 색을 쓴다 */
+  cardColor?: string | null;
+  /** 주제 탭에 보이는지(FR-147 자동 숨김 계산) */
+  onTab: boolean;
+  children: TopicNode[];
+}
+
+/** 포털 카드(FR-085) */
+export interface PortalCard {
+  id: number;
+  title: string;
+  summary: string | null;
+  thumbnailUrl: string | null;
+  topicId: number | null;
+  blog: BlogRef;
+  author: { nickname: string; profileImageUrl: string | null };
+  publishedAt: string;
+  likeCount: number;
+  commentCount: number;
+}
+
+export interface PopularTag {
+  name: string;
+  postCount: number;
+}
+
+export interface NewBlog {
+  handle: string;
+  title: string;
+  description: string | null;
+  coverImageUrl: string | null;
+  owner: { nickname: string; profileImageUrl: string | null };
+  firstPublishedAt: string;
+}
+
+/** GET /portal. 빈 영역은 []. `latest.nextCursor`가 없으면(null·생략) 더 없음 */
+export interface PortalHome {
+  curations: PortalCard[];
+  popular: PortalCard[];
+  latest: { items: PortalCard[]; nextCursor?: string | null };
+  popularTags: PopularTag[];
+  newBlogs: NewBlog[];
+  generatedAt: string;
+}
+
+export interface UserRef {
+  userId: number;
+  nickname: string;
+}
+
+/** GET /admin/topics: TopicNode + 관리 정보 */
+export interface AdminTopicNode extends Omit<TopicNode, "children"> {
+  adminHidden: boolean;
+  effectiveHidden: boolean;
+  pinnedOnTab: boolean;
+  recentPostCount: number;
+  createdAt: string;
+  updatedAt: string;
+  children: AdminTopicNode[];
+}
+
+export type CurationStatus = "ACTIVE" | "UPCOMING" | "ENDED";
+
+export interface Curation {
+  id: number;
+  post: { id: number; title: string; blogHandle: string };
+  startsAt: string;
+  endsAt: string;
+  sortOrder: number;
+  status: CurationStatus;
+  portalEligible: boolean;
+  createdBy: UserRef;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Exclusion {
+  post: { id: number; title: string; blogHandle: string };
+  reason: string;
+  excludedBy: UserRef;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GET /admin/portal/posts/{id} */
+export interface AdminPortalPost {
+  id: number;
+  title: string;
+  blog: BlogRef;
+  status: PostStatus;
+  visibility: Visibility;
+  publishedAt: string | null;
+  portalEligible: boolean;
+  ineligibleReasons: string[];
+  excluded: { reason: string; excludedBy: UserRef; createdAt: string } | null;
+}
+
+/** 인기 점수 가중치(설정 `portal.score-weights`) */
+export interface ScoreWeights {
+  view: number;
+  readComplete: number;
+  like: number;
+  comment: number;
+  halfLifeHours: number;
+  reportPenalty: number;
+}
+
+/** GET /admin/settings 한 줄 */
+export interface Setting {
+  key: string;
+  value: unknown;
+  defaultValue: unknown;
+  overridden: boolean;
+  updatedBy: UserRef | null;
+  updatedAt: string | null;
+}
+
+/** 릴리스 노트 요약(GET /release-notes, 001 contracts) */
+export interface ReleaseNoteSummary {
+  version: string;
+  title: string;
+  releaseDate: string;
+  firstPublishedAt: string;
+  lang: string;
+}
+
+/** GET /release-notes */
+export interface ReleaseNoteList {
+  items: ReleaseNoteSummary[];
+  portalCard: ReleaseNoteSummary | null;
+}
+
+export interface ReleaseNoteTocEntry {
+  level: number;
+  text: string;
+  anchor: string;
+}
+
+/** GET /release-notes/{version} */
+export interface ReleaseNoteDetail {
+  version: string;
+  releaseDate: string;
+  firstPublishedAt: string;
+  updatedAt: string;
+  requestedLang: string;
+  lang: string;
+  title: string;
+  contentHtml: string;
+  toc: ReleaseNoteTocEntry[];
+  prev: { version: string; title: string } | null;
+  next: { version: string; title: string } | null;
+  revisionCount: number;
+  /** 수정본 보기(GET .../revisions/{revisionNo})일 때만 */
+  revisionNo?: number;
+}
+
+/** GET /release-notes/search 한 줄 */
+export interface ReleaseNoteSearchHit {
+  version: string;
+  title: string;
+  snippet: string;
+  releaseDate: string;
+  lang: string;
+}
+
+/** GET /release-notes/{version}/revisions 한 줄 */
+export interface ReleaseNoteRevision {
+  revisionNo: number;
+  editedAt: string;
 }

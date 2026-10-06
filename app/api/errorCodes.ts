@@ -5,7 +5,7 @@ import { UNKNOWN_ERROR_CODE, UNKNOWN_FIELD_ERROR_CODE } from "./errorMessage";
  * 화면 문구가 있어야 하는 오류 코드 목록(FR-154, SC-024). 문구는 4개 언어 `errors.json`의 `{code}` 키다.
  * - backend `resultCode`: contracts/api.md "오류 코드" 표의 001 코드 + 002 코드(NOTIFICATION_NOT_FOUND,
  *   CANNOT_SUBSCRIBE_OWN_BLOG) + 공통 처리 코드(backend `ErrorCode`).
- *   003·006 전용 코드(RELEASE_NOTE_*)는 해당 스펙을 구현할 때 더한다(tasks.md "구현 전 결정 사항" 8번).
+ *   003 코드(주제·추천·제외·설정, 003 contracts/api.md)와 001 표의 릴리스 노트 코드 5개(003 구현 때 더함, 001 결정 8번)
  * - front가 정하는 코드(BACKEND_UNAVAILABLE 등)와 모르는 코드용 UNKNOWN
  * 새 코드를 쓰면 여기와 4개 언어 errors.json에 같은 PR에서 넣는다(tests/unit/i18n/errorCodes.test.ts).
  */
@@ -31,6 +31,11 @@ export const API_ERROR_CODES = [
   "MEDIA_NOT_FOUND",
   "NOTIFICATION_NOT_FOUND",
   "NOT_FOUND",
+  "TOPIC_NOT_FOUND",
+  "CURATION_NOT_FOUND",
+  "PORTAL_EXCLUSION_NOT_FOUND",
+  "SETTING_NOT_FOUND",
+  "RELEASE_NOTE_NOT_FOUND",
   // 409
   "EMAIL_TAKEN",
   "HANDLE_TAKEN",
@@ -38,6 +43,11 @@ export const API_ERROR_CODES = [
   "BLOG_LIMIT_EXCEEDED",
   "LAST_BLOG_CANNOT_BE_DELETED",
   "POST_NOT_PUBLISHED",
+  "TOPIC_SLUG_TAKEN",
+  "CURATION_LIMIT_EXCEEDED",
+  "RELEASE_NOTE_VERSION_TAKEN",
+  "RELEASE_NOTE_REVISION_CONFLICT",
+  "RELEASE_NOTE_ONCE_PUBLISHED",
   // 413, 415
   "MEDIA_TOO_LARGE",
   "MEDIA_TYPE_NOT_ALLOWED",
@@ -52,6 +62,10 @@ export const API_ERROR_CODES = [
   "POST_CONTENT_EMPTY",
   "TERMS_VERSION_OUTDATED",
   "CANNOT_SUBSCRIBE_OWN_BLOG",
+  "TOPIC_NOT_SELECTABLE",
+  "TOPIC_DEPTH_EXCEEDED",
+  "POST_NOT_PORTAL_ELIGIBLE",
+  "RELEASE_NOTE_VERSION_LOCKED",
   // 423, 429
   "ACCOUNT_LOCKED",
   "MEDIA_TEMP_QUOTA_EXCEEDED",

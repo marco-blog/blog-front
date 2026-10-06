@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "description": "글을 쓰고 나누는 블로그 서비스입니다. 주제별 인기 글과 최신 글을 둘러보세요."
+  },
+  "home": {
+    "title": "블로그 포털",
+    "feedLink": "구독 피드 보기",
+    "releaseNote": "새 소식: {{title}}",
+    "releaseNoteLink": "업데이트 보기",
+    "curations": "운영자 추천",
+    "topics": "주제",
+    "popular": "인기 글",
+    "latest": "최신 글",
+    "more": "더 보기",
+    "loading": "불러오는 중…",
+    "popularTags": "인기 태그",
+    "newBlogs": "새로 시작한 블로그",
+    "newBlogSince": "{{time}} 시작",
+    "emptyTitle": "아직 포털에 소개할 글이 없습니다",
+    "emptyWrite": "첫 글을 써 보세요",
+    "emptySignup": "가입하고 첫 글을 써 보세요"
+  },
+  "card": {
+    "likes": "좋아요 {{count, number}}",
+    "comments": "댓글 {{count, number}}",
+    "noTopic": "주제 없음",
+    "author": "작성자"
+  },
+  "topic": {
+    "description": "{{name}} 주제의 글을 모아 봅니다.",
+    "subtopics": "소분류",
+    "all": "전체",
+    "sortLabel": "정렬",
+    "latest": "최신순",
+    "popular": "인기순",
+    "posts": "글 목록",
+    "empty": "이 주제에는 아직 글이 없습니다.",
+    "popularEmpty": "최근 7일 동안 반응을 얻은 글이 없습니다. 최신순으로 둘러보세요."
+  }
+}

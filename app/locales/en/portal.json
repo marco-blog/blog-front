@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "description": "A blog service for writing and sharing your posts. Browse popular and latest posts by topic."
+  },
+  "home": {
+    "title": "Blog portal",
+    "feedLink": "Go to my feed",
+    "releaseNote": "What's new: {{title}}",
+    "releaseNoteLink": "See the update",
+    "curations": "Editor's picks",
+    "topics": "Topics",
+    "popular": "Popular posts",
+    "latest": "Latest posts",
+    "more": "Show more",
+    "loading": "Loading…",
+    "popularTags": "Popular tags",
+    "newBlogs": "New blogs",
+    "newBlogSince": "Started {{time}}",
+    "emptyTitle": "There are no posts on the portal yet",
+    "emptyWrite": "Write the first post",
+    "emptySignup": "Sign up and write the first post"
+  },
+  "card": {
+    "likes": "{{count, number}} likes",
+    "comments": "{{count, number}} comments",
+    "noTopic": "No topic",
+    "author": "Author"
+  },
+  "topic": {
+    "description": "Posts about {{name}}.",
+    "subtopics": "Subtopics",
+    "all": "All",
+    "sortLabel": "Sort",
+    "latest": "Latest",
+    "popular": "Popular",
+    "posts": "Posts",
+    "empty": "There are no posts on this topic yet.",
+    "popularEmpty": "No posts got reactions in the last 7 days. Try the latest posts."
+  }
+}

@@ -1,11 +1,5 @@
 {
   "appName": "博客",
-  "home": {
-    "title": "博客",
-    "intro": "撰写和分享文章的博客服务。",
-    "signup": "注册并创建博客",
-    "login": "登录"
-  },
   "notFound": {
     "title": "找不到页面",
     "description": "地址有误或页面已被删除。",

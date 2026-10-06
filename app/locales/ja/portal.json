@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "description": "記事を書いて共有するブログサービスです。トピック別の人気記事と最新記事をご覧ください。"
+  },
+  "home": {
+    "title": "ブログポータル",
+    "feedLink": "購読フィードを見る",
+    "releaseNote": "お知らせ: {{title}}",
+    "releaseNoteLink": "アップデートを見る",
+    "curations": "運営おすすめ",
+    "topics": "トピック",
+    "popular": "人気記事",
+    "latest": "最新記事",
+    "more": "もっと見る",
+    "loading": "読み込み中…",
+    "popularTags": "人気タグ",
+    "newBlogs": "新しく始まったブログ",
+    "newBlogSince": "{{time}}に開始",
+    "emptyTitle": "ポータルに紹介できる記事はまだありません",
+    "emptyWrite": "最初の記事を書いてみましょう",
+    "emptySignup": "登録して最初の記事を書いてみましょう"
+  },
+  "card": {
+    "likes": "いいね {{count, number}}",
+    "comments": "コメント {{count, number}}",
+    "noTopic": "トピックなし",
+    "author": "作成者"
+  },
+  "topic": {
+    "description": "{{name}}の記事をまとめて見られます。",
+    "subtopics": "サブトピック",
+    "all": "すべて",
+    "sortLabel": "並び替え",
+    "latest": "新着順",
+    "popular": "人気順",
+    "posts": "記事一覧",
+    "empty": "このトピックにはまだ記事がありません。",
+    "popularEmpty": "最近7日間に反応のあった記事はありません。新着順でご覧ください。"
+  }
+}
