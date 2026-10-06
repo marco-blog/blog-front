@@ -11,6 +11,59 @@ export function requireBackend() {
   test.skip(!backendUrl, "E2E_BACKEND_URL이 없으면 backend가 필요한 시나리오는 건너뛴다.");
 }
 
+/**
+ * 포털(003) 시나리오는 backend를 시험용 운영 설정으로 띄웠을 때만 돈다: 캐시 끔(BLOG_PORTAL_CACHE_TTL=0s), 가입 후 대기 없음
+ * (BLOG_PORTAL_NEW_MEMBER_DELAY=PT0S), 주제 탭 자동 숨김 기준 1편(BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD=1).
+ * 그렇게 띄웠다는 표시로 E2E_PORTAL_TEST_SETTINGS=1을 준다.
+ */
+export function requirePortalTestSettings() {
+  test.skip(
+    process.env.E2E_PORTAL_TEST_SETTINGS !== "1",
+    "E2E_PORTAL_TEST_SETTINGS=1(포털 시험용 backend 설정)이 아니면 포털 시나리오는 건너뛴다.",
+  );
+}
+
+/** 관리자 계정(E2E_ADMIN_EMAIL·E2E_ADMIN_PASSWORD). 없으면 관리자 시나리오는 건너뛴다. */
+export function requireAdmin() {
+  test.skip(
+    !process.env.E2E_ADMIN_EMAIL || !process.env.E2E_ADMIN_PASSWORD,
+    "E2E_ADMIN_EMAIL·E2E_ADMIN_PASSWORD가 없으면 관리자 시나리오는 건너뛴다.",
+  );
+}
+
+export function adminAccount() {
+  return {
+    email: process.env.E2E_ADMIN_EMAIL ?? "",
+    password: process.env.E2E_ADMIN_PASSWORD ?? "",
+  };
+}
+
+/** 포털 최소 길이(기본 200자)를 넘는 본문. n은 문단 수(문단마다 70자 남짓, 최소 4문단) */
+export function portalText(n = 4, seed = "포털") {
+  return Array.from(
+    { length: Math.max(n, 4) },
+    (_, i) =>
+      `${seed} 본문 ${i + 1}번째 문단입니다. 포털 카드에 나오려면 본문 텍스트가 최소 길이를 넘어야 하므로 문장을 넉넉하게 이어서 씁니다. 끝.`,
+  ).join("\n\n");
+}
+
+/** `GET /topics` 트리에서 slug(대분류·소분류)의 id. 없으면 시험 실패 */
+export async function topicIdBySlug(request: APIRequestContext, slug: string) {
+  const tree = await callApi<TopicTreeNode[]>(request, "GET", "/topics");
+  expect(tree.status).toBe(200);
+  const found = tree.body.result
+    .flatMap((major) => [major, ...major.children])
+    .find((topic) => topic.slug === slug);
+  expect(found, `주제 ${slug}`).toBeTruthy();
+  return found!.id;
+}
+
+interface TopicTreeNode {
+  id: number;
+  slug: string;
+  children: TopicTreeNode[];
+}
+
 export const PASSWORD = "e2e-pass-1234";
 
 /** 실행마다 겹치지 않는 handle(영문 소문자·숫자 3~20자). 뒤에 "-dev" 등을 붙일 여유를 둔다. */
@@ -83,7 +136,15 @@ export async function callApi<T>(
 export async function publishPost(
   request: APIRequestContext,
   handle: string,
-  post: { title: string; contentMarkdown: string; visibility?: "PUBLIC" | "PRIVATE" },
+  post: {
+    title: string;
+    contentMarkdown: string;
+    visibility?: "PUBLIC" | "PRIVATE";
+    /** 003 주제(소분류 id). 주제 지정은 003 US3에서 발행 API에 붙는다 */
+    topicId?: number;
+    /** 대표 이미지 mediaKey(본문 이미지 중 하나) */
+    thumbnail?: string;
+  },
 ) {
   const draft = await callApi<{ id: number }>(request, "POST", `/blogs/${handle}/posts/drafts`, {
     title: post.title,
@@ -94,6 +155,8 @@ export async function publishPost(
   const published = await callApi(request, "POST", `/posts/${id}/publish`, {
     visibility: post.visibility ?? "PUBLIC",
     commentEnabled: true,
+    ...(post.topicId === undefined ? {} : { topicId: post.topicId }),
+    ...(post.thumbnail === undefined ? {} : { thumbnailMediaKey: post.thumbnail }),
   });
   expect(published.status).toBe(200);
   return id;
