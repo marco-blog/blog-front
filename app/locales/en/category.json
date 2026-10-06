@@ -1,0 +1,50 @@
+{
+  "uncategorized": "Uncategorized",
+  "tree": {
+    "label": "Categories",
+    "all": "All posts"
+  },
+  "select": {
+    "label": "Category"
+  },
+  "page": {
+    "empty": "No public posts in this category yet.",
+    "children": "Subcategories"
+  },
+  "manage": {
+    "title": "Categories",
+    "hint": "Categories can be two levels deep. Deleting a category makes its posts (including posts in its subcategories) uncategorized.",
+    "empty": "No categories yet.",
+    "list": "Category list",
+    "postCount": "{{count}} public posts",
+    "viewPosts": "View in Posts",
+    "create": {
+      "label": "New category",
+      "name": "Name",
+      "parent": "Parent category",
+      "top": "(Top level)",
+      "submit": "Create",
+      "done": "Category created."
+    },
+    "rename": {
+      "label": "Name of {{name}}",
+      "submit": "Rename",
+      "done": "Category renamed."
+    },
+    "order": {
+      "up": "Move {{name}} up",
+      "down": "Move {{name}} down",
+      "parent": "Position of {{name}}",
+      "move": "Move",
+      "done": "Category order changed."
+    },
+    "delete": {
+      "submit": "Delete",
+      "confirm": "Delete the category “{{name}}”? All its posts, including {{count}} public posts, become uncategorized and its subcategories are deleted too.",
+      "confirmButton": "Delete",
+      "cancel": "Cancel",
+      "done": "Category deleted.",
+      "label": "Delete {{name}}"
+    }
+  }
+}

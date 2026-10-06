@@ -1,0 +1,17 @@
+{
+  "input": {
+    "label": "标签",
+    "placeholder": "输入标签后按 Enter",
+    "add": "添加",
+    "remove": "移除标签 {{tag}}",
+    "hint": "最多 {{max}} 个,每个最多 {{maxLength}} 个字符。英文字母将以小写保存。",
+    "limit": "最多可添加 {{max}} 个标签。",
+    "tooLong": "标签最多 {{maxLength}} 个字符。"
+  },
+  "page": {
+    "empty": "还没有带此标签的公开文章。"
+  },
+  "list": {
+    "label": "标签"
+  }
+}

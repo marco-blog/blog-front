@@ -18,7 +18,7 @@ describe("PublishSettingsDialog", () => {
       <I18nextProvider i18n={testI18n("ja")}>
         <PublishSettingsDialog
           published={false}
-          initial={{ visibility: "PUBLIC", commentEnabled: true }}
+          initial={{ visibility: "PUBLIC", commentEnabled: true, categoryId: null, tags: [] }}
           pending={pending}
           onClose={onClose}
           onPublish={onPublish}
@@ -47,7 +47,12 @@ describe("PublishSettingsDialog", () => {
     fireEvent.click(screen.getByRole("radio", { name: "非公開(自分のみ)" }));
     fireEvent.click(screen.getByRole("radio", { name: "公開" }));
     fireEvent.click(screen.getByRole("button", { name: "公開する" }));
-    expect(onPublish).toHaveBeenCalledWith({ visibility: "PUBLIC", commentEnabled: true });
+    expect(onPublish).toHaveBeenCalledWith({
+      visibility: "PUBLIC",
+      commentEnabled: true,
+      categoryId: null,
+      tags: [],
+    });
   });
 });
 

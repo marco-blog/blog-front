@@ -66,7 +66,10 @@
       "makePrivate": "非公開にする",
       "delete": "ゴミ箱に移動",
       "noneSelected": "先に記事を選んでください。",
-      "done": "{{updated}}件の記事を変更しました。"
+      "done": "{{updated}}件の記事を変更しました。",
+      "move": "カテゴリを移動",
+      "moveTarget": "移動先カテゴリ",
+      "moveSubmit": "移動"
     },
     "edit": "編集",
     "continue": "続きを書く",
@@ -76,7 +79,8 @@
     "deletedAt": "削除 {{date}}",
     "purgeAt": "{{date}}に完全削除",
     "restore": "復元",
-    "restored": "記事を復元しました。"
+    "restored": "記事を復元しました。",
+    "category": "カテゴリ"
   },
   "settings": {
     "title": "ブログ設定",

@@ -66,7 +66,10 @@
       "makePrivate": "비공개로 바꾸기",
       "delete": "휴지통으로 옮기기",
       "noneSelected": "글을 먼저 고르세요.",
-      "done": "글 {{updated}}편을 바꿨습니다."
+      "done": "글 {{updated}}편을 바꿨습니다.",
+      "move": "카테고리 옮기기",
+      "moveTarget": "옮길 카테고리",
+      "moveSubmit": "옮기기"
     },
     "edit": "수정",
     "continue": "이어 쓰기",
@@ -76,7 +79,8 @@
     "deletedAt": "삭제 {{date}}",
     "purgeAt": "{{date}}에 영구 삭제",
     "restore": "복구",
-    "restored": "글을 복구했습니다."
+    "restored": "글을 복구했습니다.",
+    "category": "카테고리"
   },
   "settings": {
     "title": "블로그 설정",

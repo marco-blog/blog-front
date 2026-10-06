@@ -58,6 +58,16 @@ const me = {
   unseenReleaseNote: null,
 };
 const LATEST = "GET /api/v1/blogs/marco/posts/drafts/latest";
+const CATEGORIES = "GET /api/v1/blogs/marco/categories";
+const tree = [
+  {
+    id: 12,
+    name: "Spring",
+    postCount: 3,
+    children: [{ id: 13, name: "JPA", postCount: 1, children: [] }],
+  },
+  { id: 20, name: "일상", postCount: 0, children: [] },
+];
 const CREATE_DRAFT = "POST /api/v1/blogs/marco/posts/drafts";
 const loggedIn = { cookie: "access_token=a" };
 
@@ -89,34 +99,41 @@ describe("write loader", () => {
 
   it("새 글: 이 블로그의 최근 임시저장을 함께 넘기고 last_blog 쿠키를 저장한다", async () => {
     const latest = { id: 55, title: "쓰던 글", savedAt: "2026-10-06T04:24:19Z" };
-    mockBackend({ [ME]: ok(me), [LATEST]: ok(latest) });
+    mockBackend({ [ME]: ok(me), [LATEST]: ok(latest), [CATEGORIES]: ok(tree) });
     const request = getRequest("/marco/write", loggedIn);
 
     const result = await loader(routeArgs<LoaderArgs>(request, { handle: "marco" }));
 
-    expect(result).toEqual({ handle: "marco", post: null, draft: null, latestDraft: latest });
+    expect(result).toEqual({
+      handle: "marco",
+      post: null,
+      draft: null,
+      latestDraft: latest,
+      categories: tree,
+    });
     expect(responseCookies(request)).toEqual([
       expect.stringMatching(/^last_blog=marco; Path=\/; Max-Age=31536000; HttpOnly; SameSite=Lax/),
     ]);
   });
 
   it("새 글: 임시저장이 없으면(null) 묻지 않는다", async () => {
-    mockBackend({ [ME]: ok(me), [LATEST]: ok(null) });
+    mockBackend({ [ME]: ok(me), [LATEST]: ok(null), [CATEGORIES]: ok([]) });
 
     await expect(callLoader("/marco/write", { handle: "marco" })).resolves.toMatchObject({
       latestDraft: null,
     });
   });
 
-  it("글 수정: 작성 중 사본과 글 상태를 불러온다", async () => {
+  it("글 수정: 작성 중 사본(카테고리·태그 포함)과 글 상태, 카테고리 트리를 불러온다", async () => {
     mockBackend({
       [ME]: ok(me),
+      [CATEGORIES]: ok(tree),
       "GET /api/v1/posts/123": ok({ ...postDetail, contentMarkdown: "발행본" }),
       "GET /api/v1/posts/123/draft": ok({
         title: "고친 제목",
         contentMarkdown: "고친 본문",
-        categoryId: null,
-        tags: [],
+        categoryId: 13,
+        tags: ["jpa"],
         savedAt: "2026-10-06T05:00:00Z",
       }),
     });
@@ -126,14 +143,35 @@ describe("write loader", () => {
     expect(result).toEqual({
       handle: "marco",
       post: { id: 123, status: "PUBLISHED", visibility: "PUBLIC", commentEnabled: true },
-      draft: { title: "고친 제목", contentMarkdown: "고친 본문", savedAt: "2026-10-06T05:00:00Z" },
+      draft: {
+        title: "고친 제목",
+        contentMarkdown: "고친 본문",
+        categoryId: 13,
+        tags: ["jpa"],
+        savedAt: "2026-10-06T05:00:00Z",
+      },
       latestDraft: null,
+      categories: tree,
     });
+  });
+
+  it("글 수정: 사본에 카테고리·태그가 없으면 미분류·빈 목록", async () => {
+    mockBackend({
+      [ME]: ok(me),
+      [CATEGORIES]: ok([]),
+      "GET /api/v1/posts/123": ok(postDetail),
+      "GET /api/v1/posts/123/draft": ok({ title: "t", contentMarkdown: "c", savedAt: null }),
+    });
+
+    await expect(
+      callLoader("/marco/write/123", { handle: "marco", postId: "123" }),
+    ).resolves.toMatchObject({ draft: { categoryId: null, tags: [] } });
   });
 
   it("글 수정: :handle 블로그의 글이 아니면 404", async () => {
     mockBackend({
       [ME]: ok(me),
+      [CATEGORIES]: ok([]),
       "GET /api/v1/posts/123": ok({ ...postDetail, blogHandle: "marco-dev" }),
       "GET /api/v1/posts/123/draft": ok({ title: "", contentMarkdown: "", savedAt: null }),
     });
@@ -172,7 +210,24 @@ describe("write meta", () => {
 });
 
 describe("write 화면", () => {
-  const newPost: LoaderData = { handle: "marco", post: null, draft: null, latestDraft: null };
+  const newPost: LoaderData = {
+    handle: "marco",
+    post: null,
+    draft: null,
+    latestDraft: null,
+    categories: tree,
+  };
+  const savedDraft = (
+    title: string,
+    contentMarkdown: string,
+    savedAt = "2026-10-06T04:24:19Z",
+  ) => ({
+    title,
+    contentMarkdown,
+    categoryId: null,
+    tags: [],
+    savedAt,
+  });
 
   function renderWrite(data: LoaderData = newPost, entry = "/marco/write") {
     return renderRoutes(
@@ -238,8 +293,9 @@ describe("write 화면", () => {
       {
         handle: "marco",
         post: { id: 123, status: "PUBLISHED", visibility: "PRIVATE", commentEnabled: false },
-        draft: { title: "제목", contentMarkdown: "본문", savedAt: "2026-10-06T04:24:19Z" },
+        draft: savedDraft("제목", "본문"),
         latestDraft: null,
+        categories: tree,
       },
       "/marco/write/123",
     );
@@ -270,8 +326,18 @@ describe("write 화면", () => {
       CREATE_DRAFT,
       "POST /api/v1/posts/77/publish",
     ]);
-    expect(backend.calls[0].body).toEqual({ title: "새 글", contentMarkdown: "# 안녕" });
-    expect(backend.calls[1].body).toEqual({ visibility: "PUBLIC", commentEnabled: false });
+    expect(backend.calls[0].body).toEqual({
+      title: "새 글",
+      contentMarkdown: "# 안녕",
+      categoryId: null,
+      tags: [],
+    });
+    expect(backend.calls[1].body).toEqual({
+      visibility: "PUBLIC",
+      commentEnabled: false,
+      categoryId: null,
+      tags: [],
+    });
   });
 
   it("발행 직전에 에디터의 지금 내용을 읽어 저장한다(입력 알림이 아직 오지 않았어도)", async () => {
@@ -286,7 +352,7 @@ describe("write 화면", () => {
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "공개 발행" }));
 
     expect(await screen.findByText("post page")).toBeInTheDocument();
-    expect(backend.calls[0].body).toEqual({
+    expect(backend.calls[0].body).toMatchObject({
       title: "빠르게 쓴 글",
       contentMarkdown: "방금 친 본문",
     });
@@ -301,7 +367,12 @@ describe("write 화면", () => {
     fireEvent.click(screen.getByRole("button", { name: "임시저장" }));
 
     await vi.waitFor(() => expect(backend.calls).toHaveLength(1));
-    expect(backend.calls[0].body).toEqual({ title: "제목", contentMarkdown: "늦게 알린 본문" });
+    expect(backend.calls[0].body).toEqual({
+      title: "제목",
+      contentMarkdown: "늦게 알린 본문",
+      categoryId: null,
+      tags: [],
+    });
   });
 
   it("발행 오류(POST_CONTENT_EMPTY, 제목 REQUIRED)는 발행 설정 안에 보여준다", async () => {
@@ -354,7 +425,115 @@ describe("write 화면", () => {
       CREATE_DRAFT,
       "PUT /api/v1/posts/77/draft",
     ]);
-    expect(backend.calls[1].body).toEqual({ title: "제목", contentMarkdown: "본문 2" });
+    expect(backend.calls[1].body).toMatchObject({ title: "제목", contentMarkdown: "본문 2" });
+  });
+
+  it("발행 설정에서 고른 카테고리·태그를 사본에 저장하고 발행 요청에 담는다", async () => {
+    const backend = savingBackend({
+      "POST /api/v1/posts/77/publish": ok({ ...postDetail, id: 77 }),
+    });
+    renderWrite();
+    await type("분류한 글", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    const dialog = screen.getByRole("dialog");
+    const select = within(dialog).getByRole("combobox", { name: "카테고리" });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["미분류", "Spring", "— JPA", "일상"]);
+    fireEvent.change(select, { target: { value: "13" } });
+    const tagInput = within(dialog).getByRole("textbox", { name: "태그" });
+    fireEvent.change(tagInput, { target: { value: "  Spring Boot " } });
+    fireEvent.keyDown(tagInput, { key: "Enter" });
+    expect(within(dialog).getByText("#spring boot")).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "공개 발행" }));
+
+    expect(await screen.findByText("post page")).toBeInTheDocument();
+    expect(backend.calls[0].body).toEqual({
+      title: "분류한 글",
+      contentMarkdown: "본문",
+      categoryId: 13,
+      tags: ["spring boot"],
+    });
+    expect(backend.calls[1].body).toEqual({
+      visibility: "PUBLIC",
+      commentEnabled: true,
+      categoryId: 13,
+      tags: ["spring boot"],
+    });
+  });
+
+  it("사본의 카테고리·태그로 열고, 바꾼 뒤 닫으면 저장하지 않은 변경으로 남아 임시저장된다", async () => {
+    const backend = mockBackend({
+      "PUT /api/v1/posts/123/draft": ok({ id: 123, savedAt: "2026-10-06T05:10:00Z" }),
+    });
+    renderWrite(
+      {
+        handle: "marco",
+        post: { id: 123, status: "PUBLISHED", visibility: "PUBLIC", commentEnabled: true },
+        draft: { ...savedDraft("제목", "본문"), categoryId: 20, tags: ["daily", "life"] },
+        latestDraft: null,
+        categories: tree,
+      },
+      "/marco/write/123",
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "완료" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByRole("combobox", { name: "카테고리" })).toHaveValue("20");
+    expect(within(dialog).getByText("#daily")).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "daily 태그 빼기" }));
+    fireEvent.change(within(dialog).getByRole("combobox", { name: "카테고리" }), {
+      target: { value: "" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "닫기" }));
+
+    expect(screen.getByText("저장하지 않은 변경이 있습니다.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "임시저장" }));
+    await vi.waitFor(() => expect(backend.calls).toHaveLength(1));
+    expect(backend.calls[0].body).toEqual({
+      title: "제목",
+      contentMarkdown: "본문",
+      categoryId: null,
+      tags: ["life"],
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    expect(
+      within(screen.getByRole("dialog")).getByRole("combobox", { name: "카테고리" }),
+    ).toHaveValue("");
+  });
+
+  it("태그·카테고리 발행 오류 문구", async () => {
+    savingBackend({
+      "POST /api/v1/posts/77/publish": fail(400, "VALIDATION_FAILED", [
+        { field: "tags[0]", code: "TOO_LONG", params: { max: 30 } },
+      ]),
+    });
+    renderWrite();
+    await type("제목", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(await within(screen.getByRole("dialog")).findByRole("alert")).toHaveTextContent(
+      "태그: 30자 이하로 입력해 주세요.",
+    );
+  });
+
+  it("다른 블로그 카테고리(CATEGORY_NOT_FOUND)는 발행 설정 안에 알린다", async () => {
+    savingBackend({ "POST /api/v1/posts/77/publish": fail(404, "CATEGORY_NOT_FOUND") });
+    renderWrite();
+    await type("제목", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(await within(screen.getByRole("dialog")).findByRole("alert")).toHaveTextContent(
+      "카테고리를 찾을 수 없습니다.",
+    );
   });
 
   it("1분마다 바뀐 내용이 있을 때만 자동저장한다", async () => {
@@ -403,12 +582,9 @@ describe("write 화면", () => {
               ? {
                   handle: "marco",
                   post: { id: 55, status: "DRAFT", visibility: "PUBLIC", commentEnabled: true },
-                  draft: {
-                    title: "쓰던 글",
-                    contentMarkdown: "쓰던 본문",
-                    savedAt: "2026-10-06T04:24:19Z",
-                  },
+                  draft: savedDraft("쓰던 글", "쓰던 본문"),
                   latestDraft: null,
+                  categories: tree,
                 }
               : {
                   ...newPost,

@@ -7,10 +7,12 @@ import { throwApiErrorResponse } from "~/api/errors";
 import type { Comment, PostDetail } from "~/api/models";
 import { loginPath } from "~/auth/paths";
 import { isValidHandle, parsePostId } from "~/blog/ids";
+import { categoryHref } from "~/components/blog/CategoryTree";
 import type { CommentActionData } from "~/components/comment/actions";
 import { runCommentAction } from "~/components/comment/actions.server";
 import { CommentSection } from "~/components/comment/CommentSection";
 import { PostContent } from "~/components/post/PostContent";
+import { blogTagHref } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { highlightCodeBlocks } from "~/content/highlight.server";
 import { useDateFormat } from "~/i18n/format";
@@ -116,13 +118,24 @@ export default function PostDetailPage() {
             {post.category && (
               <>
                 <dt>{t("post:detail.category")}</dt>
-                <dd>{post.category.name}</dd>
+                <dd>
+                  <Link to={categoryHref(post.blogHandle, post.category.id)}>
+                    {post.category.name}
+                  </Link>
+                </dd>
               </>
             )}
             {post.tags.length > 0 && (
               <>
                 <dt>{t("post:detail.tags")}</dt>
-                <dd>{post.tags.map((tag) => `#${tag}`).join(" ")}</dd>
+                <dd>
+                  {post.tags.map((tag, index) => (
+                    <span key={tag}>
+                      {index > 0 && " "}
+                      <Link to={blogTagHref(post.blogHandle, tag)}>#{tag}</Link>
+                    </span>
+                  ))}
+                </dd>
               </>
             )}
           </dl>

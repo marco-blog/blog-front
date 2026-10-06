@@ -1,0 +1,50 @@
+{
+  "uncategorized": "未分类",
+  "tree": {
+    "label": "分类",
+    "all": "全部文章"
+  },
+  "select": {
+    "label": "分类"
+  },
+  "page": {
+    "empty": "该分类下还没有公开的文章。",
+    "children": "子分类"
+  },
+  "manage": {
+    "title": "分类管理",
+    "hint": "分类最多可以有两级。删除分类后,其中的文章(包括子分类中的文章)将变为未分类。",
+    "empty": "还没有分类。",
+    "list": "分类列表",
+    "postCount": "公开文章 {{count}} 篇",
+    "viewPosts": "在文章管理中查看",
+    "create": {
+      "label": "新建分类",
+      "name": "名称",
+      "parent": "上级分类",
+      "top": "(顶级)",
+      "submit": "创建",
+      "done": "已创建分类。"
+    },
+    "rename": {
+      "label": "{{name}} 的名称",
+      "submit": "重命名",
+      "done": "已修改分类名称。"
+    },
+    "order": {
+      "up": "将 {{name}} 上移",
+      "down": "将 {{name}} 下移",
+      "parent": "{{name}} 的位置",
+      "move": "移动",
+      "done": "已调整分类顺序。"
+    },
+    "delete": {
+      "submit": "删除",
+      "confirm": "要删除分类“{{name}}”吗?其中所有文章(包括 {{count}} 篇公开文章)将变为未分类,子分类也会一并删除。",
+      "confirmButton": "删除",
+      "cancel": "取消",
+      "done": "已删除分类。",
+      "label": "删除 {{name}}"
+    }
+  }
+}

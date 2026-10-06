@@ -24,13 +24,17 @@ export default [
     route("login-history", "routes/settings.login-history.tsx"),
     route("blogs", "routes/settings.blogs.tsx"),
   ]),
+  route("tags/:name", "routes/tag.tsx"),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
   route(":handle", "routes/blog-home.tsx"),
+  route(":handle/category/:categoryId", "routes/blog-category.tsx"),
+  route(":handle/tags/:name", "routes/blog-tag.tsx"),
   route(":handle/write/:postId?", "routes/write.tsx"),
   route(":handle/manage", "routes/manage/layout.tsx", [
     index("routes/manage/dashboard.tsx"),
     route("posts", "routes/manage/posts.tsx"),
+    route("categories", "routes/manage/categories.tsx"),
     route("comments", "routes/manage/comments.tsx"),
     route("settings", "routes/manage/settings.tsx"),
   ]),
