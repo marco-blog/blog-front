@@ -53,11 +53,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      # backend 없이 도는 브라우저 시나리오(US5 언어 선택)에 필요하다.
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-
-      # 빌드 산출물로 서버를 띄워 SSR·404·보안 헤더(CSP nonce)와 언어 선택을 확인한다. backend 없이 도는 시나리오만 있다.
+      # 빌드 산출물로 서버를 띄워 SSR·404·보안 헤더(CSP nonce)를 확인한다. backend 없이 도는 시나리오만 있다.
       - name: E2E (smoke)
         run: npx playwright test
         env:

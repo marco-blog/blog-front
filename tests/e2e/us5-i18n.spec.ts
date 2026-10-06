@@ -18,7 +18,7 @@ import {
  * 브라우저 언어 ja로 첫 방문 → 일본어 → 하단에서 English → 같은 주소가 영어, 로그인 후 다른 브라우저에서도 영어,
  * 일본어 화면에서 한국어 글 본문은 그대로(AS4), 4개 언어 오류 문구, 시간대 설정, 영어 회원의 재설정 메일(AS5),
  * 번역 키가 화면에 나오지 않음(AS6).
- * 언어 선택 시나리오는 backend 없이도 돌고, 회원·글·오류 시나리오는 E2E_BACKEND_URL, 메일은 MAILPIT_URL이 있어야 돈다.
+ * 언어 선택·회원·글·오류 시나리오는 E2E_BACKEND_URL, 메일은 MAILPIT_URL이 있어야 돈다.
  */
 const LANGUAGES = ["ko", "en", "ja", "zh-CN"] as const;
 type Language = (typeof LANGUAGES)[number];
@@ -53,7 +53,10 @@ async function newPage(browser: Browser, options: Parameters<Browser["newContext
   return { context, page: await context.newPage() };
 }
 
-test.describe("US5 언어 선택(backend 없이도)", () => {
+test.describe("US5 언어 선택", () => {
+  // /login 화면 loader가 backend를 부르므로 backend 없이는 오류 화면이 나온다.
+  requireBackend();
+
   test("브라우저 언어 ja로 처음 오면 일본어, 하단에서 English를 고르면 같은 주소가 영어로 유지된다", async ({
     browser,
   }) => {
