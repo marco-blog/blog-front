@@ -99,6 +99,21 @@ describe("root loader", () => {
     expect(result).toMatchObject({ language: "ko", user: null });
   });
 
+  it("Kakao JavaScript 키를 브라우저로 넘긴다(없으면 null, 002 T081)", async () => {
+    vi.stubEnv("BLOG_KAKAO_JS_KEY", "kakao-js-key");
+    try {
+      expect((await callRootLoader({})).kakaoJsKey).toBe("kakao-js-key");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+    vi.stubEnv("BLOG_KAKAO_JS_KEY", "");
+    try {
+      expect((await callRootLoader({})).kakaoJsKey).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("ApiError가 아닌 오류는 그대로 던진다", async () => {
     getSessionUserMock.mockRejectedValue(new Error("bug"));
 
@@ -164,6 +179,41 @@ describe("Header", () => {
     } else {
       expect(shown).toHaveTextContent(badge);
     }
+  });
+
+  it("검색창: JS 없이도 GET /search로 q를 보내는 일반 폼(002 T066)", () => {
+    render(withI18n(<Header user={null} />));
+
+    const search = screen.getByRole("search");
+    expect(search.tagName).toBe("FORM");
+    expect(search).toHaveAttribute("method", "get");
+    expect(search).toHaveAttribute("action", "/search");
+    const input = within(search).getByRole("searchbox", { name: "검색어" });
+    expect(input).toHaveAttribute("name", "q");
+    expect(input).toHaveValue("");
+    expect(within(search).getByRole("button", { name: "검색" })).toHaveAttribute("type", "submit");
+  });
+
+  it("/search 화면에서는 지금 검색어를 채우고, 다른 화면에서는 비운다", () => {
+    const i18n = createI18n("ko", resourcesFor("ko"));
+    const { unmount } = render(
+      <I18nextProvider i18n={i18n}>
+        <MemoryRouter initialEntries={["/search?q=%EC%8A%A4%ED%94%84%EB%A7%81+jpa&page=2"]}>
+          <Header user={headerUser} />
+        </MemoryRouter>
+      </I18nextProvider>,
+    );
+    expect(screen.getByRole("searchbox", { name: "검색어" })).toHaveValue("스프링 jpa");
+    unmount();
+
+    render(
+      <I18nextProvider i18n={i18n}>
+        <MemoryRouter initialEntries={["/tags/java?q=other"]}>
+          <Header user={headerUser} />
+        </MemoryRouter>
+      </I18nextProvider>,
+    );
+    expect(screen.getByRole("searchbox", { name: "검색어" })).toHaveValue("");
   });
 
   it("비로그인에는 구독 피드·알림 링크가 없다", () => {

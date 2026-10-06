@@ -6,7 +6,8 @@
     "posts": "글 관리",
     "categories": "카테고리",
     "comments": "댓글",
-    "settings": "블로그 설정"
+    "settings": "블로그 설정",
+    "feed": "피드 설정"
   },
   "switcher": {
     "label": "블로그 전환"
@@ -99,5 +100,21 @@
     "delete": "삭제",
     "deleteConfirm": "이 댓글을 삭제할까요?",
     "deleted": "댓글을 삭제했습니다."
+  },
+  "feed": {
+    "title": "피드 설정",
+    "itemCount": "피드에 담을 글 수",
+    "itemCountOption": "{{count}}개",
+    "contentMode": "피드 공개 형태",
+    "full": "전문",
+    "summary": "요약",
+    "contentHint": "요약을 고르면 피드에 글 요약만 담고, 전문은 블로그에서 읽게 합니다.",
+    "submit": "저장",
+    "saved": "피드 설정을 저장했습니다.",
+    "urls": "피드 주소",
+    "rss": "RSS",
+    "atom": "Atom",
+    "categoryRss": "카테고리 RSS",
+    "categoryHint": "카테고리별 RSS는 아래와 같은 주소입니다(상위 카테고리는 하위 카테고리 글을 포함)."
   }
 }

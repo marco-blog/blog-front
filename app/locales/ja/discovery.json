@@ -16,5 +16,35 @@
     "label": "購読しているブログの新着記事",
     "empty": "購読しているブログの記事はまだありません。気に入ったブログを購読してみましょう。",
     "blog": "ブログ"
+  },
+  "search": {
+    "title": "検索",
+    "metaTitle": "「{{q}}」の検索",
+    "label": "検索キーワード",
+    "submit": "検索",
+    "hint": "2文字以上入力してください。スペースで区切った語をすべて含む記事を探します。",
+    "resultsLabel": "検索結果",
+    "count": "検索結果 {{count, number}}件",
+    "empty": "検索結果はありません。別の語で探してみてください。"
+  },
+  "related": {
+    "title": "関連記事"
+  },
+  "share": {
+    "label": "共有",
+    "copy": "URLをコピー",
+    "copied": "URLをコピーしました。",
+    "copyFailed": "URLをコピーできませんでした。下のURLを直接コピーしてください。",
+    "url": "記事のURL",
+    "kakao": "カカオトーク",
+    "kakaoFailed": "カカオトーク共有を読み込めませんでした。しばらくしてからもう一度お試しください。",
+    "x": "X",
+    "facebook": "Facebook",
+    "newWindow": "新しいウィンドウ"
+  },
+  "feedLink": {
+    "rss": "{{title}} RSS",
+    "atom": "{{title}} Atom",
+    "category": "{{category}} - {{title}} RSS"
   }
 }

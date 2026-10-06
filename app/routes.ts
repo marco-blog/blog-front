@@ -29,6 +29,7 @@ export default [
   route("tags/:name", "routes/tag.tsx"),
   route("feed", "routes/feed.tsx"),
   route("notifications", "routes/notifications.tsx"),
+  route("search", "routes/search.tsx"),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
   route(":handle", "routes/blog-home.tsx"),
@@ -41,6 +42,7 @@ export default [
     route("categories", "routes/manage/categories.tsx"),
     route("comments", "routes/manage/comments.tsx"),
     route("settings", "routes/manage/settings.tsx"),
+    route("feed", "routes/manage/feed.tsx"),
   ]),
   route(":handle/:postId", "routes/post-detail.tsx"),
 

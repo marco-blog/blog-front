@@ -25,7 +25,9 @@
     "logout": "退出登录",
     "feed": "订阅动态",
     "notifications": "通知",
-    "unreadNotifications": "{{count}} 条未读通知"
+    "unreadNotifications": "{{count}} 条未读通知",
+    "search": "搜索",
+    "searchLabel": "搜索词"
   },
   "footer": {
     "label": "网站信息",

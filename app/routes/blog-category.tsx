@@ -13,6 +13,7 @@ import { publicOrigin } from "~/config.server";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl } from "~/media/thumbnail";
+import { blogFeedLinks, categoryFeedLink } from "~/seo/feedLinks";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/blog-category";
@@ -56,13 +57,18 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
     return privatePageMeta(t("notFound.title"), t("appName"));
   }
   const { blog, category, page, origin } = loaderData;
-  return pageMeta({
-    title: `${category.name} - ${blog.title}`,
-    description: blog.description,
-    image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
-    url: absoluteUrl(origin, withPage(categoryHref(blog.handle, category.id), page)),
-    siteName: t("appName"),
-  });
+  return [
+    ...pageMeta({
+      title: `${category.name} - ${blog.title}`,
+      description: blog.description,
+      image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
+      url: absoluteUrl(origin, withPage(categoryHref(blog.handle, category.id), page)),
+      siteName: t("appName"),
+    }),
+    // 카테고리 RSS와 블로그 RSS·Atom 자동 발견(002 FR-048)
+    categoryFeedLink(t, origin, blog, category),
+    ...blogFeedLinks(t, origin, blog),
+  ];
 }
 
 export default function BlogCategory() {

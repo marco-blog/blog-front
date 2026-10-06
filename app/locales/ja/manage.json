@@ -6,7 +6,8 @@
     "posts": "記事管理",
     "categories": "カテゴリー",
     "comments": "コメント",
-    "settings": "ブログ設定"
+    "settings": "ブログ設定",
+    "feed": "フィード設定"
   },
   "switcher": {
     "label": "ブログ切り替え"
@@ -99,5 +100,21 @@
     "delete": "削除",
     "deleteConfirm": "このコメントを削除しますか？",
     "deleted": "コメントを削除しました。"
+  },
+  "feed": {
+    "title": "フィード設定",
+    "itemCount": "フィードに含める記事数",
+    "itemCountOption": "{{count}}件",
+    "contentMode": "フィードの公開形式",
+    "full": "全文",
+    "summary": "要約",
+    "contentHint": "要約を選ぶと、フィードには記事の要約だけを含め、全文はブログで読んでもらいます。",
+    "submit": "保存",
+    "saved": "フィード設定を保存しました。",
+    "urls": "フィードのURL",
+    "rss": "RSS",
+    "atom": "Atom",
+    "categoryRss": "カテゴリーRSS",
+    "categoryHint": "カテゴリーごとのRSSは次のようなURLです(上位カテゴリーは下位カテゴリーの記事を含みます)。"
   }
 }

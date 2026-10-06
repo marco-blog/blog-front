@@ -6,7 +6,8 @@
     "posts": "文章管理",
     "categories": "分类",
     "comments": "评论",
-    "settings": "博客设置"
+    "settings": "博客设置",
+    "feed": "订阅源设置"
   },
   "switcher": {
     "label": "切换博客"
@@ -99,5 +100,21 @@
     "delete": "删除",
     "deleteConfirm": "要删除这条评论吗？",
     "deleted": "评论已删除。"
+  },
+  "feed": {
+    "title": "订阅源设置",
+    "itemCount": "订阅源包含的文章数",
+    "itemCountOption": "{{count}} 篇",
+    "contentMode": "订阅源内容",
+    "full": "全文",
+    "summary": "摘要",
+    "contentHint": "选择摘要时，订阅源只包含文章摘要，读者需到博客阅读全文。",
+    "submit": "保存",
+    "saved": "订阅源设置已保存。",
+    "urls": "订阅源地址",
+    "rss": "RSS",
+    "atom": "Atom",
+    "categoryRss": "分类 RSS",
+    "categoryHint": "每个分类的 RSS 地址如下（上级分类包含下级分类的文章）。"
   }
 }

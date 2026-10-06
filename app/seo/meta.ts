@@ -39,6 +39,9 @@ export function pageMeta(input: PageMetaInput): MetaDescriptor[] {
       { property: "og:image", content: input.image },
       { name: "twitter:card", content: "summary_large_image" },
     );
+  } else {
+    // 대표 이미지가 없으면 작은 카드(002 contracts/routes.md)
+    tags.push({ name: "twitter:card", content: "summary" });
   }
   if (input.url) {
     tags.push(

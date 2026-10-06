@@ -493,7 +493,7 @@ describe("블로그 관리 화면", () => {
     return backend;
   }
 
-  it("레이아웃: 001 메뉴(만든 화면만, 댓글은 US3), 블로그 전환은 다른 블로그의 같은 메뉴로", async () => {
+  it("레이아웃: 001 메뉴와 002 피드 설정(T089), 블로그 전환은 다른 블로그의 같은 메뉴로", async () => {
     renderManage("/marco/manage/posts", { [POSTS]: ok([], { totalCount: 0 }) });
 
     const menu = await screen.findByRole("navigation", { name: "블로그 관리 메뉴" });
@@ -501,7 +501,7 @@ describe("블로그 관리 화면", () => {
       within(menu)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "블로그 설정"]);
+    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "블로그 설정", "피드 설정"]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
       "/marco/manage/categories",
@@ -516,7 +516,12 @@ describe("블로그 관리 화면", () => {
       "categories",
       "comments",
       "settings",
+      "feed",
     ]);
+    expect(within(menu).getByRole("link", { name: "피드 설정" })).toHaveAttribute(
+      "href",
+      "/marco/manage/feed",
+    );
     const switcher = screen.getByRole("navigation", { name: "블로그 전환" });
     expect(within(switcher).getByRole("link", { name: "marco-dev 블로그" })).toHaveAttribute(
       "href",
