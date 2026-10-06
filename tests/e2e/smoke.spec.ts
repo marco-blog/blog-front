@@ -8,7 +8,7 @@ test("첫 화면은 서버에서 화면 언어로 렌더링된다", async ({ req
   expect(response.headers()["x-request-id"]).toMatch(/^[0-9a-f]{16}$/);
   const html = await response.text();
   expect(html).toContain('<html lang="ko">');
-  expect(html).toContain("블로그 서비스를 준비하고 있습니다.");
+  expect(html).toContain("글을 쓰고 나누는 블로그 서비스입니다.");
 });
 
 test("쿠키 lang이 Accept-Language보다 먼저다", async ({ request }) => {
@@ -16,7 +16,7 @@ test("쿠키 lang이 Accept-Language보다 먼저다", async ({ request }) => {
     headers: { "Accept-Language": "ko", Cookie: "lang=en" },
   });
 
-  expect(await response.text()).toContain("Our blog service is coming soon.");
+  expect(await response.text()).toContain("A blog service for writing and sharing your posts.");
 });
 
 test("없는 주소는 404 상태 코드와 404 화면", async ({ request }) => {

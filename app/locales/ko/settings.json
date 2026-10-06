@@ -1,0 +1,30 @@
+{
+  "title": "계정 설정",
+  "nav": {
+    "label": "계정 설정 메뉴",
+    "blogs": "내 블로그"
+  },
+  "blogs": {
+    "title": "내 블로그",
+    "count": "블로그 {{count}} / {{limit}}",
+    "posts": "글 {{posts}}",
+    "manage": "관리",
+    "write": "글쓰기",
+    "create": {
+      "title": "새 블로그 만들기",
+      "handle": "블로그 주소",
+      "blogTitle": "블로그 제목",
+      "titleHint": "비워 두면 닉네임으로 제목을 정합니다.",
+      "submit": "만들기",
+      "limitReached": "블로그 한도까지 만들어서 더 만들 수 없습니다.",
+      "created": "블로그를 만들었습니다."
+    },
+    "delete": {
+      "open": "블로그 삭제",
+      "warning": "삭제하면 되돌릴 수 없습니다. 이 블로그의 모든 글이 보이지 않게 되고, 이 주소는 누구도 다시 쓸 수 없습니다.",
+      "password": "비밀번호 확인",
+      "submit": "삭제",
+      "deleted": "블로그를 삭제했습니다."
+    }
+  }
+}

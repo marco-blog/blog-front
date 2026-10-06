@@ -2,7 +2,9 @@
   "appName": "ブログ",
   "home": {
     "title": "ブログ",
-    "placeholder": "ブログサービスを準備しています。"
+    "intro": "記事を書いて共有するブログサービスです。",
+    "signup": "登録してブログを作る",
+    "login": "ログイン"
   },
   "notFound": {
     "title": "ページが見つかりません",
@@ -28,5 +30,10 @@
     "terms": "利用規約",
     "privacy": "プライバシーポリシー",
     "language": "言語"
+  },
+  "pagination": {
+    "label": "ページ",
+    "previous": "前へ",
+    "next": "次へ"
   }
 }

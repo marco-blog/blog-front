@@ -1,34 +1,31 @@
-import { backendUrl } from "~/config.server";
+import { backendUrl, publicOrigin } from "~/config.server";
 
-import { ApiError, CLIENT_ERROR_CODES } from "./errors";
+import {
+  REFRESH_TOKEN_COOKIE,
+  backendSession,
+  hasCookie,
+  recordSetCookies,
+  type BackendSession,
+} from "./backendCookies.server";
+import {
+  apiPath,
+  encodeBody,
+  isAuthPath,
+  isExpiredAccess,
+  readEnvelope,
+  unavailable,
+  type ApiRequestInit,
+  type ApiResult,
+} from "./envelope";
 import { REQUEST_ID_HEADER, resolveRequestId } from "./request-id.server";
-import { isApiEnvelope } from "./types";
 
-/** 모든 API는 /api/v1 아래에 있다(api-guidelines.md 1절). */
-export const API_PREFIX = "/api/v1";
+export { API_PREFIX, type ApiRequestInit, type ApiResult } from "./envelope";
 
-/** 브라우저 요청에서 backend로 그대로 넘기는 헤더. 쿠키(토큰), 언어, CSRF 검사용 Origin. */
-const FORWARDED_HEADERS = ["cookie", "accept-language", "origin", "user-agent"] as const;
+/** 브라우저 요청에서 backend로 그대로 넘기는 헤더. 언어, CSRF 검사용 Origin, User-Agent. 쿠키는 따로 다룬다. */
+const FORWARDED_HEADERS = ["accept-language", "origin", "user-agent"] as const;
 
-type QueryValue = string | number | boolean | null | undefined;
-
-export interface ApiRequestInit {
-  method?: string;
-  query?: Record<string, QueryValue | QueryValue[]>;
-  /** JSON으로 보낸다. FormData는 그대로 보낸다. */
-  body?: unknown;
-  headers?: HeadersInit;
-  signal?: AbortSignal;
-}
-
-export interface ApiResult<T> {
-  result: T;
-  totalCount?: number;
-  nextCursor?: string | null;
-  status: number;
-  /** backend 응답 헤더(Set-Cookie를 브라우저 응답에 옮길 때 쓴다) */
-  headers: Headers;
-}
+/** 상태를 바꾸지 않는 메서드. 나머지는 backend Origin 검사 대상이다(research.md R3). */
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export interface ApiClientOptions {
   baseUrl?: string;
@@ -37,96 +34,88 @@ export interface ApiClientOptions {
 
 export type ApiClient = ReturnType<typeof createApiClient>;
 
-function buildUrl(baseUrl: string, path: string, query: ApiRequestInit["query"]): string {
-  const url = new URL(`${baseUrl}${API_PREFIX}${path.startsWith("/") ? path : `/${path}`}`);
-  for (const [key, value] of Object.entries(query ?? {})) {
-    const values = (Array.isArray(value) ? value : [value]).filter(
-      (item): item is string | number | boolean => item !== null && item !== undefined,
-    );
-    if (values.length > 0) {
-      // 여러 값은 쉼표로 보낸다(api-guidelines.md 6절).
-      url.searchParams.set(key, values.join(","));
-    }
-  }
-  return url.toString();
-}
-
 /**
  * SSR loader·action에서 backend를 직접 호출하는 클라이언트.
  * 들어온 요청의 쿠키·언어·Origin과 X-Request-Id를 backend로 전달하고,
  * 공통 응답 틀의 result를 꺼내 준다. 실패하면 ApiError를 던진다.
+ *
+ * 접근 토큰이 만료되어 401 `UNAUTHENTICATED`를 받으면 들어온 리프레시 쿠키로 `POST /auth/refresh`를
+ * 요청당 한 번 부르고 원 요청을 다시 보낸다. 새 쿠키는 root 미들웨어가 브라우저 응답에 싣는다
+ * (tasks.md "구현 전 결정 사항" 1번, backendCookies.server.ts).
  */
 export function createApiClient(request: Request, options: ApiClientOptions = {}) {
   const baseUrl = (options.baseUrl ?? backendUrl()).replace(/\/+$/, "");
   const fetchImpl = options.fetch ?? fetch;
   const requestId = resolveRequestId(request.headers.get(REQUEST_ID_HEADER));
+  const session = backendSession(request);
 
-  async function send<T>(path: string, init: ApiRequestInit = {}): Promise<ApiResult<T>> {
-    const headers = new Headers(init.headers);
+  function baseHeaders(method: string, init?: HeadersInit): Headers {
+    const headers = new Headers(init);
     for (const name of FORWARDED_HEADERS) {
       const value = request.headers.get(name);
       if (value !== null && !headers.has(name)) {
         headers.set(name, value);
       }
     }
+    if (session.cookie && !headers.has("cookie")) {
+      headers.set("cookie", session.cookie);
+    }
+    // front 서버가 스스로 보내는 상태 변경 요청(리프레시·조회수)에는 브라우저 Origin이 없으므로 자기 출처를 싣는다.
+    if (!SAFE_METHODS.has(method) && !headers.has("origin")) {
+      headers.set("origin", publicOrigin(request));
+    }
     headers.set(REQUEST_ID_HEADER, requestId);
     headers.set("accept", "application/json");
+    return headers;
+  }
 
-    let body: BodyInit | undefined;
-    if (init.body instanceof FormData) {
-      body = init.body;
-    } else if (init.body !== undefined) {
-      body = JSON.stringify(init.body);
-      headers.set("content-type", "application/json");
-    }
-
+  async function exchange(path: string, init: ApiRequestInit): Promise<Response> {
+    const method = (init.method ?? "GET").toUpperCase();
+    const headers = baseHeaders(method, init.headers);
+    const body = encodeBody(init.body, headers);
     let response: Response;
     try {
-      response = await fetchImpl(buildUrl(baseUrl, path, init.query), {
-        method: init.method ?? "GET",
+      response = await fetchImpl(`${baseUrl}${apiPath(path, init.query)}`, {
+        method,
         headers,
         body,
         signal: init.signal,
         redirect: "manual",
       });
     } catch (cause) {
-      throw new ApiError({
-        status: 502,
-        resultCode: CLIENT_ERROR_CODES.BACKEND_UNAVAILABLE,
-        resultMessage: cause instanceof Error ? cause.message : String(cause),
-        traceId: requestId,
-      });
+      throw unavailable(cause, requestId);
     }
+    recordSetCookies(session, response.headers.getSetCookie?.() ?? []);
+    return response;
+  }
 
-    const traceId = response.headers.get(REQUEST_ID_HEADER) ?? requestId;
-    const envelope: unknown = await response.json().catch(() => undefined);
-    if (!isApiEnvelope(envelope)) {
-      throw new ApiError({
-        status: response.ok ? 502 : response.status,
-        resultCode: CLIENT_ERROR_CODES.INVALID_RESPONSE,
-        resultMessage: `Unexpected response from ${path}`,
-        traceId,
-      });
+  async function send<T>(path: string, init: ApiRequestInit = {}): Promise<ApiResult<T>> {
+    const response = await exchange(path, init);
+    try {
+      return await readEnvelope<T>(
+        response,
+        path,
+        response.headers.get(REQUEST_ID_HEADER) ?? requestId,
+      );
+    } catch (error) {
+      if (isExpiredAccess(error) && !isAuthPath(path) && (await refreshOnce(session))) {
+        const retried = await exchange(path, init);
+        return readEnvelope<T>(retried, path, retried.headers.get(REQUEST_ID_HEADER) ?? requestId);
+      }
+      throw error;
     }
+  }
 
-    const { header } = envelope;
-    if (!header.isSuccessful || !response.ok) {
-      throw new ApiError({
-        status: response.ok ? 502 : response.status,
-        resultCode: header.isSuccessful ? CLIENT_ERROR_CODES.INVALID_RESPONSE : header.resultCode,
-        resultMessage: header.resultMessage,
-        fieldErrors: header.fieldErrors,
-        traceId: header.traceId ?? traceId,
-      });
+  /** 요청당 한 번. 리프레시 쿠키가 없으면 부르지 않는다. */
+  function refreshOnce(target: BackendSession): Promise<boolean> {
+    if (!hasCookie(target.cookie, REFRESH_TOKEN_COOKIE)) {
+      return Promise.resolve(false);
     }
-
-    return {
-      result: envelope.result as T,
-      totalCount: envelope.totalCount,
-      nextCursor: envelope.nextCursor,
-      status: response.status,
-      headers: response.headers,
-    };
+    target.refresh ??= exchange("/auth/refresh", { method: "POST" }).then(
+      (response) => response.ok,
+      () => false,
+    );
+    return target.refresh;
   }
 
   const call =

@@ -10,6 +10,8 @@ export default defineConfig({
     environment: "node",
     include: ["tests/unit/**/*.test.{ts,tsx}"],
     setupFiles: ["tests/unit/setup.ts"],
+    // 테스트마다 vi.stubGlobal(fetch 등)을 되돌린다.
+    unstubGlobals: true,
     coverage: {
       // npm test만으로 커버리지를 재고, 기준 미달이면 실패한다(헌법 원칙 III).
       enabled: true,

@@ -14,7 +14,11 @@ export default defineConfig({
   webServer: {
     command: "npm run build && npm start",
     url: `http://localhost:${PORT}/`,
-    env: { PORT: String(PORT) },
+    // backend가 필요한 시나리오(tests/e2e/us1-*)는 E2E_BACKEND_URL이 있을 때만 돈다. 그때 front도 같은 backend를 본다.
+    env: {
+      PORT: String(PORT),
+      ...(process.env.E2E_BACKEND_URL ? { BLOG_BACKEND_URL: process.env.E2E_BACKEND_URL } : {}),
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

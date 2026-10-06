@@ -1,0 +1,37 @@
+{
+  "list": {
+    "label": "글 목록",
+    "empty": "아직 발행한 글이 없습니다."
+  },
+  "views": "조회 {{views}}",
+  "blog": {
+    "owner": "{{nickname}} 님의 블로그",
+    "categories": "카테고리"
+  },
+  "detail": {
+    "author": "글쓴이",
+    "publishedAt": "작성일",
+    "category": "카테고리",
+    "tags": "태그",
+    "edit": "수정",
+    "navLabel": "이전·다음 글",
+    "prev": "이전 글",
+    "next": "다음 글",
+    "draft": "임시저장",
+    "private": "비공개"
+  },
+  "publish": {
+    "title": "발행 설정",
+    "visibility": "공개 범위",
+    "public": "공개",
+    "private": "비공개(나만 보기)",
+    "publishTime": "발행 시각",
+    "now": "지금",
+    "commentEnabled": "이 글에 댓글 허용",
+    "close": "닫기",
+    "publishPublic": "공개 발행",
+    "savePrivate": "비공개 저장",
+    "republish": "수정 발행",
+    "publishing": "발행하는 중입니다."
+  }
+}

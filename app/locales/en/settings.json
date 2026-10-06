@@ -1,0 +1,30 @@
+{
+  "title": "Account settings",
+  "nav": {
+    "label": "Account settings menu",
+    "blogs": "My blogs"
+  },
+  "blogs": {
+    "title": "My blogs",
+    "count": "Blogs {{count}} / {{limit}}",
+    "posts": "Posts {{posts}}",
+    "manage": "Manage",
+    "write": "Write",
+    "create": {
+      "title": "Create a new blog",
+      "handle": "Blog address",
+      "blogTitle": "Blog title",
+      "titleHint": "If left empty, the title is based on your nickname.",
+      "submit": "Create",
+      "limitReached": "You've reached your blog limit and can't create more.",
+      "created": "Your blog has been created."
+    },
+    "delete": {
+      "open": "Delete blog",
+      "warning": "This can't be undone. All posts in this blog will be hidden, and no one can use this address again.",
+      "password": "Confirm password",
+      "submit": "Delete",
+      "deleted": "The blog has been deleted."
+    }
+  }
+}

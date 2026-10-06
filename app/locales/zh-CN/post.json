@@ -1,0 +1,37 @@
+{
+  "list": {
+    "label": "文章列表",
+    "empty": "还没有发布任何文章。"
+  },
+  "views": "阅读 {{views}}",
+  "blog": {
+    "owner": "{{nickname}} 的博客",
+    "categories": "分类"
+  },
+  "detail": {
+    "author": "作者",
+    "publishedAt": "发布时间",
+    "category": "分类",
+    "tags": "标签",
+    "edit": "编辑",
+    "navLabel": "上一篇和下一篇",
+    "prev": "上一篇",
+    "next": "下一篇",
+    "draft": "草稿",
+    "private": "私密"
+  },
+  "publish": {
+    "title": "发布设置",
+    "visibility": "公开范围",
+    "public": "公开",
+    "private": "私密（仅自己可见）",
+    "publishTime": "发布时间",
+    "now": "现在",
+    "commentEnabled": "允许对本文发表评论",
+    "close": "关闭",
+    "publishPublic": "公开发布",
+    "savePrivate": "私密保存",
+    "republish": "更新发布",
+    "publishing": "正在发布。"
+  }
+}

@@ -19,9 +19,11 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@milkdown/crepe": "^7.22.2",
     "@react-router/express": "^8.4.0",
     "@react-router/node": "^8.4.0",
     "express": "^5.2.1",
+    "highlight.js": "^11.12.0",
     "http-proxy-middleware": "^4.2.0",
     "i18next": "^26.4.2",
     "isbot": "^5.2.2",

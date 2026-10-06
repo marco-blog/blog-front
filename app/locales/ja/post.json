@@ -1,0 +1,37 @@
+{
+  "list": {
+    "label": "記事一覧",
+    "empty": "まだ公開した記事がありません。"
+  },
+  "views": "閲覧 {{views}}",
+  "blog": {
+    "owner": "{{nickname}}さんのブログ",
+    "categories": "カテゴリー"
+  },
+  "detail": {
+    "author": "投稿者",
+    "publishedAt": "投稿日",
+    "category": "カテゴリー",
+    "tags": "タグ",
+    "edit": "編集",
+    "navLabel": "前後の記事",
+    "prev": "前の記事",
+    "next": "次の記事",
+    "draft": "下書き",
+    "private": "非公開"
+  },
+  "publish": {
+    "title": "公開設定",
+    "visibility": "公開範囲",
+    "public": "公開",
+    "private": "非公開(自分のみ)",
+    "publishTime": "公開日時",
+    "now": "今すぐ",
+    "commentEnabled": "この記事へのコメントを許可",
+    "close": "閉じる",
+    "publishPublic": "公開する",
+    "savePrivate": "非公開で保存",
+    "republish": "更新して公開",
+    "publishing": "公開しています。"
+  }
+}
