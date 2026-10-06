@@ -1,0 +1,27 @@
+{
+  "editor": {
+    "uploadButton": "Upload image",
+    "uploadPlaceholder": "or paste an image URL",
+    "captionPlaceholder": "Image caption",
+    "confirm": "Confirm"
+  },
+  "thumbnail": {
+    "legend": "Thumbnail",
+    "none": "There are no images in the post, so it will be published without a thumbnail.",
+    "option": "Image {{number}} in the post"
+  },
+  "field": {
+    "preview": "{{label}} preview",
+    "empty": "No image.",
+    "choose": "Choose an image file",
+    "remove": "Remove image",
+    "uploading": "Uploading the image.",
+    "saveToApply": "Save to apply the change."
+  },
+  "profile": {
+    "label": "Profile image"
+  },
+  "cover": {
+    "label": "Blog cover image"
+  }
+}

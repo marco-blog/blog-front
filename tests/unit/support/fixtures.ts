@@ -5,7 +5,7 @@ export const blog: Blog = {
   handle: "marco",
   title: "마르코의 블로그",
   description: "자바와 스프링 이야기",
-  coverImageUrl: "/media/cover0000000000000000",
+  coverImageUrl: "/media/cover00000000000000000",
   commentEnabled: true,
   owner: { nickname: "마르코", profileImageUrl: null, bio: null },
   categories: [{ id: 12, name: "Spring", postCount: 3, children: [] }],

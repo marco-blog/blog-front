@@ -11,6 +11,7 @@ import { CategoryTree } from "~/components/blog/CategoryTree";
 import { PostList, blogTagHref } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { metaT } from "~/i18n/meta";
+import { ogImageUrl } from "~/media/thumbnail";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/blog-tag";
@@ -51,7 +52,7 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
   return pageMeta({
     title: `#${tag} - ${blog.title}`,
     description: blog.description,
-    image: absoluteUrl(origin, blog.coverImageUrl),
+    image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
     url: absoluteUrl(origin, withPage(blogTagHref(blog.handle, tag), page)),
     siteName: t("appName"),
   });

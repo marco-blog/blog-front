@@ -5,6 +5,7 @@ import { Form, Link, useRouteLoaderData } from "react-router";
 import { errorMessage } from "~/api/errorMessage";
 import type { Comment } from "~/api/models";
 import { FormAlert } from "~/components/form/FormField";
+import { Avatar } from "~/components/media/Avatar";
 import { useDateFormat } from "~/i18n/format";
 import type { RootData } from "~/root";
 
@@ -122,6 +123,7 @@ function CommentItem({
       ) : (
         <article aria-label={comment.author?.nickname ?? t("comment:unknownAuthor")}>
           <p className="comment-meta">
+            <Avatar url={comment.author?.profileImageUrl} />{" "}
             <strong>{comment.author?.nickname ?? t("comment:unknownAuthor")}</strong>{" "}
             <time dateTime={comment.createdAt}>{format.dateTime(comment.createdAt)}</time>
             {comment.updatedAt !== comment.createdAt && (

@@ -52,6 +52,7 @@ describe("PublishSettingsDialog", () => {
       commentEnabled: true,
       categoryId: null,
       tags: [],
+      thumbnailMediaKey: null,
     });
   });
 });

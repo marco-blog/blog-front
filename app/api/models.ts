@@ -145,7 +145,7 @@ export interface LatestDraft {
   savedAt: string;
 }
 
-/** POST /posts/{id}/publish. 대표 이미지는 US4, 카테고리·태그는 US2에서 더한다. */
+/** POST /posts/{id}/publish. `thumbnailMediaKey`는 본문 이미지 중 하나(생략하면 본문 첫 이미지) */
 export interface PublishSettings {
   visibility: Visibility;
   commentEnabled: boolean;
@@ -162,7 +162,7 @@ export interface LoginHistoryItem {
   device: string | null;
 }
 
-/** 댓글 작성자. 프로필 이미지는 US4 전까지 null */
+/** 댓글 작성자. 프로필 이미지가 없으면 profileImageUrl은 null */
 export interface CommentAuthor {
   userId: number;
   nickname: string;
@@ -243,4 +243,18 @@ export interface CategoryOrderItem {
   id: number;
   parentId: number | null;
   sortOrder: number;
+}
+
+/** 이미지 용도(POST /media `purpose`). 프로필·블로그 대표 이미지는 그 용도로 올린 이미지만 저장할 수 있다. */
+export type MediaPurpose = "POST" | "PROFILE" | "BLOG_COVER";
+
+/** POST /media 201 */
+export interface MediaUpload {
+  key: string;
+  /** `/media/{key}` */
+  url: string;
+  mime: string;
+  size: number;
+  width: number;
+  height: number;
 }

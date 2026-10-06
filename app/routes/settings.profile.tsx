@@ -12,7 +12,9 @@ import {
 } from "~/api/formErrors";
 import { requireUser } from "~/auth/session.server";
 import { FormAlert, FormField } from "~/components/form/FormField";
+import { ImageUploadField } from "~/components/media/ImageUploadField";
 import { metaT } from "~/i18n/meta";
+import { imageFieldValue } from "~/media/form";
 import { privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/settings.profile";
@@ -38,7 +40,12 @@ export function meta({ matches }: Route.MetaArgs) {
 /** 지금 프로필(`GET /me`, root loader와 같은 요청이면 한 번만 부른다) */
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireUser(request);
-  return { email: user.email, nickname: user.nickname, bio: user.bio };
+  return {
+    email: user.email,
+    nickname: user.nickname,
+    bio: user.bio,
+    profileImageUrl: user.profileImageUrl,
+  };
 }
 
 function failure(intent: Intent | null, fieldErrors: FormErrorData["fieldErrors"]) {
@@ -49,9 +56,9 @@ function failure(intent: Intent | null, fieldErrors: FormErrorData["fieldErrors"
 }
 
 /**
- * 프로필 저장(`PATCH /me` 닉네임·소개, FR-008)과 탈퇴(`DELETE /me` 비밀번호 확인, FR-009).
+ * 프로필 저장(`PATCH /me` 닉네임·소개·프로필 이미지, FR-008)과 탈퇴(`DELETE /me` 비밀번호 확인, FR-009).
  * 탈퇴하면 backend가 인증 쿠키를 지우고(root 미들웨어가 브라우저로 전달) 첫 화면으로 보낸다.
- * 프로필 이미지는 이미지 업로드(US4)에서 더한다.
+ * 프로필 이미지는 바꿨을 때만 보낸다(`profileImageMediaKey`, 지우면 null).
  */
 export async function action({ request }: Route.ActionArgs) {
   await requireUser(request);
@@ -67,7 +74,14 @@ export async function action({ request }: Route.ActionArgs) {
       return failure(intent, missing);
     }
     try {
-      await api.patch("/me", { body: { nickname, bio: bio || null } });
+      const profileImageMediaKey = imageFieldValue(form, "profileImageMediaKey");
+      await api.patch("/me", {
+        body: {
+          nickname,
+          bio: bio || null,
+          ...(profileImageMediaKey === undefined ? {} : { profileImageMediaKey }),
+        },
+      });
     } catch (error) {
       const { data: formError, status } = toFormError(error);
       return data<ProfileActionData>({ ...formError, intent, ok: false }, { status });
@@ -112,9 +126,21 @@ export default function SettingsProfile() {
         <dd>{profile.email}</dd>
       </dl>
       {/* 저장 후 loader가 다시 읽은 값으로 입력란을 새로 그린다. */}
-      <Form method="post" key={`${profile.nickname}\n${profile.bio ?? ""}`}>
+      <Form
+        method="post"
+        key={`${profile.nickname}\n${profile.bio ?? ""}\n${profile.profileImageUrl ?? ""}`}
+      >
         <FormAlert message={messages.form} />
         <input type="hidden" name="intent" value="profile" />
+        <ImageUploadField
+          name="profileImageMediaKey"
+          label={t("media:profile.label")}
+          purpose="PROFILE"
+          currentUrl={profile.profileImageUrl}
+          preset="avatar"
+          error={messages.fields.profileImageMediaKey}
+          disabled={submitting}
+        />
         <FormField
           label={t("settings:profile.nickname")}
           name="nickname"

@@ -1,0 +1,27 @@
+{
+  "editor": {
+    "uploadButton": "이미지 올리기",
+    "uploadPlaceholder": "또는 이미지 주소를 붙여 넣으세요",
+    "captionPlaceholder": "이미지 설명",
+    "confirm": "확인"
+  },
+  "thumbnail": {
+    "legend": "대표 이미지",
+    "none": "본문에 이미지가 없어 대표 이미지 없이 발행합니다.",
+    "option": "본문 {{number}}번째 이미지"
+  },
+  "field": {
+    "preview": "{{label}} 미리보기",
+    "empty": "이미지가 없습니다.",
+    "choose": "이미지 파일 고르기",
+    "remove": "이미지 지우기",
+    "uploading": "이미지를 올리는 중입니다.",
+    "saveToApply": "저장해야 반영됩니다."
+  },
+  "profile": {
+    "label": "프로필 이미지"
+  },
+  "cover": {
+    "label": "블로그 대표 이미지"
+  }
+}

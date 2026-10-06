@@ -86,7 +86,7 @@ describe("blog home meta", () => {
       matches: [{ id: "root", loaderData: rootData("ko") }],
     }) as unknown as MetaArgs;
 
-  it("블로그 제목·소개·og:image(대표 이미지 절대 주소)·canonical", () => {
+  it("블로그 제목·소개·og:image(대표 이미지 1200x630 절대 주소)·canonical", () => {
     const data: LoaderData = {
       blog,
       posts: [],
@@ -104,7 +104,10 @@ describe("blog home meta", () => {
         { name: "description", content: "자바와 스프링 이야기" },
         { property: "og:title", content: "마르코의 블로그" },
         { property: "og:description", content: "자바와 스프링 이야기" },
-        { property: "og:image", content: "https://blog.java21.net/media/cover0000000000000000" },
+        {
+          property: "og:image",
+          content: "https://blog.java21.net/media/cover00000000000000000/1200x630",
+        },
         { property: "og:url", content: "https://blog.java21.net/marco" },
         { tagName: "link", rel: "canonical", href: "https://blog.java21.net/marco" },
       ]),
@@ -171,6 +174,36 @@ describe("blog home 화면", () => {
     expect(within(list).getAllByText(/^조회 \d+$/)).toHaveLength(2);
     expect(within(list).getAllByText("2026. 10. 6.")).toHaveLength(2);
     expect(screen.queryByRole("navigation", { name: "페이지" })).toBeNull();
+  });
+
+  it("대표 이미지(600x400)·주인 프로필(100x100)·글 카드 썸네일(300x200), 각각 2배 srcset", async () => {
+    const thumb = "/media/k3Jd9fQ2xLmA7pZ0bR5tYw";
+    const profile = "/media/Pf9Yy8Xx7Ww6Vv5Uu4Tt3S";
+    const { container } = renderHome({
+      blog: { ...blog, owner: { ...blog.owner, profileImageUrl: profile } },
+      posts: [postSummary(1, { thumbnailUrl: thumb }), postSummary(2)],
+      totalCount: 2,
+      page: 1,
+      pageSize: 20,
+      origin: "http://front.test",
+    });
+    await screen.findByRole("heading", { level: 1 });
+
+    const cover = container.querySelector("img.blog-cover");
+    expect(cover).toHaveAttribute("src", `${blog.coverImageUrl}/600x400`);
+    expect(cover).toHaveAttribute(
+      "srcset",
+      `${blog.coverImageUrl}/600x400 1x, ${blog.coverImageUrl}/1200x800 2x`,
+    );
+    const avatar = container.querySelector("img.avatar");
+    expect(avatar).toHaveAttribute("src", `${profile}/100x100`);
+    expect(avatar).toHaveAttribute("srcset", `${profile}/100x100 1x, ${profile}/200x200 2x`);
+    const cards = container.querySelectorAll("img.post-thumbnail");
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toHaveAttribute("src", `${thumb}/300x200`);
+    expect(cards[0]).toHaveAttribute("srcset", `${thumb}/300x200 1x, ${thumb}/600x400 2x`);
+    expect(cards[0]).toHaveAttribute("width", "300");
+    expect(cards[0]).toHaveAttribute("height", "200");
   });
 
   it("20개가 넘으면 페이지 이동(이전·번호·다음)", async () => {

@@ -46,5 +46,10 @@
   "PASSWORD_RESET_TOKEN_INVALID": "재설정 링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.",
   "COMMENT_NOT_FOUND": "댓글을 찾을 수 없습니다.",
   "REPLY_DEPTH_EXCEEDED": "답글에는 다시 답글을 달 수 없습니다.",
-  "COMMENTS_DISABLED": "이 글에는 댓글을 쓸 수 없습니다."
+  "COMMENTS_DISABLED": "이 글에는 댓글을 쓸 수 없습니다.",
+  "MEDIA_NOT_FOUND": "이미지를 찾을 수 없습니다.",
+  "MEDIA_TOO_LARGE": "이미지는 10MB 이하만 올릴 수 있습니다.",
+  "MEDIA_TYPE_NOT_ALLOWED": "JPEG, PNG, GIF, WebP 이미지만 올릴 수 있습니다.",
+  "MEDIA_TEMP_QUOTA_EXCEEDED": "저장하지 않은 이미지가 너무 많습니다. 글을 저장한 뒤 다시 올려 주세요.",
+  "THUMBNAIL_SIZE_NOT_ALLOWED": "지원하지 않는 이미지 크기입니다."
 }

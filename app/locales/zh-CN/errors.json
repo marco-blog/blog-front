@@ -46,5 +46,10 @@
   "PASSWORD_RESET_TOKEN_INVALID": "重置链接已过期或已被使用。请重新申请。",
   "COMMENT_NOT_FOUND": "找不到该评论。",
   "REPLY_DEPTH_EXCEEDED": "不能回复回复。",
-  "COMMENTS_DISABLED": "此文章已关闭评论。"
+  "COMMENTS_DISABLED": "此文章已关闭评论。",
+  "MEDIA_NOT_FOUND": "找不到该图片。",
+  "MEDIA_TOO_LARGE": "图片不能超过 10MB。",
+  "MEDIA_TYPE_NOT_ALLOWED": "只能上传 JPEG、PNG、GIF 和 WebP 图片。",
+  "MEDIA_TEMP_QUOTA_EXCEEDED": "未保存的图片太多。请先保存文章后再上传。",
+  "THUMBNAIL_SIZE_NOT_ALLOWED": "不支持该图片尺寸。"
 }

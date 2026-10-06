@@ -99,6 +99,25 @@ describe("CommentSection", () => {
     );
   });
 
+  it("작성자 프로필 이미지는 50x50 썸네일(2배 srcset), 없으면 그리지 않는다", async () => {
+    const profile = "/media/Pf9Yy8Xx7Ww6Vv5Uu4Tt3S";
+    renderSection({
+      comments: [
+        comment(1, {
+          author: { userId: WRITER.userId, nickname: WRITER.nickname, profileImageUrl: profile },
+        }),
+        comment(2),
+      ],
+    });
+
+    const images = (await screen.findAllByRole("article")).map((article) =>
+      article.querySelector("img.avatar"),
+    );
+    expect(images[0]).toHaveAttribute("src", `${profile}/50x50`);
+    expect(images[0]).toHaveAttribute("srcset", `${profile}/50x50 1x, ${profile}/100x100 2x`);
+    expect(images[1]).toBeNull();
+  });
+
   it("비로그인은 로그인 안내(/login?next=)만, 쓰기·답글·수정·삭제 버튼 없음", async () => {
     renderSection();
 

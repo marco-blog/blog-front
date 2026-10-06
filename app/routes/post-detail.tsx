@@ -11,12 +11,14 @@ import { categoryHref } from "~/components/blog/CategoryTree";
 import type { CommentActionData } from "~/components/comment/actions";
 import { runCommentAction } from "~/components/comment/actions.server";
 import { CommentSection } from "~/components/comment/CommentSection";
+import { Avatar } from "~/components/media/Avatar";
 import { PostContent } from "~/components/post/PostContent";
 import { blogTagHref } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { highlightCodeBlocks } from "~/content/highlight.server";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
+import { ogImageUrl } from "~/media/thumbnail";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/post-detail";
@@ -76,7 +78,7 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
   return pageMeta({
     title: post.title,
     description: post.summary,
-    image: absoluteUrl(origin, post.thumbnailUrl),
+    image: absoluteUrl(origin, ogImageUrl(post.thumbnailUrl)),
     url: absoluteUrl(origin, `/${post.blogHandle}/${post.id}`),
     type: "article",
     siteName: t("appName"),
@@ -106,7 +108,9 @@ export default function PostDetailPage() {
           )}
           <dl className="post-meta">
             <dt>{t("post:detail.author")}</dt>
-            <dd>{post.author.nickname}</dd>
+            <dd>
+              <Avatar url={post.author.profileImageUrl} /> {post.author.nickname}
+            </dd>
             {post.publishedAt && (
               <>
                 <dt>{t("post:detail.publishedAt")}</dt>

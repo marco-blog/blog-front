@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import Settings, { loader as settingsLoader } from "~/routes/settings";
 import SettingsLoginHistory, {
@@ -135,7 +135,12 @@ describe("/settings/profile", () => {
     mockBackend({ "GET /api/v1/me": ok(me) });
     await expect(
       profileLoader(routeArgs(getRequest("/settings/profile", loggedIn)) as never),
-    ).resolves.toEqual({ email: "marco@example.com", nickname: "마르코", bio: "자바 이야기" });
+    ).resolves.toEqual({
+      email: "marco@example.com",
+      nickname: "마르코",
+      bio: "자바 이야기",
+      profileImageUrl: null,
+    });
   });
 
   it("설정 메뉴: 프로필·비밀번호·로그인 기록·내 블로그", async () => {
@@ -195,6 +200,87 @@ describe("/settings/profile", () => {
       bio: null,
     });
     expect(screen.getByLabelText("닉네임")).toHaveValue("새 닉네임");
+  });
+
+  it("프로필 이미지: 고르면 purpose=PROFILE로 올려 미리 보고, 저장할 때 키를 보낸다. 지우면 null", async () => {
+    const key = "k3Jd9fQ2xLmA7pZ0bR5tYw";
+    let current: Omit<typeof me, "profileImageUrl"> & { profileImageUrl: string | null } = me;
+    const backend = mockBackend({
+      "GET /api/v1/me": () => ok(current),
+      "POST /api/v1/media": ok(
+        { key, url: `/media/${key}`, mime: "image/png", size: 68, width: 1, height: 1 },
+        { status: 201 },
+      ),
+      "PATCH /api/v1/me": (call) => {
+        const body = call.body as { profileImageMediaKey?: string | null };
+        current = {
+          ...me,
+          profileImageUrl: body.profileImageMediaKey ? `/media/${body.profileImageMediaKey}` : null,
+        };
+        return ok(current);
+      },
+    });
+    renderRoutes(
+      [
+        {
+          path: "settings",
+          loader: withCookie(settingsLoader),
+          Component: Settings,
+          children: [route],
+        },
+      ],
+      { initialEntries: ["/settings/profile"] },
+    );
+
+    expect(await screen.findByText("이미지가 없습니다.")).toBeInTheDocument();
+    const file = new File([new Uint8Array(68)], "me.png", { type: "image/png" });
+    fireEvent.change(screen.getByLabelText("이미지 파일 고르기"), { target: { files: [file] } });
+
+    const preview = await screen.findByRole("img", { name: "프로필 이미지 미리보기" });
+    expect(preview).toHaveAttribute("src", `/media/${key}/100x100`);
+    expect(screen.getByText("저장해야 반영됩니다.")).toBeInTheDocument();
+    const upload = backend.callsTo("POST /api/v1/media")[0].body as FormData;
+    expect(upload.get("purpose")).toBe("PROFILE");
+
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    expect(await screen.findByText("프로필을 저장했습니다.")).toBeInTheDocument();
+    expect(backend.callsTo("PATCH /api/v1/me")[0].body).toEqual({
+      nickname: "마르코",
+      bio: "자바 이야기",
+      profileImageMediaKey: key,
+    });
+    expect(screen.queryByText("저장해야 반영됩니다.")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "이미지 지우기" }));
+    expect(screen.getByText("이미지가 없습니다.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    await vi.waitFor(() => expect(backend.callsTo("PATCH /api/v1/me")).toHaveLength(2));
+    expect(backend.callsTo("PATCH /api/v1/me")[1].body).toEqual({
+      nickname: "마르코",
+      bio: "자바 이야기",
+      profileImageMediaKey: null,
+    });
+  });
+
+  it("프로필 이미지: 올리기 실패와 저장 시 backend 오류를 이미지 칸에 보인다", async () => {
+    const backend = renderSettings("/settings/profile", route, {
+      "POST /api/v1/media": fail(415, "MEDIA_TYPE_NOT_ALLOWED"),
+      "PATCH /api/v1/me": fail(400, "VALIDATION_FAILED", [
+        { field: "profileImageMediaKey", code: "INVALID" },
+      ]),
+    });
+    const file = new File(["not an image"], "fake.jpg", { type: "image/jpeg" });
+
+    fireEvent.change(await screen.findByLabelText("이미지 파일 고르기"), {
+      target: { files: [file] },
+    });
+    expect(
+      await screen.findByText("JPEG, PNG, GIF, WebP 이미지만 올릴 수 있습니다."),
+    ).toBeInTheDocument();
+    expect(backend.callsTo("POST /api/v1/media")).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    expect(await screen.findByText("올바르지 않은 값입니다.")).toBeInTheDocument();
   });
 
   it("빈 닉네임은 backend를 부르지 않고 필수 문구", async () => {
