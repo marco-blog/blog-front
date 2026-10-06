@@ -1,0 +1,23 @@
+{
+  "UNKNOWN": "We couldn't process your request. Please try again later.",
+  "VALIDATION_FAILED": "Please check what you entered.",
+  "UNAUTHENTICATED": "Please log in to continue.",
+  "FORBIDDEN": "You don't have permission to do this.",
+  "ORIGIN_NOT_ALLOWED": "This request came from a location that isn't allowed.",
+  "NOT_FOUND": "We couldn't find what you were looking for.",
+  "METHOD_NOT_ALLOWED": "This request isn't supported.",
+  "UNSUPPORTED_MEDIA_TYPE": "This format isn't supported.",
+  "TOO_MANY_REQUESTS": "Too many requests. Please try again later.",
+  "INTERNAL_ERROR": "Something went wrong on our server. Please try again later.",
+  "BACKEND_UNAVAILABLE": "We can't reach the server. Please try again later.",
+  "INVALID_RESPONSE": "We couldn't read the server's response. Please try again later.",
+  "fieldErrors": {
+    "REQUIRED": "This field is required.",
+    "TOO_LONG": "Enter {{max}} characters or fewer.",
+    "TOO_SHORT": "Enter at least {{min}} characters.",
+    "TOO_SMALL": "Must be {{value}} or more.",
+    "TOO_LARGE": "Must be {{value}} or less.",
+    "INVALID_FORMAT": "The format is not valid.",
+    "INVALID": "This value is not valid."
+  }
+}

@@ -1,8 +1,16 @@
 node_modules/
 dist/
 out/
+build/
+coverage/
+.react-router/
+*.tsbuildinfo
+playwright-report/
+test-results/
+blob-report/
 .env
 .env.*
+!.env.example
 .idea/
 .vscode/
 .DS_Store

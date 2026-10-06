@@ -1,0 +1,23 @@
+{
+  "UNKNOWN": "无法处理您的请求，请稍后再试。",
+  "VALIDATION_FAILED": "请检查您输入的内容。",
+  "UNAUTHENTICATED": "请先登录。",
+  "FORBIDDEN": "您没有执行此操作的权限。",
+  "ORIGIN_NOT_ALLOWED": "该请求来自不被允许的来源。",
+  "NOT_FOUND": "找不到您请求的内容。",
+  "METHOD_NOT_ALLOWED": "不支持该请求。",
+  "UNSUPPORTED_MEDIA_TYPE": "不支持该格式。",
+  "TOO_MANY_REQUESTS": "请求过于频繁，请稍后再试。",
+  "INTERNAL_ERROR": "服务器出现问题，请稍后再试。",
+  "BACKEND_UNAVAILABLE": "无法连接到服务器，请稍后再试。",
+  "INVALID_RESPONSE": "无法处理服务器的响应，请稍后再试。",
+  "fieldErrors": {
+    "REQUIRED": "此项为必填项。",
+    "TOO_LONG": "请输入不超过 {{max}} 个字符。",
+    "TOO_SHORT": "请至少输入 {{min}} 个字符。",
+    "TOO_SMALL": "不能小于 {{value}}。",
+    "TOO_LARGE": "不能大于 {{value}}。",
+    "INVALID_FORMAT": "格式不正确。",
+    "INVALID": "该值无效。"
+  }
+}

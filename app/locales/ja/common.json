@@ -1,0 +1,16 @@
+{
+  "appName": "ブログ",
+  "home": {
+    "title": "ブログ",
+    "placeholder": "ブログサービスを準備しています。"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "description": "アドレスが間違っているか、削除されたページです。",
+    "backHome": "ホームへ"
+  },
+  "error": {
+    "title": "問題が発生しました",
+    "description": "しばらくしてからもう一度お試しください。"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "appName": "博客",
+  "home": {
+    "title": "博客",
+    "placeholder": "博客服务正在准备中。"
+  },
+  "notFound": {
+    "title": "找不到页面",
+    "description": "地址有误或页面已被删除。",
+    "backHome": "返回首页"
+  },
+  "error": {
+    "title": "出现了问题",
+    "description": "请稍后再试。"
+  }
+}
