@@ -1,0 +1,449 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Form, Link, data, useActionData, useLoaderData, useNavigation } from "react-router";
+
+import { createApiClient } from "~/api/client.server";
+import {
+  VALIDATION_FAILED,
+  toFormError,
+  useFormMessages,
+  type FormErrorData,
+} from "~/api/formErrors";
+import type {
+  Blog,
+  BulkPostRequest,
+  BulkPostResult,
+  CategoryNode,
+  PostStatus,
+  PostSummary,
+  Visibility,
+} from "~/api/models";
+import { parsePostId } from "~/blog/ids";
+import { Pagination } from "~/components/Pagination";
+import { FormAlert } from "~/components/form/FormField";
+import { useDateFormat } from "~/i18n/format";
+import { metaT } from "~/i18n/meta";
+import { requireOwnedBlog, throwManageError } from "~/manage/access.server";
+import { postHref } from "~/manage/links";
+import { privatePageMeta } from "~/seo/meta";
+
+import type { Route } from "./+types/posts";
+
+/** 한 페이지 글 수(backend 기본값과 같다) */
+export const MANAGE_PAGE_SIZE = 20;
+const MAX_PAGE = 100_000;
+const QUERY_MAX = 200;
+
+const STATUSES: readonly PostStatus[] = ["DRAFT", "PUBLISHED", "DELETED"];
+const VISIBILITIES: readonly Visibility[] = ["PUBLIC", "PRIVATE"];
+/** 일괄 작업 버튼 값 → backend 요청 */
+const BULK_OPS = {
+  PUBLIC: { action: "CHANGE_VISIBILITY", visibility: "PUBLIC" },
+  PRIVATE: { action: "CHANGE_VISIBILITY", visibility: "PRIVATE" },
+  DELETE: { action: "DELETE" },
+} as const satisfies Record<string, Omit<BulkPostRequest, "postIds">>;
+type BulkOp = keyof typeof BULK_OPS;
+
+/** 주소의 글 관리 조건(`?status=&visibility=&category=&q=&page=`). 모르는 값은 버린다. */
+export interface PostFilters {
+  status: PostStatus | null;
+  visibility: Visibility | null;
+  category: number | null;
+  q: string;
+  /** 1부터 */
+  page: number;
+}
+
+function oneOf<T extends string>(values: readonly T[], value: string | null): T | null {
+  return value !== null && (values as readonly string[]).includes(value) ? (value as T) : null;
+}
+
+export function parseFilters(search: URLSearchParams): PostFilters {
+  const pageText = search.get("page");
+  const page = pageText && /^\d{1,6}$/.test(pageText) ? Number(pageText) : 1;
+  return {
+    status: oneOf(STATUSES, search.get("status")),
+    visibility: oneOf(VISIBILITIES, search.get("visibility")),
+    category: parsePostId(search.get("category")),
+    q: (search.get("q") ?? "").trim().slice(0, QUERY_MAX),
+    page: page >= 1 && page <= MAX_PAGE ? page : 1,
+  };
+}
+
+/** 조건 → 주소 쿼리 문자열(`?…`, 빈 값은 뺀다). 첫 페이지는 page를 넣지 않는다. */
+export function filtersSearch(filters: PostFilters, page = filters.page): string {
+  const params = new URLSearchParams();
+  if (filters.status) params.set("status", filters.status);
+  if (filters.visibility) params.set("visibility", filters.visibility);
+  if (filters.category !== null) params.set("category", String(filters.category));
+  if (filters.q) params.set("q", filters.q);
+  if (page > 1) params.set("page", String(page));
+  const search = params.toString();
+  return search ? `?${search}` : "";
+}
+
+interface CategoryOption {
+  id: number;
+  name: string;
+  depth: number;
+}
+
+function flattenCategories(nodes: CategoryNode[], depth = 0): CategoryOption[] {
+  return nodes.flatMap((node) => [
+    { id: node.id, name: node.name, depth },
+    ...flattenCategories(node.children ?? [], depth + 1),
+  ]);
+}
+
+export function meta({ matches, location }: Route.MetaArgs) {
+  const t = metaT(matches);
+  const trash = new URLSearchParams(location.search).get("status") === "DELETED";
+  return privatePageMeta(t(trash ? "manage:posts.trashTitle" : "manage:posts.title"), t("appName"));
+}
+
+/**
+ * 글 관리(`/:handle/manage/posts`, SSR, 006 FR-101)와 휴지통(`?status=DELETED`, FR-084).
+ * 조건은 주소 쿼리 문자열 그대로 backend `GET /blogs/{handle}/manage/posts`에 넘기고(페이지만 0부터로 바꿈),
+ * 카테고리 필터 목록은 블로그 정보(`GET /blogs/{handle}`)의 카테고리로 만든다(US2 전에는 비어 있어 숨김).
+ */
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const { handle } = await requireOwnedBlog(request, params.handle);
+  const filters = parseFilters(new URL(request.url).searchParams);
+  const api = createApiClient(request);
+  const [posts, blog] = await Promise.all([
+    api.send<PostSummary[]>(`/blogs/${handle}/manage/posts`, {
+      query: {
+        status: filters.status,
+        visibility: filters.visibility,
+        category: filters.category,
+        q: filters.q || null,
+        page: filters.page - 1,
+        size: MANAGE_PAGE_SIZE,
+      },
+    }),
+    api.get<Blog>(`/blogs/${handle}`),
+  ]).catch(throwManageError);
+  return {
+    handle,
+    filters,
+    posts: posts.result,
+    totalCount: posts.totalCount ?? posts.result.length,
+    categories: flattenCategories(blog.categories ?? []),
+  };
+}
+
+type PostsActionData =
+  | { intent: "bulk"; ok: true; updated: number }
+  | { intent: "restore"; ok: true }
+  | { intent: "bulk"; ok: false; noSelection: true }
+  | (FormErrorData & { intent: string; ok: false; noSelection?: false });
+
+/**
+ * 일괄 작업(`POST /blogs/{handle}/manage/posts/bulk`: 공개·비공개로 바꾸기, 휴지통으로)과
+ * 휴지통 복구(`POST /posts/{id}/restore`). 끝나면 loader가 목록을 다시 읽는다.
+ */
+export async function action({ request, params }: Route.ActionArgs) {
+  const { handle } = await requireOwnedBlog(request, params.handle);
+  const form = await request.formData();
+  const intent = String(form.get("intent") ?? "");
+  const api = createApiClient(request);
+
+  if (intent === "bulk") {
+    const op = String(form.get("op") ?? "");
+    const postIds = [
+      ...new Set(
+        form
+          .getAll("postIds")
+          .map((value) => parsePostId(String(value)))
+          .filter((id): id is number => id !== null),
+      ),
+    ];
+    if (!(op in BULK_OPS)) {
+      return invalid(intent);
+    }
+    if (postIds.length === 0) {
+      return data<PostsActionData>({ intent, ok: false, noSelection: true }, { status: 400 });
+    }
+    try {
+      const result = await api.post<BulkPostResult>(`/blogs/${handle}/manage/posts/bulk`, {
+        body: { postIds, ...BULK_OPS[op as BulkOp] } satisfies BulkPostRequest,
+      });
+      return data<PostsActionData>({ intent, ok: true, updated: result.updated });
+    } catch (error) {
+      const { data: formError, status } = toFormError(error);
+      return data<PostsActionData>({ ...formError, intent, ok: false }, { status });
+    }
+  }
+
+  if (intent === "restore") {
+    const postId = parsePostId(String(form.get("postId") ?? ""));
+    if (postId === null) {
+      return invalid(intent);
+    }
+    try {
+      await api.post(`/posts/${postId}/restore`);
+      return data<PostsActionData>({ intent, ok: true });
+    } catch (error) {
+      const { data: formError, status } = toFormError(error);
+      return data<PostsActionData>({ ...formError, intent, ok: false }, { status });
+    }
+  }
+
+  return invalid(intent);
+}
+
+function invalid(intent: string) {
+  return data<PostsActionData>(
+    { intent, ok: false, resultCode: VALIDATION_FAILED, field: null, fieldErrors: [] },
+    { status: 400 },
+  );
+}
+
+export default function ManagePosts() {
+  const { t } = useTranslation();
+  const { handle, filters, posts, totalCount, categories } = useLoaderData<typeof loader>();
+  const result = useActionData<PostsActionData>();
+  const trash = filters.status === "DELETED";
+  const base = `/${handle}/manage/posts`;
+
+  return (
+    <main className="manage-posts">
+      <h1>{t(trash ? "manage:posts.trashTitle" : "manage:posts.title")}</h1>
+      <nav aria-label={t("manage:posts.views.label")}>
+        <Link to={base} aria-current={trash ? undefined : "page"}>
+          {t("manage:posts.views.all")}
+        </Link>{" "}
+        <Link to={`${base}?status=DELETED`} aria-current={trash ? "page" : undefined}>
+          {t("manage:posts.views.trash")}
+        </Link>
+      </nav>
+
+      <FilterForm key={filtersSearch(filters)} filters={filters} categories={categories} />
+      <ActionResult result={result} />
+
+      {trash ? (
+        <TrashList posts={posts} />
+      ) : (
+        <BulkList key={posts.map((post) => post.id).join(",")} handle={handle} posts={posts} />
+      )}
+
+      <Pagination
+        page={filters.page}
+        totalCount={totalCount}
+        pageSize={MANAGE_PAGE_SIZE}
+        hrefFor={(page) => `${base}${filtersSearch(filters, page)}`}
+      />
+    </main>
+  );
+}
+
+function FilterForm({
+  filters,
+  categories,
+}: {
+  filters: PostFilters;
+  categories: CategoryOption[];
+}) {
+  const { t } = useTranslation();
+  const trash = filters.status === "DELETED";
+  return (
+    <Form method="get" role="search" aria-label={t("manage:posts.filter.label")}>
+      {trash ? (
+        <input type="hidden" name="status" value="DELETED" />
+      ) : (
+        <label>
+          {t("manage:posts.filter.status")}{" "}
+          <select name="status" defaultValue={filters.status ?? ""}>
+            <option value="">{t("manage:posts.filter.all")}</option>
+            <option value="DRAFT">{t("manage:status.DRAFT")}</option>
+            <option value="PUBLISHED">{t("manage:status.PUBLISHED")}</option>
+          </select>
+        </label>
+      )}{" "}
+      <label>
+        {t("manage:posts.filter.visibility")}{" "}
+        <select name="visibility" defaultValue={filters.visibility ?? ""}>
+          <option value="">{t("manage:posts.filter.all")}</option>
+          {VISIBILITIES.map((visibility) => (
+            <option key={visibility} value={visibility}>
+              {t(`manage:visibility.${visibility}`)}
+            </option>
+          ))}
+        </select>
+      </label>{" "}
+      {categories.length > 0 && (
+        <label>
+          {t("manage:posts.filter.category")}{" "}
+          <select name="category" defaultValue={filters.category ?? ""}>
+            <option value="">{t("manage:posts.filter.all")}</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {`${"— ".repeat(category.depth)}${category.name}`}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}{" "}
+      <label>
+        {t("manage:posts.filter.query")}{" "}
+        <input type="search" name="q" defaultValue={filters.q} maxLength={QUERY_MAX} />
+      </label>{" "}
+      <button type="submit">{t("manage:posts.filter.submit")}</button>
+    </Form>
+  );
+}
+
+function ActionResult({ result }: { result: PostsActionData | undefined }) {
+  const { t } = useTranslation();
+  const error = result && !result.ok && !result.noSelection ? result : null;
+  const messages = useFormMessages(error);
+  if (!result) {
+    return null;
+  }
+  if (result.ok) {
+    return (
+      <p role="status">
+        {result.intent === "bulk"
+          ? t("manage:posts.bulk.done", { updated: result.updated })
+          : t("manage:posts.restored")}
+      </p>
+    );
+  }
+  return (
+    <FormAlert message={result.noSelection ? t("manage:posts.bulk.noneSelected") : messages.form} />
+  );
+}
+
+function PostMeta({ post }: { post: PostSummary }) {
+  const { t } = useTranslation();
+  const format = useDateFormat();
+  return (
+    <p className="post-meta">
+      <span>{t(`manage:status.${post.status}`)}</span> ·{" "}
+      <span>{t(`manage:visibility.${post.visibility}`)}</span>
+      {post.hasDraft && post.status === "PUBLISHED" && (
+        <>
+          {" "}
+          · <span>{t("manage:posts.hasDraft")}</span>
+        </>
+      )}{" "}
+      ·{" "}
+      {post.deletedAt ? (
+        <>
+          <span>{t("manage:posts.deletedAt", { date: format.date(post.deletedAt) })}</span> ·{" "}
+          <strong>{t("manage:posts.purgeAt", { date: format.date(post.purgeAt) })}</strong>
+        </>
+      ) : post.publishedAt ? (
+        <span>{t("manage:posts.publishedAt", { date: format.date(post.publishedAt) })}</span>
+      ) : (
+        <span>{t("manage:posts.updatedAt", { date: format.date(post.updatedAt) })}</span>
+      )}
+    </p>
+  );
+}
+
+function BulkList({ handle, posts }: { handle: string; posts: PostSummary[] }) {
+  const { t } = useTranslation();
+  const submitting = useNavigation().state === "submitting";
+  const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
+  if (posts.length === 0) {
+    return <p>{t("manage:posts.empty")}</p>;
+  }
+  const allSelected = selected.size === posts.length;
+  const toggle = (id: number) =>
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+  return (
+    <Form method="post" className="bulk-form">
+      <input type="hidden" name="intent" value="bulk" />
+      <fieldset>
+        <legend>{t("manage:posts.bulk.label")}</legend>
+        <button type="submit" name="op" value="PUBLIC" disabled={submitting}>
+          {t("manage:posts.bulk.makePublic")}
+        </button>{" "}
+        <button type="submit" name="op" value="PRIVATE" disabled={submitting}>
+          {t("manage:posts.bulk.makePrivate")}
+        </button>{" "}
+        <button type="submit" name="op" value="DELETE" disabled={submitting}>
+          {t("manage:posts.bulk.delete")}
+        </button>
+      </fieldset>
+      <label>
+        <input
+          type="checkbox"
+          checked={allSelected}
+          onChange={() =>
+            setSelected(allSelected ? new Set() : new Set(posts.map((post) => post.id)))
+          }
+        />{" "}
+        {t("manage:posts.selectAll")}
+      </label>
+      <ul className="manage-post-list" aria-label={t("manage:posts.list")}>
+        {posts.map((post) => {
+          const title = post.title || t("manage:posts.untitled");
+          const resume = post.status === "DRAFT" || post.hasDraft;
+          return (
+            <li key={post.id}>
+              <input
+                type="checkbox"
+                name="postIds"
+                value={post.id}
+                aria-label={t("manage:posts.select", { title })}
+                checked={selected.has(post.id)}
+                onChange={() => toggle(post.id)}
+              />{" "}
+              <Link to={postHref(handle, post)}>{title}</Link>{" "}
+              <Link to={`/${handle}/write/${post.id}`}>
+                {t(resume ? "manage:posts.continue" : "manage:posts.edit")}
+              </Link>
+              <PostMeta post={post} />
+            </li>
+          );
+        })}
+      </ul>
+    </Form>
+  );
+}
+
+function TrashList({ posts }: { posts: PostSummary[] }) {
+  const { t } = useTranslation();
+  const submitting = useNavigation().state === "submitting";
+  if (posts.length === 0) {
+    return <p>{t("manage:posts.trashEmpty")}</p>;
+  }
+  return (
+    <>
+      <p>{t("manage:posts.trashHint")}</p>
+      <ul className="manage-post-list" aria-label={t("manage:posts.list")}>
+        {posts.map((post) => {
+          const title = post.title || t("manage:posts.untitled");
+          return (
+            <li key={post.id}>
+              <strong>{title}</strong>
+              <PostMeta post={post} />
+              <Form method="post">
+                <input type="hidden" name="intent" value="restore" />
+                <input type="hidden" name="postId" value={post.id} />
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  aria-label={`${t("manage:posts.restore")}: ${title}`}
+                >
+                  {t("manage:posts.restore")}
+                </button>
+              </Form>
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}

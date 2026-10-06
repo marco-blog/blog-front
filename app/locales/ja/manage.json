@@ -1,0 +1,89 @@
+{
+  "title": "ブログ管理",
+  "nav": {
+    "label": "ブログ管理メニュー",
+    "dashboard": "ダッシュボード",
+    "posts": "記事管理",
+    "categories": "カテゴリー",
+    "comments": "コメント",
+    "settings": "ブログ設定"
+  },
+  "switcher": {
+    "label": "ブログ切り替え"
+  },
+  "viewBlog": "ブログを見る",
+  "write": "書く",
+  "dashboard": {
+    "title": "ダッシュボード",
+    "drafts": "下書き",
+    "draftCount": "{{drafts}}件",
+    "newComments": "直近7日間の新しいコメント",
+    "commentCount": "{{comments}}件",
+    "recentPosts": "最近の記事",
+    "recentComments": "最近のコメント",
+    "noPosts": "まだ記事がありません。",
+    "noComments": "まだコメントがありません。",
+    "commentOn": "{{title}}へのコメント",
+    "deletedComment": "削除されたコメント"
+  },
+  "status": {
+    "DRAFT": "下書き",
+    "PUBLISHED": "公開済み",
+    "DELETED": "ゴミ箱"
+  },
+  "visibility": {
+    "PUBLIC": "公開",
+    "PRIVATE": "非公開"
+  },
+  "posts": {
+    "title": "記事管理",
+    "trashTitle": "ゴミ箱",
+    "views": {
+      "label": "記事の表示",
+      "all": "すべての記事",
+      "trash": "ゴミ箱"
+    },
+    "filter": {
+      "label": "記事を探す",
+      "status": "状態",
+      "visibility": "公開範囲",
+      "category": "カテゴリー",
+      "all": "すべて",
+      "query": "タイトル検索",
+      "submit": "検索"
+    },
+    "list": "記事一覧",
+    "empty": "条件に合う記事がありません。",
+    "trashEmpty": "ゴミ箱は空です。",
+    "trashHint": "ゴミ箱の記事は削除から30日後に完全に削除されます。",
+    "select": "{{title}}を選択",
+    "selectAll": "すべて選択",
+    "untitled": "(タイトルなし)",
+    "bulk": {
+      "label": "選択した記事を",
+      "makePublic": "公開にする",
+      "makePrivate": "非公開にする",
+      "delete": "ゴミ箱に移動",
+      "noneSelected": "先に記事を選んでください。",
+      "done": "{{updated}}件の記事を変更しました。"
+    },
+    "edit": "編集",
+    "continue": "続きを書く",
+    "hasDraft": "未公開の修正あり",
+    "publishedAt": "公開 {{date}}",
+    "updatedAt": "更新 {{date}}",
+    "deletedAt": "削除 {{date}}",
+    "purgeAt": "{{date}}に完全削除",
+    "restore": "復元",
+    "restored": "記事を復元しました。"
+  },
+  "settings": {
+    "title": "ブログ設定",
+    "blogTitle": "ブログのタイトル",
+    "description": "ブログの紹介",
+    "commentEnabled": "このブログでコメントを許可",
+    "commentHint": "オフにすると、このブログのすべての記事に新しいコメントを付けられません。",
+    "submit": "保存",
+    "saved": "ブログ設定を保存しました。"
+  }
+}

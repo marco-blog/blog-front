@@ -1,0 +1,89 @@
+{
+  "title": "블로그 관리",
+  "nav": {
+    "label": "블로그 관리 메뉴",
+    "dashboard": "대시보드",
+    "posts": "글 관리",
+    "categories": "카테고리",
+    "comments": "댓글",
+    "settings": "블로그 설정"
+  },
+  "switcher": {
+    "label": "블로그 전환"
+  },
+  "viewBlog": "블로그 보기",
+  "write": "글쓰기",
+  "dashboard": {
+    "title": "대시보드",
+    "drafts": "임시저장 글",
+    "draftCount": "{{drafts}}편",
+    "newComments": "최근 7일 새 댓글",
+    "commentCount": "{{comments}}개",
+    "recentPosts": "최근 글",
+    "recentComments": "최근 댓글",
+    "noPosts": "아직 글이 없습니다.",
+    "noComments": "아직 댓글이 없습니다.",
+    "commentOn": "{{title}}에 남긴 댓글",
+    "deletedComment": "삭제된 댓글"
+  },
+  "status": {
+    "DRAFT": "임시저장",
+    "PUBLISHED": "발행",
+    "DELETED": "휴지통"
+  },
+  "visibility": {
+    "PUBLIC": "공개",
+    "PRIVATE": "비공개"
+  },
+  "posts": {
+    "title": "글 관리",
+    "trashTitle": "휴지통",
+    "views": {
+      "label": "글 보기",
+      "all": "모든 글",
+      "trash": "휴지통"
+    },
+    "filter": {
+      "label": "글 찾기",
+      "status": "상태",
+      "visibility": "공개 범위",
+      "category": "카테고리",
+      "all": "전체",
+      "query": "제목 검색",
+      "submit": "찾기"
+    },
+    "list": "글 목록",
+    "empty": "조건에 맞는 글이 없습니다.",
+    "trashEmpty": "휴지통이 비어 있습니다.",
+    "trashHint": "휴지통의 글은 삭제하고 30일이 지나면 영구 삭제됩니다.",
+    "select": "{{title}} 선택",
+    "selectAll": "모두 선택",
+    "untitled": "(제목 없음)",
+    "bulk": {
+      "label": "선택한 글을",
+      "makePublic": "공개로 바꾸기",
+      "makePrivate": "비공개로 바꾸기",
+      "delete": "휴지통으로 옮기기",
+      "noneSelected": "글을 먼저 고르세요.",
+      "done": "글 {{updated}}편을 바꿨습니다."
+    },
+    "edit": "수정",
+    "continue": "이어 쓰기",
+    "hasDraft": "작성 중인 수정본 있음",
+    "publishedAt": "발행 {{date}}",
+    "updatedAt": "수정 {{date}}",
+    "deletedAt": "삭제 {{date}}",
+    "purgeAt": "{{date}}에 영구 삭제",
+    "restore": "복구",
+    "restored": "글을 복구했습니다."
+  },
+  "settings": {
+    "title": "블로그 설정",
+    "blogTitle": "블로그 제목",
+    "description": "블로그 소개",
+    "commentEnabled": "이 블로그에 댓글 허용",
+    "commentHint": "끄면 이 블로그의 모든 글에 새 댓글을 달 수 없습니다.",
+    "submit": "저장",
+    "saved": "블로그 설정을 저장했습니다."
+  }
+}
