@@ -25,7 +25,9 @@
     "logout": "로그아웃",
     "feed": "구독 피드",
     "notifications": "알림",
-    "unreadNotifications": "안 읽은 알림 {{count}}개"
+    "unreadNotifications": "안 읽은 알림 {{count}}개",
+    "search": "검색",
+    "searchLabel": "검색어"
   },
   "footer": {
     "label": "사이트 정보",

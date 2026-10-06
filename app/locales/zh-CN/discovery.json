@@ -16,5 +16,35 @@
     "label": "已订阅博客的新文章",
     "empty": "已订阅的博客还没有文章。去订阅喜欢的博客吧。",
     "blog": "博客"
+  },
+  "search": {
+    "title": "搜索",
+    "metaTitle": "搜索“{{q}}”",
+    "label": "搜索词",
+    "submit": "搜索",
+    "hint": "请输入至少 2 个字符。查找包含所有词语的文章。",
+    "resultsLabel": "搜索结果",
+    "count": "{{count, number}} 条结果",
+    "empty": "没有搜索结果。请换个词试试。"
+  },
+  "related": {
+    "title": "相关文章"
+  },
+  "share": {
+    "label": "分享",
+    "copy": "复制链接",
+    "copied": "链接已复制。",
+    "copyFailed": "无法复制链接。请直接复制下面的地址。",
+    "url": "文章地址",
+    "kakao": "KakaoTalk",
+    "kakaoFailed": "无法加载 KakaoTalk 分享，请稍后再试。",
+    "x": "X",
+    "facebook": "Facebook",
+    "newWindow": "在新窗口中打开"
+  },
+  "feedLink": {
+    "rss": "{{title}} RSS",
+    "atom": "{{title}} Atom",
+    "category": "{{category}} - {{title}} RSS"
   }
 }

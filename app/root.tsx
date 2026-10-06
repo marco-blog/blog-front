@@ -14,6 +14,7 @@ import { forwardBackendCookies } from "~/api/backendCookies.server";
 import { errorMessage } from "~/api/errorMessage";
 import { isApiError } from "~/api/errors";
 import { getSessionUser } from "~/auth/session.server";
+import { kakaoJsKey } from "~/config.server";
 import { ErrorPage } from "~/components/ErrorPage";
 import { Footer } from "~/components/layout/Footer";
 import { Header, type HeaderUser } from "~/components/layout/Header";
@@ -33,6 +34,8 @@ export interface RootData extends RootLoaderData {
   user: HeaderUser | null;
   /** 날짜를 보여줄 시간대: 회원 설정, 비회원은 Asia/Seoul(FR-153) */
   timeZone?: string;
+  /** Kakao JavaScript 키(공개 값, 002 research D9). 없으면 카카오톡 공유 버튼을 숨긴다. */
+  kakaoJsKey?: string | null;
 }
 
 /**
@@ -64,6 +67,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<RootData> {
       unreadNotificationCount: member.unreadNotificationCount ?? 0,
     },
     timeZone: member?.timeZone || DEFAULT_TIME_ZONE,
+    kakaoJsKey: kakaoJsKey(),
   };
 }
 

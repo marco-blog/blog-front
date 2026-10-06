@@ -144,6 +144,34 @@ describe("blog home meta", () => {
     expect(tags.some((tag) => "property" in tag && tag.property === "og:image")).toBe(false);
   });
 
+  it("RSS·Atom 자동 발견 링크(절대 주소, 블로그 제목, 002 T088)", () => {
+    const data: LoaderData = {
+      blog,
+      posts: [],
+      totalCount: 0,
+      page: 1,
+      pageSize: 20,
+      origin: "https://blog.java21.net",
+    };
+
+    expect(meta(metaArgs(data)).filter((tag) => "rel" in tag && tag.rel === "alternate")).toEqual([
+      {
+        tagName: "link",
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "마르코의 블로그 RSS",
+        href: "https://blog.java21.net/marco/rss",
+      },
+      {
+        tagName: "link",
+        rel: "alternate",
+        type: "application/atom+xml",
+        title: "마르코의 블로그 Atom",
+        href: "https://blog.java21.net/marco/atom",
+      },
+    ]);
+  });
+
   it("오류(404)면 찾을 수 없음 제목과 noindex", () => {
     expect(meta(metaArgs(undefined))).toEqual([
       { title: "페이지를 찾을 수 없습니다 - 블로그" },

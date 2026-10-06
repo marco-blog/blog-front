@@ -8,8 +8,11 @@ import {
   CSP_NONCE_LOCAL,
   contentSecurityPolicy,
   cspNonceOf,
+  KAKAO_API_ORIGIN,
+  KAKAO_SCRIPT_ORIGIN,
   securityHeaders,
 } from "~/server/securityHeaders";
+import { KAKAO_SDK_ORIGIN, KAKAO_SDK_URL } from "~/share/kakao.client";
 
 /** 보안 헤더(research.md R27, 헌법 원칙 IV) */
 function directives(policy: string): Map<string, string[]> {
@@ -30,9 +33,9 @@ afterEach(async () => {
 });
 
 /** 보안 헤더 미들웨어 뒤에서 HTML을 그리는 앱. 본문의 script에 미들웨어가 정한 nonce를 넣는다. */
-async function start(production: boolean): Promise<string> {
+async function start(production: boolean, kakao?: boolean): Promise<string> {
   const app = express();
-  app.use(securityHeaders({ production }));
+  app.use(securityHeaders(kakao === undefined ? { production } : { production, kakao }));
   app.get("/", (_req, res) => {
     res
       .type("html")
@@ -65,6 +68,45 @@ describe("contentSecurityPolicy", () => {
     expect(scriptSrc).not.toContain("'unsafe-inline'");
     expect(scriptSrc).not.toContain("'unsafe-eval'");
     expect(scriptSrc.filter((value) => value.startsWith("http"))).toEqual([]);
+  });
+});
+
+describe("contentSecurityPolicy: 카카오톡 공유(002 T077, research D9)", () => {
+  it("키가 있으면 script-src에 SDK 출처, connect-src에 'self'와 카카오 API를 더한다", () => {
+    const policy = directives(contentSecurityPolicy("abc123", { kakao: true }));
+
+    expect(policy.get("script-src")).toEqual([
+      "'self'",
+      "'nonce-abc123'",
+      "https://t1.kakaocdn.net",
+    ]);
+    expect(policy.get("connect-src")).toEqual(["'self'", "https://kapi.kakao.com"]);
+    expect(policy.get("script-src")).not.toContain("'unsafe-inline'");
+    // 나머지는 001과 같다.
+    const base = directives(contentSecurityPolicy("abc123"));
+    for (const [name, values] of base) {
+      if (name !== "script-src") {
+        expect(policy.get(name)).toEqual(values);
+      }
+    }
+  });
+
+  it("키가 없으면 001과 같은 CSP", () => {
+    expect(contentSecurityPolicy("n", { kakao: false })).toBe(contentSecurityPolicy("n"));
+    expect(directives(contentSecurityPolicy("n")).has("connect-src")).toBe(false);
+  });
+
+  it("SDK 출처는 kakao.client.ts의 주소와 같다", () => {
+    expect(KAKAO_SDK_URL.startsWith(`${KAKAO_SCRIPT_ORIGIN}/`)).toBe(true);
+    expect(KAKAO_SCRIPT_ORIGIN).toBe(KAKAO_SDK_ORIGIN);
+    expect(KAKAO_API_ORIGIN).toBe("https://kapi.kakao.com");
+  });
+
+  it("미들웨어도 kakao 옵션에 따라 헤더를 만든다", async () => {
+    const url = await start(false, true);
+    const policy = directives((await fetch(url)).headers.get("content-security-policy") ?? "");
+    expect(policy.get("script-src")).toContain("https://t1.kakaocdn.net");
+    expect(policy.get("connect-src")).toEqual(["'self'", "https://kapi.kakao.com"]);
   });
 });
 

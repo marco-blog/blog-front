@@ -25,7 +25,9 @@
     "logout": "Log out",
     "feed": "Feed",
     "notifications": "Notifications",
-    "unreadNotifications": "{{count}} unread notifications"
+    "unreadNotifications": "{{count}} unread notifications",
+    "search": "Search",
+    "searchLabel": "Search terms"
   },
   "footer": {
     "label": "Site information",

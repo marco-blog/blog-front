@@ -11,7 +11,7 @@ import PostDetailRoute, {
 } from "~/routes/post-detail";
 
 import { fail, mockBackend, ok } from "../support/backend";
-import { postDetail, postWithoutMarkdown } from "../support/fixtures";
+import { postDetail, postSummary, postWithoutMarkdown } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
 import {
   asData,
@@ -30,6 +30,8 @@ type LoaderData = Awaited<ReturnType<typeof loader>>;
 const POST = "GET /api/v1/posts/123";
 const VIEWS = "POST /api/v1/posts/123/views";
 const COMMENTS = "GET /api/v1/posts/123/comments";
+const RELATED = "GET /api/v1/posts/123/related";
+const BLOG = "GET /api/v1/blogs/marco";
 
 const callLoader = (handle: string, postId: string, headers: Record<string, string> = {}) =>
   loader(routeArgs<LoaderArgs>(getRequest(`/${handle}/${postId}`, headers), { handle, postId }));
@@ -77,6 +79,38 @@ describe("post detail loader", () => {
       [COMMENTS]: fail(500, "INTERNAL_ERROR"),
     });
     await expect(callLoader("marco", "123")).resolves.toMatchObject({ comments: null });
+  });
+
+  it("관련 글과 블로그 제목(피드 링크 제목)을 함께 읽는다(002 T081)", async () => {
+    const related = [postSummary(7, { title: "관련 글 7" })];
+    const backend = mockBackend({
+      [POST]: ok(postDetail),
+      [VIEWS]: ok(null),
+      [RELATED]: ok(related),
+      [BLOG]: ok({ handle: "marco", title: "마르코의 블로그" }),
+    });
+
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({
+      related,
+      blogTitle: "마르코의 블로그",
+    });
+    expect(backend.callsTo(RELATED)).toHaveLength(1);
+    expect(backend.callsTo(BLOG)).toHaveLength(1);
+  });
+
+  it("관련 글·블로그 API가 실패해도 글은 보여준다(관련 글 [], 블로그 제목은 주소)", async () => {
+    mockBackend({
+      [POST]: ok(postDetail),
+      [VIEWS]: ok(null),
+      [RELATED]: fail(500, "INTERNAL_ERROR"),
+      [BLOG]: fail(500, "INTERNAL_ERROR"),
+    });
+
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({
+      post: { id: 123 },
+      related: [],
+      blogTitle: "marco",
+    });
   });
 
   it("조회수 기록이 실패해도 글은 보여준다", async () => {
@@ -138,6 +172,8 @@ describe("post detail meta", () => {
       isOwner: false,
       origin: "https://blog.java21.net",
       comments: [],
+      related: [],
+      blogTitle: "마르코의 블로그",
     };
   };
   const metaArgs = (loaderData: LoaderData | undefined) =>
@@ -169,6 +205,35 @@ describe("post detail meta", () => {
     expect(tags).not.toContainEqual({ name: "robots", content: "noindex" });
   });
 
+  it("대표 이미지가 있으면 twitter:card=summary_large_image, 없으면 summary(002 T077)", () => {
+    expect(meta(metaArgs(data()))).toContainEqual({
+      name: "twitter:card",
+      content: "summary_large_image",
+    });
+    const tags = meta(metaArgs(data({ thumbnailUrl: null })));
+    expect(tags).toContainEqual({ name: "twitter:card", content: "summary" });
+    expect(tags.some((tag) => "property" in tag && tag.property === "og:image")).toBe(false);
+  });
+
+  it("블로그 RSS·Atom 자동 발견 링크(절대 주소, 블로그 제목, 002 T088)", () => {
+    const tags = meta(metaArgs(data()));
+
+    expect(tags).toContainEqual({
+      tagName: "link",
+      rel: "alternate",
+      type: "application/rss+xml",
+      title: "마르코의 블로그 RSS",
+      href: "https://blog.java21.net/marco/rss",
+    });
+    expect(tags).toContainEqual({
+      tagName: "link",
+      rel: "alternate",
+      type: "application/atom+xml",
+      title: "마르코의 블로그 Atom",
+      href: "https://blog.java21.net/marco/atom",
+    });
+  });
+
   it("주인만 보는 임시저장·비공개 글은 noindex", () => {
     expect(meta(metaArgs(data({ status: "DRAFT" })))).toContainEqual({
       name: "robots",
@@ -193,18 +258,27 @@ describe("post detail meta", () => {
 });
 
 describe("post detail 화면", () => {
-  function renderPost(data: LoaderData) {
+  function renderPost(data: LoaderData, kakaoJsKey: string | null = null) {
     return renderRoutes(
       [{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }],
       {
         initialEntries: ["/marco/123"],
+        kakaoJsKey,
       },
     );
   }
 
   const loaded = (overrides: Partial<LoaderData> = {}): LoaderData => {
     const post = postWithoutMarkdown();
-    return { post, isOwner: false, origin: "http://front.test", comments: [], ...overrides };
+    return {
+      post,
+      isOwner: false,
+      origin: "http://front.test",
+      comments: [],
+      related: [],
+      blogTitle: "마르코의 블로그",
+      ...overrides,
+    };
   };
 
   it("작성자 프로필 이미지는 50x50 썸네일", async () => {
@@ -251,6 +325,50 @@ describe("post detail 화면", () => {
     );
     expect(within(nav).queryByText("다음 글")).toBeNull();
     expect(screen.queryByRole("link", { name: "수정" })).toBeNull();
+  });
+
+  it("관련 글 영역(002 T081), 없으면 영역 없음", async () => {
+    renderPost(loaded({ related: [postSummary(7, { title: "관련 글 7" })] }));
+
+    const region = await screen.findByRole("region", { name: "관련 글" });
+    expect(within(region).getByRole("link", { name: "관련 글 7" })).toHaveAttribute(
+      "href",
+      "/marco/7",
+    );
+  });
+
+  it("관련 글이 없으면 영역을 그리지 않는다", async () => {
+    renderPost(loaded());
+
+    await screen.findByRole("article");
+    expect(screen.queryByRole("region", { name: "관련 글" })).toBeNull();
+  });
+
+  it("공개 글은 공유 영역: 글 절대 주소로 X·페이스북 링크, 키가 있으면 카카오톡", async () => {
+    renderPost(loaded({ origin: "https://blog.java21.net" }), "kakao-key");
+
+    const share = await screen.findByRole("region", { name: "공유하기" });
+    expect(within(share).getByRole("link", { name: "X" }).getAttribute("href")).toContain(
+      "url=https%3A%2F%2Fblog.java21.net%2Fmarco%2F123",
+    );
+    expect(within(share).getByRole("link", { name: "페이스북" }).getAttribute("href")).toContain(
+      "u=https%3A%2F%2Fblog.java21.net%2Fmarco%2F123",
+    );
+    expect(await within(share).findByRole("button", { name: "카카오톡" })).toBeInTheDocument();
+  });
+
+  it("키가 없으면 카카오톡 버튼이 없고, 비공개·임시저장 글에는 공유 영역이 없다", async () => {
+    const { unmount } = renderPost(loaded());
+    const share = await screen.findByRole("region", { name: "공유하기" });
+    await within(share).findByRole("button", { name: "주소 복사" });
+    expect(within(share).queryByRole("button", { name: "카카오톡" })).toBeNull();
+    unmount();
+
+    renderPost(
+      loaded({ isOwner: true, post: { ...postWithoutMarkdown(), visibility: "PRIVATE" } }),
+    );
+    await screen.findByRole("article");
+    expect(screen.queryByRole("region", { name: "공유하기" })).toBeNull();
   });
 
   it("주인에게는 수정 링크와 상태(임시저장·비공개)를 보여준다", async () => {
@@ -409,6 +527,8 @@ describe("post detail 화면의 댓글", () => {
           replies: [],
         },
       ],
+      related: [],
+      blogTitle: "마르코의 블로그",
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -428,6 +548,8 @@ describe("post detail 화면의 댓글", () => {
       isOwner: true,
       origin: "http://front.test",
       comments: [],
+      related: [],
+      blogTitle: "마르코의 블로그",
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -512,6 +634,8 @@ describe("post detail 좋아요(002 T027)", () => {
       isOwner: false,
       origin: "http://front.test",
       comments: [],
+      related: [],
+      blogTitle: "마르코의 블로그",
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],

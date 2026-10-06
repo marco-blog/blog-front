@@ -11,7 +11,7 @@ import {
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
-import type { Comment, PostDetail } from "~/api/models";
+import type { Blog, Comment, PostDetail, PostSummary } from "~/api/models";
 import { loginPath } from "~/auth/paths";
 import { isValidHandle, parsePostId } from "~/blog/ids";
 import { categoryHref } from "~/components/blog/CategoryTree";
@@ -22,6 +22,8 @@ import { Avatar } from "~/components/media/Avatar";
 import { LikeButton } from "~/components/post/LikeButton";
 import { PostContent } from "~/components/post/PostContent";
 import { blogTagHref } from "~/components/post/PostList";
+import { RelatedPosts } from "~/components/post/RelatedPosts";
+import { ShareButtons } from "~/components/post/ShareButtons";
 import { publicOrigin } from "~/config.server";
 import { highlightCodeBlocks } from "~/content/highlight.server";
 import { formIntent, isLikeIntent, type LikeActionData } from "~/discovery/actions";
@@ -30,6 +32,7 @@ import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl } from "~/media/thumbnail";
 import type { RootData } from "~/root";
+import { blogFeedLinks } from "~/seo/feedLinks";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/post-detail";
@@ -44,6 +47,8 @@ export function links() {
  * `postId`가 숫자인지 여기서 검사한다(tasks.md "구현 전 결정 사항" 10번).
  * 볼 수 없는 글(비공개·임시저장·삭제, 정지·탈퇴 회원, 삭제된 블로그)은 backend가 404를 주고, 그대로 HTTP 404로 응답한다.
  * 댓글(US3)은 글과 함께 읽고(`GET /posts/{id}/comments`), 댓글을 읽지 못해도 글은 보여준다.
+ * 002: 관련 글(`GET /posts/{id}/related`, 실패하면 `[]`)과 피드 자동 발견 링크 제목에 쓸 블로그 제목(`GET /blogs/{handle}`,
+ * 실패하면 블로그 주소)도 함께 읽는다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const postId = parsePostId(params.postId);
@@ -51,9 +56,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
   const api = createApiClient(request);
-  const [post, comments] = await Promise.all([
+  const [post, comments, related, blog] = await Promise.all([
     api.get<PostDetail>(`/posts/${postId}`).catch(throwApiErrorResponse),
     api.get<Comment[]>(`/posts/${postId}/comments`).catch(() => null),
+    api.get<PostSummary[]>(`/posts/${postId}/related`).catch((): PostSummary[] => []),
+    api.get<Blog>(`/blogs/${params.handle}`).catch(() => null),
   ]);
   if (post.blogHandle !== params.handle) {
     throw data(null, { status: 404 });
@@ -68,6 +75,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     isOwner: contentMarkdown !== null,
     origin: publicOrigin(request),
     comments,
+    related,
+    blogTitle: blog?.title ?? post.blogHandle,
   };
 }
 
@@ -104,25 +113,30 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
   if (!loaderData) {
     return privatePageMeta(t("notFound.title"), t("appName"));
   }
-  const { post, origin } = loaderData;
-  return pageMeta({
-    title: post.title,
-    description: post.summary,
-    image: absoluteUrl(origin, ogImageUrl(post.thumbnailUrl)),
-    url: absoluteUrl(origin, `/${post.blogHandle}/${post.id}`),
-    type: "article",
-    siteName: t("appName"),
-    // 주인만 볼 수 있는 글은 검색에 넣지 않는다.
-    noindex: post.status !== "PUBLISHED" || post.visibility !== "PUBLIC",
-  });
+  const { post, origin, blogTitle } = loaderData;
+  return [
+    ...pageMeta({
+      title: post.title,
+      description: post.summary,
+      image: absoluteUrl(origin, ogImageUrl(post.thumbnailUrl)),
+      url: absoluteUrl(origin, `/${post.blogHandle}/${post.id}`),
+      type: "article",
+      siteName: t("appName"),
+      // 주인만 볼 수 있는 글은 검색에 넣지 않는다.
+      noindex: post.status !== "PUBLISHED" || post.visibility !== "PUBLIC",
+    }),
+    // RSS·Atom 자동 발견(002 FR-048)
+    ...blogFeedLinks(t, origin, { handle: post.blogHandle, title: blogTitle }),
+  ];
 }
 
 export default function PostDetailPage() {
   const { t } = useTranslation();
   const format = useDateFormat();
-  const { post, isOwner, comments } = useLoaderData<typeof loader>();
+  const { post, isOwner, comments, related, origin } = useLoaderData<typeof loader>();
   const actionData = useActionData<CommentActionData | LikeActionData>();
-  const viewer = useRouteLoaderData<RootData>("root")?.user ?? null;
+  const rootData = useRouteLoaderData<RootData>("root");
+  const viewer = rootData?.user ?? null;
   const likeResult =
     actionData && isLikeIntent(actionData.intent) ? (actionData as LikeActionData) : undefined;
   const result =
@@ -189,6 +203,15 @@ export default function PostDetailPage() {
               loginHref={viewer ? null : loginPath(`/${handle}/${post.id}`)}
               result={likeResult}
             />
+            {post.visibility === "PUBLIC" && (
+              <ShareButtons
+                url={absoluteUrl(origin, `/${handle}/${post.id}`) ?? `/${handle}/${post.id}`}
+                title={post.title}
+                summary={post.summary}
+                imageUrl={absoluteUrl(origin, ogImageUrl(post.thumbnailUrl))}
+                kakaoJsKey={rootData?.kakaoJsKey ?? null}
+              />
+            )}
           </footer>
         )}
       </article>
@@ -206,6 +229,7 @@ export default function PostDetailPage() {
           )}
         </nav>
       )}
+      <RelatedPosts handle={handle} posts={related} />
       <CommentSection
         comments={comments}
         commentCount={post.commentCount}

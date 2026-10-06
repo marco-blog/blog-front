@@ -136,6 +136,36 @@ describe("/:handle/category/:categoryId", () => {
     ).toContainEqual({ name: "robots", content: "noindex" });
   });
 
+  it("meta: 카테고리 RSS와 블로그 RSS·Atom 자동 발견(002 T088)", () => {
+    const tags = categoryMeta({
+      loaderData: data(),
+      matches: metaMatches,
+    } as unknown as Args<typeof categoryMeta>);
+    expect(tags.filter((tag) => "rel" in tag && tag.rel === "alternate")).toEqual([
+      {
+        tagName: "link",
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "Spring - 마르코의 블로그 RSS",
+        href: "https://blog.java21.net/marco/category/12/rss",
+      },
+      {
+        tagName: "link",
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "마르코의 블로그 RSS",
+        href: "https://blog.java21.net/marco/rss",
+      },
+      {
+        tagName: "link",
+        rel: "alternate",
+        type: "application/atom+xml",
+        title: "마르코의 블로그 Atom",
+        href: "https://blog.java21.net/marco/atom",
+      },
+    ]);
+  });
+
   it("화면: 제목, 하위 카테고리, 카테고리·태그 링크가 있는 글 목록, 페이지 이동", async () => {
     renderRoutes(
       [{ path: ":handle/category/:categoryId", loader: () => data(), Component: BlogCategory }],

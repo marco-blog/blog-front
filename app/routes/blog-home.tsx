@@ -24,6 +24,7 @@ import { runSubscribeAction } from "~/discovery/actions.server";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl, thumbnailImage } from "~/media/thumbnail";
 import type { RootData } from "~/root";
+import { blogFeedLinks } from "~/seo/feedLinks";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/blog-home";
@@ -90,13 +91,17 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
     return privatePageMeta(t("notFound.title"), t("appName"));
   }
   const { blog, page, origin } = loaderData;
-  return pageMeta({
-    title: blog.title,
-    description: blog.description,
-    image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
-    url: absoluteUrl(origin, pageHref(blog.handle, page)),
-    siteName: t("appName"),
-  });
+  return [
+    ...pageMeta({
+      title: blog.title,
+      description: blog.description,
+      image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
+      url: absoluteUrl(origin, pageHref(blog.handle, page)),
+      siteName: t("appName"),
+    }),
+    // RSS·Atom 자동 발견(002 FR-048)
+    ...blogFeedLinks(t, origin, blog),
+  ];
 }
 
 export default function BlogHome() {

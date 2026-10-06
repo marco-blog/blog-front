@@ -16,5 +16,35 @@
     "label": "구독한 블로그의 새 글",
     "empty": "구독한 블로그의 글이 아직 없습니다. 마음에 드는 블로그를 구독해 보세요.",
     "blog": "블로그"
+  },
+  "search": {
+    "title": "검색",
+    "metaTitle": "\"{{q}}\" 검색",
+    "label": "검색어",
+    "submit": "검색",
+    "hint": "2자 이상 입력하세요. 띄어 쓴 낱말을 모두 포함한 글을 찾습니다.",
+    "resultsLabel": "검색 결과",
+    "count": "검색 결과 {{count, number}}건",
+    "empty": "검색 결과가 없습니다. 다른 낱말로 찾아보세요."
+  },
+  "related": {
+    "title": "관련 글"
+  },
+  "share": {
+    "label": "공유하기",
+    "copy": "주소 복사",
+    "copied": "주소를 복사했습니다.",
+    "copyFailed": "주소를 복사하지 못했습니다. 아래 주소를 직접 복사해 주세요.",
+    "url": "글 주소",
+    "kakao": "카카오톡",
+    "kakaoFailed": "카카오톡 공유를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    "x": "X",
+    "facebook": "페이스북",
+    "newWindow": "새 창"
+  },
+  "feedLink": {
+    "rss": "{{title}} RSS",
+    "atom": "{{title}} Atom",
+    "category": "{{category}} - {{title}} RSS"
   }
 }

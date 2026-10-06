@@ -63,8 +63,17 @@ describe("seo meta", () => {
       { property: "og:title", content: "t" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "블로그" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ]);
+  });
+
+  it("대표 이미지가 있으면 큰 카드, 없으면 작은 카드(002 T081)", () => {
+    expect(pageMeta({ title: "t", image: "https://blog.java21.net/media/a" })).toContainEqual({
+      name: "twitter:card",
+      content: "summary_large_image",
+    });
+    expect(pageMeta({ title: "t" })).toContainEqual({ name: "twitter:card", content: "summary" });
   });
 
   it("absoluteUrl", () => {

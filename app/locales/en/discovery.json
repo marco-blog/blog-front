@@ -16,5 +16,35 @@
     "label": "New posts from blogs you subscribe to",
     "empty": "No posts from your subscriptions yet. Subscribe to blogs you like.",
     "blog": "Blog"
+  },
+  "search": {
+    "title": "Search",
+    "metaTitle": "Search for \"{{q}}\"",
+    "label": "Search terms",
+    "submit": "Search",
+    "hint": "Enter at least 2 characters. Finds posts that contain every word.",
+    "resultsLabel": "Search results",
+    "count": "{{count, number}} results",
+    "empty": "No results. Try different words."
+  },
+  "related": {
+    "title": "Related posts"
+  },
+  "share": {
+    "label": "Share",
+    "copy": "Copy link",
+    "copied": "Link copied.",
+    "copyFailed": "Couldn't copy the link. Please copy the address below.",
+    "url": "Post address",
+    "kakao": "KakaoTalk",
+    "kakaoFailed": "Couldn't load KakaoTalk sharing. Please try again later.",
+    "x": "X",
+    "facebook": "Facebook",
+    "newWindow": "opens in a new window"
+  },
+  "feedLink": {
+    "rss": "{{title}} RSS",
+    "atom": "{{title}} Atom",
+    "category": "{{category}} - {{title}} RSS"
   }
 }

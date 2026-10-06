@@ -6,7 +6,8 @@
     "posts": "Posts",
     "categories": "Categories",
     "comments": "Comments",
-    "settings": "Blog settings"
+    "settings": "Blog settings",
+    "feed": "Feed settings"
   },
   "switcher": {
     "label": "Switch blog"
@@ -99,5 +100,21 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this comment?",
     "deleted": "The comment has been deleted."
+  },
+  "feed": {
+    "title": "Feed settings",
+    "itemCount": "Posts per feed",
+    "itemCountOption": "{{count}} posts",
+    "contentMode": "Feed content",
+    "full": "Full text",
+    "summary": "Summary",
+    "contentHint": "With Summary, the feed carries only post summaries and readers open the blog for the full text.",
+    "submit": "Save",
+    "saved": "Feed settings saved.",
+    "urls": "Feed addresses",
+    "rss": "RSS",
+    "atom": "Atom",
+    "categoryRss": "Category RSS",
+    "categoryHint": "Each category has an RSS feed at addresses like these (a parent category includes its subcategories)."
   }
 }
