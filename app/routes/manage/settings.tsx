@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Form, data, useActionData, useLoaderData, useNavigation } from "react-router";
 
@@ -9,9 +10,10 @@ import {
   useFormMessages,
   type FormErrorData,
 } from "~/api/formErrors";
-import type { Blog } from "~/api/models";
+import type { Blog, TopicNode } from "~/api/models";
 import { FormAlert, FormField } from "~/components/form/FormField";
 import { ImageUploadField } from "~/components/media/ImageUploadField";
+import { TopicSelect } from "~/components/post/TopicSelect";
 import { metaT } from "~/i18n/meta";
 import { requireOwnedBlog, throwManageError } from "~/manage/access.server";
 import { imageFieldValue } from "~/media/form";
@@ -30,17 +32,27 @@ export function meta({ matches }: Route.MetaArgs) {
   return privatePageMeta(t("manage:settings.title"), t("appName"));
 }
 
-/** 블로그 설정(`/:handle/manage/settings`, SSR): 제목·소개·대표 이미지·댓글 허용. */
+/**
+ * 블로그 설정(`/:handle/manage/settings`, SSR): 제목·소개·대표 이미지·댓글 허용, 그리고 003의 "포털에 내 글 노출"(FR-089)과
+ * 블로그 기본 주제(FR-077). 주제 트리(`/topics`)를 읽지 못하면 지금 값만 남긴 고르기를 보여준다.
+ */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
-  const blog = await createApiClient(request).get<Blog>(`/blogs/${handle}`).catch(throwManageError);
+  const api = createApiClient(request);
+  const [blog, topics] = await Promise.all([
+    api.get<Blog>(`/blogs/${handle}`).catch(throwManageError),
+    api.get<TopicNode[]>("/topics").catch(() => [] as TopicNode[]),
+  ]);
   return {
+    topics,
     blog: {
       handle: blog.handle,
       title: blog.title,
       description: blog.description,
       coverImageUrl: blog.coverImageUrl,
       commentEnabled: blog.commentEnabled,
+      portalEnabled: blog.portalEnabled ?? true,
+      defaultTopicId: blog.defaultTopicId ?? null,
     },
   };
 }
@@ -52,6 +64,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   const title = String(form.get("title") ?? "").trim();
   const description = String(form.get("description") ?? "").trim();
   const commentEnabled = form.get("commentEnabled") === "on";
+  const portalEnabled = form.get("portalEnabled") === "on";
+  const topicValue = String(form.get("defaultTopicId") ?? "").trim();
+  const defaultTopicId = topicValue ? Number(topicValue) : null;
   const coverImageMediaKey = imageFieldValue(form, "coverImageMediaKey");
   const missing = requiredErrors({ title });
   if (missing.length > 0) {
@@ -66,6 +81,8 @@ export async function action({ request, params }: Route.ActionArgs) {
         title,
         description: description || null,
         commentEnabled,
+        portalEnabled,
+        defaultTopicId: Number.isSafeInteger(defaultTopicId) ? defaultTopicId : null,
         ...(coverImageMediaKey === undefined ? {} : { coverImageMediaKey }),
       },
     });
@@ -78,7 +95,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 export default function ManageSettings() {
   const { t } = useTranslation();
-  const { blog } = useLoaderData<typeof loader>();
+  const { blog, topics } = useLoaderData<typeof loader>();
   const result = useActionData<SettingsActionData>();
   const messages = useFormMessages(result && !result.ok ? result : null);
   const submitting = useNavigation().state === "submitting";
@@ -89,7 +106,7 @@ export default function ManageSettings() {
       {result?.ok && <p role="status">{t("manage:settings.saved")}</p>}
       <Form
         method="post"
-        key={`${blog.title}|${blog.description ?? ""}|${blog.commentEnabled}|${blog.coverImageUrl ?? ""}`}
+        key={`${blog.title}|${blog.description ?? ""}|${blog.commentEnabled}|${blog.coverImageUrl ?? ""}|${blog.portalEnabled}|${blog.defaultTopicId ?? ""}`}
       >
         <FormAlert message={messages.form} />
         <FormField
@@ -129,10 +146,53 @@ export default function ManageSettings() {
           </label>
           <p className="form-hint">{t("manage:settings.commentHint")}</p>
         </div>
+        <div className="form-field">
+          <label>
+            <input type="checkbox" name="portalEnabled" defaultChecked={blog.portalEnabled} />{" "}
+            {t("manage:settings.portalEnabled")}
+          </label>
+          <p className="form-hint">{t("manage:settings.portalHint")}</p>
+        </div>
+        <DefaultTopicField
+          topics={topics}
+          initial={blog.defaultTopicId}
+          error={messages.fields.defaultTopicId}
+          disabled={submitting}
+        />
         <button type="submit" disabled={submitting}>
           {t("manage:settings.submit")}
         </button>
       </Form>
     </main>
+  );
+}
+
+/** 블로그 기본 주제(새 글에 미리 골라 둠). 폼으로 보내도록 이름을 붙인 주제 고르기. */
+function DefaultTopicField({
+  topics,
+  initial,
+  error,
+  disabled,
+}: {
+  topics: TopicNode[];
+  initial: number | null;
+  error?: string;
+  disabled: boolean;
+}) {
+  const { t } = useTranslation();
+  const [value, setValue] = useState<number | null>(initial);
+  return (
+    <div className="form-field">
+      <TopicSelect
+        topics={topics}
+        value={value}
+        onChange={setValue}
+        name="defaultTopicId"
+        label={t("manage:settings.defaultTopic")}
+        disabled={disabled}
+      />
+      <p className="form-hint">{t("manage:settings.defaultTopicHint")}</p>
+      {error && <p className="form-error">{error}</p>}
+    </div>
   );
 }

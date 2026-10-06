@@ -29,7 +29,7 @@ import Settings, {
 } from "~/routes/manage/settings";
 
 import { fail, mockBackend, ok, type BackendHandler } from "../support/backend";
-import { blog, postSummary } from "../support/fixtures";
+import { blog, postSummary, topicNode } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
 import {
   asData,
@@ -357,9 +357,16 @@ describe("글 관리 action", () => {
   });
 });
 
+const TOPICS = "GET /api/v1/topics";
+const topics = [topicNode(1, "dev", {}, [topicNode(11, "java", { parentId: 1 })])];
+
 describe("블로그 설정 loader·action", () => {
-  it("loader는 블로그의 제목·소개·댓글 허용", async () => {
-    mockBackend({ [ME]: ok(me()), [BLOG]: ok(blog) });
+  it("loader는 블로그의 제목·소개·댓글 허용·포털 노출·기본 주제와 주제 트리", async () => {
+    mockBackend({
+      [ME]: ok(me()),
+      [BLOG]: ok({ ...blog, portalEnabled: false, defaultTopicId: 11 }),
+      [TOPICS]: ok(topics),
+    });
 
     await expect(
       settingsLoader(
@@ -377,8 +384,24 @@ describe("블로그 설정 loader·action", () => {
         description: blog.description,
         coverImageUrl: blog.coverImageUrl,
         commentEnabled: true,
+        portalEnabled: false,
+        defaultTopicId: 11,
       },
+      topics,
     });
+  });
+
+  it("loader: 주제 트리를 못 읽으면 빈 목록, 포털 값이 없으면 노출·기본 주제 없음", async () => {
+    mockBackend({ [ME]: ok(me()), [BLOG]: ok(blog), [TOPICS]: fail(500, "INTERNAL_ERROR") });
+
+    await expect(
+      settingsLoader(
+        routeArgs<LoaderArgs<typeof settingsLoader>>(
+          getRequest("/marco/manage/settings", loggedIn),
+          { handle: "marco" },
+        ),
+      ),
+    ).resolves.toMatchObject({ topics: [], blog: { portalEnabled: true, defaultTopicId: null } });
   });
 
   it("action: PATCH /blogs/{handle}, 소개를 비우면 null, 체크 해제는 false", async () => {
@@ -402,7 +425,27 @@ describe("블로그 설정 loader·action", () => {
       title: "새 제목",
       description: null,
       commentEnabled: false,
+      portalEnabled: false,
+      defaultTopicId: null,
     });
+  });
+
+  it("action: 포털 노출 체크와 기본 주제 번호를 보낸다(숫자가 아니면 null)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), "PATCH /api/v1/blogs/marco": ok(blog) });
+    const submit = (fields: Record<string, string>) =>
+      settingsAction(
+        routeArgs<LoaderArgs<typeof settingsAction>>(
+          formRequest("/marco/manage/settings", { title: "제목", ...fields }, loggedIn),
+          { handle: "marco" },
+        ),
+      );
+
+    await submit({ portalEnabled: "on", defaultTopicId: "11" });
+    await submit({ defaultTopicId: "abc" });
+
+    const bodies = backend.callsTo("PATCH /api/v1/blogs/marco").map((call) => call.body);
+    expect(bodies[0]).toMatchObject({ portalEnabled: true, defaultTopicId: 11 });
+    expect(bodies[1]).toMatchObject({ portalEnabled: false, defaultTopicId: null });
   });
 
   it("action: 대표 이미지는 바꿨을 때만 coverImageMediaKey로 보낸다(지우면 null)", async () => {
@@ -797,6 +840,29 @@ describe("블로그 관리 화면", () => {
     });
   });
 
+  it("블로그 설정: 기본 주제를 고르고 포털 노출을 끄면 그대로 보낸다", async () => {
+    const backend = renderManage("/marco/manage/settings", {
+      [TOPICS]: ok(topics),
+      "PATCH /api/v1/blogs/marco": ok(blog),
+    });
+
+    const select = await screen.findByRole("combobox", { name: "새 글의 기본 주제" });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["선택 안 함", "java 한"]);
+    fireEvent.change(select, { target: { value: "11" } });
+    fireEvent.click(screen.getByLabelText("포털에 이 블로그의 글 소개하기"));
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("블로그 설정을 저장했습니다.");
+    expect(backend.callsTo("PATCH /api/v1/blogs/marco")[0].body).toMatchObject({
+      portalEnabled: false,
+      defaultTopicId: 11,
+    });
+  });
+
   it("블로그 설정: 저장하면 안내, 검증 오류는 입력란에", async () => {
     let fail400 = false;
     const backend = renderManage("/marco/manage/settings", {
@@ -810,6 +876,8 @@ describe("블로그 관리 화면", () => {
 
     const title = await screen.findByLabelText("블로그 제목");
     expect(title).toHaveValue(blog.title);
+    expect(screen.getByLabelText("포털에 이 블로그의 글 소개하기")).toBeChecked();
+    expect(screen.getByRole("combobox", { name: "새 글의 기본 주제" })).toHaveValue("");
     expect(screen.getByLabelText("블로그 소개")).toHaveValue(blog.description);
     expect(screen.getByLabelText("이 블로그에 댓글 허용")).toBeChecked();
     fireEvent.change(title, { target: { value: "새 제목" } });
@@ -821,6 +889,8 @@ describe("블로그 관리 화면", () => {
       title: "새 제목",
       description: blog.description,
       commentEnabled: false,
+      portalEnabled: true,
+      defaultTopicId: null,
     });
 
     fail400 = true;

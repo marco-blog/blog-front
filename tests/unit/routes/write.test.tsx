@@ -6,7 +6,7 @@ import { responseCookies } from "~/api/backendCookies.server";
 import Write, { AUTOSAVE_INTERVAL_MS, loader, meta } from "~/routes/write";
 
 import { fail, mockBackend, ok, type BackendHandler } from "../support/backend";
-import { postDetail } from "../support/fixtures";
+import { blog, postDetail, topicNode } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
 import { caught, expectRedirect, getRequest, routeArgs, statusOf } from "../support/route";
 
@@ -69,6 +69,8 @@ const tree = [
   { id: 20, name: "일상", postCount: 0, children: [] },
 ];
 const CREATE_DRAFT = "POST /api/v1/blogs/marco/posts/drafts";
+const TOPICS = "GET /api/v1/topics";
+const topics = [topicNode(1, "dev", {}, [topicNode(11, "java", { parentId: 1 })])];
 const loggedIn = { cookie: "access_token=a" };
 
 afterEach(() => {
@@ -99,7 +101,13 @@ describe("write loader", () => {
 
   it("새 글: 이 블로그의 최근 임시저장을 함께 넘기고 last_blog 쿠키를 저장한다", async () => {
     const latest = { id: 55, title: "쓰던 글", savedAt: "2026-10-06T04:24:19Z" };
-    mockBackend({ [ME]: ok(me), [LATEST]: ok(latest), [CATEGORIES]: ok(tree) });
+    mockBackend({
+      [ME]: ok(me),
+      [LATEST]: ok(latest),
+      [CATEGORIES]: ok(tree),
+      [TOPICS]: ok(topics),
+      "GET /api/v1/blogs/marco": ok({ ...blog, defaultTopicId: 11 }),
+    });
     const request = getRequest("/marco/write", loggedIn);
 
     const result = await loader(routeArgs<LoaderArgs>(request, { handle: "marco" }));
@@ -110,6 +118,8 @@ describe("write loader", () => {
       draft: null,
       latestDraft: latest,
       categories: tree,
+      topics,
+      defaultTopicId: 11,
     });
     expect(responseCookies(request)).toEqual([
       expect.stringMatching(/^last_blog=marco; Path=\/; Max-Age=31536000; HttpOnly; SameSite=Lax/),
@@ -124,6 +134,21 @@ describe("write loader", () => {
     });
   });
 
+  it("새 글: 주제 트리·블로그를 못 읽어도 연다(주제 고르기만 비고 기본 주제 없음)", async () => {
+    mockBackend({
+      [ME]: ok(me),
+      [LATEST]: ok(null),
+      [CATEGORIES]: ok([]),
+      [TOPICS]: fail(500, "INTERNAL_ERROR"),
+      "GET /api/v1/blogs/marco": fail(500, "INTERNAL_ERROR"),
+    });
+
+    await expect(callLoader("/marco/write", { handle: "marco" })).resolves.toMatchObject({
+      topics: [],
+      defaultTopicId: null,
+    });
+  });
+
   it("글 수정: 작성 중 사본(카테고리·태그 포함)과 글 상태, 카테고리 트리를 불러온다", async () => {
     mockBackend({
       [ME]: ok(me),
@@ -134,8 +159,10 @@ describe("write loader", () => {
         contentMarkdown: "고친 본문",
         categoryId: 13,
         tags: ["jpa"],
+        topicId: 11,
         savedAt: "2026-10-06T05:00:00Z",
       }),
+      [TOPICS]: ok(topics),
     });
 
     const result = await callLoader("/marco/write/123", { handle: "marco", postId: "123" });
@@ -154,10 +181,13 @@ describe("write loader", () => {
         contentMarkdown: "고친 본문",
         categoryId: 13,
         tags: ["jpa"],
+        topicId: 11,
         savedAt: "2026-10-06T05:00:00Z",
       },
       latestDraft: null,
       categories: tree,
+      topics,
+      defaultTopicId: null,
     });
   });
 
@@ -171,7 +201,7 @@ describe("write loader", () => {
 
     await expect(
       callLoader("/marco/write/123", { handle: "marco", postId: "123" }),
-    ).resolves.toMatchObject({ draft: { categoryId: null, tags: [] } });
+    ).resolves.toMatchObject({ draft: { categoryId: null, tags: [], topicId: null } });
   });
 
   it("글 수정: :handle 블로그의 글이 아니면 404", async () => {
@@ -222,6 +252,8 @@ describe("write 화면", () => {
     draft: null,
     latestDraft: null,
     categories: tree,
+    topics,
+    defaultTopicId: null,
   };
   const savedDraft = (
     title: string,
@@ -232,6 +264,7 @@ describe("write 화면", () => {
     contentMarkdown,
     categoryId: null,
     tags: [],
+    topicId: null,
     savedAt,
   });
 
@@ -308,6 +341,8 @@ describe("write 화면", () => {
         draft: savedDraft("제목", "본문"),
         latestDraft: null,
         categories: tree,
+        topics,
+        defaultTopicId: null,
       },
       "/marco/write/123",
     );
@@ -343,12 +378,14 @@ describe("write 화면", () => {
       contentMarkdown: "# 안녕",
       categoryId: null,
       tags: [],
+      topicId: null,
     });
     expect(backend.calls[1].body).toEqual({
       visibility: "PUBLIC",
       commentEnabled: false,
       categoryId: null,
       tags: [],
+      topicId: null,
       thumbnailMediaKey: null,
     });
   });
@@ -385,6 +422,7 @@ describe("write 화면", () => {
       contentMarkdown: "늦게 알린 본문",
       categoryId: null,
       tags: [],
+      topicId: null,
     });
   });
 
@@ -457,6 +495,9 @@ describe("write 화면", () => {
         .map((option) => option.textContent),
     ).toEqual(["미분류", "Spring", "— JPA", "일상"]);
     fireEvent.change(select, { target: { value: "13" } });
+    const topicSelect = within(dialog).getByRole("combobox", { name: "주제" });
+    expect(topicSelect).toHaveValue("");
+    fireEvent.change(topicSelect, { target: { value: "11" } });
     const tagInput = within(dialog).getByRole("textbox", { name: "태그" });
     fireEvent.change(tagInput, { target: { value: "  Spring Boot " } });
     fireEvent.keyDown(tagInput, { key: "Enter" });
@@ -469,12 +510,14 @@ describe("write 화면", () => {
       contentMarkdown: "본문",
       categoryId: 13,
       tags: ["spring boot"],
+      topicId: 11,
     });
     expect(backend.calls[1].body).toEqual({
       visibility: "PUBLIC",
       commentEnabled: true,
       categoryId: 13,
       tags: ["spring boot"],
+      topicId: 11,
       thumbnailMediaKey: null,
     });
   });
@@ -496,6 +539,8 @@ describe("write 화면", () => {
         draft: { ...savedDraft("제목", "본문"), categoryId: 20, tags: ["daily", "life"] },
         latestDraft: null,
         categories: tree,
+        topics,
+        defaultTopicId: null,
       },
       "/marco/write/123",
     );
@@ -518,12 +563,43 @@ describe("write 화면", () => {
       contentMarkdown: "본문",
       categoryId: null,
       tags: ["life"],
+      topicId: null,
     });
 
     fireEvent.click(screen.getByRole("button", { name: "완료" }));
     expect(
       within(screen.getByRole("dialog")).getByRole("combobox", { name: "카테고리" }),
     ).toHaveValue("");
+  });
+
+  it("새 글은 블로그 기본 주제를 미리 골라 사본과 발행 요청에 담는다", async () => {
+    const backend = savingBackend({
+      "POST /api/v1/posts/77/publish": ok({ ...postDetail, id: 77 }),
+    });
+    renderWrite({ ...newPost, defaultTopicId: 11 });
+    await type("기본 주제", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByRole("combobox", { name: "주제" })).toHaveValue("11");
+    fireEvent.click(within(dialog).getByRole("button", { name: "공개 발행" }));
+
+    expect(await screen.findByText("post page")).toBeInTheDocument();
+    expect(backend.calls[0].body).toMatchObject({ topicId: 11 });
+    expect(backend.calls[1].body).toMatchObject({ topicId: 11 });
+  });
+
+  it("주제 발행 오류(TOPIC_NOT_SELECTABLE)는 발행 설정 안에 알린다", async () => {
+    savingBackend({ "POST /api/v1/posts/77/publish": fail(422, "TOPIC_NOT_SELECTABLE") });
+    renderWrite();
+    await type("제목", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(await within(screen.getByRole("dialog")).findByRole("alert")).toHaveTextContent(
+      "고를 수 없는 주제입니다.",
+    );
   });
 
   it("태그·카테고리 발행 오류 문구", async () => {
@@ -611,6 +687,8 @@ describe("write 화면", () => {
                   draft: savedDraft("쓰던 글", "쓰던 본문"),
                   latestDraft: null,
                   categories: tree,
+                  topics,
+                  defaultTopicId: null,
                 }
               : {
                   ...newPost,

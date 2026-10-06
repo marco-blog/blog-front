@@ -18,7 +18,8 @@
     "prev": "前の記事",
     "next": "次の記事",
     "draft": "下書き",
-    "private": "非公開"
+    "private": "非公開",
+    "topic": "トピック"
   },
   "publish": {
     "title": "公開設定",
@@ -33,5 +34,11 @@
     "savePrivate": "非公開で保存",
     "republish": "更新して公開",
     "publishing": "公開しています。"
+  },
+  "topic": {
+    "label": "トピック",
+    "none": "選択しない",
+    "hiddenCurrent": "現在のトピック(非表示)",
+    "hint": "トピックを選ぶと、ポータルのトピックページでこの記事が紹介されることがあります。"
   }
 }

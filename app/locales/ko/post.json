@@ -18,7 +18,8 @@
     "prev": "이전 글",
     "next": "다음 글",
     "draft": "임시저장",
-    "private": "비공개"
+    "private": "비공개",
+    "topic": "주제"
   },
   "publish": {
     "title": "발행 설정",
@@ -33,5 +34,11 @@
     "savePrivate": "비공개 저장",
     "republish": "수정 발행",
     "publishing": "발행하는 중입니다."
+  },
+  "topic": {
+    "label": "주제",
+    "none": "선택 안 함",
+    "hiddenCurrent": "현재 주제(숨김)",
+    "hint": "주제를 고르면 포털 주제 페이지에 이 글이 소개될 수 있습니다."
   }
 }

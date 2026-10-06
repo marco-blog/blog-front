@@ -90,7 +90,11 @@
     "commentEnabled": "允许在此博客发表评论",
     "commentHint": "关闭后，此博客的所有文章都无法添加新评论。",
     "submit": "保存",
-    "saved": "博客设置已保存。"
+    "saved": "博客设置已保存。",
+    "portalEnabled": "在门户中展示此博客的文章",
+    "portalHint": "关闭后，此博客的文章不会出现在门户首页和主题页面上。博客本身和订阅源不受影响。",
+    "defaultTopic": "新文章的默认主题",
+    "defaultTopicHint": "撰写新文章时会预先选中此主题。每篇文章都可以更改。"
   },
   "comments": {
     "title": "评论管理",
