@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store
+.claude/settings.local.json
