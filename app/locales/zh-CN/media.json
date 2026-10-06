@@ -1,0 +1,27 @@
+{
+  "editor": {
+    "uploadButton": "上传图片",
+    "uploadPlaceholder": "或粘贴图片地址",
+    "captionPlaceholder": "图片说明",
+    "confirm": "确定"
+  },
+  "thumbnail": {
+    "legend": "封面图片",
+    "none": "正文中没有图片，将不带封面图片发布。",
+    "option": "正文第 {{number}} 张图片"
+  },
+  "field": {
+    "preview": "{{label}}预览",
+    "empty": "没有图片。",
+    "choose": "选择图片文件",
+    "remove": "删除图片",
+    "uploading": "正在上传图片。",
+    "saveToApply": "保存后生效。"
+  },
+  "profile": {
+    "label": "头像"
+  },
+  "cover": {
+    "label": "博客封面图片"
+  }
+}

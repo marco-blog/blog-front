@@ -8,9 +8,11 @@ import { isValidHandle } from "~/blog/ids";
 import { parsePage, POST_PAGE_SIZE, withPage } from "~/blog/listing";
 import { Pagination } from "~/components/Pagination";
 import { CategoryTree } from "~/components/blog/CategoryTree";
+import { Avatar } from "~/components/media/Avatar";
 import { PostList } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { metaT } from "~/i18n/meta";
+import { ogImageUrl, thumbnailImage } from "~/media/thumbnail";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/blog-home";
@@ -56,7 +58,7 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
   return pageMeta({
     title: blog.title,
     description: blog.description,
-    image: absoluteUrl(origin, blog.coverImageUrl),
+    image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
     url: absoluteUrl(origin, pageHref(blog.handle, page)),
     siteName: t("appName"),
   });
@@ -68,9 +70,15 @@ export default function BlogHome() {
   return (
     <main className="blog-home">
       <header>
+        {blog.coverImageUrl && (
+          <img {...thumbnailImage(blog.coverImageUrl, "cover")} alt="" className="blog-cover" />
+        )}
         <h1>{blog.title}</h1>
         {blog.description && <p>{blog.description}</p>}
-        <p>{t("post:blog.owner", { nickname: blog.owner.nickname })}</p>
+        <p>
+          <Avatar url={blog.owner.profileImageUrl} size="avatar" />{" "}
+          {t("post:blog.owner", { nickname: blog.owner.nickname })}
+        </p>
       </header>
       <CategoryTree handle={blog.handle} categories={blog.categories} />
       <PostList handle={blog.handle} posts={posts} />

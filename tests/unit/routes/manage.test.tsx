@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { responseCookies } from "~/api/backendCookies.server";
 import type { PostSummary } from "~/api/models";
+import { thumbnailImage } from "~/media/thumbnail";
 import { loader as entryLoader } from "~/routes/manage-entry";
 import Dashboard, {
   loader as dashboardLoader,
@@ -374,6 +375,7 @@ describe("블로그 설정 loader·action", () => {
         handle: "marco",
         title: blog.title,
         description: blog.description,
+        coverImageUrl: blog.coverImageUrl,
         commentEnabled: true,
       },
     });
@@ -401,6 +403,24 @@ describe("블로그 설정 loader·action", () => {
       description: null,
       commentEnabled: false,
     });
+  });
+
+  it("action: 대표 이미지는 바꿨을 때만 coverImageMediaKey로 보낸다(지우면 null)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), "PATCH /api/v1/blogs/marco": ok(blog) });
+    const submit = (fields: Record<string, string>) =>
+      settingsAction(
+        routeArgs<LoaderArgs<typeof settingsAction>>(
+          formRequest("/marco/manage/settings", { title: "제목", ...fields }, loggedIn),
+          { handle: "marco" },
+        ),
+      );
+
+    await submit({ coverImageMediaKey: "k3Jd9fQ2xLmA7pZ0bR5tYw" });
+    await submit({ coverImageMediaKey: "" });
+
+    const bodies = backend.callsTo("PATCH /api/v1/blogs/marco").map((call) => call.body);
+    expect(bodies[0]).toMatchObject({ coverImageMediaKey: "k3Jd9fQ2xLmA7pZ0bR5tYw" });
+    expect(bodies[1]).toMatchObject({ coverImageMediaKey: null });
   });
 
   it("제목이 비면 backend를 부르지 않고 REQUIRED", async () => {
@@ -738,6 +758,38 @@ describe("블로그 관리 화면", () => {
   it("빈 휴지통", async () => {
     renderManage("/marco/manage/posts?status=DELETED", { [POSTS]: ok([]) });
     expect(await screen.findByText("휴지통이 비어 있습니다.")).toBeInTheDocument();
+  });
+
+  it("블로그 설정: 대표 이미지를 purpose=BLOG_COVER로 올려 600x400으로 미리 보고 저장한다", async () => {
+    const key = "Cv9Yy8Xx7Ww6Vv5Uu4Tt3S";
+    const backend = renderManage("/marco/manage/settings", {
+      "POST /api/v1/media": ok(
+        { key, url: `/media/${key}`, mime: "image/jpeg", size: 100, width: 1200, height: 800 },
+        { status: 201 },
+      ),
+      "PATCH /api/v1/blogs/marco": ok(blog),
+    });
+
+    const current = await screen.findByRole("img", { name: "블로그 대표 이미지 미리보기" });
+    expect(current).toHaveAttribute("src", thumbnailImage(blog.coverImageUrl!, "cover").src);
+    fireEvent.change(screen.getByLabelText("이미지 파일 고르기"), {
+      target: { files: [new File([new Uint8Array(100)], "cover.jpg", { type: "image/jpeg" })] },
+    });
+    await vi.waitFor(() =>
+      expect(screen.getByRole("img", { name: "블로그 대표 이미지 미리보기" })).toHaveAttribute(
+        "src",
+        `/media/${key}/600x400`,
+      ),
+    );
+    expect((backend.callsTo("POST /api/v1/media")[0].body as FormData).get("purpose")).toBe(
+      "BLOG_COVER",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByText("블로그 설정을 저장했습니다.")).toBeInTheDocument();
+    expect(backend.callsTo("PATCH /api/v1/blogs/marco")[0].body).toMatchObject({
+      coverImageMediaKey: key,
+    });
   });
 
   it("블로그 설정: 저장하면 안내, 검증 오류는 입력란에", async () => {

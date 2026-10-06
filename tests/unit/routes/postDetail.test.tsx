@@ -152,7 +152,10 @@ describe("post detail meta", () => {
         { property: "og:title", content: "JPA N+1 정리" },
         { property: "og:description", content: "N+1 문제를 정리한다" },
         { property: "og:type", content: "article" },
-        { property: "og:image", content: "https://blog.java21.net/media/k3Jd9fQ2xLmA7pZ0bR5tYw" },
+        {
+          property: "og:image",
+          content: "https://blog.java21.net/media/k3Jd9fQ2xLmA7pZ0bR5tYw/1200x630",
+        },
         { property: "og:url", content: "https://blog.java21.net/marco/123" },
         { tagName: "link", rel: "canonical", href: "https://blog.java21.net/marco/123" },
       ]),
@@ -197,6 +200,15 @@ describe("post detail 화면", () => {
     const post = postWithoutMarkdown();
     return { post, isOwner: false, origin: "http://front.test", comments: [], ...overrides };
   };
+
+  it("작성자 프로필 이미지는 50x50 썸네일", async () => {
+    const profile = "/media/Pf9Yy8Xx7Ww6Vv5Uu4Tt3S";
+    const post = postWithoutMarkdown();
+    renderPost(loaded({ post: { ...post, author: { ...post.author, profileImageUrl: profile } } }));
+
+    const article = await screen.findByRole("article");
+    expect(article.querySelector("img.avatar")).toHaveAttribute("src", `${profile}/50x50`);
+  });
 
   it("제목·본문·작성자·작성일·카테고리·태그·조회수, 이전 글 링크", async () => {
     renderPost(loaded());

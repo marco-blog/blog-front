@@ -1,0 +1,27 @@
+{
+  "editor": {
+    "uploadButton": "画像をアップロード",
+    "uploadPlaceholder": "または画像のURLを貼り付けてください",
+    "captionPlaceholder": "画像の説明",
+    "confirm": "確認"
+  },
+  "thumbnail": {
+    "legend": "アイキャッチ画像",
+    "none": "本文に画像がないため、アイキャッチ画像なしで公開します。",
+    "option": "本文の{{number}}番目の画像"
+  },
+  "field": {
+    "preview": "{{label}}のプレビュー",
+    "empty": "画像がありません。",
+    "choose": "画像ファイルを選択",
+    "remove": "画像を削除",
+    "uploading": "画像をアップロードしています。",
+    "saveToApply": "保存すると反映されます。"
+  },
+  "profile": {
+    "label": "プロフィール画像"
+  },
+  "cover": {
+    "label": "ブログのカバー画像"
+  }
+}

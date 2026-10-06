@@ -99,7 +99,20 @@ export function crepeConfig(
         copyText: t("editor:code.copy"),
       },
       "link-tooltip": { inputPlaceholder: t("editor:link.placeholder") },
-      ...(onUploadImage ? { "image-block": { onUpload: onUploadImage } } : {}),
+      // 붙여넣기·끌어놓기·이미지 블록의 업로드 버튼 모두 onUpload로 올리고, 돌려받은 주소를 본문에 넣는다.
+      ...(onUploadImage
+        ? {
+            "image-block": {
+              onUpload: onUploadImage,
+              blockUploadButton: t("media:editor.uploadButton"),
+              blockUploadPlaceholderText: t("media:editor.uploadPlaceholder"),
+              blockCaptionPlaceholderText: t("media:editor.captionPlaceholder"),
+              blockConfirmButton: t("media:editor.confirm"),
+              inlineUploadButton: t("media:editor.uploadButton"),
+              inlineUploadPlaceholderText: t("media:editor.uploadPlaceholder"),
+            },
+          }
+        : {}),
     },
   };
 }

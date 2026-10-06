@@ -142,7 +142,13 @@ describe("write loader", () => {
 
     expect(result).toEqual({
       handle: "marco",
-      post: { id: 123, status: "PUBLISHED", visibility: "PUBLIC", commentEnabled: true },
+      post: {
+        id: 123,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        commentEnabled: true,
+        thumbnailUrl: postDetail.thumbnailUrl,
+      },
       draft: {
         title: "고친 제목",
         contentMarkdown: "고친 본문",
@@ -292,7 +298,13 @@ describe("write 화면", () => {
     renderWrite(
       {
         handle: "marco",
-        post: { id: 123, status: "PUBLISHED", visibility: "PRIVATE", commentEnabled: false },
+        post: {
+          id: 123,
+          status: "PUBLISHED",
+          visibility: "PRIVATE",
+          commentEnabled: false,
+          thumbnailUrl: null,
+        },
         draft: savedDraft("제목", "본문"),
         latestDraft: null,
         categories: tree,
@@ -337,6 +349,7 @@ describe("write 화면", () => {
       commentEnabled: false,
       categoryId: null,
       tags: [],
+      thumbnailMediaKey: null,
     });
   });
 
@@ -462,6 +475,7 @@ describe("write 화면", () => {
       commentEnabled: true,
       categoryId: 13,
       tags: ["spring boot"],
+      thumbnailMediaKey: null,
     });
   });
 
@@ -472,7 +486,13 @@ describe("write 화면", () => {
     renderWrite(
       {
         handle: "marco",
-        post: { id: 123, status: "PUBLISHED", visibility: "PUBLIC", commentEnabled: true },
+        post: {
+          id: 123,
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          commentEnabled: true,
+          thumbnailUrl: null,
+        },
         draft: { ...savedDraft("제목", "본문"), categoryId: 20, tags: ["daily", "life"] },
         latestDraft: null,
         categories: tree,
@@ -581,7 +601,13 @@ describe("write 화면", () => {
             params.postId
               ? {
                   handle: "marco",
-                  post: { id: 55, status: "DRAFT", visibility: "PUBLIC", commentEnabled: true },
+                  post: {
+                    id: 55,
+                    status: "DRAFT",
+                    visibility: "PUBLIC",
+                    commentEnabled: true,
+                    thumbnailUrl: null,
+                  },
                   draft: savedDraft("쓰던 글", "쓰던 본문"),
                   latestDraft: null,
                   categories: tree,

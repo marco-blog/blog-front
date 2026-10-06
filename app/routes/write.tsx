@@ -25,6 +25,8 @@ import {
 } from "~/components/post/PublishSettingsDialog";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
+import { mediaKeyOf, mediaKeysIn } from "~/media/thumbnail";
+import { uploadMedia } from "~/media/upload";
 import { privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/write";
@@ -88,6 +90,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       status: post.status,
       visibility: post.visibility,
       commentEnabled: post.commentEnabled,
+      thumbnailUrl: post.thumbnailUrl,
     },
     draft: {
       title: draft.title,
@@ -103,7 +106,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 interface WriteData {
   handle: string;
-  post: { id: number; status: PostStatus; visibility: Visibility; commentEnabled: boolean } | null;
+  post: {
+    id: number;
+    status: PostStatus;
+    visibility: Visibility;
+    commentEnabled: boolean;
+    thumbnailUrl: string | null;
+  } | null;
   draft: {
     title: string;
     contentMarkdown: string;
@@ -145,6 +154,9 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  /** 발행 설정을 열 때 본문에 있던 이미지(대표 이미지 후보) */
+  const [publishImages, setPublishImages] = useState<string[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [classification, setClassification] = useState({
     categoryId: draft?.categoryId ?? null,
     tags: draft?.tags ?? [],
@@ -235,6 +247,28 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
     return () => clearInterval(timer);
   }, [save]);
 
+  /**
+   * 에디터에 붙여넣거나 끌어놓은 이미지를 올리고 본문에 넣을 주소(`/media/{key}`)를 돌려준다.
+   * 실패하면 이유(용량·형식·임시 용량 한도)를 알리고, 에디터는 이미지를 넣지 않는다.
+   */
+  const uploadImage = useCallback(
+    async (file: File): Promise<string> => {
+      setUploadError(null);
+      try {
+        return (await uploadMedia(file, "POST")).url;
+      } catch (error) {
+        setUploadError(errorMessage(t, isApiError(error) ? error : null));
+        throw error;
+      }
+    },
+    [t],
+  );
+
+  const openPublish = () => {
+    setPublishImages(mediaKeysIn(editorRef.current?.getMarkdown() ?? state.current.content));
+    setPublishOpen(true);
+  };
+
   const closePublish = useCallback(() => {
     setPublishOpen(false);
     setPublishError(null);
@@ -254,6 +288,7 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
           commentEnabled: settings.commentEnabled,
           categoryId: settings.categoryId,
           tags: settings.tags,
+          thumbnailMediaKey: settings.thumbnailMediaKey,
         },
       });
       navigate(`/${handle}/${published.id}`);
@@ -327,6 +362,7 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
         ref={editorRef}
         value={draft?.contentMarkdown ?? ""}
         label={t("editor:bodyLabel")}
+        onUploadImage={uploadImage}
         onChange={(markdown) => {
           if (markdown !== state.current.content) {
             state.current.content = markdown;
@@ -334,6 +370,11 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
           }
         }}
       />
+      {uploadError && (
+        <p role="alert" className="form-alert">
+          {uploadError}
+        </p>
+      )}
       <div className="write-actions">
         <p aria-live="polite" className="save-status">
           {saveStatus}
@@ -353,7 +394,7 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
           {t("editor:saveDraft")}
         </button>
         {/* "완료"는 화면 전환일 뿐 API를 부르지 않는다(contracts/api.md 글쓰기 순서). */}
-        <button type="button" onClick={() => setPublishOpen(true)}>
+        <button type="button" onClick={openPublish}>
           {t("editor:complete")}
         </button>
       </div>
@@ -365,7 +406,9 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
             commentEnabled: post?.commentEnabled ?? true,
             categoryId: classification.categoryId,
             tags: classification.tags,
+            thumbnailMediaKey: mediaKeyOf(post?.thumbnailUrl),
           }}
+          images={publishImages}
           categories={categories}
           onClassify={(value) => {
             state.current.categoryId = value.categoryId;

@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import type { PostSummary } from "~/api/models";
 import { categoryHref } from "~/components/blog/CategoryTree";
 import { useDateFormat } from "~/i18n/format";
+import { thumbnailImage } from "~/media/thumbnail";
 
 /** 블로그 안 태그별 글 목록 주소 */
 export function blogTagHref(handle: string, tag: string): string {
@@ -43,7 +44,12 @@ export function PostList({ handle, posts, tagScope = "blog", emptyText }: PostLi
                 <Link to={`/${blogHandle}/${post.id}`}>{post.title}</Link>
               </h2>
               {post.thumbnailUrl && (
-                <img src={post.thumbnailUrl} alt="" loading="lazy" className="post-thumbnail" />
+                <img
+                  {...thumbnailImage(post.thumbnailUrl, "card")}
+                  alt=""
+                  loading="lazy"
+                  className="post-thumbnail"
+                />
               )}
               {post.summary && <p>{post.summary}</p>}
               <p className="post-meta">
