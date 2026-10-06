@@ -1,0 +1,23 @@
+{
+  "UNKNOWN": "リクエストを処理できませんでした。しばらくしてからもう一度お試しください。",
+  "VALIDATION_FAILED": "入力内容を確認してください。",
+  "UNAUTHENTICATED": "ログインが必要です。",
+  "FORBIDDEN": "この操作を行う権限がありません。",
+  "ORIGIN_NOT_ALLOWED": "許可されていない場所から送信されたリクエストです。",
+  "NOT_FOUND": "お探しの内容が見つかりません。",
+  "METHOD_NOT_ALLOWED": "サポートされていないリクエストです。",
+  "UNSUPPORTED_MEDIA_TYPE": "サポートされていない形式です。",
+  "TOO_MANY_REQUESTS": "リクエストが多すぎます。しばらくしてからもう一度お試しください。",
+  "INTERNAL_ERROR": "サーバーで問題が発生しました。しばらくしてからもう一度お試しください。",
+  "BACKEND_UNAVAILABLE": "サーバーに接続できません。しばらくしてからもう一度お試しください。",
+  "INVALID_RESPONSE": "サーバーの応答を処理できませんでした。しばらくしてからもう一度お試しください。",
+  "fieldErrors": {
+    "REQUIRED": "必須項目です。",
+    "TOO_LONG": "{{max}}文字以内で入力してください。",
+    "TOO_SHORT": "{{min}}文字以上入力してください。",
+    "TOO_SMALL": "{{value}}以上にしてください。",
+    "TOO_LARGE": "{{value}}以下にしてください。",
+    "INVALID_FORMAT": "形式が正しくありません。",
+    "INVALID": "正しくない値です。"
+  }
+}

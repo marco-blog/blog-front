@@ -1,0 +1,16 @@
+{
+  "appName": "Blog",
+  "home": {
+    "title": "Blog",
+    "placeholder": "Our blog service is coming soon."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The address is wrong or the page has been removed.",
+    "backHome": "Go to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "Please try again later."
+  }
+}
