@@ -18,13 +18,17 @@
     "newBlogSince": "{{time}}に開始",
     "emptyTitle": "ポータルに紹介できる記事はまだありません",
     "emptyWrite": "最初の記事を書いてみましょう",
-    "emptySignup": "登録して最初の記事を書いてみましょう"
+    "emptySignup": "登録して最初の記事を書いてみましょう",
+    "tagPosts_one": "記事 {{count, number}}件",
+    "tagPosts_other": "記事 {{count, number}}件"
   },
   "card": {
-    "likes": "いいね {{count, number}}",
-    "comments": "コメント {{count, number}}",
     "noTopic": "トピックなし",
-    "author": "作成者"
+    "author": "作成者",
+    "likes_one": "いいね {{count, number}}",
+    "likes_other": "いいね {{count, number}}",
+    "comments_one": "コメント {{count, number}}",
+    "comments_other": "コメント {{count, number}}"
   },
   "topic": {
     "description": "{{name}}の記事をまとめて見られます。",

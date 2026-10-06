@@ -75,6 +75,24 @@ describe("영역 내용", () => {
     ]);
   });
 
+  it("인기 태그의 글 수는 복수형 문구(en: 1 post, 2 posts)", async () => {
+    renderUi(
+      <PopularTags
+        tags={[
+          { name: "java", postCount: 1 },
+          { name: "spring", postCount: 2 },
+        ]}
+      />,
+      "en",
+    );
+
+    const items = within(await screen.findByRole("region", { name: "Popular tags" })).getAllByRole(
+      "listitem",
+    );
+    expect(items[0]).toHaveTextContent("#java 1 post");
+    expect(items[1]).toHaveTextContent("#spring 2 posts");
+  });
+
   it("인기 태그는 /tags/{name}, 새 블로그는 블로그 홈 링크와 상대 시각", async () => {
     renderUi(
       <>
@@ -99,7 +117,7 @@ describe("영역 내용", () => {
       "href",
       "/tags/spring%20boot",
     );
-    expect(tags).toHaveTextContent("1,400");
+    expect(tags).toHaveTextContent("글 1,400개");
     const blogs = screen.getByRole("region", { name: "새로 시작한 블로그" });
     expect(within(blogs).getByRole("link", { name: "마르코의 블로그" })).toHaveAttribute(
       "href",

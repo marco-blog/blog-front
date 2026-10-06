@@ -18,13 +18,17 @@
     "newBlogSince": "Started {{time}}",
     "emptyTitle": "There are no posts on the portal yet",
     "emptyWrite": "Write the first post",
-    "emptySignup": "Sign up and write the first post"
+    "emptySignup": "Sign up and write the first post",
+    "tagPosts_one": "{{count, number}} post",
+    "tagPosts_other": "{{count, number}} posts"
   },
   "card": {
-    "likes": "{{count, number}} likes",
-    "comments": "{{count, number}} comments",
     "noTopic": "No topic",
-    "author": "Author"
+    "author": "Author",
+    "likes_one": "{{count, number}} like",
+    "likes_other": "{{count, number}} likes",
+    "comments_one": "{{count, number}} comment",
+    "comments_other": "{{count, number}} comments"
   },
   "topic": {
     "description": "Posts about {{name}}.",
