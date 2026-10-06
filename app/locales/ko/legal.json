@@ -1,0 +1,10 @@
+{
+  "terms": {
+    "title": "이용약관"
+  },
+  "privacy": {
+    "title": "개인정보처리방침"
+  },
+  "meta": "버전 {{version}} · 시행일 {{date}}",
+  "translationNotice": "이 문서는 번역본입니다. 한국어판과 내용이 다르면 한국어판이 우선합니다."
+}

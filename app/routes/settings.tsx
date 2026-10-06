@@ -15,8 +15,11 @@ export default function SettingsLayout() {
   const { t } = useTranslation();
   return (
     <div className="settings">
-      {/* 프로필·비밀번호·로그인 기록·언어 메뉴는 계정 설정(Phase 4)에서 더한다. */}
+      {/* 언어·시간대 메뉴(/settings/language)는 US5에서 더한다. */}
       <nav aria-label={t("settings:nav.label")}>
+        <NavLink to="/settings/profile">{t("settings:nav.profile")}</NavLink>{" "}
+        <NavLink to="/settings/password">{t("settings:nav.password")}</NavLink>{" "}
+        <NavLink to="/settings/login-history">{t("settings:nav.loginHistory")}</NavLink>{" "}
         <NavLink to="/settings/blogs">{t("settings:nav.blogs")}</NavLink>
       </nav>
       <Outlet />

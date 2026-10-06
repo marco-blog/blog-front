@@ -1,0 +1,10 @@
+{
+  "terms": {
+    "title": "Terms of Service"
+  },
+  "privacy": {
+    "title": "Privacy Policy"
+  },
+  "meta": "Version {{version}} · Effective {{date}}",
+  "translationNotice": "This is a translation. If it differs from the Korean version, the Korean version prevails."
+}

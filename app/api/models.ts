@@ -153,3 +153,11 @@ export interface PublishSettings {
   categoryId?: number | null;
   tags?: string[];
 }
+
+/** GET /me/login-history 한 줄(IP는 backend가 일부 가림) */
+export interface LoginHistoryItem {
+  at: string;
+  success: boolean;
+  ipMasked: string | null;
+  device: string | null;
+}
