@@ -1,0 +1,130 @@
+import highlightStyles from "highlight.js/styles/github.css?url";
+import { useTranslation } from "react-i18next";
+import { Link, data, useLoaderData } from "react-router";
+
+import { createApiClient } from "~/api/client.server";
+import { throwApiErrorResponse } from "~/api/errors";
+import type { PostDetail } from "~/api/models";
+import { isValidHandle, parsePostId } from "~/blog/ids";
+import { PostContent } from "~/components/post/PostContent";
+import { publicOrigin } from "~/config.server";
+import { highlightCodeBlocks } from "~/content/highlight.server";
+import { useDateFormat } from "~/i18n/format";
+import { metaT } from "~/i18n/meta";
+import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
+
+import type { Route } from "./+types/post-detail";
+
+/** 코드 강조 테마(R24). highlight.js 스크립트는 브라우저로 보내지 않는다. */
+export function links() {
+  return [{ rel: "stylesheet", href: highlightStyles }];
+}
+
+/**
+ * 글 상세(`/:handle/:postId`, SSR, FR-019·036). React Router는 정규식 경로를 지원하지 않으므로
+ * `postId`가 숫자인지 여기서 검사한다(tasks.md "구현 전 결정 사항" 10번).
+ * 볼 수 없는 글(비공개·임시저장·삭제, 정지·탈퇴 회원, 삭제된 블로그)은 backend가 404를 주고, 그대로 HTTP 404로 응답한다.
+ */
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const postId = parsePostId(params.postId);
+  if (!isValidHandle(params.handle) || postId === null) {
+    throw data(null, { status: 404 });
+  }
+  const api = createApiClient(request);
+  const post = await api.get<PostDetail>(`/posts/${postId}`).catch(throwApiErrorResponse);
+  if (post.blogHandle !== params.handle) {
+    throw data(null, { status: 404 });
+  }
+  // 조회수 기록(FR-020). 중복 판단은 backend가 한다. 실패해도 글은 보여준다.
+  await api.post(`/posts/${postId}/views`).catch(() => null);
+
+  const { contentMarkdown, ...rest } = post;
+  return {
+    post: { ...rest, contentHtml: highlightCodeBlocks(post.contentHtml) },
+    // contentMarkdown은 주인에게만 온다(contracts/api.md). 원문은 화면에 넘기지 않는다.
+    isOwner: contentMarkdown !== null,
+    origin: publicOrigin(request),
+  };
+}
+
+export function meta({ loaderData, matches }: Route.MetaArgs) {
+  const t = metaT(matches);
+  if (!loaderData) {
+    return privatePageMeta(t("notFound.title"), t("appName"));
+  }
+  const { post, origin } = loaderData;
+  return pageMeta({
+    title: post.title,
+    description: post.summary,
+    image: absoluteUrl(origin, post.thumbnailUrl),
+    url: absoluteUrl(origin, `/${post.blogHandle}/${post.id}`),
+    type: "article",
+    siteName: t("appName"),
+    // 주인만 볼 수 있는 글은 검색에 넣지 않는다.
+    noindex: post.status !== "PUBLISHED" || post.visibility !== "PUBLIC",
+  });
+}
+
+export default function PostDetailPage() {
+  const { t } = useTranslation();
+  const format = useDateFormat();
+  const { post, isOwner } = useLoaderData<typeof loader>();
+  const handle = post.blogHandle;
+
+  return (
+    <main>
+      <article className="post">
+        <header>
+          <h1>{post.title}</h1>
+          {isOwner && (
+            <p className="post-status">
+              {post.status === "DRAFT" && <span>{t("post:detail.draft")}</span>}{" "}
+              {post.visibility === "PRIVATE" && <span>{t("post:detail.private")}</span>}{" "}
+              <Link to={`/${handle}/write/${post.id}`}>{t("post:detail.edit")}</Link>
+            </p>
+          )}
+          <dl className="post-meta">
+            <dt>{t("post:detail.author")}</dt>
+            <dd>{post.author.nickname}</dd>
+            {post.publishedAt && (
+              <>
+                <dt>{t("post:detail.publishedAt")}</dt>
+                <dd>
+                  <time dateTime={post.publishedAt}>{format.date(post.publishedAt)}</time>
+                </dd>
+              </>
+            )}
+            {post.category && (
+              <>
+                <dt>{t("post:detail.category")}</dt>
+                <dd>{post.category.name}</dd>
+              </>
+            )}
+            {post.tags.length > 0 && (
+              <>
+                <dt>{t("post:detail.tags")}</dt>
+                <dd>{post.tags.map((tag) => `#${tag}`).join(" ")}</dd>
+              </>
+            )}
+          </dl>
+          <p>{t("post:views", { views: post.viewCount })}</p>
+        </header>
+        <PostContent html={post.contentHtml} />
+      </article>
+      {(post.prev || post.next) && (
+        <nav aria-label={t("post:detail.navLabel")} className="post-nav">
+          {post.prev && (
+            <Link to={`/${handle}/${post.prev.id}`} rel="prev">
+              {t("post:detail.prev")}: {post.prev.title}
+            </Link>
+          )}{" "}
+          {post.next && (
+            <Link to={`/${handle}/${post.next.id}`} rel="next">
+              {t("post:detail.next")}: {post.next.title}
+            </Link>
+          )}
+        </nav>
+      )}
+    </main>
+  );
+}

@@ -28,11 +28,21 @@ describe("Home", () => {
     render(withI18n(<Home />, "en"));
 
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Blog");
-    expect(screen.getByText("Our blog service is coming soon.")).toBeInTheDocument();
+    expect(
+      screen.getByText("A blog service for writing and sharing your posts."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Sign up and create your blog" })).toHaveAttribute(
+      "href",
+      "/signup",
+    );
+    expect(screen.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/login");
   });
 
-  it("meta title은 서비스 이름", () => {
-    expect(homeMeta(metaArgs("zh-CN"))).toEqual([{ title: "博客" }]);
+  it("meta title은 서비스 이름, description은 소개", () => {
+    expect(homeMeta(metaArgs("zh-CN"))).toEqual([
+      { title: "博客" },
+      { name: "description", content: "撰写和分享文章的博客服务。" },
+    ]);
   });
 });
 

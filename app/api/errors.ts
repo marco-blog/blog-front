@@ -65,3 +65,14 @@ export function toApiErrorData(error: ApiError): ApiErrorData {
 export function apiErrorResponse(error: ApiError) {
   return data(toApiErrorData(error), { status: error.status });
 }
+
+/**
+ * loader에서 `.catch(throwApiErrorResponse)`로 쓴다. ApiError면 backend 상태 코드(404 등)를 화면 응답으로 던지고,
+ * 그 밖의 오류는 그대로 던진다.
+ */
+export function throwApiErrorResponse(error: unknown): never {
+  if (isApiError(error)) {
+    throw apiErrorResponse(error);
+  }
+  throw error;
+}

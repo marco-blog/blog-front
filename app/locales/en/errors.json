@@ -18,6 +18,24 @@
     "TOO_SMALL": "Must be {{value}} or more.",
     "TOO_LARGE": "Must be {{value}} or less.",
     "INVALID_FORMAT": "The format is not valid.",
-    "INVALID": "This value is not valid."
-  }
+    "INVALID": "This value is not valid.",
+    "PASSWORD_WEAK": "Passwords must be 8 to 64 characters and include both letters and numbers."
+  },
+  "INVALID_CREDENTIALS": "The email or password is incorrect.",
+  "REFRESH_INVALID": "Your login has expired. Please log in again.",
+  "ACCOUNT_LOCKED": "Too many failed login attempts. Please try again in 10 minutes.",
+  "EMAIL_TAKEN": "This email is already registered.",
+  "HANDLE_TAKEN": "This address is already in use.",
+  "HANDLE_RESERVED": "This address can't be used.",
+  "HANDLE_INVALID": "Use 3 to 20 lowercase letters, numbers, or hyphens. Hyphens can't be at the start or end or appear twice in a row.",
+  "BLOG_LIMIT_EXCEEDED": "You've reached the maximum number of blogs.",
+  "LAST_BLOG_CANNOT_BE_DELETED": "You can't delete your last remaining blog.",
+  "TERMS_VERSION_OUTDATED": "The terms have changed. Please refresh the page and agree again.",
+  "CURRENT_PASSWORD_MISMATCH": "The password is incorrect.",
+  "BLOG_NOT_FOUND": "We couldn't find this blog.",
+  "POST_NOT_FOUND": "We couldn't find this post.",
+  "DRAFT_NOT_FOUND": "We couldn't find this draft.",
+  "POST_NOT_PUBLISHED": "This post hasn't been published yet.",
+  "POST_NOT_IN_TRASH": "This post isn't in the trash.",
+  "POST_CONTENT_EMPTY": "Write some content before publishing."
 }

@@ -1,0 +1,53 @@
+{
+  "newTitle": "写文章",
+  "editTitle": "编辑文章",
+  "titleLabel": "标题",
+  "titlePlaceholder": "请输入标题",
+  "bodyLabel": "正文",
+  "placeholder": "请输入内容。按 / 打开格式菜单。",
+  "loading": "正在加载编辑器。",
+  "loadFailed": "编辑器加载失败，已显示基本输入框。",
+  "saveDraft": "保存草稿",
+  "complete": "完成",
+  "saving": "正在保存。",
+  "savedAt": "已于 {{time}} 保存。",
+  "unsaved": "有尚未保存的更改。",
+  "resume": {
+    "message": "有一篇未完成的文章“{{title}}”（{{time}} 保存）。要继续写吗？",
+    "untitled": "无标题",
+    "continue": "继续写",
+    "discard": "写新文章"
+  },
+  "menu": {
+    "text": "文本",
+    "paragraph": "正文",
+    "h1": "标题 1",
+    "h2": "标题 2",
+    "h3": "标题 3",
+    "quote": "引用",
+    "divider": "分隔线",
+    "list": "列表",
+    "bulletList": "项目符号列表",
+    "orderedList": "编号列表",
+    "taskList": "任务列表",
+    "advanced": "更多",
+    "image": "图片",
+    "codeBlock": "代码块",
+    "table": "表格"
+  },
+  "toolbar": {
+    "bold": "粗体",
+    "italic": "斜体",
+    "strikethrough": "删除线",
+    "code": "行内代码",
+    "link": "链接"
+  },
+  "code": {
+    "search": "搜索语言",
+    "noResult": "没有匹配的语言",
+    "copy": "复制"
+  },
+  "link": {
+    "placeholder": "请粘贴链接地址"
+  }
+}

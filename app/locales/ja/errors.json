@@ -18,6 +18,24 @@
     "TOO_SMALL": "{{value}}以上にしてください。",
     "TOO_LARGE": "{{value}}以下にしてください。",
     "INVALID_FORMAT": "形式が正しくありません。",
-    "INVALID": "正しくない値です。"
-  }
+    "INVALID": "正しくない値です。",
+    "PASSWORD_WEAK": "パスワードは8〜64文字で、英字と数字を両方含める必要があります。"
+  },
+  "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。",
+  "REFRESH_INVALID": "ログインの有効期限が切れました。もう一度ログインしてください。",
+  "ACCOUNT_LOCKED": "ログインに複数回失敗したため、しばらくログインできません。10分後にもう一度お試しください。",
+  "EMAIL_TAKEN": "このメールアドレスはすでに登録されています。",
+  "HANDLE_TAKEN": "このアドレスはすでに使われています。",
+  "HANDLE_RESERVED": "このアドレスは使用できません。",
+  "HANDLE_INVALID": "英小文字・数字・ハイフンで3〜20文字を入力してください。ハイフンは先頭・末尾や連続では使えません。",
+  "BLOG_LIMIT_EXCEEDED": "作成できるブログの数を超えています。",
+  "LAST_BLOG_CANNOT_BE_DELETED": "最後のブログは削除できません。",
+  "TERMS_VERSION_OUTDATED": "規約が変更されました。ページを再読み込みしてから、もう一度同意してください。",
+  "CURRENT_PASSWORD_MISMATCH": "パスワードが正しくありません。",
+  "BLOG_NOT_FOUND": "ブログが見つかりません。",
+  "POST_NOT_FOUND": "記事が見つかりません。",
+  "DRAFT_NOT_FOUND": "下書きが見つかりません。",
+  "POST_NOT_PUBLISHED": "まだ公開していない記事です。",
+  "POST_NOT_IN_TRASH": "ゴミ箱にある記事ではありません。",
+  "POST_CONTENT_EMPTY": "本文を入力してから公開してください。"
 }

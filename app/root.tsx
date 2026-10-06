@@ -10,6 +10,7 @@ import {
   useRouteLoaderData,
 } from "react-router";
 
+import { forwardBackendCookies } from "~/api/backendCookies.server";
 import { errorMessage } from "~/api/errorMessage";
 import { isApiError } from "~/api/errors";
 import { getSessionUser } from "~/auth/session.server";
@@ -19,6 +20,7 @@ import { Header, type HeaderUser } from "~/components/layout/Header";
 import { NotFound } from "~/components/NotFound";
 import { DEFAULT_LANGUAGE } from "~/i18n/config";
 import { FALLBACK_RESOURCES } from "~/i18n/fallback-resources";
+import { DEFAULT_TIME_ZONE } from "~/i18n/format";
 import { createI18n } from "~/i18n/instance";
 import { resolveLanguage } from "~/i18n/language";
 import { resourcesFor } from "~/i18n/resources.server";
@@ -29,7 +31,15 @@ import type { Route } from "./+types/root";
 export interface RootData extends RootLoaderData {
   /** 로그인 회원(상단 메뉴용). 비로그인이면 null */
   user: HeaderUser | null;
+  /** 날짜를 보여줄 시간대: 회원 설정, 비회원은 Asia/Seoul(FR-153) */
+  timeZone?: string;
 }
+
+/**
+ * 모든 요청에서 backend가 준 Set-Cookie(로그인·리프레시·로그아웃 등)와 front 쿠키를 브라우저 응답에 싣는다
+ * (tasks.md "구현 전 결정 사항" 1번).
+ */
+export const middleware: Route.MiddlewareFunction[] = [forwardBackendCookies];
 
 /**
  * 로그인 회원(/me)과 화면 언어를 정하고(FR-149) 그 언어의 번역 리소스를 브라우저로 넘긴다(research.md R22).
@@ -51,6 +61,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<RootData> {
       nickname: member.nickname,
       role: member.role,
     },
+    timeZone: member?.timeZone || DEFAULT_TIME_ZONE,
   };
 }
 

@@ -1,0 +1,53 @@
+{
+  "newTitle": "글쓰기",
+  "editTitle": "글 수정",
+  "titleLabel": "제목",
+  "titlePlaceholder": "제목을 입력하세요",
+  "bodyLabel": "본문",
+  "placeholder": "내용을 입력하세요. /를 누르면 서식 메뉴가 열립니다.",
+  "loading": "에디터를 불러오는 중입니다.",
+  "loadFailed": "에디터를 불러오지 못해 기본 입력란을 보여줍니다.",
+  "saveDraft": "임시저장",
+  "complete": "완료",
+  "saving": "저장하는 중입니다.",
+  "savedAt": "{{time}}에 저장했습니다.",
+  "unsaved": "저장하지 않은 변경이 있습니다.",
+  "resume": {
+    "message": "작성 중이던 글 「{{title}}」({{time}} 저장)이 있습니다. 이어서 쓸까요?",
+    "untitled": "제목 없음",
+    "continue": "이어 쓰기",
+    "discard": "새 글 쓰기"
+  },
+  "menu": {
+    "text": "텍스트",
+    "paragraph": "본문",
+    "h1": "제목 1",
+    "h2": "제목 2",
+    "h3": "제목 3",
+    "quote": "인용",
+    "divider": "구분선",
+    "list": "목록",
+    "bulletList": "글머리 기호 목록",
+    "orderedList": "번호 목록",
+    "taskList": "할 일 목록",
+    "advanced": "더 보기",
+    "image": "이미지",
+    "codeBlock": "코드 블록",
+    "table": "표"
+  },
+  "toolbar": {
+    "bold": "굵게",
+    "italic": "기울임",
+    "strikethrough": "취소선",
+    "code": "인라인 코드",
+    "link": "링크"
+  },
+  "code": {
+    "search": "언어 검색",
+    "noResult": "찾는 언어가 없습니다",
+    "copy": "복사"
+  },
+  "link": {
+    "placeholder": "링크 주소를 붙여 넣으세요"
+  }
+}

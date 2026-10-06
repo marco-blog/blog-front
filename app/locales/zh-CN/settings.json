@@ -1,0 +1,30 @@
+{
+  "title": "账号设置",
+  "nav": {
+    "label": "账号设置菜单",
+    "blogs": "我的博客"
+  },
+  "blogs": {
+    "title": "我的博客",
+    "count": "博客 {{count}} / {{limit}}",
+    "posts": "文章 {{posts}}",
+    "manage": "管理",
+    "write": "写文章",
+    "create": {
+      "title": "创建新博客",
+      "handle": "博客地址",
+      "blogTitle": "博客标题",
+      "titleHint": "留空时将根据昵称设置标题。",
+      "submit": "创建",
+      "limitReached": "已达到博客数量上限，无法再创建。",
+      "created": "博客已创建。"
+    },
+    "delete": {
+      "open": "删除博客",
+      "warning": "删除后无法恢复。该博客的所有文章将不再显示，任何人都无法再使用此地址。",
+      "password": "确认密码",
+      "submit": "删除",
+      "deleted": "博客已删除。"
+    }
+  }
+}

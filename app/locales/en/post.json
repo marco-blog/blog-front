@@ -1,0 +1,37 @@
+{
+  "list": {
+    "label": "Posts",
+    "empty": "No posts have been published yet."
+  },
+  "views": "Views {{views}}",
+  "blog": {
+    "owner": "Blog by {{nickname}}",
+    "categories": "Categories"
+  },
+  "detail": {
+    "author": "Author",
+    "publishedAt": "Published",
+    "category": "Category",
+    "tags": "Tags",
+    "edit": "Edit",
+    "navLabel": "Previous and next posts",
+    "prev": "Previous post",
+    "next": "Next post",
+    "draft": "Draft",
+    "private": "Private"
+  },
+  "publish": {
+    "title": "Publish settings",
+    "visibility": "Visibility",
+    "public": "Public",
+    "private": "Private (only me)",
+    "publishTime": "Publish time",
+    "now": "Now",
+    "commentEnabled": "Allow comments on this post",
+    "close": "Close",
+    "publishPublic": "Publish",
+    "savePrivate": "Save as private",
+    "republish": "Update post",
+    "publishing": "Publishing."
+  }
+}

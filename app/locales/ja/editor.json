@@ -1,0 +1,53 @@
+{
+  "newTitle": "記事を書く",
+  "editTitle": "記事を編集",
+  "titleLabel": "タイトル",
+  "titlePlaceholder": "タイトルを入力してください",
+  "bodyLabel": "本文",
+  "placeholder": "本文を入力してください。/ を押すと書式メニューが開きます。",
+  "loading": "エディターを読み込んでいます。",
+  "loadFailed": "エディターを読み込めなかったため、基本の入力欄を表示しています。",
+  "saveDraft": "下書き保存",
+  "complete": "完了",
+  "saving": "保存しています。",
+  "savedAt": "{{time}}に保存しました。",
+  "unsaved": "保存していない変更があります。",
+  "resume": {
+    "message": "書きかけの記事「{{title}}」({{time}}保存)があります。続きを書きますか?",
+    "untitled": "タイトルなし",
+    "continue": "続きを書く",
+    "discard": "新しく書く"
+  },
+  "menu": {
+    "text": "テキスト",
+    "paragraph": "本文",
+    "h1": "見出し1",
+    "h2": "見出し2",
+    "h3": "見出し3",
+    "quote": "引用",
+    "divider": "区切り線",
+    "list": "リスト",
+    "bulletList": "箇条書き",
+    "orderedList": "番号付きリスト",
+    "taskList": "タスクリスト",
+    "advanced": "その他",
+    "image": "画像",
+    "codeBlock": "コードブロック",
+    "table": "表"
+  },
+  "toolbar": {
+    "bold": "太字",
+    "italic": "斜体",
+    "strikethrough": "取り消し線",
+    "code": "インラインコード",
+    "link": "リンク"
+  },
+  "code": {
+    "search": "言語を検索",
+    "noResult": "該当する言語がありません",
+    "copy": "コピー"
+  },
+  "link": {
+    "placeholder": "リンクのURLを貼り付けてください"
+  }
+}

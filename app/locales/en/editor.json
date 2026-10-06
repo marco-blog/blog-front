@@ -1,0 +1,53 @@
+{
+  "newTitle": "Write",
+  "editTitle": "Edit post",
+  "titleLabel": "Title",
+  "titlePlaceholder": "Enter a title",
+  "bodyLabel": "Body",
+  "placeholder": "Start writing. Type / to open the formatting menu.",
+  "loading": "Loading the editor.",
+  "loadFailed": "The editor couldn't load, so a plain text box is shown instead.",
+  "saveDraft": "Save draft",
+  "complete": "Done",
+  "saving": "Saving.",
+  "savedAt": "Saved at {{time}}.",
+  "unsaved": "You have unsaved changes.",
+  "resume": {
+    "message": "You have a draft \"{{title}}\" (saved {{time}}). Do you want to continue it?",
+    "untitled": "Untitled",
+    "continue": "Continue draft",
+    "discard": "Start a new post"
+  },
+  "menu": {
+    "text": "Text",
+    "paragraph": "Paragraph",
+    "h1": "Heading 1",
+    "h2": "Heading 2",
+    "h3": "Heading 3",
+    "quote": "Quote",
+    "divider": "Divider",
+    "list": "List",
+    "bulletList": "Bulleted list",
+    "orderedList": "Numbered list",
+    "taskList": "Task list",
+    "advanced": "More",
+    "image": "Image",
+    "codeBlock": "Code block",
+    "table": "Table"
+  },
+  "toolbar": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "strikethrough": "Strikethrough",
+    "code": "Inline code",
+    "link": "Link"
+  },
+  "code": {
+    "search": "Search languages",
+    "noResult": "No matching language",
+    "copy": "Copy"
+  },
+  "link": {
+    "placeholder": "Paste a link"
+  }
+}

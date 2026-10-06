@@ -18,6 +18,24 @@
     "TOO_SMALL": "不能小于 {{value}}。",
     "TOO_LARGE": "不能大于 {{value}}。",
     "INVALID_FORMAT": "格式不正确。",
-    "INVALID": "该值无效。"
-  }
+    "INVALID": "该值无效。",
+    "PASSWORD_WEAK": "密码须为 8~64 个字符，且同时包含字母和数字。"
+  },
+  "INVALID_CREDENTIALS": "电子邮箱或密码不正确。",
+  "REFRESH_INVALID": "登录已过期，请重新登录。",
+  "ACCOUNT_LOCKED": "登录失败次数过多，暂时无法登录。请在 10 分钟后重试。",
+  "EMAIL_TAKEN": "该电子邮箱已注册。",
+  "HANDLE_TAKEN": "该地址已被使用。",
+  "HANDLE_RESERVED": "该地址无法使用。",
+  "HANDLE_INVALID": "请输入 3~20 个小写字母、数字或连字符。连字符不能位于开头或结尾，也不能连续使用。",
+  "BLOG_LIMIT_EXCEEDED": "已超过可创建的博客数量。",
+  "LAST_BLOG_CANNOT_BE_DELETED": "无法删除最后一个博客。",
+  "TERMS_VERSION_OUTDATED": "条款已更新，请刷新页面后重新同意。",
+  "CURRENT_PASSWORD_MISMATCH": "密码不正确。",
+  "BLOG_NOT_FOUND": "找不到该博客。",
+  "POST_NOT_FOUND": "找不到该文章。",
+  "DRAFT_NOT_FOUND": "找不到该草稿。",
+  "POST_NOT_PUBLISHED": "该文章尚未发布。",
+  "POST_NOT_IN_TRASH": "该文章不在回收站中。",
+  "POST_CONTENT_EMPTY": "请先输入正文再发布。"
 }

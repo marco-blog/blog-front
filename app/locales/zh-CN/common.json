@@ -2,7 +2,9 @@
   "appName": "博客",
   "home": {
     "title": "博客",
-    "placeholder": "博客服务正在准备中。"
+    "intro": "撰写和分享文章的博客服务。",
+    "signup": "注册并创建博客",
+    "login": "登录"
   },
   "notFound": {
     "title": "找不到页面",
@@ -28,5 +30,10 @@
     "terms": "服务条款",
     "privacy": "隐私政策",
     "language": "语言"
+  },
+  "pagination": {
+    "label": "分页",
+    "previous": "上一页",
+    "next": "下一页"
   }
 }

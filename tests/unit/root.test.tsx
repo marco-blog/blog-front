@@ -180,7 +180,7 @@ describe("Layout", () => {
 
     render(<Stub />);
 
-    expect(await screen.findByText("ブログサービスを準備しています。")).toBeInTheDocument();
+    expect(await screen.findByText("記事を書いて共有するブログサービスです。")).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("ja");
     expect(screen.getByRole("banner")).toHaveTextContent("ログアウト");
     expect(screen.getByRole("contentinfo")).toHaveTextContent("利用規約");
