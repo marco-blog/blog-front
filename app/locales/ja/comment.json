@@ -1,6 +1,6 @@
 {
   "title": "コメント",
-  "count": "コメント {{comments}}",
+  "count": "コメント {{comments, number}}",
   "list": "コメント一覧",
   "empty": "まだコメントはありません。",
   "loadFailed": "コメントを読み込めませんでした。",

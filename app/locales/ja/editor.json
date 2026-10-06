@@ -45,7 +45,9 @@
   "code": {
     "search": "言語を検索",
     "noResult": "該当する言語がありません",
-    "copy": "コピー"
+    "copy": "コピー",
+    "previewEdit": "編集",
+    "previewHide": "プレビューを隠す"
   },
   "link": {
     "placeholder": "リンクのURLを貼り付けてください"

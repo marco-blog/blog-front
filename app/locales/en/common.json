@@ -15,7 +15,6 @@
     "title": "Something went wrong",
     "description": "Please try again later."
   },
-  "languageName": "English",
   "nav": {
     "label": "Main menu",
     "login": "Log in",
@@ -29,7 +28,8 @@
     "label": "Site information",
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
-    "language": "Language"
+    "language": "Language",
+    "changeLanguage": "Change"
   },
   "pagination": {
     "label": "Pages",

@@ -2,7 +2,7 @@ import { createApiClient } from "~/api/client.server";
 import { isApiError, throwApiErrorResponse } from "~/api/errors";
 import type { LegalDocument } from "~/api/models";
 import { getSessionUser } from "~/auth/session.server";
-import { resolveLanguage } from "~/i18n/language";
+import { resolveLanguage } from "~/i18n/resolveLanguage.server";
 
 export type LegalDocumentType = "terms" | "privacy";
 

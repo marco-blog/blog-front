@@ -45,7 +45,9 @@
   "code": {
     "search": "搜索语言",
     "noResult": "没有匹配的语言",
-    "copy": "复制"
+    "copy": "复制",
+    "previewEdit": "编辑",
+    "previewHide": "隐藏预览"
   },
   "link": {
     "placeholder": "请粘贴链接地址"

@@ -3,7 +3,7 @@
     "label": "記事一覧",
     "empty": "まだ公開した記事がありません。"
   },
-  "views": "閲覧 {{views}}",
+  "views": "閲覧 {{views, number}}",
   "blog": {
     "owner": "{{nickname}}さんのブログ",
     "categories": "カテゴリー"

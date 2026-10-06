@@ -45,7 +45,9 @@
   "code": {
     "search": "언어 검색",
     "noResult": "찾는 언어가 없습니다",
-    "copy": "복사"
+    "copy": "복사",
+    "previewEdit": "편집",
+    "previewHide": "미리보기 숨기기"
   },
   "link": {
     "placeholder": "링크 주소를 붙여 넣으세요"

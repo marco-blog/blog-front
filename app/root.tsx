@@ -22,7 +22,7 @@ import { DEFAULT_LANGUAGE } from "~/i18n/config";
 import { FALLBACK_RESOURCES } from "~/i18n/fallback-resources";
 import { DEFAULT_TIME_ZONE } from "~/i18n/format";
 import { createI18n } from "~/i18n/instance";
-import { resolveLanguage } from "~/i18n/language";
+import { resolveLanguage } from "~/i18n/resolveLanguage.server";
 import { resourcesFor } from "~/i18n/resources.server";
 import type { RootLoaderData } from "~/i18n/root-data";
 

@@ -97,6 +97,8 @@ export function crepeConfig(
         searchPlaceholder: t("editor:code.search"),
         noResultText: t("editor:code.noResult"),
         copyText: t("editor:code.copy"),
+        previewToggleText: (previewOnly: boolean) =>
+          previewOnly ? t("editor:code.previewEdit") : t("editor:code.previewHide"),
       },
       "link-tooltip": { inputPlaceholder: t("editor:link.placeholder") },
       // 붙여넣기·끌어놓기·이미지 블록의 업로드 버튼 모두 onUpload로 올리고, 돌려받은 주소를 본문에 넣는다.

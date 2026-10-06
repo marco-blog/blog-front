@@ -10,6 +10,7 @@ import { Pagination } from "~/components/Pagination";
 import { CategoryTree, categoryHref, findCategory } from "~/components/blog/CategoryTree";
 import { PostList } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
+import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl } from "~/media/thumbnail";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
@@ -67,6 +68,7 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 export default function BlogCategory() {
   const { t } = useTranslation();
   const { blog, category, posts, totalCount, page, pageSize } = useLoaderData<typeof loader>();
+  const format = useDateFormat();
   return (
     <main className="blog-category">
       <header>
@@ -80,7 +82,7 @@ export default function BlogCategory() {
               {category.children.map((child) => (
                 <li key={child.id}>
                   <Link to={categoryHref(blog.handle, child.id)}>
-                    {child.name} ({child.postCount})
+                    {child.name} ({format.number(child.postCount)})
                   </Link>
                 </li>
               ))}

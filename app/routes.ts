@@ -15,6 +15,7 @@ export default [
   route("password-reset/confirm", "routes/password-reset.confirm.tsx"),
   route("terms", "routes/terms.tsx"),
   route("privacy", "routes/privacy.tsx"),
+  route("locale", "routes/locale.ts"),
   route("write", "routes/write-entry.ts"),
   route("manage", "routes/manage-entry.ts"),
   route("settings", "routes/settings.tsx", [
@@ -23,6 +24,7 @@ export default [
     route("password", "routes/settings.password.tsx"),
     route("login-history", "routes/settings.login-history.tsx"),
     route("blogs", "routes/settings.blogs.tsx"),
+    route("language", "routes/settings.language.tsx"),
   ]),
   route("tags/:name", "routes/tag.tsx"),
 

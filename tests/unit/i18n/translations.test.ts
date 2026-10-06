@@ -43,6 +43,16 @@ function placeholders(value: unknown): string[] {
   return [...String(value).matchAll(/\{\{\s*([\w.]+)[^}]*\}\}/g)].map((m) => m[1]).sort();
 }
 
+/**
+ * 번역하지 않고 다른 언어 문구를 복사해 둔 경우를 찾는다(SC-024). 한국어(기준 언어)는 검사하지 않는다.
+ * en: 한글·가나·한자, ja: 한글, zh-CN: 한글·가나
+ */
+const FOREIGN_SCRIPTS: Partial<Record<string, RegExp>> = {
+  en: /[\uac00-\ud7a3\u3040-\u30ff\u4e00-\u9fff]/,
+  ja: /[\uac00-\ud7a3]/,
+  "zh-CN": /[\uac00-\ud7a3\u3040-\u30ff]/,
+};
+
 const locales = Object.fromEntries(
   SUPPORTED_LANGUAGES.map((language) => [language, readNamespaces(language)]),
 );
@@ -76,6 +86,15 @@ describe("번역 파일", () => {
         .map(([k]) => k);
 
       expect({ missing, extra, empty }).toEqual({ missing: [], extra: [], empty: [] });
+    });
+
+    it.each(Object.keys(base))("%s: 다른 언어 문구를 그대로 옮겨 두지 않았다", (namespace) => {
+      const foreign = FOREIGN_SCRIPTS[language];
+      const copied = [...flatten(target[namespace] ?? {})]
+        .filter(([, value]) => foreign && foreign.test(String(value)))
+        .map(([key]) => key);
+
+      expect(copied).toEqual([]);
     });
 
     it.each(Object.keys(base))("%s: 문구의 {{변수}}가 기준 언어와 같다", (namespace) => {

@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { isSupportedLanguage } from "~/i18n/config";
-import {
-  languageFromAcceptLanguage,
-  matchLanguage,
-  readCookie,
-  resolveLanguage,
-} from "~/i18n/language";
+import { languageFromAcceptLanguage, matchLanguage, readCookie } from "~/i18n/language";
 
 describe("matchLanguage", () => {
   it.each([
@@ -54,32 +49,6 @@ describe("readCookie", () => {
     expect(readCookie("lang=%E0%A4%A", "lang")).toBe("%E0%A4%A");
     expect(readCookie("xlang=ja; broken", "lang")).toBeNull();
     expect(readCookie(null, "lang")).toBeNull();
-  });
-});
-
-describe("resolveLanguage (FR-149)", () => {
-  const request = (headers: Record<string, string>) =>
-    new Request("http://front.test/", { headers });
-
-  it("회원 설정이 가장 먼저", () => {
-    expect(resolveLanguage(request({ cookie: "lang=ja", "accept-language": "en" }), "zh-CN")).toBe(
-      "zh-CN",
-    );
-  });
-
-  it("다음은 쿠키 lang", () => {
-    expect(resolveLanguage(request({ cookie: "lang=ja", "accept-language": "ko" }), "xx")).toBe(
-      "ja",
-    );
-  });
-
-  it("다음은 Accept-Language", () => {
-    expect(resolveLanguage(request({ cookie: "lang=fr", "accept-language": "ko-KR" }))).toBe("ko");
-  });
-
-  it("모두 없으면 영어", () => {
-    expect(resolveLanguage(request({ "accept-language": "fr" }))).toBe("en");
-    expect(resolveLanguage(request({}))).toBe("en");
   });
 });
 

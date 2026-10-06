@@ -1,6 +1,6 @@
 {
   "title": "Comments",
-  "count": "Comments {{comments}}",
+  "count": "Comments {{comments, number}}",
   "list": "Comment list",
   "empty": "No comments yet.",
   "loadFailed": "Could not load the comments.",

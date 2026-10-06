@@ -93,7 +93,7 @@ describe("CommentSection", () => {
     expect(await screen.findByRole("heading", { name: "댓글 3" })).toBeInTheDocument();
     const first = screen.getByRole("article", { name: "작성자" });
     expect(first).toHaveTextContent("댓글 1");
-    expect(within(first).getByText("2026. 10. 6. 오후 1:24")).toHaveAttribute(
+    expect(within(first).getByText("2026년 10월 6일 오후 1:24")).toHaveAttribute(
       "dateTime",
       "2026-10-06T04:24:19Z",
     );

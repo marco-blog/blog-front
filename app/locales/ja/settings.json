@@ -5,12 +5,13 @@
     "blogs": "マイブログ",
     "profile": "プロフィール",
     "password": "パスワード変更",
-    "loginHistory": "ログイン履歴"
+    "loginHistory": "ログイン履歴",
+    "language": "言語・タイムゾーン"
   },
   "blogs": {
     "title": "マイブログ",
-    "count": "ブログ {{count}} / {{limit}}",
-    "posts": "記事 {{posts}}",
+    "count": "ブログ {{count, number}} / {{limit, number}}",
+    "posts": "記事 {{posts, number}}",
     "manage": "管理",
     "write": "記事を書く",
     "create": {
@@ -64,5 +65,14 @@
     "failure": "失敗",
     "unknown": "不明",
     "empty": "ログイン履歴はありません。"
+  },
+  "language": {
+    "title": "言語とタイムゾーン",
+    "language": "表示言語",
+    "languageHint": "メニュー・ボタン・案内文とメールをこの言語で表示します。記事とコメントは書かれたまま表示されます。",
+    "timeZone": "タイムゾーン",
+    "timeZoneHint": "記事・コメント・ログイン履歴の時刻をこのタイムゾーンで表示します。",
+    "submit": "保存",
+    "saved": "言語とタイムゾーンを保存しました。"
   }
 }

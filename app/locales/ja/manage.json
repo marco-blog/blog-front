@@ -16,9 +16,9 @@
   "dashboard": {
     "title": "ダッシュボード",
     "drafts": "下書き",
-    "draftCount": "{{drafts}}件",
+    "draftCount": "{{drafts, number}}件",
     "newComments": "直近7日間の新しいコメント",
-    "commentCount": "{{comments}}件",
+    "commentCount": "{{comments, number}}件",
     "recentPosts": "最近の記事",
     "recentComments": "最近のコメント",
     "noPosts": "まだ記事がありません。",

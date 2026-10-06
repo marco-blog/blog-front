@@ -143,7 +143,7 @@ describe("/settings/profile", () => {
     });
   });
 
-  it("설정 메뉴: 프로필·비밀번호·로그인 기록·내 블로그", async () => {
+  it("설정 메뉴: 프로필·비밀번호·로그인 기록·내 블로그·언어", async () => {
     renderSettings("/settings/profile", route);
 
     const nav = await screen.findByRole("navigation", { name: "계정 설정 메뉴" });
@@ -162,6 +162,10 @@ describe("/settings/profile", () => {
     expect(within(nav).getByRole("link", { name: "내 블로그" })).toHaveAttribute(
       "href",
       "/settings/blogs",
+    );
+    expect(within(nav).getByRole("link", { name: "언어·시간대" })).toHaveAttribute(
+      "href",
+      "/settings/language",
     );
   });
 
@@ -485,7 +489,7 @@ describe("/settings/login-history", () => {
     expect(within(rows[1]).getByText("실패")).toBeInTheDocument();
     expect(within(rows[1]).getByText("211.234.*.*")).toBeInTheDocument();
     expect(within(rows[1]).getByText("알 수 없음")).toBeInTheDocument();
-    expect(within(rows[1]).getByText(/2026\. 10\. 6\./)).toBeInTheDocument();
+    expect(within(rows[1]).getByText(/2026년 10월 6일/)).toBeInTheDocument();
     expect(within(rows[2]).getByText("성공")).toBeInTheDocument();
     expect(within(rows[2]).getByText("2001:db8:85a3::*")).toBeInTheDocument();
     expect(within(rows[2]).getByText("Mozilla/5.0 (2)")).toBeInTheDocument();

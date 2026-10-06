@@ -3,7 +3,7 @@
     "label": "Posts",
     "empty": "No posts have been published yet."
   },
-  "views": "Views {{views}}",
+  "views": "Views {{views, number}}",
   "blog": {
     "owner": "Blog by {{nickname}}",
     "categories": "Categories"

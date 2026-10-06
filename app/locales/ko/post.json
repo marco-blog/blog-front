@@ -3,7 +3,7 @@
     "label": "글 목록",
     "empty": "아직 발행한 글이 없습니다."
   },
-  "views": "조회 {{views}}",
+  "views": "조회 {{views, number}}",
   "blog": {
     "owner": "{{nickname}} 님의 블로그",
     "categories": "카테고리"

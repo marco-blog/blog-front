@@ -15,7 +15,6 @@
     "title": "問題が発生しました",
     "description": "しばらくしてからもう一度お試しください。"
   },
-  "languageName": "日本語",
   "nav": {
     "label": "メインメニュー",
     "login": "ログイン",
@@ -29,7 +28,8 @@
     "label": "サイト情報",
     "terms": "利用規約",
     "privacy": "プライバシーポリシー",
-    "language": "言語"
+    "language": "言語",
+    "changeLanguage": "変更"
   },
   "pagination": {
     "label": "ページ",

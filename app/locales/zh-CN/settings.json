@@ -5,12 +5,13 @@
     "blogs": "我的博客",
     "profile": "个人资料",
     "password": "修改密码",
-    "loginHistory": "登录记录"
+    "loginHistory": "登录记录",
+    "language": "语言和时区"
   },
   "blogs": {
     "title": "我的博客",
-    "count": "博客 {{count}} / {{limit}}",
-    "posts": "文章 {{posts}}",
+    "count": "博客 {{count, number}} / {{limit, number}}",
+    "posts": "文章 {{posts, number}}",
     "manage": "管理",
     "write": "写文章",
     "create": {
@@ -64,5 +65,14 @@
     "failure": "失败",
     "unknown": "未知",
     "empty": "没有登录记录。"
+  },
+  "language": {
+    "title": "语言和时区",
+    "language": "界面语言",
+    "languageHint": "菜单、按钮、提示信息和邮件将使用此语言。文章和评论按原文显示。",
+    "timeZone": "时区",
+    "timeZoneHint": "文章、评论和登录记录的时间将按此时区显示。",
+    "submit": "保存",
+    "saved": "已保存语言和时区。"
   }
 }
