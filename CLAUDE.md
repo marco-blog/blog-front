@@ -4,7 +4,9 @@ Blog Platform의 React SSR 프런트엔드. 스펙은 형제 저장소 `../docs/
 
 ## 스택
 - 이름: `net.java21.blog.front` (package.json name)
-- Next.js(App Router) + TypeScript (React SSR)
+- React + Vite + TypeScript
+- SSR: Vite SSR(Node Express 서버에서 `renderToPipeableStream`), 라우팅은 React Router
+- 명령(앱 생성 후): `npm run dev`, `npm run build`, `npm test`
 - API 타입은 backend OpenAPI에서 생성한다(손으로 작성하지 않음).
 - 테스트: Vitest, Playwright
 
