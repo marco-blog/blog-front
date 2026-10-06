@@ -2,7 +2,10 @@
   "title": "Account settings",
   "nav": {
     "label": "Account settings menu",
-    "blogs": "My blogs"
+    "blogs": "My blogs",
+    "profile": "Profile",
+    "password": "Change password",
+    "loginHistory": "Login history"
   },
   "blogs": {
     "title": "My blogs",
@@ -26,5 +29,40 @@
       "submit": "Delete",
       "deleted": "The blog has been deleted."
     }
+  },
+  "profile": {
+    "title": "Profile",
+    "email": "Email",
+    "nickname": "Nickname",
+    "bio": "Bio",
+    "bioHint": "Up to 300 characters.",
+    "submit": "Save",
+    "saved": "Your profile has been saved.",
+    "withdraw": {
+      "open": "Delete account",
+      "warning": "This can't be undone. You won't be able to log in, and all posts in all your blogs will become private. Your personal information will be destroyed after 30 days.",
+      "password": "Confirm password",
+      "submit": "Delete my account"
+    }
+  },
+  "password": {
+    "title": "Change password",
+    "current": "Current password",
+    "new": "New password",
+    "newConfirm": "Confirm new password",
+    "submit": "Change password",
+    "changed": "Your password has been changed. You have been logged out on other devices."
+  },
+  "loginHistory": {
+    "title": "Login history",
+    "caption": "Recent login attempts (kept for 3 months)",
+    "at": "Time",
+    "result": "Result",
+    "ip": "IP",
+    "device": "Device",
+    "success": "Success",
+    "failure": "Failed",
+    "unknown": "Unknown",
+    "empty": "There is no login history."
   }
 }

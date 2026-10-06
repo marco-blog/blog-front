@@ -19,7 +19,8 @@
     "TOO_LARGE": "不能大于 {{value}}。",
     "INVALID_FORMAT": "格式不正确。",
     "INVALID": "该值无效。",
-    "PASSWORD_WEAK": "密码须为 8~64 个字符，且同时包含字母和数字。"
+    "PASSWORD_WEAK": "密码须为 8~64 个字符，且同时包含字母和数字。",
+    "PASSWORD_CONFIRM_MISMATCH": "两次输入的新密码不一致。"
   },
   "INVALID_CREDENTIALS": "电子邮箱或密码不正确。",
   "REFRESH_INVALID": "登录已过期，请重新登录。",
@@ -41,5 +42,6 @@
   "CATEGORY_NOT_FOUND": "找不到该分类。",
   "CATEGORY_NAME_TAKEN": "同一位置已有同名分类。",
   "CATEGORY_DEPTH_EXCEEDED": "分类最多只能有两级。",
-  "TAG_LIMIT_EXCEEDED": "每篇文章最多可添加 10 个标签。"
+  "TAG_LIMIT_EXCEEDED": "每篇文章最多可添加 10 个标签。",
+  "PASSWORD_RESET_TOKEN_INVALID": "重置链接已过期或已被使用。请重新申请。"
 }

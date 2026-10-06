@@ -154,6 +154,14 @@ export interface PublishSettings {
   tags?: string[];
 }
 
+/** GET /me/login-history 한 줄(IP는 backend가 일부 가림) */
+export interface LoginHistoryItem {
+  at: string;
+  success: boolean;
+  ipMasked: string | null;
+  device: string | null;
+}
+
 /** 대시보드 최근 댓글(Comment + { postId, postTitle }). 댓글은 US3에서 채운다. */
 export interface ManageRecentComment {
   id: number;
