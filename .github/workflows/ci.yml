@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # package.json engines(>=22.18)와 의존성(jsdom 등)의 요구를 함께 만족하는 LTS
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # 커버리지는 vitest.config.ts에서 켜져 있고, 라인 80% 미만이면 실패한다(헌법 원칙 III).
+      # 번역 누락 점검(tests/unit/i18n/translations.test.ts)도 여기 포함된다.
+      - name: Test (coverage)
+        run: npm test -- --coverage
+
+      - name: Upload coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Build
+        run: npm run build
+
+      # 빌드 산출물로 서버를 띄워 SSR·404·보안 헤더(CSP nonce)를 확인한다. backend 없이 도는 시나리오만 있다.
+      - name: E2E (smoke)
+        run: npx playwright test
+        env:
+          CI: "true"

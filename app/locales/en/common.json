@@ -12,5 +12,21 @@
   "error": {
     "title": "Something went wrong",
     "description": "Please try again later."
+  },
+  "languageName": "English",
+  "nav": {
+    "label": "Main menu",
+    "login": "Log in",
+    "signup": "Sign up",
+    "write": "Write",
+    "manage": "Manage my blog",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "footer": {
+    "label": "Site information",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "language": "Language"
   }
 }
