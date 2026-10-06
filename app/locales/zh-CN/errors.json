@@ -43,5 +43,8 @@
   "CATEGORY_NAME_TAKEN": "同一位置已有同名分类。",
   "CATEGORY_DEPTH_EXCEEDED": "分类最多只能有两级。",
   "TAG_LIMIT_EXCEEDED": "每篇文章最多可添加 10 个标签。",
-  "PASSWORD_RESET_TOKEN_INVALID": "重置链接已过期或已被使用。请重新申请。"
+  "PASSWORD_RESET_TOKEN_INVALID": "重置链接已过期或已被使用。请重新申请。",
+  "COMMENT_NOT_FOUND": "找不到该评论。",
+  "REPLY_DEPTH_EXCEEDED": "不能回复回复。",
+  "COMMENTS_DISABLED": "此文章已关闭评论。"
 }

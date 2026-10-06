@@ -24,7 +24,8 @@
     "noPosts": "아직 글이 없습니다.",
     "noComments": "아직 댓글이 없습니다.",
     "commentOn": "{{title}}에 남긴 댓글",
-    "deletedComment": "삭제된 댓글"
+    "deletedComment": "삭제된 댓글",
+    "allComments": "댓글 모두 보기"
   },
   "status": {
     "DRAFT": "임시저장",
@@ -89,5 +90,14 @@
     "commentHint": "끄면 이 블로그의 모든 글에 새 댓글을 달 수 없습니다.",
     "submit": "저장",
     "saved": "블로그 설정을 저장했습니다."
+  },
+  "comments": {
+    "title": "댓글 관리",
+    "list": "댓글 목록",
+    "empty": "아직 댓글이 없습니다.",
+    "on": "{{title}}에 남긴 댓글",
+    "delete": "삭제",
+    "deleteConfirm": "이 댓글을 삭제할까요?",
+    "deleted": "댓글을 삭제했습니다."
   }
 }

@@ -35,6 +35,7 @@ export default [
     index("routes/manage/dashboard.tsx"),
     route("posts", "routes/manage/posts.tsx"),
     route("categories", "routes/manage/categories.tsx"),
+    route("comments", "routes/manage/comments.tsx"),
     route("settings", "routes/manage/settings.tsx"),
   ]),
   route(":handle/:postId", "routes/post-detail.tsx"),

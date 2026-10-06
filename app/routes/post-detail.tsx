@@ -1,12 +1,16 @@
 import highlightStyles from "highlight.js/styles/github.css?url";
 import { useTranslation } from "react-i18next";
-import { Link, data, useLoaderData } from "react-router";
+import { Link, data, useActionData, useLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
-import type { PostDetail } from "~/api/models";
+import type { Comment, PostDetail } from "~/api/models";
+import { loginPath } from "~/auth/paths";
 import { isValidHandle, parsePostId } from "~/blog/ids";
 import { categoryHref } from "~/components/blog/CategoryTree";
+import type { CommentActionData } from "~/components/comment/actions";
+import { runCommentAction } from "~/components/comment/actions.server";
+import { CommentSection } from "~/components/comment/CommentSection";
 import { PostContent } from "~/components/post/PostContent";
 import { blogTagHref } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
@@ -26,6 +30,7 @@ export function links() {
  * 글 상세(`/:handle/:postId`, SSR, FR-019·036). React Router는 정규식 경로를 지원하지 않으므로
  * `postId`가 숫자인지 여기서 검사한다(tasks.md "구현 전 결정 사항" 10번).
  * 볼 수 없는 글(비공개·임시저장·삭제, 정지·탈퇴 회원, 삭제된 블로그)은 backend가 404를 주고, 그대로 HTTP 404로 응답한다.
+ * 댓글(US3)은 글과 함께 읽고(`GET /posts/{id}/comments`), 댓글을 읽지 못해도 글은 보여준다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const postId = parsePostId(params.postId);
@@ -33,7 +38,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
   const api = createApiClient(request);
-  const post = await api.get<PostDetail>(`/posts/${postId}`).catch(throwApiErrorResponse);
+  const [post, comments] = await Promise.all([
+    api.get<PostDetail>(`/posts/${postId}`).catch(throwApiErrorResponse),
+    api.get<Comment[]>(`/posts/${postId}/comments`).catch(() => null),
+  ]);
   if (post.blogHandle !== params.handle) {
     throw data(null, { status: 404 });
   }
@@ -46,7 +54,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     // contentMarkdown은 주인에게만 온다(contracts/api.md). 원문은 화면에 넘기지 않는다.
     isOwner: contentMarkdown !== null,
     origin: publicOrigin(request),
+    comments,
   };
+}
+
+/** 댓글 쓰기·답글·수정·삭제(US3). 로그인이 필요하면 이 글로 돌아오는 로그인 화면으로 보낸다. */
+export async function action({ request, params }: Route.ActionArgs) {
+  const postId = parsePostId(params.postId);
+  if (!isValidHandle(params.handle) || postId === null) {
+    throw data(null, { status: 404 });
+  }
+  return runCommentAction(request, { postId, returnTo: `/${params.handle}/${postId}` });
 }
 
 export function meta({ loaderData, matches }: Route.MetaArgs) {
@@ -70,7 +88,8 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 export default function PostDetailPage() {
   const { t } = useTranslation();
   const format = useDateFormat();
-  const { post, isOwner } = useLoaderData<typeof loader>();
+  const { post, isOwner, comments } = useLoaderData<typeof loader>();
+  const result = useActionData<CommentActionData>();
   const handle = post.blogHandle;
 
   return (
@@ -138,6 +157,14 @@ export default function PostDetailPage() {
           )}
         </nav>
       )}
+      <CommentSection
+        comments={comments}
+        commentCount={post.commentCount}
+        commentEnabled={post.commentEnabled && post.status === "PUBLISHED"}
+        isPostOwner={isOwner}
+        loginHref={loginPath(`/${handle}/${post.id}`)}
+        result={result}
+      />
     </main>
   );
 }

@@ -43,5 +43,8 @@
   "CATEGORY_NAME_TAKEN": "同じ場所に同じ名前のカテゴリがすでにあります。",
   "CATEGORY_DEPTH_EXCEEDED": "カテゴリは2階層までしか作れません。",
   "TAG_LIMIT_EXCEEDED": "タグは1つの記事に10個まで付けられます。",
-  "PASSWORD_RESET_TOKEN_INVALID": "再設定リンクの有効期限が切れたか、すでに使用されています。もう一度リクエストしてください。"
+  "PASSWORD_RESET_TOKEN_INVALID": "再設定リンクの有効期限が切れたか、すでに使用されています。もう一度リクエストしてください。",
+  "COMMENT_NOT_FOUND": "コメントが見つかりません。",
+  "REPLY_DEPTH_EXCEEDED": "返信にさらに返信することはできません。",
+  "COMMENTS_DISABLED": "この記事にはコメントできません。"
 }

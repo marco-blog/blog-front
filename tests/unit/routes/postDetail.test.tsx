@@ -2,12 +2,20 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import PostDetailRoute, { links, loader, meta } from "~/routes/post-detail";
+import PostDetailRoute, { action, links, loader, meta } from "~/routes/post-detail";
 
 import { fail, mockBackend, ok } from "../support/backend";
 import { postDetail, postWithoutMarkdown } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
-import { caught, getRequest, routeArgs, statusOf } from "../support/route";
+import {
+  asData,
+  caught,
+  expectRedirect,
+  formRequest,
+  getRequest,
+  routeArgs,
+  statusOf,
+} from "../support/route";
 
 type LoaderArgs = Parameters<typeof loader>[0];
 type MetaArgs = Parameters<typeof meta>[0];
@@ -15,6 +23,7 @@ type LoaderData = Awaited<ReturnType<typeof loader>>;
 
 const POST = "GET /api/v1/posts/123";
 const VIEWS = "POST /api/v1/posts/123/views";
+const COMMENTS = "GET /api/v1/posts/123/comments";
 
 const callLoader = (handle: string, postId: string, headers: Record<string, string> = {}) =>
   loader(routeArgs<LoaderArgs>(getRequest(`/${handle}/${postId}`, headers), { handle, postId }));
@@ -33,6 +42,35 @@ describe("post detail loader", () => {
     expect(backend.callsTo(VIEWS)[0].headers.get("cookie")).toBe("visitor_id=v1");
     // 브라우저가 보낸 Origin이 없는 서버 요청이라 front 자기 출처를 싣는다(backend Origin 검사).
     expect(backend.callsTo(VIEWS)[0].headers.get("origin")).toBe("http://front.test");
+  });
+
+  it("댓글을 글과 함께 읽고, 댓글을 읽지 못해도 글은 보여준다(null)", async () => {
+    const comments = [
+      {
+        id: 1,
+        content: "좋은 글",
+        author: { userId: 2, nickname: "작성자", profileImageUrl: null },
+        deleted: false,
+        createdAt: "2026-10-06T05:00:00Z",
+        updatedAt: "2026-10-06T05:00:00Z",
+        replies: [],
+      },
+    ];
+    const backend = mockBackend({
+      [POST]: ok(postDetail),
+      [VIEWS]: ok(null),
+      [COMMENTS]: ok(comments),
+    });
+
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({ comments });
+    expect(backend.callsTo(COMMENTS)).toHaveLength(1);
+
+    mockBackend({
+      [POST]: ok(postDetail),
+      [VIEWS]: ok(null),
+      [COMMENTS]: fail(500, "INTERNAL_ERROR"),
+    });
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({ comments: null });
   });
 
   it("조회수 기록이 실패해도 글은 보여준다", async () => {
@@ -93,6 +131,7 @@ describe("post detail meta", () => {
       post: { ...post, ...overrides },
       isOwner: false,
       origin: "https://blog.java21.net",
+      comments: [],
     };
   };
   const metaArgs = (loaderData: LoaderData | undefined) =>
@@ -156,7 +195,7 @@ describe("post detail 화면", () => {
 
   const loaded = (overrides: Partial<LoaderData> = {}): LoaderData => {
     const post = postWithoutMarkdown();
-    return { post, isOwner: false, origin: "http://front.test", ...overrides };
+    return { post, isOwner: false, origin: "http://front.test", comments: [], ...overrides };
   };
 
   it("제목·본문·작성자·작성일·카테고리·태그·조회수, 이전 글 링크", async () => {
@@ -217,5 +256,166 @@ describe("post detail 화면", () => {
     expect(screen.getByText("임시저장")).toBeInTheDocument();
     expect(screen.getByText("비공개")).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "이전·다음 글" })).toBeNull();
+  });
+});
+
+describe("post detail action(댓글)", () => {
+  type ActionArgs = Parameters<typeof action>[0];
+  const COMMENT_POST = "POST /api/v1/posts/123/comments";
+  const callAction = (fields: Record<string, string>, handle = "marco", postId = "123") =>
+    action(
+      routeArgs<ActionArgs>(
+        formRequest(`/${handle}/${postId}`, fields, { cookie: "access_token=a" }),
+        {
+          handle,
+          postId,
+        },
+      ),
+    );
+
+  it("댓글·답글 쓰기는 POST /posts/{id}/comments", async () => {
+    const backend = mockBackend({ [COMMENT_POST]: ok({ id: 1 }, { status: 201 }) });
+
+    const created = asData(await callAction({ intent: "create", target: "new", content: "안녕" }));
+    const reply = asData(
+      await callAction({ intent: "create", target: "reply-7", parentId: "7", content: "답" }),
+    );
+
+    expect(created.data).toEqual({ intent: "create", target: "new", ok: true });
+    expect(reply.data).toEqual({ intent: "create", target: "reply-7", ok: true });
+    expect(backend.callsTo(COMMENT_POST).map((call) => call.body)).toEqual([
+      { content: "안녕", parentId: null },
+      { content: "답", parentId: 7 },
+    ]);
+  });
+
+  it("수정은 PATCH, 삭제는 DELETE /comments/{id}", async () => {
+    const backend = mockBackend({
+      "PATCH /api/v1/comments/5": ok({ id: 5 }),
+      "DELETE /api/v1/comments/5": ok(null),
+    });
+
+    await callAction({ intent: "edit", target: "edit-5", commentId: "5", content: "고침" });
+    await callAction({ intent: "delete", target: "delete-5", commentId: "5" });
+
+    expect(backend.callsTo("PATCH /api/v1/comments/5")[0].body).toEqual({ content: "고침" });
+    expect(backend.callsTo("DELETE /api/v1/comments/5")).toHaveLength(1);
+  });
+
+  it("빈 내용·1000자 초과는 backend를 부르지 않고 필드 오류", async () => {
+    const backend = mockBackend();
+
+    const blank = asData<{ fieldErrors: unknown[] }>(
+      await callAction({ intent: "create", target: "new", content: "   " }),
+    );
+    const long = asData<{ fieldErrors: unknown[] }>(
+      await callAction({
+        intent: "edit",
+        target: "edit-5",
+        commentId: "5",
+        content: "가".repeat(1001),
+      }),
+    );
+
+    expect(blank.init?.status).toBe(400);
+    expect(blank.data.fieldErrors).toEqual([{ field: "content", code: "REQUIRED" }]);
+    expect(long.data.fieldErrors).toEqual([
+      { field: "content", code: "TOO_LONG", params: { max: 1000 } },
+    ]);
+    expect(backend.calls).toHaveLength(0);
+  });
+
+  it("잘못된 요청(모르는 작업, 숫자가 아닌 id, 이상한 target)은 400", async () => {
+    mockBackend();
+
+    const cases: Record<string, string>[] = [
+      { intent: "hack", target: "new" },
+      { intent: "delete", target: "delete-x", commentId: "x" },
+      { intent: "create", target: "<script>", parentId: "abc", content: "a" },
+    ];
+    for (const fields of cases) {
+      const result = asData<{ target: string }>(await callAction(fields));
+      expect(result.init?.status).toBe(400);
+      expect(result.data.target).toBe("new");
+    }
+  });
+
+  it("backend 오류(COMMENTS_DISABLED·REPLY_DEPTH_EXCEEDED)는 상태 코드와 함께 폼에", async () => {
+    mockBackend({ [COMMENT_POST]: fail(422, "REPLY_DEPTH_EXCEEDED") });
+
+    const result = asData(
+      await callAction({ intent: "create", target: "reply-2", parentId: "2", content: "답" }),
+    );
+
+    expect(result.init?.status).toBe(422);
+    expect(result.data).toMatchObject({
+      ok: false,
+      resultCode: "REPLY_DEPTH_EXCEEDED",
+      target: "reply-2",
+    });
+  });
+
+  it("로그인이 풀렸으면(401) 이 글로 돌아오는 로그인 화면으로", async () => {
+    mockBackend({
+      [COMMENT_POST]: fail(401, "UNAUTHENTICATED"),
+      "POST /api/v1/auth/refresh": fail(401, "REFRESH_INVALID"),
+    });
+
+    const location = expectRedirect(
+      await caught(callAction({ intent: "create", target: "new", content: "안녕" })),
+    );
+
+    expect(location).toBe("/login?next=%2Fmarco%2F123");
+  });
+
+  it("글 주소가 잘못되면 404", async () => {
+    mockBackend();
+    expect(statusOf(await caught(callAction({ intent: "delete" }, "marco", "abc")))).toBe(404);
+  });
+});
+
+describe("post detail 화면의 댓글", () => {
+  it("글 아래에 댓글 목록과, 비로그인에게 로그인 안내", async () => {
+    const data: LoaderData = {
+      post: postWithoutMarkdown(),
+      isOwner: false,
+      origin: "http://front.test",
+      comments: [
+        {
+          id: 1,
+          content: "첫 댓글",
+          author: { userId: 2, nickname: "작성자", profileImageUrl: null },
+          deleted: false,
+          createdAt: "2026-10-06T05:00:00Z",
+          updatedAt: "2026-10-06T05:00:00Z",
+          replies: [],
+        },
+      ],
+    };
+    renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
+      initialEntries: ["/marco/123"],
+    });
+
+    expect(await screen.findByRole("heading", { name: "댓글 2" })).toBeInTheDocument();
+    expect(screen.getByText("첫 댓글")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "댓글을 쓰려면 로그인하세요" })).toHaveAttribute(
+      "href",
+      "/login?next=%2Fmarco%2F123",
+    );
+  });
+
+  it("발행 전 글(주인 미리보기)이나 댓글이 막힌 글은 쓰기 폼 대신 안내", async () => {
+    const data: LoaderData = {
+      post: { ...postWithoutMarkdown(), status: "DRAFT", commentEnabled: true },
+      isOwner: true,
+      origin: "http://front.test",
+      comments: [],
+    };
+    renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
+      initialEntries: ["/marco/123"],
+      user: { userId: 1, nickname: "마르코", role: "USER" },
+    });
+
+    expect(await screen.findByRole("note")).toHaveTextContent("이 글에는 댓글을 쓸 수 없습니다.");
   });
 });

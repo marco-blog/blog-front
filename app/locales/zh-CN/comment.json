@@ -1,0 +1,27 @@
+{
+  "title": "评论",
+  "count": "评论 {{comments}}",
+  "list": "评论列表",
+  "empty": "还没有评论。",
+  "loadFailed": "无法加载评论。",
+  "loginToWrite": "登录后即可发表评论",
+  "disabled": "此文章已关闭评论。",
+  "form": {
+    "content": "评论内容",
+    "submit": "发表评论",
+    "replyContent": "回复内容",
+    "replySubmit": "发表回复",
+    "editContent": "修改内容",
+    "editSubmit": "保存修改",
+    "maxLength": "最多可输入 {{max}} 个字。"
+  },
+  "reply": "回复",
+  "edit": "修改",
+  "delete": "删除",
+  "deleteConfirm": "要删除这条评论吗？",
+  "deleted": "该评论已删除。",
+  "edited": "已修改",
+  "replies": "回复",
+  "author": "作者",
+  "unknownAuthor": "未知作者"
+}

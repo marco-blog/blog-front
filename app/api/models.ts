@@ -162,11 +162,41 @@ export interface LoginHistoryItem {
   device: string | null;
 }
 
-/** 대시보드 최근 댓글(Comment + { postId, postTitle }). 댓글은 US3에서 채운다. */
-export interface ManageRecentComment {
+/** 댓글 작성자. 프로필 이미지는 US4 전까지 null */
+export interface CommentAuthor {
+  userId: number;
+  nickname: string;
+  profileImageUrl: string | null;
+}
+
+/**
+ * GET /posts/{postId}/comments 한 줄(contracts/api.md `Comment`). 답글이 남은 채 삭제된 댓글은
+ * `deleted: true`, `content: null`, `author: null`. 답글은 replies에 작성순(답글의 replies는 늘 빈 배열).
+ */
+export interface Comment {
   id: number;
   content: string | null;
-  author: { userId: number; nickname: string; profileImageUrl: string | null };
+  author: CommentAuthor | null;
+  deleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  replies: Comment[];
+}
+
+/** POST /posts/{postId}/comments, PATCH /comments/{id}. 내용은 일반 텍스트 1~1000자 */
+export interface CommentWrite {
+  content: string;
+  parentId?: number | null;
+}
+
+/** 댓글 내용 최대 길이(backend `Comment.CONTENT_MAX`) */
+export const COMMENT_MAX_LENGTH = 1000;
+
+/** 블로그 관리 댓글 목록·대시보드 최근 댓글(Comment + { postId, postTitle }) */
+export interface ManageComment {
+  id: number;
+  content: string | null;
+  author: CommentAuthor | null;
   deleted: boolean;
   createdAt: string;
   updatedAt: string;
@@ -179,7 +209,7 @@ export interface ManageDashboard {
   draftCount: number;
   recentPosts: PostSummary[];
   newComments7d: number;
-  recentComments: ManageRecentComment[];
+  recentComments: ManageComment[];
 }
 
 /** POST /blogs/{handle}/manage/posts/bulk. `MOVE_CATEGORY`의 categoryId가 null이면 미분류로 옮긴다. */

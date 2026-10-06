@@ -1,0 +1,27 @@
+{
+  "title": "Comments",
+  "count": "Comments {{comments}}",
+  "list": "Comment list",
+  "empty": "No comments yet.",
+  "loadFailed": "Could not load the comments.",
+  "loginToWrite": "Log in to write a comment",
+  "disabled": "Comments are closed for this post.",
+  "form": {
+    "content": "Comment",
+    "submit": "Post comment",
+    "replyContent": "Reply",
+    "replySubmit": "Post reply",
+    "editContent": "Edit comment",
+    "editSubmit": "Save",
+    "maxLength": "Up to {{max}} characters."
+  },
+  "reply": "Reply",
+  "edit": "Edit",
+  "delete": "Delete",
+  "deleteConfirm": "Delete this comment?",
+  "deleted": "This comment has been deleted.",
+  "edited": "edited",
+  "replies": "Replies",
+  "author": "Author",
+  "unknownAuthor": "Unknown author"
+}

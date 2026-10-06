@@ -43,5 +43,8 @@
   "CATEGORY_NAME_TAKEN": "A category with the same name already exists here.",
   "CATEGORY_DEPTH_EXCEEDED": "Categories can only be two levels deep.",
   "TAG_LIMIT_EXCEEDED": "A post can have up to 10 tags.",
-  "PASSWORD_RESET_TOKEN_INVALID": "This reset link has expired or has already been used. Please request a new one."
+  "PASSWORD_RESET_TOKEN_INVALID": "This reset link has expired or has already been used. Please request a new one.",
+  "COMMENT_NOT_FOUND": "The comment could not be found.",
+  "REPLY_DEPTH_EXCEEDED": "You cannot reply to a reply.",
+  "COMMENTS_DISABLED": "Comments are closed for this post."
 }

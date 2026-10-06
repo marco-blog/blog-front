@@ -24,7 +24,8 @@
     "noPosts": "还没有文章。",
     "noComments": "还没有评论。",
     "commentOn": "评论于 {{title}}",
-    "deletedComment": "已删除的评论"
+    "deletedComment": "已删除的评论",
+    "allComments": "查看全部评论"
   },
   "status": {
     "DRAFT": "草稿",
@@ -89,5 +90,14 @@
     "commentHint": "关闭后，此博客的所有文章都无法添加新评论。",
     "submit": "保存",
     "saved": "博客设置已保存。"
+  },
+  "comments": {
+    "title": "评论管理",
+    "list": "评论列表",
+    "empty": "还没有评论。",
+    "on": "评论于 {{title}}",
+    "delete": "删除",
+    "deleteConfirm": "要删除这条评论吗？",
+    "deleted": "评论已删除。"
   }
 }

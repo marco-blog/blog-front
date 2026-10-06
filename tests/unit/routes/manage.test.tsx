@@ -473,7 +473,7 @@ describe("블로그 관리 화면", () => {
     return backend;
   }
 
-  it("레이아웃: 001 메뉴(만든 화면만), 블로그 전환은 다른 블로그의 같은 메뉴로", async () => {
+  it("레이아웃: 001 메뉴(만든 화면만, 댓글은 US3), 블로그 전환은 다른 블로그의 같은 메뉴로", async () => {
     renderManage("/marco/manage/posts", { [POSTS]: ok([], { totalCount: 0 }) });
 
     const menu = await screen.findByRole("navigation", { name: "블로그 관리 메뉴" });
@@ -481,7 +481,7 @@ describe("블로그 관리 화면", () => {
       within(menu)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["대시보드", "글 관리", "카테고리", "블로그 설정"]);
+    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "블로그 설정"]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
       "/marco/manage/categories",
@@ -567,7 +567,11 @@ describe("블로그 관리 화면", () => {
     expect(screen.getByText("2개")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "발행한 글에 남긴 댓글" })[0]).toHaveAttribute(
       "href",
-      "/marco/3",
+      "/marco/3#comment-1",
+    );
+    expect(screen.getByRole("link", { name: "댓글 모두 보기" })).toHaveAttribute(
+      "href",
+      "/marco/manage/comments",
     );
     expect(screen.getByText("아직 글이 없습니다.")).toBeInTheDocument();
   });
