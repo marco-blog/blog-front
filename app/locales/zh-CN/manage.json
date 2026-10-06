@@ -1,0 +1,89 @@
+{
+  "title": "博客管理",
+  "nav": {
+    "label": "博客管理菜单",
+    "dashboard": "仪表盘",
+    "posts": "文章管理",
+    "categories": "分类",
+    "comments": "评论",
+    "settings": "博客设置"
+  },
+  "switcher": {
+    "label": "切换博客"
+  },
+  "viewBlog": "查看博客",
+  "write": "写文章",
+  "dashboard": {
+    "title": "仪表盘",
+    "drafts": "草稿",
+    "draftCount": "{{drafts}} 篇",
+    "newComments": "最近 7 天的新评论",
+    "commentCount": "{{comments}} 条",
+    "recentPosts": "最近的文章",
+    "recentComments": "最近的评论",
+    "noPosts": "还没有文章。",
+    "noComments": "还没有评论。",
+    "commentOn": "评论于 {{title}}",
+    "deletedComment": "已删除的评论"
+  },
+  "status": {
+    "DRAFT": "草稿",
+    "PUBLISHED": "已发布",
+    "DELETED": "回收站"
+  },
+  "visibility": {
+    "PUBLIC": "公开",
+    "PRIVATE": "私密"
+  },
+  "posts": {
+    "title": "文章管理",
+    "trashTitle": "回收站",
+    "views": {
+      "label": "文章视图",
+      "all": "全部文章",
+      "trash": "回收站"
+    },
+    "filter": {
+      "label": "查找文章",
+      "status": "状态",
+      "visibility": "可见范围",
+      "category": "分类",
+      "all": "全部",
+      "query": "搜索标题",
+      "submit": "查找"
+    },
+    "list": "文章列表",
+    "empty": "没有符合条件的文章。",
+    "trashEmpty": "回收站是空的。",
+    "trashHint": "回收站中的文章在删除 30 天后将被永久删除。",
+    "select": "选择 {{title}}",
+    "selectAll": "全选",
+    "untitled": "(无标题)",
+    "bulk": {
+      "label": "对所选文章",
+      "makePublic": "设为公开",
+      "makePrivate": "设为私密",
+      "delete": "移到回收站",
+      "noneSelected": "请先选择文章。",
+      "done": "已更改 {{updated}} 篇文章。"
+    },
+    "edit": "编辑",
+    "continue": "继续写作",
+    "hasDraft": "有未发布的修改",
+    "publishedAt": "发布于 {{date}}",
+    "updatedAt": "更新于 {{date}}",
+    "deletedAt": "删除于 {{date}}",
+    "purgeAt": "将于 {{date}} 永久删除",
+    "restore": "恢复",
+    "restored": "文章已恢复。"
+  },
+  "settings": {
+    "title": "博客设置",
+    "blogTitle": "博客标题",
+    "description": "博客简介",
+    "commentEnabled": "允许在此博客发表评论",
+    "commentHint": "关闭后，此博客的所有文章都无法添加新评论。",
+    "submit": "保存",
+    "saved": "博客设置已保存。"
+  }
+}
