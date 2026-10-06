@@ -23,3 +23,11 @@ export function publicOrigin(request: Request, env: NodeJS.ProcessEnv = process.
   }
   return new URL(request.url).origin;
 }
+
+/**
+ * Kakao JavaScript 키(002 research D9). 카카오톡 공유 버튼은 이 값이 있을 때만 보인다.
+ * 환경 변수 BLOG_KAKAO_JS_KEY가 없거나 비었으면 null.
+ */
+export function kakaoJsKey(env: NodeJS.ProcessEnv = process.env): string | null {
+  return env.BLOG_KAKAO_JS_KEY?.trim() || null;
+}

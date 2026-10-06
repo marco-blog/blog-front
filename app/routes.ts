@@ -27,6 +27,8 @@ export default [
     route("language", "routes/settings.language.tsx"),
   ]),
   route("tags/:name", "routes/tag.tsx"),
+  route("feed", "routes/feed.tsx"),
+  route("notifications", "routes/notifications.tsx"),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
   route(":handle", "routes/blog-home.tsx"),

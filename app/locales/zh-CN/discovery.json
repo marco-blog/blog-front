@@ -1,0 +1,20 @@
+{
+  "like": {
+    "like": "点赞",
+    "unlike": "取消点赞",
+    "count": "点赞 {{count, number}}",
+    "loginToLike": "登录后点赞"
+  },
+  "subscribe": {
+    "subscribe": "订阅",
+    "unsubscribe": "已订阅(取消)",
+    "count": "订阅者 {{count, number}}",
+    "loginToSubscribe": "登录后订阅"
+  },
+  "feed": {
+    "title": "订阅动态",
+    "label": "已订阅博客的新文章",
+    "empty": "已订阅的博客还没有文章。去订阅喜欢的博客吧。",
+    "blog": "博客"
+  }
+}

@@ -22,7 +22,10 @@
     "write": "글쓰기",
     "manage": "내 블로그 관리",
     "settings": "설정",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "feed": "구독 피드",
+    "notifications": "알림",
+    "unreadNotifications": "안 읽은 알림 {{count}}개"
   },
   "footer": {
     "label": "사이트 정보",

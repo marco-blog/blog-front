@@ -1,0 +1,20 @@
+{
+  "like": {
+    "like": "いいね",
+    "unlike": "いいねを取り消す",
+    "count": "いいね {{count, number}}",
+    "loginToLike": "ログインしていいねする"
+  },
+  "subscribe": {
+    "subscribe": "購読",
+    "unsubscribe": "購読中(解除)",
+    "count": "購読者 {{count, number}}人",
+    "loginToSubscribe": "ログインして購読する"
+  },
+  "feed": {
+    "title": "購読フィード",
+    "label": "購読しているブログの新着記事",
+    "empty": "購読しているブログの記事はまだありません。気に入ったブログを購読してみましょう。",
+    "blog": "ブログ"
+  }
+}

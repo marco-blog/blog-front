@@ -1,18 +1,29 @@
 import { useTranslation } from "react-i18next";
-import { data, useLoaderData } from "react-router";
+import {
+  data,
+  useActionData,
+  useLoaderData,
+  useRouteLoaderData,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
 import type { Blog, PostSummary } from "~/api/models";
+import { loginPath } from "~/auth/paths";
 import { isValidHandle } from "~/blog/ids";
 import { parsePage, POST_PAGE_SIZE, withPage } from "~/blog/listing";
 import { Pagination } from "~/components/Pagination";
 import { CategoryTree } from "~/components/blog/CategoryTree";
+import { SubscribeButton } from "~/components/blog/SubscribeButton";
 import { Avatar } from "~/components/media/Avatar";
 import { PostList } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
+import { formIntent, isSubscribeIntent, type SubscribeActionData } from "~/discovery/actions";
+import { runSubscribeAction } from "~/discovery/actions.server";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl, thumbnailImage } from "~/media/thumbnail";
+import type { RootData } from "~/root";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/blog-home";
@@ -49,6 +60,30 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
+/** 구독·구독 취소(`intent=subscribe|unsubscribe`, 002 FR-031). 로그인이 필요하면 이 블로그로 돌아오는 로그인 화면으로. */
+export async function action({ request, params }: Route.ActionArgs) {
+  const { handle } = params;
+  if (!isValidHandle(handle)) {
+    throw data(null, { status: 404 });
+  }
+  const intent = await formIntent(request);
+  if (!isSubscribeIntent(intent)) {
+    throw data(null, { status: 400 });
+  }
+  return runSubscribeAction(request, intent, { handle, returnTo: `/${handle}` });
+}
+
+/** 구독은 응답의 수로 화면을 고치므로 블로그·글 목록을 다시 읽지 않는다. */
+export function shouldRevalidate({
+  formData,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (isSubscribeIntent(formData?.get("intent"))) {
+    return false;
+  }
+  return defaultShouldRevalidate;
+}
+
 export function meta({ loaderData, matches }: Route.MetaArgs) {
   const t = metaT(matches);
   if (!loaderData) {
@@ -67,6 +102,8 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 export default function BlogHome() {
   const { t } = useTranslation();
   const { blog, posts, totalCount, page, pageSize } = useLoaderData<typeof loader>();
+  const result = useActionData<SubscribeActionData>();
+  const viewer = useRouteLoaderData<RootData>("root")?.user ?? null;
   return (
     <main className="blog-home">
       <header>
@@ -79,6 +116,13 @@ export default function BlogHome() {
           <Avatar url={blog.owner.profileImageUrl} size="avatar" />{" "}
           {t("post:blog.owner", { nickname: blog.owner.nickname })}
         </p>
+        <SubscribeButton
+          subscribed={blog.subscribedByMe === true}
+          subscriberCount={blog.subscriberCount}
+          isOwnBlog={viewer?.blogs?.includes(blog.handle) ?? false}
+          loginHref={viewer ? null : loginPath(`/${blog.handle}`)}
+          result={result}
+        />
       </header>
       <CategoryTree handle={blog.handle} categories={blog.categories} />
       <PostList handle={blog.handle} posts={posts} />

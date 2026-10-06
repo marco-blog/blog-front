@@ -3,7 +3,8 @@ import { UNKNOWN_ERROR_CODE, UNKNOWN_FIELD_ERROR_CODE } from "./errorMessage";
 
 /**
  * 화면 문구가 있어야 하는 오류 코드 목록(FR-154, SC-024). 문구는 4개 언어 `errors.json`의 `{code}` 키다.
- * - backend `resultCode`: contracts/api.md "오류 코드" 표의 001 코드 + 공통 처리 코드(backend `ErrorCode`).
+ * - backend `resultCode`: contracts/api.md "오류 코드" 표의 001 코드 + 002 코드(NOTIFICATION_NOT_FOUND,
+ *   CANNOT_SUBSCRIBE_OWN_BLOG) + 공통 처리 코드(backend `ErrorCode`).
  *   003·006 전용 코드(RELEASE_NOTE_*)는 해당 스펙을 구현할 때 더한다(tasks.md "구현 전 결정 사항" 8번).
  * - front가 정하는 코드(BACKEND_UNAVAILABLE 등)와 모르는 코드용 UNKNOWN
  * 새 코드를 쓰면 여기와 4개 언어 errors.json에 같은 PR에서 넣는다(tests/unit/i18n/errorCodes.test.ts).
@@ -28,6 +29,7 @@ export const API_ERROR_CODES = [
   "CATEGORY_NOT_FOUND",
   "COMMENT_NOT_FOUND",
   "MEDIA_NOT_FOUND",
+  "NOTIFICATION_NOT_FOUND",
   "NOT_FOUND",
   // 409
   "EMAIL_TAKEN",
@@ -49,6 +51,7 @@ export const API_ERROR_CODES = [
   "POST_NOT_IN_TRASH",
   "POST_CONTENT_EMPTY",
   "TERMS_VERSION_OUTDATED",
+  "CANNOT_SUBSCRIBE_OWN_BLOG",
   // 423, 429
   "ACCOUNT_LOCKED",
   "MEDIA_TEMP_QUOTA_EXCEEDED",

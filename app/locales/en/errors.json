@@ -51,5 +51,7 @@
   "MEDIA_TOO_LARGE": "Images must be 10 MB or smaller.",
   "MEDIA_TYPE_NOT_ALLOWED": "Only JPEG, PNG, GIF and WebP images can be uploaded.",
   "MEDIA_TEMP_QUOTA_EXCEEDED": "You have too many unsaved images. Save your post and try again.",
-  "THUMBNAIL_SIZE_NOT_ALLOWED": "This image size isn't supported."
+  "THUMBNAIL_SIZE_NOT_ALLOWED": "This image size isn't supported.",
+  "NOTIFICATION_NOT_FOUND": "Notification not found.",
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "You can't subscribe to your own blog."
 }

@@ -22,7 +22,10 @@
     "write": "写文章",
     "manage": "管理我的博客",
     "settings": "设置",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "feed": "订阅动态",
+    "notifications": "通知",
+    "unreadNotifications": "{{count}} 条未读通知"
   },
   "footer": {
     "label": "网站信息",

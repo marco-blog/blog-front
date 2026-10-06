@@ -51,5 +51,7 @@
   "MEDIA_TOO_LARGE": "画像は10MB以下のみアップロードできます。",
   "MEDIA_TYPE_NOT_ALLOWED": "JPEG、PNG、GIF、WebPの画像のみアップロードできます。",
   "MEDIA_TEMP_QUOTA_EXCEEDED": "保存していない画像が多すぎます。記事を保存してからもう一度アップロードしてください。",
-  "THUMBNAIL_SIZE_NOT_ALLOWED": "対応していない画像サイズです。"
+  "THUMBNAIL_SIZE_NOT_ALLOWED": "対応していない画像サイズです。",
+  "NOTIFICATION_NOT_FOUND": "お知らせが見つかりません。",
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "自分のブログは購読できません。"
 }

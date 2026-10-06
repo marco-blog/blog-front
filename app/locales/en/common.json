@@ -22,7 +22,10 @@
     "write": "Write",
     "manage": "Manage my blog",
     "settings": "Settings",
-    "logout": "Log out"
+    "logout": "Log out",
+    "feed": "Feed",
+    "notifications": "Notifications",
+    "unreadNotifications": "{{count}} unread notifications"
   },
   "footer": {
     "label": "Site information",

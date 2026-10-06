@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
-import type { PostSummary } from "~/api/models";
+import type { BlogRef, PostSummary } from "~/api/models";
 import { categoryHref } from "~/components/blog/CategoryTree";
 import { useDateFormat } from "~/i18n/format";
 import { thumbnailImage } from "~/media/thumbnail";
@@ -17,9 +17,10 @@ export function tagHref(tag: string): string {
 }
 
 export interface PostListProps {
-  /** 글마다 blogHandle이 있으면(서비스 전체 태그 목록) 그 값을 쓴다. */
+  /** 글마다 blogHandle이나 blog가 있으면(서비스 전체 태그 목록, 구독 피드) 그 값을 쓴다. */
   handle?: string;
-  posts: (PostSummary & { blogHandle?: string })[];
+  /** `blog`가 있으면 글 위에 블로그 이름(블로그 홈 링크)을 보여준다(002 구독 피드). */
+  posts: (PostSummary & { blogHandle?: string; blog?: BlogRef })[];
   /** 태그 링크: 블로그 안(기본) 또는 서비스 전체 */
   tagScope?: "blog" | "global";
   /** 빈 목록 문구 */
@@ -36,10 +37,15 @@ export function PostList({ handle, posts, tagScope = "blog", emptyText }: PostLi
   return (
     <ul className="post-list" aria-label={t("post:list.label")}>
       {posts.map((post) => {
-        const blogHandle = post.blogHandle ?? handle ?? "";
+        const blogHandle = post.blog?.handle ?? post.blogHandle ?? handle ?? "";
         return (
           <li key={post.id}>
             <article>
+              {post.blog && (
+                <p className="post-blog">
+                  <Link to={`/${post.blog.handle}`}>{post.blog.title}</Link>
+                </p>
+              )}
               <h2>
                 <Link to={`/${blogHandle}/${post.id}`}>{post.title}</Link>
               </h2>

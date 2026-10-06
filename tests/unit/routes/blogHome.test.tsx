@@ -2,12 +2,20 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import BlogHome, { loader, meta } from "~/routes/blog-home";
+import BlogHome, { action, loader, meta, shouldRevalidate } from "~/routes/blog-home";
 
 import { fail, mockBackend, ok } from "../support/backend";
 import { blog, postSummary } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
-import { caught, getRequest, routeArgs, statusOf } from "../support/route";
+import {
+  asData,
+  caught,
+  expectRedirect,
+  formRequest,
+  getRequest,
+  routeArgs,
+  statusOf,
+} from "../support/route";
 
 type LoaderArgs = Parameters<typeof loader>[0];
 type MetaArgs = Parameters<typeof meta>[0];
@@ -238,5 +246,125 @@ describe("blog home 화면", () => {
 
     expect(await screen.findByText("아직 발행한 글이 없습니다.")).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "카테고리" })).toBeNull();
+  });
+});
+
+describe("blog home 구독(002 T028)", () => {
+  type ActionArgs = Parameters<typeof action>[0];
+  const SUBSCRIBE = "PUT /api/v1/me/subscriptions/marco";
+  const UNSUBSCRIBE = "DELETE /api/v1/me/subscriptions/marco";
+  const callAction = (
+    fields: Record<string, string>,
+    handle = "marco",
+    headers = { cookie: "access_token=a" },
+  ) => action(routeArgs<ActionArgs>(formRequest(`/${handle}`, fields, headers), { handle }));
+
+  it("intent=subscribe는 PUT, unsubscribe는 DELETE /me/subscriptions/{handle}", async () => {
+    const backend = mockBackend({
+      [SUBSCRIBE]: ok({ handle: "marco", subscribed: true, subscriberCount: 4 }),
+      [UNSUBSCRIBE]: ok({ handle: "marco", subscribed: false, subscriberCount: 3 }),
+    });
+
+    expect(asData(await callAction({ intent: "subscribe" })).data).toEqual({
+      intent: "subscribe",
+      ok: true,
+      subscribed: true,
+      subscriberCount: 4,
+    });
+    expect(asData(await callAction({ intent: "unsubscribe" })).data).toEqual({
+      intent: "unsubscribe",
+      ok: true,
+      subscribed: false,
+      subscriberCount: 3,
+    });
+    expect(backend.callsTo(SUBSCRIBE)).toHaveLength(1);
+    expect(backend.callsTo(UNSUBSCRIBE)).toHaveLength(1);
+  });
+
+  it("내 블로그(CANNOT_SUBSCRIBE_OWN_BLOG)는 422와 오류 코드", async () => {
+    mockBackend({ [SUBSCRIBE]: fail(422, "CANNOT_SUBSCRIBE_OWN_BLOG") });
+
+    const result = asData(await callAction({ intent: "subscribe" }));
+
+    expect(result.init?.status).toBe(422);
+    expect(result.data).toEqual({
+      intent: "subscribe",
+      ok: false,
+      resultCode: "CANNOT_SUBSCRIBE_OWN_BLOG",
+    });
+  });
+
+  it("비로그인(401)은 이 블로그로 돌아오는 로그인 화면으로", async () => {
+    mockBackend({ [SUBSCRIBE]: fail(401, "UNAUTHENTICATED") });
+
+    const location = expectRedirect(
+      await caught(callAction({ intent: "subscribe" }, "marco", { cookie: "" })),
+    );
+
+    expect(location).toBe("/login?next=%2Fmarco");
+  });
+
+  it("모르는 작업은 400, 잘못된 주소는 404(backend를 부르지 않음)", async () => {
+    const backend = mockBackend();
+
+    expect(statusOf(await caught(callAction({ intent: "hack" })))).toBe(400);
+    expect(statusOf(await caught(callAction({ intent: "subscribe" }, "Bad")))).toBe(404);
+    expect(backend.calls).toHaveLength(0);
+  });
+
+  it("구독 뒤에는 다시 읽지 않는다", () => {
+    const args = (intent: string | null) =>
+      ({
+        formData:
+          intent === null ? undefined : (new URLSearchParams({ intent }) as unknown as FormData),
+        defaultShouldRevalidate: true,
+      }) as Parameters<typeof shouldRevalidate>[0];
+
+    expect(shouldRevalidate(args("subscribe"))).toBe(false);
+    expect(shouldRevalidate(args(null))).toBe(true);
+  });
+
+  function renderHome(
+    user: { userId: number; nickname: string; role: string; blogs?: string[] } | null,
+    overrides: Partial<typeof blog> = {},
+  ) {
+    const data: LoaderData = {
+      blog: { ...blog, ...overrides },
+      posts: [],
+      totalCount: 0,
+      page: 1,
+      pageSize: 20,
+      origin: "http://front.test",
+    };
+    renderRoutes([{ path: ":handle", loader: () => data, Component: BlogHome }], {
+      initialEntries: ["/marco"],
+      user,
+    });
+  }
+
+  it("구독자 수와 구독 버튼(구독 중이면 취소)", async () => {
+    renderHome(
+      { userId: 2, nickname: "독자", role: "USER", blogs: ["reader"] },
+      { subscribedByMe: true, subscriberCount: 10 },
+    );
+
+    expect(await screen.findByRole("button", { name: "구독 중 (취소)" })).toBeInTheDocument();
+    expect(screen.getByText("구독자 10명")).toBeInTheDocument();
+  });
+
+  it("내 블로그는 버튼 없이 수만, 비로그인은 로그인 링크", async () => {
+    renderHome({ userId: 1, nickname: "마르코", role: "USER", blogs: ["marco"] });
+
+    expect(await screen.findByText("구독자 3명")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "구독" })).toBeNull();
+  });
+
+  it("비로그인은 로그인 링크", async () => {
+    renderHome(null);
+
+    expect(await screen.findByRole("link", { name: "로그인하고 구독하기" })).toHaveAttribute(
+      "href",
+      "/login?next=%2Fmarco",
+    );
   });
 });

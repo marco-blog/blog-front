@@ -42,6 +42,38 @@ describe("isBackendPath", () => {
   });
 });
 
+describe("isBackendPath — 002 피드·사이트맵(contracts/routes.md 프록시)", () => {
+  const backendPaths = [
+    "/marco/rss",
+    "/marco/atom",
+    "/marco/category/12/rss",
+    "/sitemap.xml",
+    "/sitemap/posts-1.xml",
+    "/robots.txt",
+  ];
+
+  it.each(
+    backendPaths.flatMap((path) => [
+      ["GET", path],
+      ["HEAD", path],
+    ]),
+  )("%s %s → backend", (method, path) => {
+    expect(isBackendPath(method, path)).toBe(true);
+  });
+
+  it.each([
+    ["GET", "/marco/rss/x"],
+    ["GET", "/marco/category/x/rss"],
+    ["POST", "/marco/rss"],
+    ["GET", "/search"],
+    ["GET", "/feed"],
+    ["GET", "/notifications"],
+    ["POST", "/notifications"],
+  ])("%s %s → front", (method, path) => {
+    expect(isBackendPath(method, path)).toBe(false);
+  });
+});
+
 interface Received {
   method?: string;
   url?: string;
