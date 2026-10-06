@@ -57,7 +57,9 @@ test.describe("US1 블로그 관리", () => {
     await expect(page.getByText("아직 발행한 글이 없습니다.")).toBeVisible();
   });
 
-  test("휴지통으로 옮긴 글을 복구하면 삭제 전 상태·공개 범위로 돌아온다 (#16)", async ({ page }) => {
+  test("휴지통으로 옮긴 글을 복구하면 삭제 전 상태·공개 범위로 돌아온다 (#16)", async ({
+    page,
+  }) => {
     await logIn(page, owner);
     await page.goto(`/${owner.handle}/manage/posts?status=PUBLISHED`);
     await page.getByLabel(`${titles[0]} 선택`).check();
@@ -99,10 +101,15 @@ test.describe("US1 블로그 관리", () => {
     expect((await page.goto(`/${owner.handle}/manage/posts`))?.status()).toBe(404);
     const api = await callApi(page.request, "GET", `/blogs/${owner.handle}/manage/dashboard`);
     expect(api.status).toBe(403);
-    const bulk = await callApi(page.request, "POST", `/blogs/${stranger.handle}/manage/posts/bulk`, {
-      postIds: [1],
-      action: "DELETE",
-    });
+    const bulk = await callApi(
+      page.request,
+      "POST",
+      `/blogs/${stranger.handle}/manage/posts/bulk`,
+      {
+        postIds: [1],
+        action: "DELETE",
+      },
+    );
     expect(bulk.status).toBe(403);
     await context.close();
   });
