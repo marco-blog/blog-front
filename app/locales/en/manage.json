@@ -65,7 +65,10 @@
       "makePrivate": "Make private",
       "delete": "Move to trash",
       "noneSelected": "Select posts first.",
-      "done": "Updated {{updated}} post(s)."
+      "done": "Updated {{updated}} post(s).",
+      "move": "Move to category",
+      "moveTarget": "Target category",
+      "moveSubmit": "Move"
     },
     "edit": "Edit",
     "continue": "Continue writing",
@@ -75,7 +78,8 @@
     "deletedAt": "Deleted {{date}}",
     "purgeAt": "Permanently deleted on {{date}}",
     "restore": "Restore",
-    "restored": "The post was restored."
+    "restored": "The post was restored.",
+    "category": "Category"
   },
   "settings": {
     "title": "Blog settings",

@@ -1,0 +1,17 @@
+{
+  "input": {
+    "label": "タグ",
+    "placeholder": "タグを入力して Enter",
+    "add": "追加",
+    "remove": "タグ {{tag}} を外す",
+    "hint": "最大 {{max}}個、各 {{maxLength}}文字まで。英字は小文字で保存されます。",
+    "limit": "タグは {{max}}個まで付けられます。",
+    "tooLong": "タグは {{maxLength}}文字まで入力できます。"
+  },
+  "page": {
+    "empty": "このタグが付いた公開記事はありません。"
+  },
+  "list": {
+    "label": "タグ"
+  }
+}

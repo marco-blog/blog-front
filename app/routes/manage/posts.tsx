@@ -41,6 +41,8 @@ const BULK_OPS = {
   PUBLIC: { action: "CHANGE_VISIBILITY", visibility: "PUBLIC" },
   PRIVATE: { action: "CHANGE_VISIBILITY", visibility: "PRIVATE" },
   DELETE: { action: "DELETE" },
+  /** 카테고리 옮기기. 대상은 폼의 `moveCategoryId`(비우면 미분류) */
+  MOVE: { action: "MOVE_CATEGORY" },
 } as const satisfies Record<string, Omit<BulkPostRequest, "postIds">>;
 type BulkOp = keyof typeof BULK_OPS;
 
@@ -104,7 +106,8 @@ export function meta({ matches, location }: Route.MetaArgs) {
 /**
  * 글 관리(`/:handle/manage/posts`, SSR, 006 FR-101)와 휴지통(`?status=DELETED`, FR-084).
  * 조건은 주소 쿼리 문자열 그대로 backend `GET /blogs/{handle}/manage/posts`에 넘기고(페이지만 0부터로 바꿈),
- * 카테고리 필터 목록은 블로그 정보(`GET /blogs/{handle}`)의 카테고리로 만든다(US2 전에는 비어 있어 숨김).
+ * 카테고리 필터·옮길 카테고리 목록은 블로그 정보(`GET /blogs/{handle}`)의 카테고리로 만든다(없으면 필터를 숨김).
+ * 상위 카테고리로 거르면 하위 카테고리 글도 나온다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
@@ -139,7 +142,7 @@ type PostsActionData =
   | (FormErrorData & { intent: string; ok: false; noSelection?: false });
 
 /**
- * 일괄 작업(`POST /blogs/{handle}/manage/posts/bulk`: 공개·비공개로 바꾸기, 휴지통으로)과
+ * 일괄 작업(`POST /blogs/{handle}/manage/posts/bulk`: 공개·비공개로 바꾸기, 휴지통으로, 카테고리 옮기기)과
  * 휴지통 복구(`POST /posts/{id}/restore`). 끝나면 loader가 목록을 다시 읽는다.
  */
 export async function action({ request, params }: Route.ActionArgs) {
@@ -164,9 +167,13 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (postIds.length === 0) {
       return data<PostsActionData>({ intent, ok: false, noSelection: true }, { status: 400 });
     }
+    const body: BulkPostRequest = { postIds, ...BULK_OPS[op as BulkOp] };
+    if (op === "MOVE") {
+      body.categoryId = parsePostId(String(form.get("moveCategoryId") ?? ""));
+    }
     try {
       const result = await api.post<BulkPostResult>(`/blogs/${handle}/manage/posts/bulk`, {
-        body: { postIds, ...BULK_OPS[op as BulkOp] } satisfies BulkPostRequest,
+        body,
       });
       return data<PostsActionData>({ intent, ok: true, updated: result.updated });
     } catch (error) {
@@ -224,7 +231,12 @@ export default function ManagePosts() {
       {trash ? (
         <TrashList posts={posts} />
       ) : (
-        <BulkList key={posts.map((post) => post.id).join(",")} handle={handle} posts={posts} />
+        <BulkList
+          key={posts.map((post) => post.id).join(",")}
+          handle={handle}
+          posts={posts}
+          categories={categories}
+        />
       )}
 
       <Pagination
@@ -319,7 +331,10 @@ function PostMeta({ post }: { post: PostSummary }) {
   const format = useDateFormat();
   return (
     <p className="post-meta">
-      <span>{t(`manage:status.${post.status}`)}</span> ·{" "}
+      <span>
+        {t("manage:posts.category")}: {post.category?.name ?? t("category:uncategorized")}
+      </span>{" "}
+      · <span>{t(`manage:status.${post.status}`)}</span> ·{" "}
       <span>{t(`manage:visibility.${post.visibility}`)}</span>
       {post.hasDraft && post.status === "PUBLISHED" && (
         <>
@@ -342,7 +357,15 @@ function PostMeta({ post }: { post: PostSummary }) {
   );
 }
 
-function BulkList({ handle, posts }: { handle: string; posts: PostSummary[] }) {
+function BulkList({
+  handle,
+  posts,
+  categories,
+}: {
+  handle: string;
+  posts: PostSummary[];
+  categories: CategoryOption[];
+}) {
   const { t } = useTranslation();
   const submitting = useNavigation().state === "submitting";
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
@@ -374,7 +397,24 @@ function BulkList({ handle, posts }: { handle: string; posts: PostSummary[] }) {
         </button>{" "}
         <button type="submit" name="op" value="DELETE" disabled={submitting}>
           {t("manage:posts.bulk.delete")}
-        </button>
+        </button>{" "}
+        <span className="bulk-move">
+          {t("manage:posts.bulk.move")}:{" "}
+          <label>
+            {t("manage:posts.bulk.moveTarget")}{" "}
+            <select name="moveCategoryId" defaultValue="">
+              <option value="">{t("category:uncategorized")}</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {`${"— ".repeat(category.depth)}${category.name}`}
+                </option>
+              ))}
+            </select>
+          </label>{" "}
+          <button type="submit" name="op" value="MOVE" disabled={submitting}>
+            {t("manage:posts.bulk.moveSubmit")}
+          </button>
+        </span>
       </fieldset>
       <label>
         <input

@@ -37,5 +37,9 @@
   "DRAFT_NOT_FOUND": "下書きが見つかりません。",
   "POST_NOT_PUBLISHED": "まだ公開していない記事です。",
   "POST_NOT_IN_TRASH": "ゴミ箱にある記事ではありません。",
-  "POST_CONTENT_EMPTY": "本文を入力してから公開してください。"
+  "POST_CONTENT_EMPTY": "本文を入力してから公開してください。",
+  "CATEGORY_NOT_FOUND": "カテゴリが見つかりません。",
+  "CATEGORY_NAME_TAKEN": "同じ場所に同じ名前のカテゴリがすでにあります。",
+  "CATEGORY_DEPTH_EXCEEDED": "カテゴリは2階層までしか作れません。",
+  "TAG_LIMIT_EXCEEDED": "タグは1つの記事に10個まで付けられます。"
 }

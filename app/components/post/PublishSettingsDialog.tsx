@@ -1,41 +1,62 @@
 import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { Visibility } from "~/api/models";
+import type { CategoryNode, Visibility } from "~/api/models";
+import { CategorySelect } from "~/components/blog/CategoryTree";
+import { TagInput } from "~/components/post/TagInput";
 
 export interface PublishSettingsValue {
   visibility: Visibility;
   commentEnabled: boolean;
+  categoryId: number | null;
+  tags: string[];
 }
 
 export interface PublishSettingsDialogProps {
   /** 이미 발행한 글이면 버튼이 "수정 발행"(FR-108) */
   published: boolean;
   initial: PublishSettingsValue;
+  /** 이 블로그의 카테고리 트리 */
+  categories?: CategoryNode[];
   pending?: boolean;
   /** 발행 실패 문구 */
   error?: string | null;
   onClose: () => void;
+  /** 카테고리·태그를 바꿀 때마다(닫아도 고른 값이 작성 화면에 남아 임시저장된다) */
+  onClassify?: (value: Pick<PublishSettingsValue, "categoryId" | "tags">) => void;
   onPublish: (value: PublishSettingsValue) => void;
 }
 
 /**
  * 발행 설정 레이어(FR-013, FR-107). "완료"를 누르면 열리고, 여기서 발행 버튼을 눌러야만 발행된다.
  * 닫으면 작성 화면으로 돌아가고 글은 임시저장 상태로 남는다(AS8).
- * 공개 범위(공개·비공개), 발행 시각(지금), 댓글 허용. 카테고리·태그는 US2, 대표 이미지는 US4에서 더한다.
+ * 공개 범위(공개·비공개), 카테고리(미분류 포함), 태그, 발행 시각(지금), 댓글 허용. 대표 이미지는 US4에서 더한다.
  */
 export function PublishSettingsDialog({
   published,
   initial,
+  categories = [],
   pending = false,
   error,
   onClose,
+  onClassify,
   onPublish,
 }: PublishSettingsDialogProps) {
   const { t } = useTranslation();
   const titleId = useId();
   const [visibility, setVisibility] = useState<Visibility>(initial.visibility);
   const [commentEnabled, setCommentEnabled] = useState(initial.commentEnabled);
+  const [categoryId, setCategoryId] = useState<number | null>(initial.categoryId);
+  const [tags, setTags] = useState<string[]>(initial.tags);
+
+  const changeCategory = (next: number | null) => {
+    setCategoryId(next);
+    onClassify?.({ categoryId: next, tags });
+  };
+  const changeTags = (next: string[]) => {
+    setTags(next);
+    onClassify?.({ categoryId, tags: next });
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -80,6 +101,13 @@ export function PublishSettingsDialog({
           {t("post:publish.private")}
         </label>
       </fieldset>
+      <CategorySelect
+        categories={categories}
+        value={categoryId}
+        onChange={changeCategory}
+        disabled={pending}
+      />
+      <TagInput value={tags} onChange={changeTags} disabled={pending} />
       <p>
         {t("post:publish.publishTime")}: {t("post:publish.now")}
       </p>
@@ -103,7 +131,7 @@ export function PublishSettingsDialog({
         </button>
         <button
           type="button"
-          onClick={() => onPublish({ visibility, commentEnabled })}
+          onClick={() => onPublish({ visibility, commentEnabled, categoryId, tags })}
           disabled={pending}
           aria-busy={pending || undefined}
         >

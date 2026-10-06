@@ -1,0 +1,17 @@
+{
+  "input": {
+    "label": "Tags",
+    "placeholder": "Type a tag and press Enter",
+    "add": "Add",
+    "remove": "Remove tag {{tag}}",
+    "hint": "Up to {{max}} tags, {{maxLength}} characters each. Letters are saved in lowercase.",
+    "limit": "You can add up to {{max}} tags.",
+    "tooLong": "Tags can be up to {{maxLength}} characters."
+  },
+  "page": {
+    "empty": "No public posts with this tag yet."
+  },
+  "list": {
+    "label": "Tags"
+  }
+}

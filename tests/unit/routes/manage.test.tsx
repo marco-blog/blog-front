@@ -302,13 +302,27 @@ describe("글 관리 action", () => {
     expect(backend.callsTo(BULK)[0].body).toEqual({ postIds: [9], action: "DELETE" });
   });
 
+  it("카테고리 옮기기: MOVE_CATEGORY, 대상이 비면 미분류(null)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), [BULK]: ok({ updated: 2 }) });
+
+    await call({ intent: "bulk", op: "MOVE", postIds: ["1", "2"], moveCategoryId: "12" });
+    await call({ intent: "bulk", op: "MOVE", postIds: "3", moveCategoryId: "" });
+
+    expect(backend.callsTo(BULK).map((c) => c.body)).toEqual([
+      { postIds: [1, 2], action: "MOVE_CATEGORY", categoryId: 12 },
+      { postIds: [3], action: "MOVE_CATEGORY", categoryId: null },
+    ]);
+  });
+
   it("고른 글이 없거나 모르는 작업이면 backend를 부르지 않는다", async () => {
     const backend = mockBackend({ [ME]: ok(me()) });
 
     const none = asData(await call({ intent: "bulk", op: "PUBLIC" }));
     expect(none.data).toEqual({ intent: "bulk", ok: false, noSelection: true });
     expect(none.init?.status).toBe(400);
-    expect(asData(await call({ intent: "bulk", op: "MOVE", postIds: "1" })).init?.status).toBe(400);
+    expect(asData(await call({ intent: "bulk", op: "RENAME", postIds: "1" })).init?.status).toBe(
+      400,
+    );
     expect(asData(await call({ intent: "restore", postId: "abc" })).init?.status).toBe(400);
     expect(asData(await call({ intent: "nope" })).init?.status).toBe(400);
     expect(new Set(backend.calls.map((c) => c.path))).toEqual(new Set(["/api/v1/me"]));
@@ -467,7 +481,11 @@ describe("블로그 관리 화면", () => {
       within(menu)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["대시보드", "글 관리", "블로그 설정"]);
+    ).toEqual(["대시보드", "글 관리", "카테고리", "블로그 설정"]);
+    expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
+      "href",
+      "/marco/manage/categories",
+    );
     expect(within(menu).getByRole("link", { name: "글 관리" })).toHaveAttribute(
       "href",
       "/marco/manage/posts",
@@ -649,6 +667,38 @@ describe("블로그 관리 화면", () => {
     fireEvent.click(screen.getByRole("button", { name: "공개로 바꾸기" }));
 
     expect(await screen.findByText("이 작업을 할 권한이 없습니다.")).toBeInTheDocument();
+  });
+
+  it("글 관리: 카테고리를 보여주고, 고른 글을 다른 카테고리로 옮긴다", async () => {
+    const backend = renderManage("/marco/manage/posts", {
+      [POSTS]: ok([
+        postSummary(1, { title: "분류 글", category: { id: 12, name: "Spring" } }),
+        postSummary(2, { title: "미분류 글" }),
+      ]),
+      [BULK]: ok({ updated: 1 }),
+    });
+
+    const list = await screen.findByRole("list", { name: "글 목록" });
+    const items = within(list).getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("카테고리: Spring");
+    expect(items[1]).toHaveTextContent("카테고리: 미분류");
+
+    fireEvent.click(screen.getByLabelText("미분류 글 선택"));
+    const target = screen.getByLabelText("옮길 카테고리");
+    expect(
+      within(target)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["미분류", "Spring"]);
+    fireEvent.change(target, { target: { value: "12" } });
+    fireEvent.click(screen.getByRole("button", { name: "옮기기" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("글 1편을 바꿨습니다.");
+    expect(backend.callsTo(BULK)[0].body).toEqual({
+      postIds: [2],
+      action: "MOVE_CATEGORY",
+      categoryId: 12,
+    });
   });
 
   it("빈 목록·빈 휴지통 안내", async () => {

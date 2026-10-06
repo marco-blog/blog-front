@@ -173,6 +173,18 @@ describe("post detail 화면", () => {
     );
     expect(article).toHaveTextContent("Spring");
     expect(article).toHaveTextContent("#jpa");
+    expect(within(article).getByRole("link", { name: "Spring" })).toHaveAttribute(
+      "href",
+      "/marco/category/12",
+    );
+    expect(within(article).getByRole("link", { name: "#jpa" })).toHaveAttribute(
+      "href",
+      "/marco/tags/jpa",
+    );
+    expect(within(article).getByRole("link", { name: "#spring" })).toHaveAttribute(
+      "href",
+      "/marco/tags/spring",
+    );
     expect(article).toHaveTextContent("조회 10");
 
     const nav = screen.getByRole("navigation", { name: "이전·다음 글" });

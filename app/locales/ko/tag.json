@@ -1,0 +1,17 @@
+{
+  "input": {
+    "label": "태그",
+    "placeholder": "태그를 입력하고 Enter",
+    "add": "추가",
+    "remove": "{{tag}} 태그 빼기",
+    "hint": "최대 {{max}}개, 각 {{maxLength}}자까지. 영문은 소문자로 저장됩니다.",
+    "limit": "태그는 {{max}}개까지 넣을 수 있습니다.",
+    "tooLong": "태그는 {{maxLength}}자까지 쓸 수 있습니다."
+  },
+  "page": {
+    "empty": "이 태그가 달린 공개 글이 없습니다."
+  },
+  "list": {
+    "label": "태그"
+  }
+}

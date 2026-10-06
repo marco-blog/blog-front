@@ -37,5 +37,9 @@
   "DRAFT_NOT_FOUND": "We couldn't find this draft.",
   "POST_NOT_PUBLISHED": "This post hasn't been published yet.",
   "POST_NOT_IN_TRASH": "This post isn't in the trash.",
-  "POST_CONTENT_EMPTY": "Write some content before publishing."
+  "POST_CONTENT_EMPTY": "Write some content before publishing.",
+  "CATEGORY_NOT_FOUND": "Category not found.",
+  "CATEGORY_NAME_TAKEN": "A category with the same name already exists here.",
+  "CATEGORY_DEPTH_EXCEEDED": "Categories can only be two levels deep.",
+  "TAG_LIMIT_EXCEEDED": "A post can have up to 10 tags."
 }

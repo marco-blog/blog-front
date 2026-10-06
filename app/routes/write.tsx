@@ -7,6 +7,7 @@ import { createApiClient } from "~/api/client.server";
 import { errorMessage, fieldErrorMessage } from "~/api/errorMessage";
 import { apiErrorResponse, isApiError } from "~/api/errors";
 import type {
+  CategoryNode,
   DraftContent,
   LatestDraft,
   PostDetail,
@@ -61,19 +62,21 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const backend = createApiClient(request);
 
   if (params.postId === undefined) {
-    const latestDraft = await backend
-      .get<LatestDraft | null>(`/blogs/${handle}/posts/drafts/latest`)
-      .catch(toNotFound);
-    return { handle, post: null, draft: null, latestDraft };
+    const [latestDraft, categories] = await Promise.all([
+      backend.get<LatestDraft | null>(`/blogs/${handle}/posts/drafts/latest`),
+      backend.get<CategoryNode[]>(`/blogs/${handle}/categories`),
+    ]).catch(toNotFound);
+    return { handle, post: null, draft: null, latestDraft, categories };
   }
 
   const postId = parsePostId(params.postId);
   if (postId === null) {
     throw notFound();
   }
-  const [post, draft] = await Promise.all([
+  const [post, draft, categories] = await Promise.all([
     backend.get<PostDetail>(`/posts/${postId}`),
     backend.get<DraftContent>(`/posts/${postId}/draft`),
+    backend.get<CategoryNode[]>(`/blogs/${handle}/categories`),
   ]).catch(toNotFound);
   if (post.blogHandle !== handle) {
     throw notFound();
@@ -86,16 +89,30 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       visibility: post.visibility,
       commentEnabled: post.commentEnabled,
     },
-    draft: { title: draft.title, contentMarkdown: draft.contentMarkdown, savedAt: draft.savedAt },
+    draft: {
+      title: draft.title,
+      contentMarkdown: draft.contentMarkdown,
+      categoryId: draft.categoryId ?? null,
+      tags: draft.tags ?? [],
+      savedAt: draft.savedAt,
+    },
     latestDraft: null,
+    categories,
   };
 }
 
 interface WriteData {
   handle: string;
   post: { id: number; status: PostStatus; visibility: Visibility; commentEnabled: boolean } | null;
-  draft: { title: string; contentMarkdown: string; savedAt: string | null } | null;
+  draft: {
+    title: string;
+    contentMarkdown: string;
+    categoryId: number | null;
+    tags: string[];
+    savedAt: string | null;
+  } | null;
   latestDraft: LatestDraft | null;
+  categories: CategoryNode[];
 }
 
 export default function WritePage() {
@@ -109,10 +126,12 @@ interface DraftState {
   postId: number | null;
   title: string;
   content: string;
+  categoryId: number | null;
+  tags: string[];
   dirty: boolean;
 }
 
-function Writer({ handle, post, draft, latestDraft }: WriteData) {
+function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
   const { t } = useTranslation();
   const format = useDateFormat();
   const navigate = useNavigate();
@@ -126,11 +145,17 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
   const [publishOpen, setPublishOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [classification, setClassification] = useState({
+    categoryId: draft?.categoryId ?? null,
+    tags: draft?.tags ?? [],
+  });
 
   const state = useRef<DraftState>({
     postId: post?.id ?? null,
     title: draft?.title ?? "",
     content: draft?.contentMarkdown ?? "",
+    categoryId: draft?.categoryId ?? null,
+    tags: draft?.tags ?? [],
     dirty: false,
   });
   /** 저장은 한 번에 하나씩(새 글이 두 번 만들어지지 않게) */
@@ -158,7 +183,13 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
       if (!force && current.postId === null && !current.title.trim() && !current.content.trim()) {
         return null;
       }
-      const snapshot = { title: current.title, contentMarkdown: current.content };
+      // 카테고리·태그는 사본에 그대로 저장하고 검사는 발행할 때 한다(contracts/api.md DraftWrite).
+      const snapshot = {
+        title: current.title,
+        contentMarkdown: current.content,
+        categoryId: current.categoryId,
+        tags: current.tags,
+      };
       setSaving(true);
       try {
         const saved =
@@ -213,10 +244,17 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
     setPublishing(true);
     setPublishError(null);
     try {
-      // 발행은 작성 중 사본을 발행본으로 옮긴다. 지금 내용을 먼저 저장한다.
+      // 발행은 작성 중 사본을 발행본으로 옮긴다. 고른 카테고리·태그를 담아 지금 내용을 먼저 저장한다.
+      state.current.categoryId = settings.categoryId;
+      state.current.tags = settings.tags;
       const id = await save(true);
       const published = await api.post<PostDetail>(`/posts/${id}/publish`, {
-        body: { visibility: settings.visibility, commentEnabled: settings.commentEnabled },
+        body: {
+          visibility: settings.visibility,
+          commentEnabled: settings.commentEnabled,
+          categoryId: settings.categoryId,
+          tags: settings.tags,
+        },
       });
       navigate(`/${handle}/${published.id}`);
     } catch (error) {
@@ -225,11 +263,18 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
     }
   }
 
+  function fieldLabel(field: string): string | null {
+    if (field === "title") {
+      return t("editor:titleLabel");
+    }
+    return field.startsWith("tags") ? t("tag:input.label") : null;
+  }
+
   function publishErrorMessage(error: unknown): string {
     if (isApiError(error) && error.fieldErrors.length > 0) {
       return error.fieldErrors
         .map((fieldError) => {
-          const label = fieldError.field === "title" ? t("editor:titleLabel") : null;
+          const label = fieldLabel(fieldError.field);
           const message = fieldErrorMessage(t, fieldError);
           return label ? `${label}: ${message}` : message;
         })
@@ -318,6 +363,15 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
           initial={{
             visibility: post?.visibility ?? "PUBLIC",
             commentEnabled: post?.commentEnabled ?? true,
+            categoryId: classification.categoryId,
+            tags: classification.tags,
+          }}
+          categories={categories}
+          onClassify={(value) => {
+            state.current.categoryId = value.categoryId;
+            state.current.tags = value.tags;
+            setClassification(value);
+            markDirty();
           }}
           pending={publishing}
           error={publishError}

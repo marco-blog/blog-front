@@ -174,12 +174,35 @@ export interface ManageDashboard {
   recentComments: ManageRecentComment[];
 }
 
-/** POST /blogs/{handle}/manage/posts/bulk. 카테고리 이동(MOVE_CATEGORY)은 US2에서 더한다. */
+/** POST /blogs/{handle}/manage/posts/bulk. `MOVE_CATEGORY`의 categoryId가 null이면 미분류로 옮긴다. */
 export interface BulkPostRequest {
   postIds: number[];
-  action: "CHANGE_VISIBILITY" | "DELETE";
+  action: "CHANGE_VISIBILITY" | "DELETE" | "MOVE_CATEGORY";
   visibility?: Visibility;
+  categoryId?: number | null;
 }
 export interface BulkPostResult {
   updated: number;
+}
+
+/** GET /tags/{name}/posts: 서비스 전체 태그별 글(PostSummary + 블로그 주소) */
+export type TaggedPostSummary = PostSummary & { blogHandle: string };
+
+/** GET /blogs/{handle}/tags */
+export interface BlogTag {
+  name: string;
+  postCount: number;
+}
+
+/** POST /blogs/{handle}/categories */
+export interface CreateCategoryRequest {
+  name: string;
+  parentId: number | null;
+}
+
+/** PUT /blogs/{handle}/categories/order의 항목 */
+export interface CategoryOrderItem {
+  id: number;
+  parentId: number | null;
+  sortOrder: number;
 }

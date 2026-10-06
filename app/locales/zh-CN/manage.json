@@ -65,7 +65,10 @@
       "makePrivate": "设为私密",
       "delete": "移到回收站",
       "noneSelected": "请先选择文章。",
-      "done": "已更改 {{updated}} 篇文章。"
+      "done": "已更改 {{updated}} 篇文章。",
+      "move": "移动到分类",
+      "moveTarget": "目标分类",
+      "moveSubmit": "移动"
     },
     "edit": "编辑",
     "continue": "继续写作",
@@ -75,7 +78,8 @@
     "deletedAt": "删除于 {{date}}",
     "purgeAt": "将于 {{date}} 永久删除",
     "restore": "恢复",
-    "restored": "文章已恢复。"
+    "restored": "文章已恢复。",
+    "category": "分类"
   },
   "settings": {
     "title": "博客设置",
