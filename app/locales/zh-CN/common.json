@@ -15,7 +15,6 @@
     "title": "出现了问题",
     "description": "请稍后再试。"
   },
-  "languageName": "简体中文",
   "nav": {
     "label": "主菜单",
     "login": "登录",
@@ -29,7 +28,8 @@
     "label": "网站信息",
     "terms": "服务条款",
     "privacy": "隐私政策",
-    "language": "语言"
+    "language": "语言",
+    "changeLanguage": "切换"
   },
   "pagination": {
     "label": "分页",

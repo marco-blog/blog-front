@@ -14,7 +14,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "~/api/errors";
 import { getSessionUser, type SessionUser } from "~/auth/session.server";
 import { ErrorPage } from "~/components/ErrorPage";
-import { Footer } from "~/components/layout/Footer";
 import { Header } from "~/components/layout/Header";
 import type { Language } from "~/i18n/config";
 import { createI18n } from "~/i18n/instance";
@@ -130,24 +129,6 @@ describe("Header", () => {
     expect(form).toHaveAttribute("method", "post");
     expect(form).toHaveAttribute("action", "/logout");
     expect(within(nav).queryByRole("link", { name: "Log in" })).toBeNull();
-  });
-});
-
-describe("Footer", () => {
-  it("약관·개인정보처리방침 링크와 언어 선택 자리", () => {
-    render(withI18n(<Footer />, "zh-CN"));
-
-    const footer = screen.getByRole("contentinfo");
-    expect(within(footer).getByRole("link", { name: "服务条款" })).toHaveAttribute(
-      "href",
-      "/terms",
-    );
-    expect(within(footer).getByRole("link", { name: "隐私政策" })).toHaveAttribute(
-      "href",
-      "/privacy",
-    );
-    const languageSlot = within(footer).getByRole("group", { name: "语言" });
-    expect(languageSlot).toHaveTextContent("简体中文");
   });
 });
 

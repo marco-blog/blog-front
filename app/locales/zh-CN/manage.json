@@ -16,9 +16,9 @@
   "dashboard": {
     "title": "仪表盘",
     "drafts": "草稿",
-    "draftCount": "{{drafts}} 篇",
+    "draftCount": "{{drafts, number}} 篇",
     "newComments": "最近 7 天的新评论",
-    "commentCount": "{{comments}} 条",
+    "commentCount": "{{comments, number}} 条",
     "recentPosts": "最近的文章",
     "recentComments": "最近的评论",
     "noPosts": "还没有文章。",

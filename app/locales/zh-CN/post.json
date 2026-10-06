@@ -3,7 +3,7 @@
     "label": "文章列表",
     "empty": "还没有发布任何文章。"
   },
-  "views": "阅读 {{views}}",
+  "views": "阅读 {{views, number}}",
   "blog": {
     "owner": "{{nickname}} 的博客",
     "categories": "分类"

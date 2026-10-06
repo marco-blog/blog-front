@@ -16,7 +16,7 @@
     "hint": "分类最多可以有两级。删除分类后,其中的文章(包括子分类中的文章)将变为未分类。",
     "empty": "还没有分类。",
     "list": "分类列表",
-    "postCount": "公开文章 {{count}} 篇",
+    "postCount": "公开文章 {{count, number}} 篇",
     "viewPosts": "在文章管理中查看",
     "create": {
       "label": "新建分类",
@@ -40,7 +40,7 @@
     },
     "delete": {
       "submit": "删除",
-      "confirm": "要删除分类“{{name}}”吗?其中所有文章(包括 {{count}} 篇公开文章)将变为未分类,子分类也会一并删除。",
+      "confirm": "要删除分类“{{name}}”吗?其中所有文章(包括 {{count, number}} 篇公开文章)将变为未分类,子分类也会一并删除。",
       "confirmButton": "删除",
       "cancel": "取消",
       "done": "已删除分类。",

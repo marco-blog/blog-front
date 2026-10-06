@@ -5,12 +5,13 @@
     "blogs": "My blogs",
     "profile": "Profile",
     "password": "Change password",
-    "loginHistory": "Login history"
+    "loginHistory": "Login history",
+    "language": "Language & time zone"
   },
   "blogs": {
     "title": "My blogs",
-    "count": "Blogs {{count}} / {{limit}}",
-    "posts": "Posts {{posts}}",
+    "count": "Blogs {{count, number}} / {{limit, number}}",
+    "posts": "Posts {{posts, number}}",
     "manage": "Manage",
     "write": "Write",
     "create": {
@@ -64,5 +65,14 @@
     "failure": "Failed",
     "unknown": "Unknown",
     "empty": "There is no login history."
+  },
+  "language": {
+    "title": "Language and time zone",
+    "language": "Display language",
+    "languageHint": "Menus, buttons, messages and emails use this language. Posts and comments are shown as written.",
+    "timeZone": "Time zone",
+    "timeZoneHint": "Times of posts, comments and login history are shown in this time zone.",
+    "submit": "Save",
+    "saved": "Your language and time zone have been saved."
   }
 }

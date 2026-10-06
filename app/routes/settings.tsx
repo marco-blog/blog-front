@@ -15,12 +15,12 @@ export default function SettingsLayout() {
   const { t } = useTranslation();
   return (
     <div className="settings">
-      {/* 언어·시간대 메뉴(/settings/language)는 US5에서 더한다. */}
       <nav aria-label={t("settings:nav.label")}>
         <NavLink to="/settings/profile">{t("settings:nav.profile")}</NavLink>{" "}
         <NavLink to="/settings/password">{t("settings:nav.password")}</NavLink>{" "}
         <NavLink to="/settings/login-history">{t("settings:nav.loginHistory")}</NavLink>{" "}
-        <NavLink to="/settings/blogs">{t("settings:nav.blogs")}</NavLink>
+        <NavLink to="/settings/blogs">{t("settings:nav.blogs")}</NavLink>{" "}
+        <NavLink to="/settings/language">{t("settings:nav.language")}</NavLink>
       </nav>
       <Outlet />
     </div>

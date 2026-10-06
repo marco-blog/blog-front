@@ -16,7 +16,7 @@
     "hint": "Categories can be two levels deep. Deleting a category makes its posts (including posts in its subcategories) uncategorized.",
     "empty": "No categories yet.",
     "list": "Category list",
-    "postCount": "{{count}} public posts",
+    "postCount": "{{count, number}} public posts",
     "viewPosts": "View in Posts",
     "create": {
       "label": "New category",
@@ -40,7 +40,7 @@
     },
     "delete": {
       "submit": "Delete",
-      "confirm": "Delete the category “{{name}}”? All its posts, including {{count}} public posts, become uncategorized and its subcategories are deleted too.",
+      "confirm": "Delete the category “{{name}}”? All its posts, including {{count, number}} public posts, become uncategorized and its subcategories are deleted too.",
       "confirmButton": "Delete",
       "cancel": "Cancel",
       "done": "Category deleted.",

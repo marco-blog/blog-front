@@ -218,7 +218,7 @@ describe("post detail 화면", () => {
     expect(article).toHaveTextContent("본문입니다.");
     expect(article.querySelector("pre code.language-java")).not.toBeNull();
     expect(article).toHaveTextContent("마르코");
-    expect(within(article).getByText("2026. 10. 6.")).toHaveAttribute(
+    expect(within(article).getByText("2026년 10월 6일")).toHaveAttribute(
       "dateTime",
       "2026-10-06T04:24:19Z",
     );

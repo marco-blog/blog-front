@@ -16,9 +16,9 @@
   "dashboard": {
     "title": "대시보드",
     "drafts": "임시저장 글",
-    "draftCount": "{{drafts}}편",
+    "draftCount": "{{drafts, number}}편",
     "newComments": "최근 7일 새 댓글",
-    "commentCount": "{{comments}}개",
+    "commentCount": "{{comments, number}}개",
     "recentPosts": "최근 글",
     "recentComments": "최근 댓글",
     "noPosts": "아직 글이 없습니다.",

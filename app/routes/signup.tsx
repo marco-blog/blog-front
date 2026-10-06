@@ -23,7 +23,7 @@ import type { LegalDocument, SignupResult } from "~/api/models";
 import { FormAlert, FormField } from "~/components/form/FormField";
 import { HandleField } from "~/components/form/HandleField";
 import { isSupportedLanguage } from "~/i18n/config";
-import { resolveLanguage } from "~/i18n/language";
+import { resolveLanguage } from "~/i18n/resolveLanguage.server";
 import { metaT } from "~/i18n/meta";
 import { privatePageMeta } from "~/seo/meta";
 

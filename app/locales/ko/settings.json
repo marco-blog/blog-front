@@ -5,12 +5,13 @@
     "blogs": "내 블로그",
     "profile": "프로필",
     "password": "비밀번호 변경",
-    "loginHistory": "로그인 기록"
+    "loginHistory": "로그인 기록",
+    "language": "언어·시간대"
   },
   "blogs": {
     "title": "내 블로그",
-    "count": "블로그 {{count}} / {{limit}}",
-    "posts": "글 {{posts}}",
+    "count": "블로그 {{count, number}} / {{limit, number}}",
+    "posts": "글 {{posts, number}}",
     "manage": "관리",
     "write": "글쓰기",
     "create": {
@@ -64,5 +65,14 @@
     "failure": "실패",
     "unknown": "알 수 없음",
     "empty": "로그인 기록이 없습니다."
+  },
+  "language": {
+    "title": "언어와 시간대",
+    "language": "화면 언어",
+    "languageHint": "메뉴·버튼·안내 문구와 메일을 이 언어로 보여줍니다. 글과 댓글은 쓴 그대로 보입니다.",
+    "timeZone": "시간대",
+    "timeZoneHint": "글·댓글·로그인 기록의 시각을 이 시간대로 보여줍니다.",
+    "submit": "저장",
+    "saved": "언어와 시간대를 저장했습니다."
   }
 }

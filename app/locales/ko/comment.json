@@ -1,6 +1,6 @@
 {
   "title": "댓글",
-  "count": "댓글 {{comments}}",
+  "count": "댓글 {{comments, number}}",
   "list": "댓글 목록",
   "empty": "아직 댓글이 없습니다.",
   "loadFailed": "댓글을 불러오지 못했습니다.",

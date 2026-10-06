@@ -742,7 +742,7 @@ describe("블로그 관리 화면", () => {
 
     expect(await screen.findByRole("heading", { name: "휴지통" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "휴지통" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getAllByText("2026. 11. 4.에 영구 삭제")).toHaveLength(2);
+    expect(screen.getAllByText("2026년 11월 4일에 영구 삭제")).toHaveLength(2);
     expect(screen.getByText(/30일이 지나면 영구 삭제/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "휴지통으로 옮기기" })).toBeNull();
     expect(screen.queryByLabelText("상태")).toBeNull();

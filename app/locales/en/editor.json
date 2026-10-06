@@ -45,7 +45,9 @@
   "code": {
     "search": "Search languages",
     "noResult": "No matching language",
-    "copy": "Copy"
+    "copy": "Copy",
+    "previewEdit": "Edit",
+    "previewHide": "Hide preview"
   },
   "link": {
     "placeholder": "Paste a link"

@@ -1,10 +1,4 @@
-import {
-  DEFAULT_LANGUAGE,
-  LANGUAGE_COOKIE,
-  SUPPORTED_LANGUAGES,
-  isSupportedLanguage,
-  type Language,
-} from "./config";
+import { SUPPORTED_LANGUAGES, type Language } from "./config";
 
 /**
  * 언어 태그(BCP 47)를 지원 언어로 맞춘다. 맞는 것이 없으면 null.
@@ -73,21 +67,4 @@ export function readCookie(header: string | null | undefined, name: string): str
     }
   }
   return null;
-}
-
-/**
- * 화면 언어를 정한다(FR-149, research.md R22).
- * (1) 로그인 회원의 언어 설정 → (2) 쿠키 `lang` → (3) Accept-Language → (4) 영어.
- * (1)은 로그인 기능(US1)에서 /me 응답으로 넘긴다.
- */
-export function resolveLanguage(request: Request, memberLanguage?: string | null): Language {
-  if (isSupportedLanguage(memberLanguage)) {
-    return memberLanguage;
-  }
-  const fromCookie = matchLanguage(readCookie(request.headers.get("cookie"), LANGUAGE_COOKIE));
-  return (
-    fromCookie ??
-    languageFromAcceptLanguage(request.headers.get("accept-language")) ??
-    DEFAULT_LANGUAGE
-  );
 }

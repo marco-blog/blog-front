@@ -172,7 +172,7 @@ describe("blog home 화면", () => {
       ["첫 글", "/marco/1"],
     ]);
     expect(within(list).getAllByText(/^조회 \d+$/)).toHaveLength(2);
-    expect(within(list).getAllByText("2026. 10. 6.")).toHaveLength(2);
+    expect(within(list).getAllByText("2026년 10월 6일")).toHaveLength(2);
     expect(screen.queryByRole("navigation", { name: "페이지" })).toBeNull();
   });
 

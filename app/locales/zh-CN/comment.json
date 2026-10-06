@@ -1,6 +1,6 @@
 {
   "title": "评论",
-  "count": "评论 {{comments}}",
+  "count": "评论 {{comments, number}}",
   "list": "评论列表",
   "empty": "还没有评论。",
   "loadFailed": "无法加载评论。",

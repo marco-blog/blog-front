@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
 import type { CategoryNode } from "~/api/models";
+import { useDateFormat } from "~/i18n/format";
 
 export function categoryHref(handle: string, categoryId: number): string {
   return `/${handle}/category/${categoryId}`;
@@ -36,6 +37,7 @@ export interface CategoryTreeProps {
  */
 export function CategoryTree({ handle, categories, currentId = null }: CategoryTreeProps) {
   const { t } = useTranslation();
+  const format = useDateFormat();
   if (categories.length === 0) {
     return null;
   }
@@ -44,7 +46,7 @@ export function CategoryTree({ handle, categories, currentId = null }: CategoryT
       to={categoryHref(handle, node.id)}
       aria-current={node.id === currentId ? "page" : undefined}
     >
-      {node.name} ({node.postCount})
+      {node.name} ({format.number(node.postCount)})
     </Link>
   );
   return (

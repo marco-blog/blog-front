@@ -16,9 +16,9 @@
   "dashboard": {
     "title": "Dashboard",
     "drafts": "Drafts",
-    "draftCount": "{{drafts}}",
+    "draftCount": "{{drafts, number}}",
     "newComments": "New comments (last 7 days)",
-    "commentCount": "{{comments}}",
+    "commentCount": "{{comments, number}}",
     "recentPosts": "Recent posts",
     "recentComments": "Recent comments",
     "noPosts": "No posts yet.",
