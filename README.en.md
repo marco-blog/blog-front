@@ -2,13 +2,22 @@
 
 [한국어](README.md) | **English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
-React SSR front end of the Blog Platform (`blog.java21.net`), built with React + Vite + TypeScript, React Router framework mode (SSR) and a custom Express server.
-Specs and principles live in the sibling repository `blog-docs`. The Korean README is the reference version.
+React SSR front end of the multi-user blog platform running at [blog.java21.net](https://blog.java21.net) (a Tistory-like service).
+Public pages such as blog home, post detail and lists are rendered on the server (body and meta tags are in the HTML even without JS), and it provides the writing, blog management and account settings screens.
+The API is served by the sibling repository [blog-backend](https://github.com/marco-blog/blog-backend) (Spring Boot), and the specs are in [blog-docs](https://github.com/marco-blog/blog-docs).
 
-## Requirements
+## Stack
+
+- React 19 + TypeScript, Vite, React Router 8 framework mode (SSR), custom Express 5 server (`server.ts`)
+- Post editor: Milkdown Crepe (loaded in the browser on the writing screen only); code highlighting: highlight.js (SSR)
+- i18n: i18next + react-i18next, four languages (ko, en, ja, zh-CN)
+- Tests: Vitest + Testing Library (line coverage ≥ 80%), Playwright (E2E), ESLint, Prettier
+
+## Prerequisites
 
 - Node.js 22.18 or later (22 LTS). `server.ts` runs directly with Node's built-in TypeScript support.
-- API and image requests need the backend (`blog-backend`) at `http://localhost:8080`. The home and 404 pages render without it.
+- API and image requests need the backend (`blog-backend`) running at `http://localhost:8080`. The home and 404 pages render without it. See the [blog-backend README](https://github.com/marco-blog/blog-backend#readme) for how to run it.
+- Check out the three repositories as siblings so relative paths in the docs work: `blog/blog-docs`, `blog/blog-backend`, `blog/blog-front`
 
 ## Run
 
@@ -16,28 +25,96 @@ Specs and principles live in the sibling repository `blog-docs`. The Korean READ
 npm install
 cp .env.example .env      # edit if needed
 npm run dev               # dev server at http://localhost:5173 (Vite HMR)
-npm run build             # production build (build/client, build/server)
-npm start                 # run the build with NODE_ENV=production
+```
+
+Production build and run:
+
+```bash
+npm run build             # creates build/client and build/server
+npm start                 # runs the build with NODE_ENV=production
 ```
 
 ## Environment variables
 
-`npm run dev` and `npm start` read `.env` if it exists. Do not commit `.env`; keep only `.env.example`.
+`npm run dev` and `npm start` read `.env` if it exists (`node --env-file-if-exists`). Do not commit `.env`; keep only `.env.example`. There are no secrets.
 
-| Name               | Default                                                       | Description                                                                                                       |
-| ------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `BLOG_BACKEND_URL` | `http://localhost:8080`                                       | Backend address, used by the proxy (`/api/**`, `/media/**`, ...) and by SSR loaders/actions                       |
-| `PORT`             | `5173`                                                        | Front server port. Must match a backend allowed origin locally (`http://localhost:5173`, `http://localhost:3000`) |
-| `NODE_ENV`         | `development` for `npm run dev`, `production` for `npm start` | Development mode renders through Vite middleware                                                                  |
+| Name               | Default                                                       | Description                                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BLOG_BACKEND_URL` | `http://localhost:8080`                                       | Backend address, used by the proxy (`/api/**`, `/media/**`, ...) and called directly by SSR loaders/actions                                                               |
+| `PORT`             | `5173`                                                        | Front server port. Must match a backend allowed origin locally (`http://localhost:5173`, `http://localhost:3000`)                                                         |
+| `BLOG_PUBLIC_URL`  | origin of the incoming request                                | Public site address (scheme+host), used as the `Origin` of POSTs the SSR sends to the backend (token refresh, view count). Keep it equal to the backend's `blog.base-url` |
+| `NODE_ENV`         | `development` for `npm run dev`, `production` for `npm start` | Development mode renders through Vite middleware                                                                                                                          |
 
-## Checks
+## Checks and tests
 
 ```bash
-npm run typecheck
-npm run lint
-npm run format:check
-npm test                  # Vitest with coverage; fails below 80% line coverage
-npm run e2e               # Playwright against a built server
+npm run lint              # ESLint
+npm run format:check      # Prettier (npm run format to fix)
+npm run typecheck         # route type generation + tsc
+npm test -- --coverage    # Vitest with coverage; fails below 80% line coverage (coverage is always on in vitest.config.ts, so plain npm test is the same)
+npm run build
 ```
 
-`npm test` includes the translation check, which fails if any key is missing or empty in any of the four languages.
+- Coverage report: `coverage/index.html`
+- `npm test` includes the translation check (`tests/unit/i18n/translations.test.ts`), which fails if any key is missing or empty in any of the four languages.
+- CI (`.github/workflows/ci.yml`) runs the checks above, the build and the backend-less E2E (smoke) on every PR and push to `main`; its `e2e-backend` job starts backend `main` with a throwaway MySQL and runs the E2E scenarios that need the backend.
+
+## E2E (Playwright)
+
+```bash
+npx playwright install chromium      # first time only
+npm run e2e                          # = npx playwright test
+```
+
+`playwright.config.ts` starts the front server with `npm run build && npm start` (`E2E_PORT`, default 5173). Which scenarios run depends on environment variables:
+
+| Variable          | Example                 | When missing                                                                                                                                                         |
+| ----------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (none)            |                         | Only smoke scenarios run (home, 404, security headers)                                                                                                               |
+| `E2E_BACKEND_URL` | `http://localhost:8080` | Sign-up, post, category, comment, image and language scenarios (`tests/e2e/us*`) are skipped. When set, the front server also uses this backend (`BLOG_BACKEND_URL`) |
+| `MAILPIT_URL`     | `http://localhost:8025` | Scenarios that read password-reset mail are skipped (the backend must send mail to the same Mailpit)                                                                 |
+
+To run everything including the backend, start MySQL (with the schema), Mailpit and the backend (local profile) as described in the backend README, then:
+
+```bash
+E2E_BACKEND_URL=http://localhost:8080 MAILPIT_URL=http://localhost:8025 npm run e2e
+```
+
+Without `CI`, an already running front server on the same port is reused. Each run creates new accounts, so you can run it repeatedly against the same DB.
+
+## Layout
+
+```text
+server.ts                 # Express entry: X-Request-Id, backend proxy, security headers, static files, React Router
+server/app.ts             # React Router request handler (bundled into build/server), passes the CSP nonce via load context
+server/middleware/        # request-id, backend-proxy
+app/entry.server.tsx      # SSR entry (React Router default + CSP nonce)
+app/root.tsx              # common layout (header, footer), signed-in member and language (root loader), error boundary
+app/server/               # security headers (CSP, HSTS, ...), load context
+app/auth/                 # session helpers (getSessionUser, requireUser, next validation)
+app/components/layout/    # Header, Footer
+app/routes.ts             # route definitions (per blog-docs contracts/routes.md)
+app/routes/               # route modules
+app/api/                  # backend client (client.server.ts), common response types, ApiError, error code → message (errorMessage.ts)
+app/i18n/                 # i18next setup, language resolution
+app/locales/{ko,en,ja,zh-CN}/*.json   # translations (reference language: ko)
+tests/unit/               # Vitest
+tests/e2e/                # Playwright
+```
+
+## Rules in brief
+
+- The browser only talks to the front server. `/api/**`, `/media/**`, feeds (`/:handle/rss`, ...), trackbacks, sitemap and robots are forwarded to the backend, passing the browser's `Origin` and cookies unchanged.
+- SSR loaders/actions call the backend directly through `createApiClient(request)`, forwarding cookies, `Accept-Language`, `Origin` and `X-Request-Id`. It returns the response `result` and throws `ApiError` (status, resultCode, fieldErrors, traceId) on failure.
+- UI text is never hard-coded; use keys from `app/locales`. New text goes into all four languages in the same PR. API errors use `errors:{code}`, field errors `errors:fieldErrors.{code}`, and unknown codes fall back to a generic message.
+- The front server adds security headers to HTML responses (blog-docs research.md R27): CSP with a per-request nonce, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and HSTS in production only. Server-rendered `<script>` tags carry the same nonce, so do not add inline scripts by hand.
+- `dangerouslySetInnerHTML` is used only to display the sanitized post body (`app/components/post/PostContent.tsx`); ESLint blocks it elsewhere.
+- Loaders of sign-in-only screens call `requireUser(request)`. Anonymous users are sent to `/login?next={current path}`, and `next` accepts only same-site relative paths (`safeNextPath`).
+- The UI language is resolved in this order: member setting → `lang` cookie → `Accept-Language` → English. URLs have no language prefix.
+
+## Documentation
+
+- Specs: [blog-docs/specs](https://github.com/marco-blog/blog-docs/tree/main/specs) — core features in [specs/001-blog-core](https://github.com/marco-blog/blog-docs/tree/main/specs/001-blog-core) (spec, contracts/routes.md, contracts/api.md, quickstart.md)
+- Backend operations guide (environment variables, backups, scheduled jobs): [blog-backend docs/operations.md](https://github.com/marco-blog/blog-backend/blob/main/docs/operations.md)
+- API guidelines: [blog-docs/api-guidelines.md](https://github.com/marco-blog/blog-docs/blob/main/api-guidelines.md)
+- Development rules: [CLAUDE.md](CLAUDE.md); principles in blog-docs `.specify/memory/constitution.md`
