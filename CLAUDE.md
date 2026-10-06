@@ -14,4 +14,5 @@ Blog Platform의 React SSR 프런트엔드. 스펙은 형제 저장소 `../docs/
 - 공개 페이지(블로그 홈, 글 상세, 목록)는 서버 렌더링. JS 없이도 본문과 메타 태그가 HTML에 있어야 한다.
 - 비즈니스 로직은 두지 않고 backend API를 호출한다.
 - 토큰은 HttpOnly 쿠키에 보관하고 서버 렌더링 시 backend로 전달한다.
+- 글 에디터: TOAST UI Editor. 브라우저 전용이므로 작성 화면에서만 클라이언트로 불러온다(SSR 대상 아님).
 - 스펙(tasks.md)에 없는 기능은 구현하지 않는다.
