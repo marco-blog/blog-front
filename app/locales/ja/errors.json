@@ -19,7 +19,8 @@
     "TOO_LARGE": "{{value}}以下にしてください。",
     "INVALID_FORMAT": "形式が正しくありません。",
     "INVALID": "正しくない値です。",
-    "PASSWORD_WEAK": "パスワードは8〜64文字で、英字と数字を両方含める必要があります。"
+    "PASSWORD_WEAK": "パスワードは8〜64文字で、英字と数字を両方含める必要があります。",
+    "PASSWORD_CONFIRM_MISMATCH": "新しいパスワードが一致しません。"
   },
   "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。",
   "REFRESH_INVALID": "ログインの有効期限が切れました。もう一度ログインしてください。",
@@ -38,6 +39,7 @@
   "POST_NOT_PUBLISHED": "まだ公開していない記事です。",
   "POST_NOT_IN_TRASH": "ゴミ箱にある記事ではありません。",
   "POST_CONTENT_EMPTY": "本文を入力してから公開してください。",
+  "PASSWORD_RESET_TOKEN_INVALID": "再設定リンクの有効期限が切れたか、すでに使用されています。もう一度リクエストしてください。",
   "COMMENT_NOT_FOUND": "コメントが見つかりません。",
   "REPLY_DEPTH_EXCEEDED": "返信にさらに返信することはできません。",
   "COMMENTS_DISABLED": "この記事にはコメントできません。"

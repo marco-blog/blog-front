@@ -154,6 +154,14 @@ export interface PublishSettings {
   tags?: string[];
 }
 
+/** GET /me/login-history 한 줄(IP는 backend가 일부 가림) */
+export interface LoginHistoryItem {
+  at: string;
+  success: boolean;
+  ipMasked: string | null;
+  device: string | null;
+}
+
 /** 댓글 작성자. 프로필 이미지는 US4 전까지 null */
 export interface CommentAuthor {
   userId: number;
