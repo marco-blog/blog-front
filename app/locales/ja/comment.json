@@ -1,0 +1,27 @@
+{
+  "title": "コメント",
+  "count": "コメント {{comments}}",
+  "list": "コメント一覧",
+  "empty": "まだコメントはありません。",
+  "loadFailed": "コメントを読み込めませんでした。",
+  "loginToWrite": "コメントするにはログインしてください",
+  "disabled": "この記事にはコメントできません。",
+  "form": {
+    "content": "コメント内容",
+    "submit": "コメントを投稿",
+    "replyContent": "返信内容",
+    "replySubmit": "返信を投稿",
+    "editContent": "修正内容",
+    "editSubmit": "修正を保存",
+    "maxLength": "{{max}}文字まで入力できます。"
+  },
+  "reply": "返信",
+  "edit": "修正",
+  "delete": "削除",
+  "deleteConfirm": "このコメントを削除しますか？",
+  "deleted": "削除されたコメントです。",
+  "edited": "修正済み",
+  "replies": "返信",
+  "author": "投稿者",
+  "unknownAuthor": "不明な投稿者"
+}

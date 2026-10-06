@@ -65,7 +65,7 @@ interface Envelope<T> {
 /** 브라우저 쿠키를 함께 쓰는 API 호출(front 서버의 /api 프록시를 거친다). */
 export async function callApi<T>(
   request: APIRequestContext,
-  method: "GET" | "POST" | "PUT" | "DELETE",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<{ status: number; body: Envelope<T> }> {

@@ -24,7 +24,8 @@
     "noPosts": "No posts yet.",
     "noComments": "No comments yet.",
     "commentOn": "On {{title}}",
-    "deletedComment": "Deleted comment"
+    "deletedComment": "Deleted comment",
+    "allComments": "See all comments"
   },
   "status": {
     "DRAFT": "Draft",
@@ -85,5 +86,14 @@
     "commentHint": "When off, no new comments can be added to any post on this blog.",
     "submit": "Save",
     "saved": "Blog settings saved."
+  },
+  "comments": {
+    "title": "Comments",
+    "list": "Comment list",
+    "empty": "No comments yet.",
+    "on": "On {{title}}",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this comment?",
+    "deleted": "The comment has been deleted."
   }
 }

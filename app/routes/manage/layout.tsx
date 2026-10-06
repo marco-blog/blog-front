@@ -9,14 +9,14 @@ import { privatePageMeta } from "~/seo/meta";
 import type { Route } from "./+types/layout";
 
 /**
- * 블로그 관리 메뉴(006 FR-099의 001 범위). 아직 만들지 않은 화면(카테고리 US2, 댓글 US3)은 숨긴다.
+ * 블로그 관리 메뉴(006 FR-099의 001 범위). 아직 만들지 않은 화면(카테고리 US2)은 숨긴다.
  * 002~007의 메뉴(피드, 방명록, 통계 등)는 해당 스펙이 더한다.
  */
 export const MANAGE_MENU = [
   { key: "dashboard", path: "", available: true },
   { key: "posts", path: "/posts", available: true },
   { key: "categories", path: "/categories", available: false },
-  { key: "comments", path: "/comments", available: false },
+  { key: "comments", path: "/comments", available: true },
   { key: "settings", path: "/settings", available: true },
 ] as const;
 

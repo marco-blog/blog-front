@@ -24,7 +24,8 @@
     "noPosts": "まだ記事がありません。",
     "noComments": "まだコメントがありません。",
     "commentOn": "{{title}}へのコメント",
-    "deletedComment": "削除されたコメント"
+    "deletedComment": "削除されたコメント",
+    "allComments": "コメントをすべて見る"
   },
   "status": {
     "DRAFT": "下書き",
@@ -85,5 +86,14 @@
     "commentHint": "オフにすると、このブログのすべての記事に新しいコメントを付けられません。",
     "submit": "保存",
     "saved": "ブログ設定を保存しました。"
+  },
+  "comments": {
+    "title": "コメント管理",
+    "list": "コメント一覧",
+    "empty": "まだコメントはありません。",
+    "on": "{{title}}へのコメント",
+    "delete": "削除",
+    "deleteConfirm": "このコメントを削除しますか？",
+    "deleted": "コメントを削除しました。"
   }
 }
