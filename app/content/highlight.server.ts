@@ -1,5 +1,8 @@
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
+import c from "highlight.js/lib/languages/c";
+import cpp from "highlight.js/lib/languages/cpp";
+import csharp from "highlight.js/lib/languages/csharp";
 import css from "highlight.js/lib/languages/css";
 import diff from "highlight.js/lib/languages/diff";
 import go from "highlight.js/lib/languages/go";
@@ -31,17 +34,25 @@ const LANGUAGES = {
   python,
   go,
   diff,
+  c,
+  cpp,
+  csharp,
 };
 
 for (const [name, language] of Object.entries(LANGUAGES)) {
   hljs.registerLanguage(name, language);
 }
 
-/** 등록한 언어. 펜스에는 별칭(js, ts, html, sh, yml, py, kt 등)도 쓸 수 있다. */
+/** 등록한 언어. 펜스에는 별칭(js, ts, html, sh, yml, py, kt, c++, c#, cs 등)도 쓸 수 있다. */
 export const HIGHLIGHT_LANGUAGES = Object.keys(LANGUAGES);
 
-/** 살균 정책이 남기는 형식 그대로(R8): 코드 안에는 태그가 없고 `<`는 이스케이프되어 있다. */
-const CODE_BLOCK = /<pre><code class="language-([a-z0-9+#-]+)">([^<]*)<\/code><\/pre>/g;
+/**
+ * 살균 정책이 남기는 형식 그대로(R8): 코드 안에는 태그가 없고 `<`는 이스케이프되어 있다.
+ * class 값은 살균기가 인코딩한 채로 온다(`language-c++` → `language-c&#43;&#43;`). 풀어서 언어 이름을 읽는다.
+ */
+const CODE_BLOCK = /<pre><code class="language-([^"<>]+)">([^<]*)<\/code><\/pre>/g;
+/** 살균 정책이 허용하는 언어 이름(R8) */
+const LANGUAGE_NAME = /^[a-z0-9+#-]+$/;
 
 const NAMED_ENTITIES: Record<string, string> = {
   amp: "&",
@@ -69,8 +80,9 @@ export function highlightCodeBlocks(html: string | null | undefined): string {
   if (!html) {
     return "";
   }
-  return html.replace(CODE_BLOCK, (block, language: string, escapedCode: string) => {
-    if (!hljs.getLanguage(language)) {
+  return html.replace(CODE_BLOCK, (block, encodedLanguage: string, escapedCode: string) => {
+    const language = decodeEntities(encodedLanguage);
+    if (!LANGUAGE_NAME.test(language) || !hljs.getLanguage(language)) {
       return block;
     }
     // highlight.js는 코드 내용을 다시 이스케이프하고 `<span class="hljs-*">`만 만든다.
@@ -78,6 +90,7 @@ export function highlightCodeBlocks(html: string | null | undefined): string {
       language,
       ignoreIllegals: true,
     });
-    return `<pre><code class="language-${language} hljs">${value}</code></pre>`;
+    // class 값은 받은(인코딩된) 그대로 다시 쓴다.
+    return `<pre><code class="language-${encodedLanguage} hljs">${value}</code></pre>`;
   });
 }

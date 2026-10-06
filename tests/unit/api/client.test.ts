@@ -86,6 +86,50 @@ describe("createApiClient", () => {
     expect(client.requestId).toBe("abcdef1234567890");
   });
 
+  it("방문자 주소(X-Forwarded-For)와 원래 scheme(X-Forwarded-Proto)을 backend로 전달한다", async () => {
+    // front 서버 미들웨어(server/middleware/forwarded.ts)가 접속 주소를 붙여 둔 값이다.
+    const { client, fetchMock } = setup(jsonResponse(ok(null)), {
+      headers: { "x-forwarded-for": "203.0.113.7", "x-forwarded-proto": "https" },
+    });
+
+    await client.get("/me");
+
+    const { headers } = sentRequest(fetchMock);
+    expect(headers.get("x-forwarded-for")).toBe("203.0.113.7");
+    expect(headers.get("x-forwarded-proto")).toBe("https");
+  });
+
+  it("리프레시 요청에도 방문자 주소를 싣는다", async () => {
+    let meCalls = 0;
+    const fetchMock = vi.fn<typeof fetch>(async (input) => {
+      if (String(input).endsWith("/auth/refresh")) {
+        return jsonResponse(ok(null), { headers: { "set-cookie": "access_token=new; Path=/" } });
+      }
+      meCalls += 1;
+      if (meCalls === 1) {
+        return jsonResponse(
+          {
+            header: { isSuccessful: false, resultCode: "UNAUTHENTICATED", resultMessage: "" },
+            result: null,
+          },
+          { status: 401 },
+        );
+      }
+      return jsonResponse(ok({ id: 7 }));
+    });
+    const request = new Request("http://front.test/page", {
+      headers: { cookie: "refresh_token=r", "x-forwarded-for": "198.51.100.9, 10.0.0.2" },
+    });
+    const client = createApiClient(request, { baseUrl: "http://backend.test", fetch: fetchMock });
+
+    await expect(client.get("/me")).resolves.toEqual({ id: 7 });
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    for (const [, init] of fetchMock.mock.calls) {
+      expect(new Headers(init!.headers).get("x-forwarded-for")).toBe("198.51.100.9, 10.0.0.2");
+    }
+  });
+
   it("들어온 X-Request-Id가 없거나 형식이 틀리면 새로 만든다", async () => {
     const { client, fetchMock } = setup(jsonResponse(ok(null)), {
       headers: { "x-request-id": "bad id!" },

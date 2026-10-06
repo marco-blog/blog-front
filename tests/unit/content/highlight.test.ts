@@ -25,6 +25,33 @@ describe("highlightCodeBlocks", () => {
     }
   });
 
+  it("backend 살균기가 인코딩한 언어 이름(language-c&#43;&#43;)도 풀어서 알아본다", () => {
+    // OWASP 살균기는 속성 값의 +를 &#43;로 바꾼다(실제 backend 출력).
+    const html = '<pre><code class="language-c&#43;&#43;">int a&lt;b;\n</code></pre>';
+
+    const result = highlightCodeBlocks(html);
+
+    expect(result).toContain('<pre><code class="language-c&#43;&#43; hljs">');
+    expect(result).toContain('<span class="hljs-type">int</span>');
+    expect(result).not.toContain("a<b");
+  });
+
+  it("c#·cs·c 펜스도 강조한다", () => {
+    for (const alias of ["c#", "cs", "c", "cpp"]) {
+      const result = highlightCodeBlocks(
+        `<pre><code class="language-${alias}">int x = 1;</code></pre>`,
+      );
+      expect(result, alias).toContain(`class="language-${alias} hljs"`);
+      expect(result, alias).toContain("hljs-");
+    }
+  });
+
+  it("풀어 낸 언어 이름이 허용 형식이 아니면 그대로 둔다", () => {
+    const html = '<pre><code class="language-&#34;java">int x;</code></pre>';
+
+    expect(highlightCodeBlocks(html)).toBe(html);
+  });
+
   it("언어를 지정하지 않은 블록은 그대로 둔다(자동 감지 없음)", () => {
     const html = "<pre><code>public class A {}\nSELECT * FROM t;</code></pre>";
 
@@ -82,6 +109,9 @@ describe("highlightCodeBlocks", () => {
         "python",
         "go",
         "diff",
+        "c",
+        "cpp",
+        "csharp",
       ]),
     );
   });

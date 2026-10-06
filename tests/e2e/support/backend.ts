@@ -56,9 +56,10 @@ export async function logOut(page: Page) {
   await page.context().clearCookies();
 }
 
+/** backend 공통 응답 틀(api-guidelines.md 4절) */
 interface Envelope<T> {
-  resultCode: string;
-  data: T;
+  header: { isSuccessful: boolean; resultCode: string; resultMessage: string };
+  result: T;
 }
 
 /** 브라우저 쿠키를 함께 쓰는 API 호출(front 서버의 /api 프록시를 거친다). */
@@ -89,7 +90,7 @@ export async function publishPost(
     contentMarkdown: post.contentMarkdown,
   });
   expect(draft.status).toBe(201);
-  const id = draft.body.data.id;
+  const id = draft.body.result.id;
   const published = await callApi(request, "POST", `/posts/${id}/publish`, {
     visibility: post.visibility ?? "PUBLIC",
     commentEnabled: true,

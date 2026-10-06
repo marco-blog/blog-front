@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -15,6 +15,17 @@ export interface EditorProps {
   onUploadImage?: (file: File) => Promise<string>;
   /** 스크린 리더용 이름 */
   label?: string;
+  /** 저장 직전에 에디터의 지금 내용을 읽는 손잡이({@link EditorHandle}) */
+  ref?: Ref<EditorHandle>;
+}
+
+/**
+ * Milkdown은 입력 알림(`onChange`)을 잠깐 늦춰 보낸다. 입력 직후 바로 저장·발행해도 마지막 글자를 잃지 않도록
+ * 저장하는 쪽이 이 손잡이로 지금 내용을 직접 읽는다.
+ */
+export interface EditorHandle {
+  /** 에디터의 지금 Markdown. 에디터를 아직 불러오지 않았거나 기본 입력란이면(그때는 onChange가 바로 온다) null */
+  getMarkdown: () => string | null;
 }
 
 type Status = "loading" | "ready" | "failed";
@@ -23,6 +34,7 @@ interface CrepeLike {
   create: () => Promise<unknown>;
   destroy: () => Promise<unknown>;
   on: (fn: (api: MarkdownListener) => void) => unknown;
+  getMarkdown: () => string;
 }
 
 interface MarkdownListener {
@@ -96,10 +108,13 @@ export function crepeConfig(
  * Milkdown Crepe를 브라우저에서만 지연 로딩한다(SSR 제외). 서버 렌더링과 로딩 중에는 안내만 보이고,
  * 불러오지 못하면 기본 입력란(textarea)으로 계속 쓸 수 있게 한다.
  */
-export function Editor({ value, onChange, onUploadImage, label }: EditorProps) {
+export function Editor({ value, onChange, onUploadImage, label, ref }: EditorProps) {
   const { t } = useTranslation();
   const rootRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<Status>("loading");
+  /** 다 만들어진 에디터(그 전·실패 시 null) */
+  const ready = useRef<CrepeLike | null>(null);
+  useImperativeHandle(ref, () => ({ getMarkdown: () => ready.current?.getMarkdown() ?? null }), []);
   // 에디터는 한 번만 만들고, 최신 콜백은 ref로 읽는다.
   const latest = useRef({ value, onChange, onUploadImage, t });
   useEffect(() => {
@@ -132,6 +147,7 @@ export function Editor({ value, onChange, onUploadImage, label }: EditorProps) {
         });
         await crepe.create();
         if (!cancelled) {
+          ready.current = crepe;
           setStatus("ready");
         }
       } catch {
@@ -143,6 +159,7 @@ export function Editor({ value, onChange, onUploadImage, label }: EditorProps) {
 
     return () => {
       cancelled = true;
+      ready.current = null;
       void editor?.destroy().catch(() => undefined);
     };
   }, []);

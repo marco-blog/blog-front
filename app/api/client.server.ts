@@ -21,8 +21,18 @@ import { REQUEST_ID_HEADER, resolveRequestId } from "./request-id.server";
 
 export { API_PREFIX, type ApiRequestInit, type ApiResult } from "./envelope";
 
-/** 브라우저 요청에서 backend로 그대로 넘기는 헤더. 언어, CSRF 검사용 Origin, User-Agent. 쿠키는 따로 다룬다. */
-const FORWARDED_HEADERS = ["accept-language", "origin", "user-agent"] as const;
+/**
+ * 브라우저 요청에서 backend로 그대로 넘기는 헤더. 언어, CSRF 검사용 Origin, User-Agent, 그리고
+ * 방문자 주소·원래 scheme(X-Forwarded-For·X-Forwarded-Proto, front 서버 미들웨어 `server/middleware/forwarded.ts`가
+ * 접속 주소를 붙여 둔 값. backend는 믿는 프록시가 보낸 것만 쓴다). 쿠키는 따로 다룬다.
+ */
+const FORWARDED_HEADERS = [
+  "accept-language",
+  "origin",
+  "user-agent",
+  "x-forwarded-for",
+  "x-forwarded-proto",
+] as const;
 
 /** 상태를 바꾸지 않는 메서드. 나머지는 backend Origin 검사 대상이다(research.md R3). */
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);

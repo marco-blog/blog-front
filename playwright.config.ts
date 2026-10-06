@@ -10,6 +10,8 @@ export default defineConfig({
   testDir: "tests/e2e",
   use: {
     baseURL: `http://localhost:${PORT}`,
+    // 시나리오는 한국어 화면 문구로 요소를 찾는다. 브라우저 언어(Accept-Language)를 한국어로 고정한다.
+    locale: "ko-KR",
   },
   webServer: {
     command: "npm run build && npm start",

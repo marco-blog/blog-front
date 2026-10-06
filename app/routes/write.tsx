@@ -17,7 +17,7 @@ import type {
 import { rememberLastBlog } from "~/auth/lastBlog.server";
 import { requireUser } from "~/auth/session.server";
 import { parsePostId } from "~/blog/ids";
-import { Editor } from "~/components/Editor/Editor";
+import { Editor, type EditorHandle } from "~/components/Editor/Editor";
 import {
   PublishSettingsDialog,
   type PublishSettingsValue,
@@ -135,6 +135,7 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
   });
   /** 저장은 한 번에 하나씩(새 글이 두 번 만들어지지 않게) */
   const queue = useRef<Promise<unknown>>(Promise.resolve());
+  const editorRef = useRef<EditorHandle>(null);
 
   const markDirty = () => {
     state.current.dirty = true;
@@ -144,6 +145,13 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
   const runSave = useCallback(
     async (force: boolean): Promise<number | null> => {
       const current = state.current;
+      // 에디터의 입력 알림은 늦게 올 수 있으므로 저장 직전에 지금 내용을 직접 읽는다.
+      const latest = editorRef.current?.getMarkdown() ?? null;
+      if (latest !== null && latest !== current.content) {
+        current.content = latest;
+        current.dirty = true;
+        setDirty(true);
+      }
       if (!force && !current.dirty) {
         return current.postId;
       }
@@ -271,6 +279,7 @@ function Writer({ handle, post, draft, latestDraft }: WriteData) {
         />
       </div>
       <Editor
+        ref={editorRef}
         value={draft?.contentMarkdown ?? ""}
         label={t("editor:bodyLabel")}
         onChange={(markdown) => {

@@ -3,11 +3,14 @@ import express from "express";
 
 import { createLoadContext } from "../app/server/requestContext";
 import { cspNonceOf } from "../app/server/securityHeaders";
+import { forwardedHeaders } from "./middleware/forwarded";
 
 /** React Router 요청 처리기. 개발 시 Vite가, 운영 시 빌드 산출물(build/server)이 이 모듈을 불러온다. */
 export const app = express();
 app.disable("x-powered-by");
 
+// SSR이 backend를 부를 때 방문자 주소(X-Forwarded-For)·scheme을 함께 보낸다.
+app.use(forwardedHeaders());
 app.use(
   createRequestHandler({
     build: () => import("virtual:react-router/server-build"),

@@ -11,11 +11,31 @@ import { renderRoutes, rootData } from "../support/render";
 import { caught, expectRedirect, getRequest, routeArgs, statusOf } from "../support/route";
 
 // 에디터(Milkdown Crepe)는 브라우저 전용이라 이 테스트에서는 같은 인터페이스의 입력란으로 바꾼다.
-vi.mock("~/components/Editor/Editor", () => ({
-  Editor: ({ value, onChange }: { value: string; onChange: (markdown: string) => void }) => (
-    <textarea aria-label="본문" defaultValue={value} onChange={(e) => onChange(e.target.value)} />
-  ),
-}));
+// `editor.unreported`는 에디터에 들어갔지만 아직 onChange로 알리지 않은 내용(Milkdown은 알림을 늦춰 보낸다)이다.
+const editor = vi.hoisted(() => ({ unreported: null as string | null }));
+vi.mock("~/components/Editor/Editor", async () => {
+  const { useImperativeHandle } = await import("react");
+  return {
+    Editor: ({
+      value,
+      onChange,
+      ref,
+    }: {
+      value: string;
+      onChange: (markdown: string) => void;
+      ref?: React.Ref<{ getMarkdown: () => string | null }>;
+    }) => {
+      useImperativeHandle(ref, () => ({ getMarkdown: () => editor.unreported }));
+      return (
+        <textarea
+          aria-label="본문"
+          defaultValue={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      );
+    },
+  };
+});
 
 type LoaderArgs = Parameters<typeof loader>[0];
 type MetaArgs = Parameters<typeof meta>[0];
@@ -43,6 +63,7 @@ const loggedIn = { cookie: "access_token=a" };
 
 afterEach(() => {
   vi.useRealTimers();
+  editor.unreported = null;
 });
 
 const callLoader = (path: string, params: Record<string, string>, headers = loggedIn) =>
@@ -251,6 +272,36 @@ describe("write 화면", () => {
     ]);
     expect(backend.calls[0].body).toEqual({ title: "새 글", contentMarkdown: "# 안녕" });
     expect(backend.calls[1].body).toEqual({ visibility: "PUBLIC", commentEnabled: false });
+  });
+
+  it("발행 직전에 에디터의 지금 내용을 읽어 저장한다(입력 알림이 아직 오지 않았어도)", async () => {
+    const backend = savingBackend({
+      "POST /api/v1/posts/77/publish": ok({ ...postDetail, id: 77 }),
+    });
+    renderWrite();
+    fireEvent.change(await screen.findByLabelText("제목"), { target: { value: "빠르게 쓴 글" } });
+    editor.unreported = "방금 친 본문";
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "공개 발행" }));
+
+    expect(await screen.findByText("post page")).toBeInTheDocument();
+    expect(backend.calls[0].body).toEqual({
+      title: "빠르게 쓴 글",
+      contentMarkdown: "방금 친 본문",
+    });
+  });
+
+  it('"임시저장" 버튼도 에디터의 지금 내용을 저장한다', async () => {
+    const backend = savingBackend();
+    renderWrite();
+    fireEvent.change(await screen.findByLabelText("제목"), { target: { value: "제목" } });
+    editor.unreported = "늦게 알린 본문";
+
+    fireEvent.click(screen.getByRole("button", { name: "임시저장" }));
+
+    await vi.waitFor(() => expect(backend.calls).toHaveLength(1));
+    expect(backend.calls[0].body).toEqual({ title: "제목", contentMarkdown: "늦게 알린 본문" });
   });
 
   it("발행 오류(POST_CONTENT_EMPTY, 제목 REQUIRED)는 발행 설정 안에 보여준다", async () => {
