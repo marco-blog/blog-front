@@ -10,10 +10,15 @@ import {
   useRouteLoaderData,
 } from "react-router";
 
+import { errorMessage } from "~/api/errorMessage";
+import { isApiError } from "~/api/errors";
+import { getSessionUser } from "~/auth/session.server";
 import { ErrorPage } from "~/components/ErrorPage";
+import { Footer } from "~/components/layout/Footer";
+import { Header, type HeaderUser } from "~/components/layout/Header";
 import { NotFound } from "~/components/NotFound";
 import { DEFAULT_LANGUAGE } from "~/i18n/config";
-import { errorMessage } from "~/i18n/errors";
+import { FALLBACK_RESOURCES } from "~/i18n/fallback-resources";
 import { createI18n } from "~/i18n/instance";
 import { resolveLanguage } from "~/i18n/language";
 import { resourcesFor } from "~/i18n/resources.server";
@@ -21,17 +26,40 @@ import type { RootLoaderData } from "~/i18n/root-data";
 
 import type { Route } from "./+types/root";
 
-/** 화면 언어를 정하고(FR-149) 그 언어의 번역 리소스를 브라우저로 넘긴다(research.md R22). */
-export function loader({ request }: Route.LoaderArgs): RootLoaderData {
-  const language = resolveLanguage(request);
-  return { language, resources: resourcesFor(language) };
+export interface RootData extends RootLoaderData {
+  /** 로그인 회원(상단 메뉴용). 비로그인이면 null */
+  user: HeaderUser | null;
 }
 
+/**
+ * 로그인 회원(/me)과 화면 언어를 정하고(FR-149) 그 언어의 번역 리소스를 브라우저로 넘긴다(research.md R22).
+ * backend에 닿지 못해도 공개 화면은 비로그인 상태로 그린다.
+ */
+export async function loader({ request }: Route.LoaderArgs): Promise<RootData> {
+  const member = await getSessionUser(request).catch((error: unknown) => {
+    if (isApiError(error)) {
+      return null;
+    }
+    throw error;
+  });
+  const language = resolveLanguage(request, member?.locale);
+  return {
+    language,
+    resources: resourcesFor(language),
+    user: member && {
+      userId: member.userId,
+      nickname: member.nickname,
+      role: member.role,
+    },
+  };
+}
+
+/** 모든 화면(오류 화면 포함)의 공통 틀: 상단, 본문, 하단 */
 export function Layout({ children }: { children: React.ReactNode }) {
   const data = useRouteLoaderData<typeof loader>("root");
   const language = data?.language ?? DEFAULT_LANGUAGE;
-  const resources = data?.resources;
-  const i18n = useMemo(() => createI18n(language, resources ?? {}), [language, resources]);
+  const resources = data?.resources ?? FALLBACK_RESOURCES;
+  const i18n = useMemo(() => createI18n(language, resources), [language, resources]);
 
   return (
     <html lang={language}>
@@ -42,7 +70,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+        <I18nextProvider i18n={i18n}>
+          <Header user={data?.user ?? null} />
+          {children}
+          <Footer />
+        </I18nextProvider>
+        {/* CSP nonce는 entry.server의 <ServerRouter nonce>가 기본값으로 넘긴다(research.md R27). */}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -54,6 +87,10 @@ export default function App() {
   return <Outlet />;
 }
 
+/**
+ * 오류 경계. 404(없는 주소, 볼 권한이 없는 자원)는 찾을 수 없음 화면이며 HTTP 상태도 404다.
+ * loader가 `throw data(..., { status: 404 })`나 `throw apiErrorResponse(error)`로 던진 상태를 그대로 쓴다.
+ */
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const { t } = useTranslation();
   if (isRouteErrorResponse(error)) {

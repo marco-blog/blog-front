@@ -15,7 +15,14 @@ export default defineConfig({
       enabled: true,
       provider: "v8",
       include: ["app/**/*.{ts,tsx}", "server/**/*.ts"],
-      exclude: ["app/routes.ts", "app/**/*.d.ts", "app/api/types.ts", "server/app.ts"],
+      // entry.server.tsx(React Router 기본 진입점 + nonce)와 server/app.ts는 E2E(tests/e2e)에서 확인한다.
+      exclude: [
+        "app/routes.ts",
+        "app/**/*.d.ts",
+        "app/api/types.ts",
+        "app/entry.server.tsx",
+        "server/app.ts",
+      ],
       reporter: ["text", "html", "lcov"],
       thresholds: {
         lines: 80,

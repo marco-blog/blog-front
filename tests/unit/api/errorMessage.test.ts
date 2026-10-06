@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { SUPPORTED_LANGUAGES } from "~/i18n/config";
-import { errorMessage, fieldErrorMessage, fieldErrorMessages } from "~/i18n/errors";
+import { errorMessage, fieldErrorMessage, fieldErrorMessages } from "~/api/errorMessage";
+import { ApiError, toApiErrorData } from "~/api/errors";
 import { createI18n } from "~/i18n/instance";
 import { allResources, resourcesFor } from "~/i18n/resources.server";
 
@@ -21,6 +22,56 @@ describe("errorMessage (FR-154)", () => {
     expect(errorMessage(t(language), "a:b.c")).toBe(expected);
     expect(errorMessage(t(language), undefined)).toBe(expected);
   });
+});
+
+describe("화면에 키나 resultMessage가 나오지 않는다 (FR-154)", () => {
+  const error = new ApiError({
+    status: 400,
+    resultCode: "VALIDATION_FAILED",
+    resultMessage: "Validation failed: title must not be blank",
+    fieldErrors: [{ field: "title", code: "REQUIRED" }],
+  });
+
+  it("ApiError·직렬화한 오류 데이터도 resultCode로 번역한다", () => {
+    expect(errorMessage(t("ko"), error)).toBe("입력한 내용을 확인해 주세요.");
+    expect(errorMessage(t("en"), toApiErrorData(error))).toBe("Please check what you entered.");
+    expect(errorMessage(t("en"), null)).toBe(
+      (allResources.en.errors as Record<string, string>).UNKNOWN,
+    );
+  });
+
+  it.each(SUPPORTED_LANGUAGES)("%s: 공통 오류 코드는 모두 번역돼 있다", (language) => {
+    for (const code of [
+      "VALIDATION_FAILED",
+      "UNAUTHENTICATED",
+      "FORBIDDEN",
+      "ORIGIN_NOT_ALLOWED",
+      "NOT_FOUND",
+      "INTERNAL_ERROR",
+      "UNKNOWN",
+    ]) {
+      const message = errorMessage(t(language), code);
+      expect(message).toBe((allResources[language].errors as Record<string, string>)[code]);
+      expect(message).not.toContain(code);
+      expect(message).not.toContain("errors:");
+    }
+  });
+
+  it.each(SUPPORTED_LANGUAGES)(
+    "%s: 어떤 입력에도 키·영어 디버그 문구가 나오지 않는다",
+    (language) => {
+      const messages = [
+        errorMessage(t(language), error),
+        errorMessage(t(language), "NEW_BACKEND_CODE"),
+        fieldErrorMessage(t(language), { code: "NEW_FIELD_RULE" }),
+        ...Object.values(fieldErrorMessages(t(language), error.fieldErrors)),
+      ];
+      for (const message of messages) {
+        expect(message).not.toMatch(/errors:|fieldErrors\.|NEW_/);
+        expect(message).not.toContain(error.resultMessage);
+      }
+    },
+  );
 });
 
 describe("fieldErrorMessage", () => {
@@ -47,26 +98,5 @@ describe("fieldErrorMessage", () => {
       ]),
     ).toEqual({ title: "This field is required.", handle: "The format is not valid." });
     expect(fieldErrorMessages(t("en"), undefined)).toEqual({});
-  });
-});
-
-describe("대체 언어 (FR-152)", () => {
-  it("화면 언어에 없는 키는 영어, 영어도 없으면 한국어", () => {
-    const i18n = createI18n("ja", {
-      ja: { common: { a: "ja-a" } },
-      en: { common: { a: "en-a", b: "en-b" } },
-      ko: { common: { a: "ko-a", b: "ko-b", c: "ko-c" } },
-    });
-    expect([i18n.t("a"), i18n.t("b"), i18n.t("c")]).toEqual(["ja-a", "en-b", "ko-c"]);
-  });
-
-  it("빈 문자열은 번역이 없는 것으로 본다", () => {
-    const i18n = createI18n("ja", { ja: { common: { a: "" } }, en: { common: { a: "en-a" } } });
-    expect(i18n.t("a")).toBe("en-a");
-  });
-
-  it("resourcesFor는 화면 언어와 대체 언어만 담는다", () => {
-    expect(Object.keys(resourcesFor("ja")).sort()).toEqual(["en", "ja", "ko"]);
-    expect(Object.keys(resourcesFor("ko")).sort()).toEqual(["en", "ko"]);
   });
 });

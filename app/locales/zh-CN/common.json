@@ -12,5 +12,21 @@
   "error": {
     "title": "出现了问题",
     "description": "请稍后再试。"
+  },
+  "languageName": "简体中文",
+  "nav": {
+    "label": "主菜单",
+    "login": "登录",
+    "signup": "注册",
+    "write": "写文章",
+    "manage": "管理我的博客",
+    "settings": "设置",
+    "logout": "退出登录"
+  },
+  "footer": {
+    "label": "网站信息",
+    "terms": "服务条款",
+    "privacy": "隐私政策",
+    "language": "语言"
   }
 }

@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 
-import type { ApiFieldError } from "~/api/types";
+import type { ApiFieldError } from "./types";
 
 /** backend 오류 코드 형식(대문자 스네이크). 이 밖의 값은 키로 쓰지 않는다. */
 const CODE_PATTERN = /^[A-Z][A-Z0-9_]*$/;
@@ -9,10 +9,15 @@ export const UNKNOWN_ERROR_CODE = "UNKNOWN";
 export const UNKNOWN_FIELD_ERROR_CODE = "INVALID";
 
 /**
- * API 오류 코드(header.resultCode)를 화면 언어 문구로 바꾼다(FR-154).
+ * API 오류 코드(header.resultCode)를 화면 언어 문구로 바꾼다(FR-154, research.md R22).
  * 키는 errors 네임스페이스의 `{code}`이며, 모르는 코드는 일반 오류 문구(`UNKNOWN`)를 쓴다.
+ * backend의 resultMessage는 영어 디버그용이라 화면에 쓰지 않는다. ApiError·ApiErrorData를 그대로 넘겨도 된다.
  */
-export function errorMessage(t: TFunction, code: string | null | undefined): string {
+export function errorMessage(
+  t: TFunction,
+  codeOrError: string | { resultCode: string } | null | undefined,
+): string {
+  const code = typeof codeOrError === "object" ? codeOrError?.resultCode : codeOrError;
   const fallback = t(`errors:${UNKNOWN_ERROR_CODE}`);
   if (!code || !CODE_PATTERN.test(code)) {
     return fallback;
