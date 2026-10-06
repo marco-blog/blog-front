@@ -1,0 +1,155 @@
+name: E2E (nightly)
+
+# 전체 Playwright E2E(T245): backend main + 일회용 MySQL + Mailpit과 함께 메일 시나리오까지 모두 돌린다.
+# PR마다 도는 ci.yml(e2e-backend)과 같은 구성에 Mailpit(MAILPIT_URL)을 더했다. 수동 실행과 매일 밤 실행.
+on:
+  workflow_dispatch:
+    inputs:
+      backend-ref:
+        description: "blog-backend 브랜치·태그·커밋"
+        required: false
+        default: main
+  schedule:
+    # 매일 03:00 KST(18:00 UTC)
+    - cron: "0 18 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # 비밀 값은 실행마다 새로 만드는 일회용 값이고, MySQL 비밀번호는 작업이 끝나면 사라지는 컨테이너용 고정값이다.
+    env:
+      MYSQL_ROOT_PASSWORD: ci-only-root-pw
+
+    services:
+      # 개발용 메일 서버. backend local 프로필의 기본 메일 설정(localhost:1025, 인증·STARTTLS 없음)이 여기로 보낸다.
+      # E2E는 웹 API(MAILPIT_URL=http://localhost:8025)로 받은 메일을 읽는다.
+      mailpit:
+        image: axllent/mailpit
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: marco-blog/blog-backend
+          ref: ${{ inputs.backend-ref || 'main' }}
+          path: blog-backend
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: blog-backend/pom.xml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # services: 는 컨테이너 실행 인자를 줄 수 없어서(--ngram-token-size=2) docker run으로 띄운다.
+      - name: Start MySQL 8.4 and load schema
+        run: |
+          docker run -d --name blog-mysql -p 3306:3306 \
+            -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
+            -e MYSQL_DATABASE=blog_e2e \
+            mysql:8.4 --ngram-token-size=2
+          # 초기화용 임시 서버는 TCP를 열지 않으므로 TCP 접속이 되면 실제 서버가 뜬 것이다.
+          for i in $(seq 1 60); do
+            if docker exec blog-mysql mysql -h127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+          docker exec -i blog-mysql mysql -h127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" blog_e2e \
+            < blog-backend/src/test/resources/db/schema-mysql.sql
+
+      - name: Wait for Mailpit
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:8025/api/v1/info >/dev/null; then
+              echo "Mailpit is ready"; exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
+      - name: Build backend
+        working-directory: blog-backend
+        run: ./mvnw -B -q -DskipTests package
+
+      # local 프로필: 허용 Origin에 http://localhost:5173(Playwright가 띄우는 front)이 있고,
+      # 메일 링크 주소(blog.base-url)도 http://localhost:5173이다.
+      - name: Start backend
+        working-directory: blog-backend
+        env:
+          SPRING_PROFILES_ACTIVE: local
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/blog_e2e?connectionTimeZone=UTC&characterEncoding=UTF-8
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ci-only-root-pw
+          DB_PASSWORD: unused
+          BLOG_MAIL_HOST: localhost
+          BLOG_MAIL_PORT: "1025"
+          BLOG_MAIL_STARTTLS: "false"
+          BLOG_MAIL_FROM: no-reply@localhost
+          BLOG_BASE_URL: http://localhost:5173
+          BLOG_MEDIA_UPLOAD_DIR: ${{ runner.temp }}/blog-media/upload
+          BLOG_MEDIA_TEMP_DIR: ${{ runner.temp }}/blog-media/temp
+          BLOG_MEDIA_THUMBNAIL_DIR: ${{ runner.temp }}/blog-media/thumb
+        run: |
+          BLOG_CRYPTO_KEY_V1="$(openssl rand -base64 32)"
+          BLOG_CRYPTO_HASH_KEY="$(openssl rand -base64 32)"
+          BLOG_AUTH_JWT_SECRET="$(openssl rand -base64 48)"
+          echo "::add-mask::$BLOG_CRYPTO_KEY_V1"
+          echo "::add-mask::$BLOG_CRYPTO_HASH_KEY"
+          echo "::add-mask::$BLOG_AUTH_JWT_SECRET"
+          export BLOG_CRYPTO_KEY_V1 BLOG_CRYPTO_HASH_KEY BLOG_AUTH_JWT_SECRET
+          nohup java -jar target/blog-backend-*.jar --spring.jpa.show-sql=false > backend.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -fs http://localhost:8080/actuator/health >/dev/null; then
+              echo "backend is up"; exit 0
+            fi
+            sleep 2
+          done
+          cat backend.log
+          exit 1
+
+      - run: npm ci
+
+      - name: Build front
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts의 webServer가 front를 빌드해 http://localhost:5173으로 띄우고 BLOG_BACKEND_URL을 넘긴다.
+      - name: E2E (all scenarios, with mail)
+        run: npx playwright test
+        env:
+          CI: "true"
+          E2E_BACKEND_URL: http://localhost:8080
+          MAILPIT_URL: http://localhost:8025
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-nightly-logs
+          path: |
+            blog-backend/backend.log
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
