@@ -37,5 +37,8 @@
   "DRAFT_NOT_FOUND": "We couldn't find this draft.",
   "POST_NOT_PUBLISHED": "This post hasn't been published yet.",
   "POST_NOT_IN_TRASH": "This post isn't in the trash.",
-  "POST_CONTENT_EMPTY": "Write some content before publishing."
+  "POST_CONTENT_EMPTY": "Write some content before publishing.",
+  "COMMENT_NOT_FOUND": "The comment could not be found.",
+  "REPLY_DEPTH_EXCEEDED": "You cannot reply to a reply.",
+  "COMMENTS_DISABLED": "Comments are closed for this post."
 }

@@ -77,10 +77,12 @@ export default function ManageDashboardPage() {
           <ul>
             {dashboard.recentComments.map((comment) => (
               <li key={comment.id}>
-                <p>{comment.deleted ? t("manage:dashboard.deletedComment") : comment.content}</p>
+                <p className="comment-content" style={{ whiteSpace: "pre-wrap" }}>
+                  {comment.deleted ? t("manage:dashboard.deletedComment") : comment.content}
+                </p>
                 <p>
-                  {comment.author.nickname} ·{" "}
-                  <Link to={`/${handle}/${comment.postId}`}>
+                  {comment.author?.nickname ?? t("comment:unknownAuthor")} ·{" "}
+                  <Link to={`/${handle}/${comment.postId}#comment-${comment.id}`}>
                     {t("manage:dashboard.commentOn", { title: comment.postTitle })}
                   </Link>{" "}
                   <time dateTime={comment.createdAt}>{format.dateTime(comment.createdAt)}</time>
@@ -89,6 +91,9 @@ export default function ManageDashboardPage() {
             ))}
           </ul>
         )}
+        <p>
+          <Link to={`/${handle}/manage/comments`}>{t("manage:dashboard.allComments")}</Link>
+        </p>
       </section>
     </main>
   );

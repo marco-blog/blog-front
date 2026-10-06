@@ -37,5 +37,8 @@
   "DRAFT_NOT_FOUND": "找不到该草稿。",
   "POST_NOT_PUBLISHED": "该文章尚未发布。",
   "POST_NOT_IN_TRASH": "该文章不在回收站中。",
-  "POST_CONTENT_EMPTY": "请先输入正文再发布。"
+  "POST_CONTENT_EMPTY": "请先输入正文再发布。",
+  "COMMENT_NOT_FOUND": "找不到该评论。",
+  "REPLY_DEPTH_EXCEEDED": "不能回复回复。",
+  "COMMENTS_DISABLED": "此文章已关闭评论。"
 }
