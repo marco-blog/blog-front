@@ -19,7 +19,8 @@
     "TOO_LARGE": "Must be {{value}} or less.",
     "INVALID_FORMAT": "The format is not valid.",
     "INVALID": "This value is not valid.",
-    "PASSWORD_WEAK": "Passwords must be 8 to 64 characters and include both letters and numbers."
+    "PASSWORD_WEAK": "Passwords must be 8 to 64 characters and include both letters and numbers.",
+    "PASSWORD_CONFIRM_MISMATCH": "The new passwords don't match."
   },
   "INVALID_CREDENTIALS": "The email or password is incorrect.",
   "REFRESH_INVALID": "Your login has expired. Please log in again.",
@@ -37,5 +38,6 @@
   "DRAFT_NOT_FOUND": "We couldn't find this draft.",
   "POST_NOT_PUBLISHED": "This post hasn't been published yet.",
   "POST_NOT_IN_TRASH": "This post isn't in the trash.",
-  "POST_CONTENT_EMPTY": "Write some content before publishing."
+  "POST_CONTENT_EMPTY": "Write some content before publishing.",
+  "PASSWORD_RESET_TOKEN_INVALID": "This reset link has expired or has already been used. Please request a new one."
 }

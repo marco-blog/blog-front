@@ -2,7 +2,10 @@
   "title": "账号设置",
   "nav": {
     "label": "账号设置菜单",
-    "blogs": "我的博客"
+    "blogs": "我的博客",
+    "profile": "个人资料",
+    "password": "修改密码",
+    "loginHistory": "登录记录"
   },
   "blogs": {
     "title": "我的博客",
@@ -26,5 +29,40 @@
       "submit": "删除",
       "deleted": "博客已删除。"
     }
+  },
+  "profile": {
+    "title": "个人资料",
+    "email": "邮箱",
+    "nickname": "昵称",
+    "bio": "简介",
+    "bioHint": "最多300个字符。",
+    "submit": "保存",
+    "saved": "个人资料已保存。",
+    "withdraw": {
+      "open": "注销账号",
+      "warning": "注销后无法恢复。您将无法登录，所有博客的文章都将变为不公开。个人信息将在30天后销毁。",
+      "password": "确认密码",
+      "submit": "注销账号"
+    }
+  },
+  "password": {
+    "title": "修改密码",
+    "current": "当前密码",
+    "new": "新密码",
+    "newConfirm": "确认新密码",
+    "submit": "修改密码",
+    "changed": "密码已修改。其他设备已退出登录。"
+  },
+  "loginHistory": {
+    "title": "登录记录",
+    "caption": "最近的登录尝试(保留3个月)",
+    "at": "时间",
+    "result": "结果",
+    "ip": "IP",
+    "device": "设备",
+    "success": "成功",
+    "failure": "失败",
+    "unknown": "未知",
+    "empty": "没有登录记录。"
   }
 }

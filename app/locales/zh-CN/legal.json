@@ -1,0 +1,10 @@
+{
+  "terms": {
+    "title": "服务条款"
+  },
+  "privacy": {
+    "title": "隐私政策"
+  },
+  "meta": "版本 {{version}} · 生效日期 {{date}}",
+  "translationNotice": "本文件为译本。如与韩文版内容不一致，以韩文版为准。"
+}

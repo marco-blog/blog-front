@@ -104,6 +104,9 @@ export default function Login() {
         </button>
       </Form>
       <p>
+        <Link to="/password-reset">{t("auth:login.forgotPassword")}</Link>
+      </p>
+      <p>
         {t("auth:login.noAccount")} <Link to="/signup">{t("auth:login.signup")}</Link>
       </p>
     </main>
