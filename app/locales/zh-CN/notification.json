@@ -1,0 +1,14 @@
+{
+  "title": "通知",
+  "label": "通知列表",
+  "empty": "暂无通知。",
+  "unread": "未读",
+  "readAll": "全部标为已读",
+  "withdrawnActor": "已注销用户",
+  "unknownActor": "未知用户",
+  "types": {
+    "NEW_COMMENT": "{{actor}} 评论了“{{postTitle}}”。",
+    "NEW_SUBSCRIBER": "{{actor}} 订阅了 {{blogTitle}}。",
+    "UNKNOWN": "你有一条新通知。"
+  }
+}

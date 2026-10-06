@@ -1,0 +1,14 @@
+{
+  "title": "お知らせ",
+  "label": "お知らせ一覧",
+  "empty": "お知らせはありません。",
+  "unread": "未読",
+  "readAll": "すべて既読にする",
+  "withdrawnActor": "退会した会員",
+  "unknownActor": "不明な会員",
+  "types": {
+    "NEW_COMMENT": "{{actor}}さんが「{{postTitle}}」にコメントしました。",
+    "NEW_SUBSCRIBER": "{{actor}}さんが{{blogTitle}}を購読しました。",
+    "UNKNOWN": "新しいお知らせがあります。"
+  }
+}

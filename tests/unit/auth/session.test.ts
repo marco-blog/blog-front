@@ -20,6 +20,7 @@ const member: SessionUser = {
   timeZone: "Asia/Seoul",
   blogs: [{ handle: "marco", title: "마르코의 블로그" }],
   unseenReleaseNote: null,
+  unreadNotificationCount: 3,
 };
 
 function envelope(status: number, body: unknown) {

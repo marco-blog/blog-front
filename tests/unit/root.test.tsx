@@ -37,9 +37,16 @@ const member: SessionUser = {
   timeZone: "Asia/Seoul",
   blogs: [{ handle: "marco", title: "마르코의 블로그" }],
   unseenReleaseNote: null,
+  unreadNotificationCount: 3,
 };
 
-const headerUser = { userId: 7, nickname: "마르코", role: "USER" };
+const headerUser = {
+  userId: 7,
+  nickname: "마르코",
+  role: "USER",
+  blogs: ["marco"],
+  unreadNotificationCount: 3,
+};
 
 beforeEach(() => {
   getSessionUserMock.mockReset();
@@ -129,6 +136,41 @@ describe("Header", () => {
     expect(form).toHaveAttribute("method", "post");
     expect(form).toHaveAttribute("action", "/logout");
     expect(within(nav).queryByRole("link", { name: "Log in" })).toBeNull();
+  });
+
+  it("로그인: 구독 피드(/feed)와 알림(/notifications) 링크, 안 읽은 수 배지(002 T049)", () => {
+    render(withI18n(<Header user={headerUser} />));
+
+    const nav = screen.getByRole("navigation", { name: "주 메뉴" });
+    expect(within(nav).getByRole("link", { name: "구독 피드" })).toHaveAttribute("href", "/feed");
+    const notifications = within(nav).getByRole("link", { name: /^알림/ });
+    expect(notifications).toHaveAttribute("href", "/notifications");
+    expect(within(notifications).getByLabelText("안 읽은 알림 3개")).toHaveTextContent("3");
+  });
+
+  it.each([
+    [0, null],
+    [undefined, null],
+    [99, "99"],
+    [100, "99+"],
+    [1234, "99+"],
+  ])("안 읽은 알림 %s개 → 배지 %s", (count, badge) => {
+    render(withI18n(<Header user={{ ...headerUser, unreadNotificationCount: count }} />));
+
+    const notifications = screen.getByRole("link", { name: /^알림/ });
+    const shown = notifications.querySelector(".badge");
+    if (badge === null) {
+      expect(shown).toBeNull();
+    } else {
+      expect(shown).toHaveTextContent(badge);
+    }
+  });
+
+  it("비로그인에는 구독 피드·알림 링크가 없다", () => {
+    render(withI18n(<Header user={null} />));
+
+    expect(screen.queryByRole("link", { name: "구독 피드" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^알림/ })).toBeNull();
   });
 });
 

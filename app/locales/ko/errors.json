@@ -51,5 +51,7 @@
   "MEDIA_TOO_LARGE": "이미지는 10MB 이하만 올릴 수 있습니다.",
   "MEDIA_TYPE_NOT_ALLOWED": "JPEG, PNG, GIF, WebP 이미지만 올릴 수 있습니다.",
   "MEDIA_TEMP_QUOTA_EXCEEDED": "저장하지 않은 이미지가 너무 많습니다. 글을 저장한 뒤 다시 올려 주세요.",
-  "THUMBNAIL_SIZE_NOT_ALLOWED": "지원하지 않는 이미지 크기입니다."
+  "THUMBNAIL_SIZE_NOT_ALLOWED": "지원하지 않는 이미지 크기입니다.",
+  "NOTIFICATION_NOT_FOUND": "알림을 찾을 수 없습니다.",
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "내 블로그는 구독할 수 없습니다."
 }

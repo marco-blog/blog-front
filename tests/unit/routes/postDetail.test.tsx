@@ -2,7 +2,13 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import PostDetailRoute, { action, links, loader, meta } from "~/routes/post-detail";
+import PostDetailRoute, {
+  action,
+  links,
+  loader,
+  meta,
+  shouldRevalidate,
+} from "~/routes/post-detail";
 
 import { fail, mockBackend, ok } from "../support/backend";
 import { postDetail, postWithoutMarkdown } from "../support/fixtures";
@@ -429,5 +435,111 @@ describe("post detail 화면의 댓글", () => {
     });
 
     expect(await screen.findByRole("note")).toHaveTextContent("이 글에는 댓글을 쓸 수 없습니다.");
+  });
+});
+
+describe("post detail 좋아요(002 T027)", () => {
+  type ActionArgs = Parameters<typeof action>[0];
+  const LIKE = "PUT /api/v1/me/likes/123";
+  const UNLIKE = "DELETE /api/v1/me/likes/123";
+  const callAction = (fields: Record<string, string>, headers = { cookie: "access_token=a" }) =>
+    action(
+      routeArgs<ActionArgs>(formRequest("/marco/123", fields, headers), {
+        handle: "marco",
+        postId: "123",
+      }),
+    );
+
+  it("intent=like는 PUT /me/likes/{id}, unlike는 DELETE, 응답의 수를 돌려준다", async () => {
+    const backend = mockBackend({
+      [LIKE]: ok({ postId: 123, liked: true, likeCount: 6 }),
+      [UNLIKE]: ok({ postId: 123, liked: false, likeCount: 5 }),
+    });
+
+    const liked = asData(await callAction({ intent: "like" }));
+    const unliked = asData(await callAction({ intent: "unlike" }));
+
+    expect(liked.data).toEqual({ intent: "like", ok: true, liked: true, likeCount: 6 });
+    expect(unliked.data).toEqual({ intent: "unlike", ok: true, liked: false, likeCount: 5 });
+    expect(backend.callsTo(LIKE)).toHaveLength(1);
+    expect(backend.callsTo(UNLIKE)).toHaveLength(1);
+    expect(backend.callsTo("POST /api/v1/posts/123/comments")).toHaveLength(0);
+  });
+
+  it("볼 수 없는 글(POST_NOT_FOUND)은 상태 코드와 오류 코드를 돌려준다", async () => {
+    mockBackend({ [LIKE]: fail(404, "POST_NOT_FOUND") });
+
+    const result = asData(await callAction({ intent: "like" }));
+
+    expect(result.init?.status).toBe(404);
+    expect(result.data).toEqual({ intent: "like", ok: false, resultCode: "POST_NOT_FOUND" });
+  });
+
+  it("비로그인(401)은 이 글로 돌아오는 로그인 화면으로", async () => {
+    mockBackend({ [LIKE]: fail(401, "UNAUTHENTICATED") });
+
+    const location = expectRedirect(await caught(callAction({ intent: "like" }, { cookie: "" })));
+
+    expect(location).toBe("/login?next=%2Fmarco%2F123");
+  });
+
+  it("댓글 intent는 그대로 댓글 API로", async () => {
+    const backend = mockBackend({
+      "POST /api/v1/posts/123/comments": ok({ id: 1 }, { status: 201 }),
+    });
+
+    await callAction({ intent: "create", target: "new", content: "안녕" });
+
+    expect(backend.callsTo("POST /api/v1/posts/123/comments")).toHaveLength(1);
+    expect(backend.callsTo(LIKE)).toHaveLength(0);
+  });
+
+  it("좋아요 뒤에는 글을 다시 읽지 않고, 그 밖의 작업은 기본 동작", () => {
+    const args = (intent: string) =>
+      ({
+        formData: new URLSearchParams({ intent }) as unknown as FormData,
+        defaultShouldRevalidate: true,
+      }) as Parameters<typeof shouldRevalidate>[0];
+
+    expect(shouldRevalidate(args("like"))).toBe(false);
+    expect(shouldRevalidate(args("unlike"))).toBe(false);
+    expect(shouldRevalidate(args("create"))).toBe(true);
+  });
+
+  function renderPost(user: { userId: number; nickname: string; role: string } | null, post = {}) {
+    const data: LoaderData = {
+      post: { ...postWithoutMarkdown(), ...post },
+      isOwner: false,
+      origin: "http://front.test",
+      comments: [],
+    };
+    renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
+      initialEntries: ["/marco/123"],
+      user,
+    });
+  }
+
+  it("로그인 회원: 좋아요 수와 버튼(이미 눌렀으면 취소)", async () => {
+    renderPost({ userId: 2, nickname: "독자", role: "USER" }, { likedByMe: true, likeCount: 7 });
+
+    expect(await screen.findByRole("button", { name: "좋아요 취소" })).toBeInTheDocument();
+    expect(screen.getByText("좋아요 7")).toBeInTheDocument();
+  });
+
+  it("비로그인: 수와 로그인 링크", async () => {
+    renderPost(null);
+
+    expect(await screen.findByRole("link", { name: "로그인하고 좋아요 누르기" })).toHaveAttribute(
+      "href",
+      "/login?next=%2Fmarco%2F123",
+    );
+    expect(screen.getByText("좋아요 5")).toBeInTheDocument();
+  });
+
+  it("발행 전 글(주인 미리보기)에는 좋아요가 없다", async () => {
+    renderPost({ userId: 1, nickname: "마르코", role: "USER" }, { status: "DRAFT" });
+
+    await screen.findByRole("article");
+    expect(screen.queryByText(/^좋아요/)).toBeNull();
   });
 });

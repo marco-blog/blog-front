@@ -1,6 +1,13 @@
 import highlightStyles from "highlight.js/styles/github.css?url";
 import { useTranslation } from "react-i18next";
-import { Link, data, useActionData, useLoaderData } from "react-router";
+import {
+  Link,
+  data,
+  useActionData,
+  useLoaderData,
+  useRouteLoaderData,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
@@ -12,13 +19,17 @@ import type { CommentActionData } from "~/components/comment/actions";
 import { runCommentAction } from "~/components/comment/actions.server";
 import { CommentSection } from "~/components/comment/CommentSection";
 import { Avatar } from "~/components/media/Avatar";
+import { LikeButton } from "~/components/post/LikeButton";
 import { PostContent } from "~/components/post/PostContent";
 import { blogTagHref } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { highlightCodeBlocks } from "~/content/highlight.server";
+import { formIntent, isLikeIntent, type LikeActionData } from "~/discovery/actions";
+import { runLikeAction } from "~/discovery/actions.server";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl } from "~/media/thumbnail";
+import type { RootData } from "~/root";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/post-detail";
@@ -60,13 +71,32 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
-/** 댓글 쓰기·답글·수정·삭제(US3). 로그인이 필요하면 이 글로 돌아오는 로그인 화면으로 보낸다. */
+/**
+ * 좋아요(`intent=like|unlike`, 002)와 댓글 쓰기·답글·수정·삭제(US3).
+ * 로그인이 필요하면 이 글로 돌아오는 로그인 화면으로 보낸다.
+ */
 export async function action({ request, params }: Route.ActionArgs) {
   const postId = parsePostId(params.postId);
   if (!isValidHandle(params.handle) || postId === null) {
     throw data(null, { status: 404 });
   }
-  return runCommentAction(request, { postId, returnTo: `/${params.handle}/${postId}` });
+  const returnTo = `/${params.handle}/${postId}`;
+  const intent = await formIntent(request);
+  if (isLikeIntent(intent)) {
+    return runLikeAction(request, intent, { postId, returnTo });
+  }
+  return runCommentAction(request, { postId, returnTo });
+}
+
+/** 좋아요는 응답의 수로 화면을 고치므로 글을 다시 읽지 않는다(조회수 기록도 다시 하지 않음). */
+export function shouldRevalidate({
+  formData,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (isLikeIntent(formData?.get("intent"))) {
+    return false;
+  }
+  return defaultShouldRevalidate;
 }
 
 export function meta({ loaderData, matches }: Route.MetaArgs) {
@@ -91,7 +121,12 @@ export default function PostDetailPage() {
   const { t } = useTranslation();
   const format = useDateFormat();
   const { post, isOwner, comments } = useLoaderData<typeof loader>();
-  const result = useActionData<CommentActionData>();
+  const actionData = useActionData<CommentActionData | LikeActionData>();
+  const viewer = useRouteLoaderData<RootData>("root")?.user ?? null;
+  const likeResult =
+    actionData && isLikeIntent(actionData.intent) ? (actionData as LikeActionData) : undefined;
+  const result =
+    actionData && !isLikeIntent(actionData.intent) ? (actionData as CommentActionData) : undefined;
   const handle = post.blogHandle;
 
   return (
@@ -146,6 +181,16 @@ export default function PostDetailPage() {
           <p>{t("post:views", { views: post.viewCount })}</p>
         </header>
         <PostContent html={post.contentHtml} />
+        {post.status === "PUBLISHED" && (
+          <footer className="post-actions">
+            <LikeButton
+              liked={post.likedByMe === true}
+              likeCount={post.likeCount}
+              loginHref={viewer ? null : loginPath(`/${handle}/${post.id}`)}
+              result={likeResult}
+            />
+          </footer>
+        )}
       </article>
       {(post.prev || post.next) && (
         <nav aria-label={t("post:detail.navLabel")} className="post-nav">

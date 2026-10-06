@@ -23,6 +23,8 @@ export interface SessionUser {
   timeZone: string;
   blogs: { handle: string; title: string }[];
   unseenReleaseNote: { version: string; title: string } | null;
+  /** 안 읽은 알림 수(002 FR-033, 상단 배지) */
+  unreadNotificationCount: number;
 }
 
 /**

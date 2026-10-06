@@ -60,6 +60,8 @@ export async function loader({ request }: Route.LoaderArgs): Promise<RootData> {
       userId: member.userId,
       nickname: member.nickname,
       role: member.role,
+      blogs: member.blogs.map((blog) => blog.handle),
+      unreadNotificationCount: member.unreadNotificationCount ?? 0,
     },
     timeZone: member?.timeZone || DEFAULT_TIME_ZONE,
   };

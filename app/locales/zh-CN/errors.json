@@ -51,5 +51,7 @@
   "MEDIA_TOO_LARGE": "图片不能超过 10MB。",
   "MEDIA_TYPE_NOT_ALLOWED": "只能上传 JPEG、PNG、GIF 和 WebP 图片。",
   "MEDIA_TEMP_QUOTA_EXCEEDED": "未保存的图片太多。请先保存文章后再上传。",
-  "THUMBNAIL_SIZE_NOT_ALLOWED": "不支持该图片尺寸。"
+  "THUMBNAIL_SIZE_NOT_ALLOWED": "不支持该图片尺寸。",
+  "NOTIFICATION_NOT_FOUND": "找不到该通知。",
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "不能订阅自己的博客。"
 }

@@ -48,7 +48,10 @@ export interface CategoryNode {
   children: CategoryNode[];
 }
 
-/** GET /blogs/{handle} */
+/** 피드(RSS·Atom) 공개 형태(002 FR-046): 본문 전체 또는 요약 */
+export type FeedContentMode = "FULL" | "SUMMARY";
+
+/** GET /blogs/{handle}. 002가 구독자 수·구독 여부·피드 설정을 더했다(contracts/api.md "001 응답 확장"). */
 export interface Blog {
   handle: string;
   title: string;
@@ -57,6 +60,11 @@ export interface Blog {
   commentEnabled: boolean;
   owner: { nickname: string; profileImageUrl: string | null; bio: string | null };
   categories: CategoryNode[];
+  subscriberCount: number;
+  /** 로그인 회원이 구독 중이면 true, 아니면 false, 비로그인이면 null */
+  subscribedByMe: boolean | null;
+  feedItemCount: 10 | 20 | 30 | 50;
+  feedContentMode: FeedContentMode;
 }
 
 /** GET /me/blogs */
@@ -117,6 +125,10 @@ export interface PostDetail {
   next: PostRef | null;
   publishedAt: string | null;
   updatedAt: string;
+  /** 좋아요 수(002 FR-030) */
+  likeCount: number;
+  /** 로그인 회원이 눌렀으면 true, 아니면 false, 비로그인이면 null */
+  likedByMe: boolean | null;
 }
 
 /** 작성 화면의 내용(DraftWrite). 카테고리·태그는 US2에서 채운다. */
@@ -257,4 +269,60 @@ export interface MediaUpload {
   size: number;
   width: number;
   height: number;
+}
+
+/** PUT·DELETE /me/likes/{postId}(002 FR-030) */
+export interface LikeState {
+  postId: number;
+  liked: boolean;
+  likeCount: number;
+}
+
+/** PUT·DELETE /me/subscriptions/{handle}(002 FR-031) */
+export interface SubscriptionState {
+  handle: string;
+  subscribed: boolean;
+  subscriberCount: number;
+}
+
+/** GET /me/feed 한 줄: PostSummary + 블로그·작성자. `hasDraft`는 늘 false */
+export type FeedPost = PostSummary & {
+  blog: BlogRef;
+  author: { nickname: string; profileImageUrl: string | null };
+};
+
+/** GET /search/posts 한 줄: PostSummary + 블로그 */
+export type SearchPost = PostSummary & { blog: BlogRef };
+
+/** 002가 만드는 알림 종류. 이후 스펙이 더하므로 응답의 `type`은 string으로 받는다(모르는 값은 공통 문구). */
+export const NOTIFICATION_TYPES = ["NEW_COMMENT", "NEW_SUBSCRIBER"] as const;
+export type KnownNotificationType = (typeof NOTIFICATION_TYPES)[number];
+
+/** GET /me/notifications 한 줄(contracts/api.md `Notification`) */
+export interface Notification {
+  id: number;
+  type: string;
+  /** 알림을 일으킨 회원. 비회원·시스템이면 null, 탈퇴 회원이면 닉네임·프로필 없이 withdrawn: true */
+  actor: {
+    userId: number;
+    nickname: string | null;
+    profileImageUrl: string | null;
+    withdrawn: boolean;
+  } | null;
+  blog: BlogRef | null;
+  targetType: string | null;
+  targetId: number | null;
+  /** 만들 때 저장한 값(번역하지 않음). NEW_COMMENT { postId, postTitle }, NEW_SUBSCRIBER { blogTitle } */
+  params: Record<string, unknown>;
+  read: boolean;
+  createdAt: string;
+}
+
+/** POST /me/notifications/bulk */
+export interface BulkNotificationRequest {
+  action: "MARK_READ";
+  ids?: number[];
+}
+export interface BulkNotificationResult {
+  updated: number;
 }

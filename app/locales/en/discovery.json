@@ -1,0 +1,20 @@
+{
+  "like": {
+    "like": "Like",
+    "unlike": "Unlike",
+    "count": "Likes {{count, number}}",
+    "loginToLike": "Log in to like"
+  },
+  "subscribe": {
+    "subscribe": "Subscribe",
+    "unsubscribe": "Subscribed (unsubscribe)",
+    "count": "Subscribers {{count, number}}",
+    "loginToSubscribe": "Log in to subscribe"
+  },
+  "feed": {
+    "title": "Subscription feed",
+    "label": "New posts from blogs you subscribe to",
+    "empty": "No posts from your subscriptions yet. Subscribe to blogs you like.",
+    "blog": "Blog"
+  }
+}

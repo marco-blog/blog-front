@@ -1,0 +1,20 @@
+{
+  "like": {
+    "like": "좋아요",
+    "unlike": "좋아요 취소",
+    "count": "좋아요 {{count, number}}",
+    "loginToLike": "로그인하고 좋아요 누르기"
+  },
+  "subscribe": {
+    "subscribe": "구독",
+    "unsubscribe": "구독 중 (취소)",
+    "count": "구독자 {{count, number}}명",
+    "loginToSubscribe": "로그인하고 구독하기"
+  },
+  "feed": {
+    "title": "구독 피드",
+    "label": "구독한 블로그의 새 글",
+    "empty": "구독한 블로그의 글이 아직 없습니다. 마음에 드는 블로그를 구독해 보세요.",
+    "blog": "블로그"
+  }
+}

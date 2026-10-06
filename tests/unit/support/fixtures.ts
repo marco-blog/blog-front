@@ -9,6 +9,10 @@ export const blog: Blog = {
   commentEnabled: true,
   owner: { nickname: "마르코", profileImageUrl: null, bio: null },
   categories: [{ id: 12, name: "Spring", postCount: 3, children: [] }],
+  subscriberCount: 3,
+  subscribedByMe: null,
+  feedItemCount: 20,
+  feedContentMode: "FULL",
 };
 
 export function postSummary(id: number, overrides: Partial<PostSummary> = {}): PostSummary {
@@ -50,6 +54,8 @@ export const postDetail: PostDetail = {
   next: null,
   publishedAt: "2026-10-06T04:24:19Z",
   updatedAt: "2026-10-06T05:00:00Z",
+  likeCount: 5,
+  likedByMe: null,
 };
 
 /** 글 상세 loader가 화면에 넘기는 형태(본문 원문 제외) */

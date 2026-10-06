@@ -22,7 +22,10 @@
     "write": "記事を書く",
     "manage": "ブログ管理",
     "settings": "設定",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "feed": "購読フィード",
+    "notifications": "お知らせ",
+    "unreadNotifications": "未読のお知らせ {{count}}件"
   },
   "footer": {
     "label": "サイト情報",

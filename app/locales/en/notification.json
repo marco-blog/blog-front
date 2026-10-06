@@ -1,0 +1,14 @@
+{
+  "title": "Notifications",
+  "label": "Notification list",
+  "empty": "You have no notifications.",
+  "unread": "Unread",
+  "readAll": "Mark all as read",
+  "withdrawnActor": "Former member",
+  "unknownActor": "Unknown member",
+  "types": {
+    "NEW_COMMENT": "{{actor}} commented on \"{{postTitle}}\".",
+    "NEW_SUBSCRIBER": "{{actor}} subscribed to {{blogTitle}}.",
+    "UNKNOWN": "You have a new notification."
+  }
+}
