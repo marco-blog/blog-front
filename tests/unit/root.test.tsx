@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, within } from "@testing-library/react";
-import { I18nextProvider } from "react-i18next";
+import { I18nextProvider, useTranslation } from "react-i18next";
 import {
   MemoryRouter,
   Outlet,
@@ -19,8 +19,17 @@ import type { Language } from "~/i18n/config";
 import { createI18n } from "~/i18n/instance";
 import { resourcesFor } from "~/i18n/resources.server";
 import App, { ErrorBoundary, Layout, loader as rootLoader, type RootData } from "~/root";
-import Home from "~/routes/home";
 import NotFoundRoute, { loader as notFoundLoader } from "~/routes/not-found";
+
+/** 레이아웃 아래에 그릴 화면(화면 언어 문구 하나). 포털 메인은 backend가 필요해 tests/unit/routes/home.test.tsx가 본다. */
+function Home() {
+  const { t } = useTranslation();
+  return (
+    <main>
+      <p>{t("notFound.description")}</p>
+    </main>
+  );
+}
 
 vi.mock("~/auth/session.server", () => ({ getSessionUser: vi.fn() }));
 
@@ -253,7 +262,9 @@ describe("Layout", () => {
 
     render(<Stub />);
 
-    expect(await screen.findByText("記事を書いて共有するブログサービスです。")).toBeInTheDocument();
+    expect(
+      await screen.findByText("アドレスが間違っているか、削除されたページです。"),
+    ).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("ja");
     expect(screen.getByRole("banner")).toHaveTextContent("ログアウト");
     expect(screen.getByRole("contentinfo")).toHaveTextContent("利用規約");
