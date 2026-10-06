@@ -1,0 +1,89 @@
+{
+  "title": "Blog management",
+  "nav": {
+    "label": "Blog management menu",
+    "dashboard": "Dashboard",
+    "posts": "Posts",
+    "categories": "Categories",
+    "comments": "Comments",
+    "settings": "Blog settings"
+  },
+  "switcher": {
+    "label": "Switch blog"
+  },
+  "viewBlog": "View blog",
+  "write": "Write",
+  "dashboard": {
+    "title": "Dashboard",
+    "drafts": "Drafts",
+    "draftCount": "{{drafts}}",
+    "newComments": "New comments (last 7 days)",
+    "commentCount": "{{comments}}",
+    "recentPosts": "Recent posts",
+    "recentComments": "Recent comments",
+    "noPosts": "No posts yet.",
+    "noComments": "No comments yet.",
+    "commentOn": "On {{title}}",
+    "deletedComment": "Deleted comment"
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "PUBLISHED": "Published",
+    "DELETED": "Trash"
+  },
+  "visibility": {
+    "PUBLIC": "Public",
+    "PRIVATE": "Private"
+  },
+  "posts": {
+    "title": "Posts",
+    "trashTitle": "Trash",
+    "views": {
+      "label": "Post views",
+      "all": "All posts",
+      "trash": "Trash"
+    },
+    "filter": {
+      "label": "Find posts",
+      "status": "Status",
+      "visibility": "Visibility",
+      "category": "Category",
+      "all": "All",
+      "query": "Search titles",
+      "submit": "Search"
+    },
+    "list": "Posts",
+    "empty": "No posts match these filters.",
+    "trashEmpty": "The trash is empty.",
+    "trashHint": "Posts in the trash are permanently deleted 30 days after deletion.",
+    "select": "Select {{title}}",
+    "selectAll": "Select all",
+    "untitled": "(Untitled)",
+    "bulk": {
+      "label": "With selected posts",
+      "makePublic": "Make public",
+      "makePrivate": "Make private",
+      "delete": "Move to trash",
+      "noneSelected": "Select posts first.",
+      "done": "Updated {{updated}} post(s)."
+    },
+    "edit": "Edit",
+    "continue": "Continue writing",
+    "hasDraft": "Unpublished edits",
+    "publishedAt": "Published {{date}}",
+    "updatedAt": "Updated {{date}}",
+    "deletedAt": "Deleted {{date}}",
+    "purgeAt": "Permanently deleted on {{date}}",
+    "restore": "Restore",
+    "restored": "The post was restored."
+  },
+  "settings": {
+    "title": "Blog settings",
+    "blogTitle": "Blog title",
+    "description": "Blog description",
+    "commentEnabled": "Allow comments on this blog",
+    "commentHint": "When off, no new comments can be added to any post on this blog.",
+    "submit": "Save",
+    "saved": "Blog settings saved."
+  }
+}

@@ -153,3 +153,33 @@ export interface PublishSettings {
   categoryId?: number | null;
   tags?: string[];
 }
+
+/** 대시보드 최근 댓글(Comment + { postId, postTitle }). 댓글은 US3에서 채운다. */
+export interface ManageRecentComment {
+  id: number;
+  content: string | null;
+  author: { userId: number; nickname: string; profileImageUrl: string | null };
+  deleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  postId: number;
+  postTitle: string;
+}
+
+/** GET /blogs/{handle}/manage/dashboard. 방문자 수·방명록은 004가 더한다. */
+export interface ManageDashboard {
+  draftCount: number;
+  recentPosts: PostSummary[];
+  newComments7d: number;
+  recentComments: ManageRecentComment[];
+}
+
+/** POST /blogs/{handle}/manage/posts/bulk. 카테고리 이동(MOVE_CATEGORY)은 US2에서 더한다. */
+export interface BulkPostRequest {
+  postIds: number[];
+  action: "CHANGE_VISIBILITY" | "DELETE";
+  visibility?: Visibility;
+}
+export interface BulkPostResult {
+  updated: number;
+}
