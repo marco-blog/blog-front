@@ -1,3 +1,165 @@
 {
-  "title": "管理控制台"
+  "title": "管理控制台",
+  "nav": {
+    "label": "管理菜单",
+    "topics": "主题",
+    "curations": "门户推荐",
+    "exclusions": "门户排除",
+    "settings": "门户设置"
+  },
+  "timeZone": "时间以 {{timeZone}} 为准。",
+  "fields": {
+    "slug": "地址(slug)",
+    "names": {
+      "ko": "名称(韩语)",
+      "en": "名称(英语)",
+      "ja": "名称(日语)",
+      "zh-CN": "名称(简体中文)"
+    },
+    "cardColor": "卡片颜色",
+    "parentId": "上级主题",
+    "ids": "顺序",
+    "adminHidden": "隐藏",
+    "pinnedOnTab": "固定到标签",
+    "postRef": "文章地址或编号",
+    "postId": "文章",
+    "startsAt": "开始",
+    "endsAt": "结束",
+    "sortOrder": "顺序",
+    "reason": "原因",
+    "value": "值",
+    "weights": {
+      "view": "浏览权重",
+      "readComplete": "读完权重",
+      "like": "点赞权重",
+      "comment": "评论权重",
+      "halfLifeHours": "半衰期(小时)",
+      "reportPenalty": "举报扣分(0~1)"
+    }
+  },
+  "lookup": {
+    "submit": "查看文章",
+    "hint": "请输入文章地址(https://…/{博客}/{编号} 或 /{博客}/{编号})或文章编号。",
+    "result": "查看的文章",
+    "eligible": "这篇文章可以在门户中展示。",
+    "ineligible": "这篇文章目前不会在门户中展示。",
+    "excluded": "这篇文章已从门户中排除(原因：{{reason}})。"
+  },
+  "reasons": {
+    "NOT_BODY_VISIBLE": "不是公开文章或无法查看",
+    "BLOG_PORTAL_DISABLED": "博客关闭了门户展示",
+    "EXCLUDED": "运营者已从门户中排除",
+    "NEW_MEMBER": "作者注册后的等待时间未过",
+    "TOO_SHORT": "正文短于最小长度"
+  },
+  "topics": {
+    "title": "主题管理",
+    "hint": "管理大分类和小分类。隐藏的主题会从门户和写文章时的主题列表中移除。",
+    "list": "主题列表",
+    "empty": "还没有主题。",
+    "create": {
+      "label": "添加主题",
+      "parent": "位置",
+      "major": "添加为大分类",
+      "slugHint": "地址使用小写英文字母、数字和连字符，创建后不能更改。颜色使用 #RRGGBB 格式。",
+      "submit": "添加"
+    },
+    "hidden": "已隐藏",
+    "hiddenByParent": "因大分类隐藏而一同隐藏",
+    "pinned": "已固定到标签",
+    "offTab": "文章较少，已自动从标签中移除",
+    "recentPosts_one": "最近 30 天 {{count, number}} 篇文章",
+    "recentPosts_other": "最近 30 天 {{count, number}} 篇文章",
+    "save": "保存名称和颜色",
+    "hide": "隐藏",
+    "unhide": "取消隐藏",
+    "pin": "固定到标签",
+    "unpin": "取消固定",
+    "up": "将{{name}}上移",
+    "down": "将{{name}}下移",
+    "done": {
+      "create": "已添加主题。",
+      "update": "已保存名称和颜色。",
+      "hide": "已隐藏主题。",
+      "unhide": "已取消隐藏主题。",
+      "pin": "已固定到主题标签。",
+      "unpin": "已取消固定。",
+      "order": "已更改顺序。"
+    }
+  },
+  "curations": {
+    "title": "门户推荐",
+    "hint": "按期间指定在门户首页运营者推荐区域展示的文章。期间重叠的推荐最多 5 个。",
+    "add": "添加推荐",
+    "create": "添加推荐",
+    "tabs": "推荐状态",
+    "status": {
+      "ACTIVE": "进行中",
+      "UPCOMING": "即将开始",
+      "ENDED": "已结束"
+    },
+    "empty": "没有此状态的推荐。",
+    "period": "{{start}} ~ {{end}}",
+    "sortOrder": "顺序 {{order}}",
+    "createdBy": "指定人：{{nickname}}",
+    "ineligible": "已不满足门户展示条件，目前不显示。",
+    "save": "保存期间和顺序",
+    "delete": "删除",
+    "done": {
+      "create": "已添加推荐。",
+      "update": "已修改推荐。",
+      "delete": "已删除推荐。"
+    }
+  },
+  "exclusions": {
+    "title": "门户排除",
+    "hint": "排除的文章只会从门户首页和主题页面中移除，博客、搜索和订阅源中仍然保留。",
+    "add": "排除文章",
+    "exclude": "排除",
+    "list": "已排除的文章",
+    "empty": "没有已排除的文章。",
+    "by": "{{nickname}} · {{time}}",
+    "saveReason": "保存原因",
+    "unexclude": "取消排除",
+    "done": {
+      "exclude": "已从门户中排除。",
+      "unexclude": "已取消排除。"
+    }
+  },
+  "settings": {
+    "title": "门户设置",
+    "hint": "更改的值从下一次门户请求开始生效。",
+    "save": "保存",
+    "reset": "恢复默认值",
+    "default": "默认值：{{value}}",
+    "usingDefault": "正在使用默认值。",
+    "changedBy": "{{nickname}} 于 {{time}} 更改",
+    "done": {
+      "save": "已保存设置。",
+      "reset": "已恢复默认值。"
+    },
+    "keys": {
+      "portal": {
+        "score-weights": {
+          "title": "热度分数权重",
+          "hint": "浏览、读完、点赞、评论的权重(0~1000)，半衰期(1~720 小时)，举报扣分(0~1)。"
+        },
+        "new-member-delay": {
+          "title": "新会员等待时间",
+          "hint": "注册后经过这段时间，文章才会出现在门户中(0~720 小时)。",
+          "input": "等待时间(小时)"
+        },
+        "min-content-length": {
+          "title": "最小正文长度",
+          "hint": "正文少于此字数的文章不会出现在门户中(0~10000)。",
+          "input": "字数"
+        },
+        "topic-auto-hide-threshold": {
+          "title": "主题自动隐藏标准",
+          "hint": "最近 30 天文章数少于此数的大分类会从主题标签中移除(0~1000)。",
+          "input": "文章数"
+        }
+      }
+    }
+  }
 }

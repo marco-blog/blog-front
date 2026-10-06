@@ -1,3 +1,165 @@
 {
-  "title": "관리자 콘솔"
+  "title": "관리자 콘솔",
+  "nav": {
+    "label": "관리자 메뉴",
+    "topics": "주제",
+    "curations": "포털 추천",
+    "exclusions": "포털 제외",
+    "settings": "포털 설정"
+  },
+  "timeZone": "시각은 {{timeZone}} 기준입니다.",
+  "fields": {
+    "slug": "주소(slug)",
+    "names": {
+      "ko": "이름(한국어)",
+      "en": "이름(English)",
+      "ja": "이름(日本語)",
+      "zh-CN": "이름(简体中文)"
+    },
+    "cardColor": "카드 색",
+    "parentId": "상위 주제",
+    "ids": "순서",
+    "adminHidden": "숨김",
+    "pinnedOnTab": "탭 고정",
+    "postRef": "글 주소 또는 번호",
+    "postId": "글",
+    "startsAt": "시작",
+    "endsAt": "종료",
+    "sortOrder": "순서",
+    "reason": "사유",
+    "value": "값",
+    "weights": {
+      "view": "조회 가중치",
+      "readComplete": "끝까지 읽음 가중치",
+      "like": "좋아요 가중치",
+      "comment": "댓글 가중치",
+      "halfLifeHours": "반감기(시간)",
+      "reportPenalty": "신고 감점(0~1)"
+    }
+  },
+  "lookup": {
+    "submit": "글 확인",
+    "hint": "글 주소(https://…/{블로그}/{번호} 또는 /{블로그}/{번호})나 글 번호를 넣으세요.",
+    "result": "확인한 글",
+    "eligible": "포털에 노출할 수 있는 글입니다.",
+    "ineligible": "지금은 포털에 노출되지 않는 글입니다.",
+    "excluded": "포털에서 제외된 글입니다(사유: {{reason}})."
+  },
+  "reasons": {
+    "NOT_BODY_VISIBLE": "공개 글이 아니거나 볼 수 없는 글",
+    "BLOG_PORTAL_DISABLED": "블로그가 포털 노출을 껐음",
+    "EXCLUDED": "운영자가 포털에서 제외함",
+    "NEW_MEMBER": "가입 직후 대기 시간이 지나지 않은 글쓴이",
+    "TOO_SHORT": "본문이 최소 길이보다 짧음"
+  },
+  "topics": {
+    "title": "주제 관리",
+    "hint": "대분류와 소분류를 관리합니다. 숨긴 주제는 포털과 글쓰기 주제 목록에서 빠집니다.",
+    "list": "주제 목록",
+    "empty": "아직 주제가 없습니다.",
+    "create": {
+      "label": "주제 추가",
+      "parent": "위치",
+      "major": "대분류로 추가",
+      "slugHint": "주소는 영문 소문자·숫자·하이픈으로, 만든 뒤에는 바꿀 수 없습니다. 색은 #RRGGBB 형식입니다.",
+      "submit": "추가"
+    },
+    "hidden": "숨김",
+    "hiddenByParent": "대분류가 숨겨져 함께 숨김",
+    "pinned": "탭 고정",
+    "offTab": "글이 적어 탭에서 자동으로 빠짐",
+    "recentPosts_one": "최근 30일 글 {{count, number}}편",
+    "recentPosts_other": "최근 30일 글 {{count, number}}편",
+    "save": "이름·색 저장",
+    "hide": "숨기기",
+    "unhide": "숨김 해제",
+    "pin": "탭 고정",
+    "unpin": "탭 고정 해제",
+    "up": "{{name}} 위로",
+    "down": "{{name}} 아래로",
+    "done": {
+      "create": "주제를 추가했습니다.",
+      "update": "이름과 색을 저장했습니다.",
+      "hide": "주제를 숨겼습니다.",
+      "unhide": "주제 숨김을 해제했습니다.",
+      "pin": "주제 탭에 고정했습니다.",
+      "unpin": "탭 고정을 해제했습니다.",
+      "order": "순서를 바꿨습니다."
+    }
+  },
+  "curations": {
+    "title": "포털 추천",
+    "hint": "포털 메인의 운영자 추천 영역에 보일 글을 기간을 정해 지정합니다. 기간이 겹치는 추천은 5개까지입니다.",
+    "add": "추천 추가",
+    "create": "추천 추가",
+    "tabs": "추천 상태",
+    "status": {
+      "ACTIVE": "진행 중",
+      "UPCOMING": "예정",
+      "ENDED": "종료"
+    },
+    "empty": "이 상태의 추천이 없습니다.",
+    "period": "{{start}} ~ {{end}}",
+    "sortOrder": "순서 {{order}}",
+    "createdBy": "지정: {{nickname}}",
+    "ineligible": "포털 노출 조건을 잃어 지금은 보이지 않습니다.",
+    "save": "기간·순서 저장",
+    "delete": "삭제",
+    "done": {
+      "create": "추천을 추가했습니다.",
+      "update": "추천을 고쳤습니다.",
+      "delete": "추천을 삭제했습니다."
+    }
+  },
+  "exclusions": {
+    "title": "포털 제외",
+    "hint": "제외한 글은 포털 메인과 주제 페이지에서만 빠지고, 블로그·검색·구독 피드에는 그대로 있습니다.",
+    "add": "글 제외",
+    "exclude": "제외",
+    "list": "제외한 글",
+    "empty": "제외한 글이 없습니다.",
+    "by": "{{nickname}} · {{time}}",
+    "saveReason": "사유 저장",
+    "unexclude": "제외 해제",
+    "done": {
+      "exclude": "포털에서 제외했습니다.",
+      "unexclude": "제외를 해제했습니다."
+    }
+  },
+  "settings": {
+    "title": "포털 설정",
+    "hint": "바꾼 값은 다음 포털 요청부터 적용됩니다.",
+    "save": "저장",
+    "reset": "기본값으로",
+    "default": "기본값: {{value}}",
+    "usingDefault": "기본값을 쓰고 있습니다.",
+    "changedBy": "{{nickname}} 님이 {{time}}에 바꿈",
+    "done": {
+      "save": "설정을 저장했습니다.",
+      "reset": "기본값으로 되돌렸습니다."
+    },
+    "keys": {
+      "portal": {
+        "score-weights": {
+          "title": "인기 점수 가중치",
+          "hint": "조회·끝까지 읽음·좋아요·댓글의 가중치(0~1000), 반감기(1~720시간), 신고 감점(0~1)."
+        },
+        "new-member-delay": {
+          "title": "신규 회원 대기 시간",
+          "hint": "가입 후 이 시간이 지나야 글이 포털에 나옵니다(0~720시간).",
+          "input": "대기 시간(시간)"
+        },
+        "min-content-length": {
+          "title": "최소 본문 길이",
+          "hint": "본문이 이 글자 수보다 짧은 글은 포털에 나오지 않습니다(0~10000).",
+          "input": "글자 수"
+        },
+        "topic-auto-hide-threshold": {
+          "title": "주제 자동 숨김 기준",
+          "hint": "최근 30일 글이 이 수보다 적은 대분류는 주제 탭에서 빠집니다(0~1000).",
+          "input": "글 수"
+        }
+      }
+    }
+  }
 }
