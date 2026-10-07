@@ -34,6 +34,13 @@ const FORWARDED_HEADERS = [
   "x-forwarded-proto",
 ] as const;
 
+/** 요청 메모 대상(쿼리·헤더 없는 블로그 정보 조회) */
+const MEMO_PATH = /^\/blogs\/[a-z0-9-]{1,40}$/;
+
+function isMemoizable(path: string, init: Omit<ApiRequestInit, "method">): boolean {
+  return MEMO_PATH.test(path) && !init.query && !init.headers && !init.signal;
+}
+
 /** 상태를 바꾸지 않는 메서드. 나머지는 backend Origin 검사 대상이다(research.md R3). */
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -130,13 +137,35 @@ export function createApiClient(request: Request, options: ApiClientOptions = {}
 
   const call =
     (method: string) =>
-    async <T>(path: string, init: Omit<ApiRequestInit, "method"> = {}): Promise<T> =>
-      (await send<T>(path, { ...init, method })).result;
+    async <T>(path: string, init: Omit<ApiRequestInit, "method"> = {}): Promise<T> => {
+      if (method !== "GET") {
+        // 상태를 바꾸면 이 요청에서 기억해 둔 조회를 버린다(바뀐 블로그 설정을 다시 읽도록).
+        session.memo.clear();
+      }
+      return (await send<T>(path, { ...init, method })).result;
+    };
+
+  /**
+   * GET. 같은 요청 안에서 여러 loader가 부르는 조회(`/blogs/{handle}`: 공개 블로그 레이아웃과 자식 화면, 004)는
+   * `BackendSession.memo`로 한 번만 보낸다.
+   */
+  function get<T>(path: string, init: Omit<ApiRequestInit, "method"> = {}): Promise<T> {
+    if (!isMemoizable(path, init)) {
+      return call("GET")<T>(path, init);
+    }
+    const key = `GET ${path}`;
+    let pending = session.memo.get(key) as Promise<T> | undefined;
+    if (!pending) {
+      pending = call("GET")<T>(path, init);
+      session.memo.set(key, pending);
+    }
+    return pending;
+  }
 
   return {
     requestId,
     send,
-    get: call("GET"),
+    get,
     post: call("POST"),
     put: call("PUT"),
     patch: call("PATCH"),

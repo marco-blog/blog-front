@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "label": "博客菜单",
+    "home": "首页",
+    "notice": "公告",
+    "guestbook": "留言板",
+    "tags": "标签"
+  }
+}

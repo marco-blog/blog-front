@@ -15,14 +15,26 @@ export const UNKNOWN_FIELD_ERROR_CODE = "INVALID";
  */
 export function errorMessage(
   t: TFunction,
-  codeOrError: string | { resultCode: string } | null | undefined,
+  codeOrError: string | { resultCode: string; retryAfter?: number | null } | null | undefined,
 ): string {
   const code = typeof codeOrError === "object" ? codeOrError?.resultCode : codeOrError;
   const fallback = t(`errors:${UNKNOWN_ERROR_CODE}`);
   if (!code || !CODE_PATTERN.test(code)) {
     return fallback;
   }
-  return t(`errors:${code}`, { defaultValue: fallback });
+  const retryAfter = typeof codeOrError === "object" ? codeOrError?.retryAfter : null;
+  return t(`errors:${code}`, { defaultValue: fallback, minutes: retryMinutes(retryAfter) });
+}
+
+/** 비밀번호 시도 제한의 기본 대기 시간(분, backend `blog.guest`·보호 글 10분) */
+export const DEFAULT_RETRY_MINUTES = 10;
+
+/** `Retry-After`(초)를 올림한 분. 모르면 기본 10분 */
+export function retryMinutes(seconds: number | null | undefined): number {
+  if (seconds === null || seconds === undefined || !Number.isFinite(seconds) || seconds < 0) {
+    return DEFAULT_RETRY_MINUTES;
+  }
+  return Math.max(1, Math.ceil(seconds / 60));
 }
 
 /**

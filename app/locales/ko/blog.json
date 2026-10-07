@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "label": "블로그 메뉴",
+    "home": "홈",
+    "notice": "공지",
+    "guestbook": "방명록",
+    "tags": "태그"
+  }
+}

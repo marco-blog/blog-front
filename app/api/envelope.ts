@@ -91,6 +91,7 @@ export async function readEnvelope<T>(
       resultMessage: header.resultMessage,
       fieldErrors: header.fieldErrors,
       traceId: header.traceId ?? traceId,
+      retryAfter: retryAfterSeconds(response.headers.get("retry-after")),
     });
   }
   return {
@@ -100,6 +101,14 @@ export async function readEnvelope<T>(
     status: response.status,
     headers: response.headers,
   };
+}
+
+/** `Retry-After`(초 단위 정수만 받는다). 없거나 날짜 형식이면 null */
+export function retryAfterSeconds(value: string | null): number | null {
+  if (value === null || !/^\d{1,9}$/.test(value.trim())) {
+    return null;
+  }
+  return Number(value.trim());
 }
 
 /** 리프레시로 풀 수 있는 401인지 */

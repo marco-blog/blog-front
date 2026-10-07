@@ -136,6 +136,9 @@ jobs:
           BLOG_PORTAL_CACHE_TTL: 0s
           BLOG_PORTAL_NEW_MEMBER_DELAY: PT0S
           BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD: "1"
+          # 004 비회원 글 시험용 설정(E2E_GUEST_TEST_SETTINGS=1과 짝): 같은 IP(localhost)에서 여러 시나리오가 쓰므로 속도 제한을 넉넉히
+          BLOG_GUEST_COMMENT_PER_MINUTE: "1000"
+          BLOG_GUEST_GUESTBOOK_PER_MINUTE: "1000"
         run: |
           BLOG_CRYPTO_KEY_V1="$(openssl rand -base64 32)"
           BLOG_CRYPTO_HASH_KEY="$(openssl rand -base64 32)"
@@ -174,6 +177,7 @@ jobs:
           CI: "true"
           E2E_BACKEND_URL: http://localhost:8080
           E2E_PORTAL_TEST_SETTINGS: "1"
+          E2E_GUEST_TEST_SETTINGS: "1"
 
       - name: Upload logs
         if: failure()

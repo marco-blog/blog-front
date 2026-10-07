@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "label": "Blog menu",
+    "home": "Home",
+    "notice": "Notices",
+    "guestbook": "Guestbook",
+    "tags": "Tags"
+  }
+}

@@ -67,5 +67,18 @@
   "MEDIA_TEMP_QUOTA_EXCEEDED": "未保存的图片太多。请先保存文章后再上传。",
   "THUMBNAIL_SIZE_NOT_ALLOWED": "不支持该图片尺寸。",
   "NOTIFICATION_NOT_FOUND": "找不到该通知。",
-  "CANNOT_SUBSCRIBE_OWN_BLOG": "不能订阅自己的博客。"
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "不能订阅自己的博客。",
+  "POST_PASSWORD_MISMATCH": "密码不正确。",
+  "POST_LOCKED": "这是受保护的文章，输入密码后才能阅读。",
+  "PASSWORD_ATTEMPTS_EXCEEDED": "密码错误次数过多，请在 {{minutes}} 分钟后重试。",
+  "SCHEDULE_NOT_ALLOWED": "已发布的文章不能定时发布。",
+  "POST_NOT_SCHEDULED": "这篇文章不是定时发布状态。",
+  "GUEST_PASSWORD_MISMATCH": "密码不正确。",
+  "GUESTBOOK_DISABLED": "此博客未开启留言板。",
+  "GUESTBOOK_ENTRY_NOT_FOUND": "找不到该留言。",
+  "EXPORT_LIMIT_EXCEEDED": "备份每天只能创建一次。",
+  "EXPORT_NOT_FOUND": "找不到备份文件。",
+  "CANNOT_BLOCK_SELF": "不能屏蔽自己。",
+  "USER_NOT_FOUND": "找不到该会员。",
+  "BLOCK_NOT_FOUND": "该会员未被屏蔽。"
 }
