@@ -13,6 +13,9 @@ import type { GuestbookActionData } from "~/components/guestbook/actions";
 import { runGuestbookAction } from "~/components/guestbook/actions.server";
 import { GuestbookForm } from "~/components/guestbook/GuestbookForm";
 import { GuestbookList } from "~/components/guestbook/GuestbookList";
+import { isReportResult, REPORT_INTENT } from "~/components/report/actions";
+import { runReportAction } from "~/components/report/actions.server";
+import { formIntent } from "~/discovery/actions";
 import { publicOrigin } from "~/config.server";
 import { metaT } from "~/i18n/meta";
 import type { RootData } from "~/root";
@@ -57,13 +60,19 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
-/** `intent=create|reply|update|delete|unlock`. 성공하면 같은 쪽으로(새 글은 첫 쪽으로) 리다이렉트한다. */
+/**
+ * `intent=create|reply|update|delete|unlock`. 성공하면 같은 쪽으로(새 글은 첫 쪽으로) 리다이렉트한다.
+ * `intent=report`(005): 방명록 글 신고.
+ */
 export async function action({ request, params }: Route.ActionArgs) {
   const { handle } = params;
   if (!isValidHandle(handle)) {
     throw data(null, { status: 404 });
   }
   const page = parsePage(new URL(request.url).searchParams.get("page"));
+  if ((await formIntent(request)) === REPORT_INTENT) {
+    return runReportAction(request, { returnTo: guestbookHref(handle, page) });
+  }
   return runGuestbookAction(request, {
     handle,
     returnTo: guestbookHref(handle, page),
@@ -88,7 +97,9 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 export default function BlogGuestbook() {
   const { t } = useTranslation();
   const { blog, entries, totalCount, page, pageSize } = useLoaderData<typeof loader>();
-  const result = useActionData<GuestbookActionData>();
+  const actionData = useActionData<GuestbookActionData>();
+  // 신고 결과는 신고 버튼이 직접 읽는다(ReportButton).
+  const result = isReportResult(actionData) ? undefined : actionData;
   const viewer = useRouteLoaderData<RootData>("root")?.user ?? null;
   const isOwner = viewer?.blogs?.includes(blog.handle) ?? false;
   const mode = writerMode(viewer, blog.guestWriteEnabled);
@@ -107,6 +118,7 @@ export default function BlogGuestbook() {
         viewerId={viewer?.userId ?? null}
         isOwner={isOwner}
         result={result}
+        reportable
       />
       <Pagination
         page={page}

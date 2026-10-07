@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useLoaderData } from "react-router";
 
 import { requireAdmin } from "~/admin/access.server";
-import { ADMIN_MENU } from "~/admin/links";
+import { ADMIN_MENU, ADMIN_REPORTS_MENU_KEY } from "~/admin/links";
+import { createApiClient } from "~/api/client.server";
 import { metaT } from "~/i18n/meta";
 import { privatePageMeta } from "~/seo/meta";
 
@@ -19,12 +20,16 @@ export function meta({ matches }: Route.MetaArgs) {
  */
 export async function loader({ request }: Route.LoaderArgs) {
   const user = await requireAdmin(request);
-  return { nickname: user.nickname };
+  // 005 "신고 관리" 배지. 읽지 못하면 배지 없이 그린다(각 화면이 권한·오류를 따로 처리한다).
+  const summary = await createApiClient(request)
+    .get<{ pendingCount: number }>("/admin/reports/summary")
+    .catch(() => null);
+  return { nickname: user.nickname, pendingReports: summary?.pendingCount ?? 0 };
 }
 
 export default function AdminLayout() {
   const { t } = useTranslation();
-  const { nickname } = useLoaderData<typeof loader>();
+  const { nickname, pendingReports } = useLoaderData<typeof loader>();
   return (
     <div className="admin">
       <header className="admin-header">
@@ -36,7 +41,17 @@ export default function AdminLayout() {
         <ul>
           {ADMIN_MENU.map((item) => (
             <li key={item.key}>
-              <NavLink to={item.path}>{t(`admin:nav.${item.key}`)}</NavLink>
+              <NavLink to={item.path}>
+                {t(`admin:nav.${item.key}`)}
+                {item.key === ADMIN_REPORTS_MENU_KEY && pendingReports > 0 && (
+                  <>
+                    {" "}
+                    <span className="badge">
+                      {t("admin:nav.pending", { count: pendingReports })}
+                    </span>
+                  </>
+                )}
+              </NavLink>
             </li>
           ))}
         </ul>

@@ -40,7 +40,14 @@
       "comment": "コメントの重み",
       "halfLifeHours": "半減期(時間)",
       "reportPenalty": "通報による減点(0〜1)"
-    }
+    },
+    "suspendReason": "停止の理由",
+    "note": "メモ",
+    "targetUrl": "アドレス",
+    "targetType": "種類",
+    "targetId": "番号",
+    "maxBlogs": "上限",
+    "decision": "処理"
   },
   "lookup": {
     "submit": "記事を確認",

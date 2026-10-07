@@ -187,7 +187,7 @@ describe("글 관리 조건", () => {
       ),
     ).toEqual({ status: "DELETED", visibility: "PRIVATE", category: 12, q: "스프링", page: 3 });
     expect(
-      parseFilters(new URLSearchParams("status=HIDDEN&visibility=x&category=-1&page=0")),
+      parseFilters(new URLSearchParams("status=GONE&visibility=x&category=-1&page=0")),
     ).toEqual({ status: null, visibility: null, category: null, q: "", page: 1 });
   });
 
@@ -287,7 +287,7 @@ describe("글 관리 action", () => {
       await call({ intent: "bulk", op: "PRIVATE", postIds: ["1", "2", "3", "2", "x"] }),
     );
 
-    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 3 });
+    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 3, skipped: 0 });
     expect(backend.callsTo(BULK)[0].body).toEqual({
       postIds: [1, 2, 3],
       action: "CHANGE_VISIBILITY",
@@ -309,7 +309,7 @@ describe("글 관리 action", () => {
     const result = asData(await call({ intent: "bulk", op: "NOTICE", postIds: ["1", "2"] }));
     await call({ intent: "bulk", op: "UNNOTICE", postIds: "3" });
 
-    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 2 });
+    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 2, skipped: 0 });
     expect(backend.callsTo(BULK).map((c) => c.body)).toEqual([
       { postIds: [1, 2], action: "NOTICE" },
       { postIds: [3], action: "UNNOTICE" },

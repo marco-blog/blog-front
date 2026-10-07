@@ -51,7 +51,10 @@ describe("/admin 접근", () => {
 
     for (const role of ["ADMIN", "SUPER_ADMIN"]) {
       mockBackend({ [ME]: ok(member(role)) });
-      await expect(call(layoutLoader, "/admin/topics")).resolves.toEqual({ nickname: "운영자" });
+      await expect(call(layoutLoader, "/admin/topics")).resolves.toEqual({
+        nickname: "운영자",
+        pendingReports: 0,
+      });
     }
     expect(ADMIN_ROLES).toEqual(["ADMIN", "SUPER_ADMIN"]);
   });
@@ -96,8 +99,12 @@ describe("/admin 접근", () => {
 });
 
 describe("/admin 화면", () => {
-  it("좌측 메뉴는 주제·포털 추천·포털 제외·포털 설정 4개", async () => {
-    mockBackend({ [ME]: ok(member()), "GET /api/v1/admin/topics": ok([adminTopic(1, "dev")]) });
+  it("좌측 메뉴는 003의 4개와 005의 회원 관리·신고 관리(처리 대기 배지)·숨긴 글", async () => {
+    mockBackend({
+      [ME]: ok(member()),
+      "GET /api/v1/admin/topics": ok([adminTopic(1, "dev")]),
+      "GET /api/v1/admin/reports/summary": ok({ pendingCount: 3 }),
+    });
     renderRoutes(
       [
         {
@@ -117,6 +124,9 @@ describe("/admin 화면", () => {
       "포털 추천",
       "포털 제외",
       "포털 설정",
+      "회원 관리",
+      "신고 관리 처리 대기 3건",
+      "숨긴 글",
     ]);
     expect(links.map((link) => link.getAttribute("href"))).toEqual(
       ADMIN_MENU.map((item) => item.path),
@@ -138,7 +148,7 @@ describe("/admin 화면", () => {
     ]);
   });
 
-  it("라우트: /admin 아래 4개 화면이 /:handle 계열보다 앞에", () => {
+  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글)이 /:handle 계열보다 앞에", () => {
     const paths = routes.map((route) => route.path);
     const admin = routes.find((route) => route.path === "admin");
     expect(paths.indexOf("admin")).toBeLessThan(firstBlogRoute(paths));
@@ -148,6 +158,11 @@ describe("/admin 화면", () => {
       "portal/curations",
       "portal/exclusions",
       "portal/settings",
+      "reports",
+      "reports/:id",
+      "users",
+      "users/:id",
+      "contents/hidden-posts",
     ]);
   });
 });

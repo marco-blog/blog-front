@@ -40,7 +40,14 @@
       "comment": "댓글 가중치",
       "halfLifeHours": "반감기(시간)",
       "reportPenalty": "신고 감점(0~1)"
-    }
+    },
+    "suspendReason": "정지 사유",
+    "note": "메모",
+    "targetUrl": "주소",
+    "targetType": "종류",
+    "targetId": "번호",
+    "maxBlogs": "한도",
+    "decision": "처리"
   },
   "lookup": {
     "submit": "글 확인",

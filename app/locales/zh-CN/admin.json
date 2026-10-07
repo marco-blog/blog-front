@@ -40,7 +40,14 @@
       "comment": "评论权重",
       "halfLifeHours": "半衰期(小时)",
       "reportPenalty": "举报扣分(0~1)"
-    }
+    },
+    "suspendReason": "停用理由",
+    "note": "备注",
+    "targetUrl": "地址",
+    "targetType": "类型",
+    "targetId": "编号",
+    "maxBlogs": "上限",
+    "decision": "处理"
   },
   "lookup": {
     "submit": "查看文章",

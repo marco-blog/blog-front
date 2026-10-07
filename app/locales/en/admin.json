@@ -40,7 +40,14 @@
       "comment": "Comment weight",
       "halfLifeHours": "Half-life (hours)",
       "reportPenalty": "Report penalty (0–1)"
-    }
+    },
+    "suspendReason": "Reason for suspension",
+    "note": "Note",
+    "targetUrl": "Address",
+    "targetType": "Type",
+    "targetId": "Number",
+    "maxBlogs": "Limit",
+    "decision": "Decision"
   },
   "lookup": {
     "submit": "Check post",

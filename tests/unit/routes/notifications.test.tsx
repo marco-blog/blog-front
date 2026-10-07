@@ -64,7 +64,7 @@ const subscriber: Notification = {
 };
 const unknown: Notification = {
   id: 503,
-  type: "REPORT_RESOLVED",
+  type: "SOMETHING_NEW",
   actor: null,
   blog: null,
   targetType: "REPORT",
@@ -216,6 +216,28 @@ describe("notifications 화면", () => {
     expect(items[1]).toHaveTextContent("탈퇴한 회원님이 마르코의 블로그 블로그를 구독했습니다.");
     expect(items[1]).not.toHaveTextContent("안 읽음");
     expect(items[2]).toHaveTextContent("새 알림이 있습니다.");
+  });
+
+  it("신고 처리 알림(005 REPORT_RESOLVED): 조치·기각 두 가지 문구, 결과를 모르면 공통 문구, 링크는 알림 목록", async () => {
+    const resolved = (id: number, decision?: string): Notification => ({
+      ...unknown,
+      id,
+      type: "REPORT_RESOLVED",
+      params: decision ? { targetType: "POST", decision } : {},
+    });
+    renderPage({
+      notifications: [resolved(601, "ACTIONED"), resolved(602, "DISMISSED"), resolved(603)],
+      totalCount: 3,
+      page: 1,
+      pageSize: 20,
+    });
+
+    const list = await screen.findByRole("list", { name: "알림 목록" });
+    const items = within(list).getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("신고하신 콘텐츠를 검토해 조치했습니다.");
+    expect(items[1]).toHaveTextContent("신고하신 콘텐츠를 검토했으나 조치하지 않았습니다.");
+    expect(items[2]).toHaveTextContent("신고하신 콘텐츠의 검토를 마쳤습니다.");
+    expect(notificationHref(resolved(601, "ACTIONED"))).toBe("/notifications");
   });
 
   it("영어 화면 문구", async () => {

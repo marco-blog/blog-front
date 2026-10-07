@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Form } from "react-router";
 
-import type { Notification } from "~/api/models";
+import { REPORT_RESOLVED_NOTIFICATION, type Notification } from "~/api/models";
 import { useDateFormat } from "~/i18n/format";
 
 import { isKnownNotificationType } from "./links";
@@ -21,6 +21,23 @@ function text(value: unknown): string {
 }
 
 /**
+ * 문구 키 이름. 005 신고 처리 알림은 결과(`params.decision`)에 따라 "조치했습니다"·"조치하지 않았습니다"로 나누고,
+ * 결과를 모르면 공통 문구. 대상 제목·내용은 알림에 없다.
+ */
+function messageKey(notification: Notification): string {
+  if (!isKnownNotificationType(notification.type)) {
+    return "UNKNOWN";
+  }
+  if (notification.type === REPORT_RESOLVED_NOTIFICATION) {
+    const decision = notification.params.decision;
+    return decision === "ACTIONED" || decision === "DISMISSED"
+      ? `${REPORT_RESOLVED_NOTIFICATION}_${decision}`
+      : REPORT_RESOLVED_NOTIFICATION;
+  }
+  return notification.type;
+}
+
+/**
  * 알림 한 줄(002 FR-033). 문구는 `notification:types.{type}`에 일으킨 회원·글 제목·블로그 제목을 넣어 화면 언어로 만들고,
  * 모르는 종류는 `types.UNKNOWN`. 누르면 `intent=read`로 읽음 처리한 뒤 대상 화면으로 간다(JS 없이도 폼 전송).
  */
@@ -28,8 +45,7 @@ export function NotificationItem({ notification }: { notification: Notification 
   const { t } = useTranslation();
   const format = useDateFormat();
   const actor = useActorName(notification.actor);
-  const type = isKnownNotificationType(notification.type) ? notification.type : "UNKNOWN";
-  const message = t(`notification:types.${type}`, {
+  const message = t(`notification:types.${messageKey(notification)}`, {
     actor,
     postTitle: text(notification.params.postTitle),
     blogTitle: text(notification.params.blogTitle) || notification.blog?.title || "",

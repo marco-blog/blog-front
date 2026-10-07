@@ -91,7 +91,7 @@ describe("공개 블로그 레이아웃 loader", () => {
     expect(backend.callsTo(VISITS)[0].headers.get("origin")).toBe("http://front.test");
   });
 
-  it("세 요청을 함께 보낸다(앞 요청을 기다리지 않음)", async () => {
+  it("블로그·사이드바를 함께 읽고, 방문 기록은 블로그를 읽은 뒤에 보낸다(005: 이용 제한 블로그는 기록하지 않음)", async () => {
     let release: () => void = () => {};
     const gate = new Promise<void>((resolve) => (release = resolve));
     const backend = mockBackend({
@@ -104,9 +104,11 @@ describe("공개 블로그 레이아웃 loader", () => {
     });
 
     const pending = callLoader();
-    await vi.waitFor(() => expect(backend.calls).toHaveLength(3));
+    await vi.waitFor(() => expect(backend.calls).toHaveLength(2));
+    expect(backend.callsTo(VISITS)).toHaveLength(0);
     release();
     await pending;
+    expect(backend.callsTo(VISITS)).toHaveLength(1);
   });
 
   it("방문 기록·사이드바가 실패해도 화면은 그린다(사이드바 null)", async () => {
