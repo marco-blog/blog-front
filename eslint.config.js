@@ -6,7 +6,12 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 /** dangerouslySetInnerHTML을 쓸 수 있는 유일한 파일: backend가 sanitize한 글 본문 표시(R27) */
-const SANITIZED_HTML_FILES = ["app/components/post/PostContent.tsx"];
+const SANITIZED_HTML_FILES = [
+  "app/components/post/PostContent.tsx",
+  // 003 릴리스 노트 본문(backend가 살균, 제목 id 허용). 003 contracts/routes.md
+  "app/routes/updates/version.tsx",
+  "app/routes/updates/revision.tsx",
+];
 
 export default tseslint.config(
   {
@@ -32,7 +37,7 @@ export default tseslint.config(
   },
   {
     // sanitize된 본문(contentHtml) 외에는 HTML을 직접 넣지 않는다(research.md R27).
-    // 예외는 본문 표시 컴포넌트 한 파일(SANITIZED_HTML_FILES)뿐이다. 늘리려면 R27을 먼저 고친다.
+    // 예외는 살균한 본문 표시 파일(SANITIZED_HTML_FILES)뿐이다. 늘리려면 R27을 먼저 고친다.
     plugins: { "react-dom": reactDom },
     rules: {
       "react-dom/no-dangerously-set-innerhtml": "error",

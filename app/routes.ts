@@ -33,6 +33,14 @@ export default [
   // 003 주제 페이지(대분류·소분류 공용 모듈). `/:handle` 계열보다 앞에 둔다.
   route("topics/:major", "routes/topic.tsx", { id: "topic-major" }),
   route("topics/:major/:minor", "routes/topic.tsx", { id: "topic-minor" }),
+  // 003 릴리스 노트 위키(`/updates/v1.2.3`). 버전 조각은 loader가 `v` + SemVer인지 검사한다.
+  route("updates", "routes/updates/layout.tsx", [
+    index("routes/updates/index.tsx"),
+    route("seen", "routes/updates/seen.ts"),
+    route(":version", "routes/updates/version.tsx"),
+    route(":version/history", "routes/updates/history.tsx"),
+    route(":version/history/:revisionNo", "routes/updates/revision.tsx"),
+  ]),
   // 003 시스템 관리자 콘솔(관리자만, 아니면 404). 006이 나머지 메뉴를 더한다.
   route("admin", "routes/admin/layout.tsx", [
     index("routes/admin/index.ts"),

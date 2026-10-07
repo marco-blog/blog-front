@@ -4,7 +4,7 @@ import { ESLint } from "eslint";
 import { describe, expect, it } from "vitest";
 
 /**
- * sanitize된 본문(contentHtml) 표시 컴포넌트 한 파일만 dangerouslySetInnerHTML을 쓸 수 있다(research.md R27).
+ * sanitize된 본문(contentHtml) 표시 파일만 dangerouslySetInnerHTML을 쓸 수 있다(research.md R27, 003 contracts/routes.md).
  */
 const ROOT = join(import.meta.dirname, "../../..");
 const RULE = "react-dom/no-dangerously-set-innerhtml";
@@ -28,4 +28,15 @@ describe("dangerouslySetInnerHTML 예외 목록", () => {
   it("app/components/post/PostContent.tsx만 허용", { timeout: 30_000 }, async () => {
     expect(await ruleIds("app/components/post/PostContent.tsx")).toEqual([]);
   });
+
+  it(
+    "003 릴리스 노트 본문 두 파일도 허용, 같은 폴더의 다른 파일은 오류(T116)",
+    { timeout: 30_000 },
+    async () => {
+      expect(await ruleIds("app/routes/updates/version.tsx")).toEqual([]);
+      expect(await ruleIds("app/routes/updates/revision.tsx")).toEqual([]);
+      expect(await ruleIds("app/routes/updates/index.tsx")).toEqual([RULE]);
+      expect(await ruleIds("app/routes/updates/history.tsx")).toEqual([RULE]);
+    },
+  );
 });

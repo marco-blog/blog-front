@@ -1,3 +1,38 @@
 {
-  "title": "アップデート情報"
+  "title": "アップデート情報",
+  "description": "ブログサービスの新機能と変更点をバージョンごとにお知らせします。",
+  "empty": "まだアップデート情報はありません。",
+  "tree": {
+    "label": "バージョン一覧",
+    "group": "v{{version}}"
+  },
+  "toc": "目次",
+  "releaseDate": "{{date}} リリース",
+  "edition": "{{requested}}版がないため、{{shown}}版を表示しています。",
+  "versionNav": "前後のバージョン",
+  "prev": "前のバージョン",
+  "next": "次のバージョン",
+  "search": {
+    "label": "アップデート情報を検索",
+    "submit": "検索",
+    "title": "「{{q}}」の検索結果",
+    "count_one": "{{count, number}}件",
+    "count_other": "{{count, number}}件",
+    "empty": "検索結果はありません。"
+  },
+  "history": {
+    "link": "修正履歴",
+    "title": "v{{version}} の修正履歴",
+    "revision": "修正版 {{no}}",
+    "revisionTitle": "v{{version}} 修正版 {{no}}",
+    "old": "以前の修正版(修正版 {{no}})です。現在の内容と異なる場合があります。",
+    "current": "現在のバージョンを見る",
+    "list": "修正版一覧"
+  },
+  "banner": {
+    "label": "新しいアップデート情報",
+    "text": "新しいバージョン v{{version}}: {{title}}",
+    "view": "見る",
+    "dismiss": "閉じる"
+  }
 }

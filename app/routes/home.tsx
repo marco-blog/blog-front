@@ -3,19 +3,14 @@ import { Link, useLoaderData, useRouteLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
-import type {
-  PortalCard,
-  PortalHome,
-  ReleaseNoteList,
-  ReleaseNoteSummary,
-  TopicNode,
-} from "~/api/models";
+import type { PortalCard, PortalHome, ReleaseNoteList, TopicNode } from "~/api/models";
 import { CurationSection } from "~/components/portal/CurationSection";
 import { EmptyPortal } from "~/components/portal/EmptyPortal";
 import { LatestPosts, type LatestBatch } from "~/components/portal/LatestPosts";
 import { NewBlogs } from "~/components/portal/NewBlogs";
 import { PopularPosts } from "~/components/portal/PopularPosts";
 import { PopularTags } from "~/components/portal/PopularTags";
+import { ReleaseNoteCard } from "~/components/portal/ReleaseNoteCard";
 import { TopicTabs } from "~/components/portal/TopicTabs";
 import { publicOrigin } from "~/config.server";
 import { metaT } from "~/i18n/meta";
@@ -80,18 +75,6 @@ function isEmpty(portal: PortalHome): boolean {
     portal.latest.items.length === 0 &&
     portal.popularTags.length === 0 &&
     portal.newBlogs.length === 0
-  );
-}
-
-function ReleaseNoteCard({ note }: { note: ReleaseNoteSummary }) {
-  const { t } = useTranslation();
-  return (
-    <aside className="portal-release-note">
-      <p>
-        {t("portal:home.releaseNote", { title: note.title })}{" "}
-        <Link to={`/updates/v${note.version}`}>{t("portal:home.releaseNoteLink")}</Link>
-      </p>
-    </aside>
   );
 }
 

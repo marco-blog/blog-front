@@ -1,3 +1,38 @@
 {
-  "title": "업데이트 소식"
+  "title": "업데이트 소식",
+  "description": "블로그 서비스의 새 기능과 바뀐 점을 버전별로 알려 드립니다.",
+  "empty": "아직 업데이트 소식이 없습니다.",
+  "tree": {
+    "label": "버전 목록",
+    "group": "v{{version}}"
+  },
+  "toc": "목차",
+  "releaseDate": "{{date}} 릴리스",
+  "edition": "{{requested}}판이 없어 {{shown}}판으로 보여 드립니다.",
+  "versionNav": "이전·다음 버전",
+  "prev": "이전 버전",
+  "next": "다음 버전",
+  "search": {
+    "label": "업데이트 소식 검색",
+    "submit": "검색",
+    "title": "「{{q}}」 검색 결과",
+    "count_one": "{{count, number}}건",
+    "count_other": "{{count, number}}건",
+    "empty": "검색 결과가 없습니다."
+  },
+  "history": {
+    "link": "수정 이력",
+    "title": "v{{version}} 수정 이력",
+    "revision": "수정본 {{no}}",
+    "revisionTitle": "v{{version}} 수정본 {{no}}",
+    "old": "이전 수정본(수정본 {{no}})입니다. 지금 내용과 다를 수 있습니다.",
+    "current": "현재 버전 보기",
+    "list": "수정본 목록"
+  },
+  "banner": {
+    "label": "새 업데이트 소식",
+    "text": "새 버전 v{{version}}: {{title}}",
+    "view": "보기",
+    "dismiss": "닫기"
+  }
 }
