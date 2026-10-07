@@ -331,6 +331,31 @@ describe("방명록 action", () => {
   });
 });
 
+describe("방명록 신고(005 T047)", () => {
+  it("intent=report는 POST /reports(방명록 글), 비로그인이면 신고 폼이 열린 같은 쪽으로 돌아오는 로그인", async () => {
+    const backend = mockBackend({ "POST /api/v1/reports": ok({ id: 1, status: "PENDING" }) });
+    const fields = { intent: "report", targetType: "GUESTBOOK", targetId: "9", reason: "ABUSE" };
+
+    expect(asData(await callAction(fields)).data).toEqual({
+      intent: "report",
+      ok: true,
+      key: "guestbook-9",
+    });
+    expect(backend.callsTo("POST /api/v1/reports")[0].body).toEqual({
+      targetType: "GUESTBOOK",
+      targetId: 9,
+      reason: "ABUSE",
+    });
+
+    mockBackend({ "POST /api/v1/reports": fail(401, "UNAUTHENTICATED") });
+    expect(
+      decodeURIComponent(
+        expectRedirect(await caught(callAction(fields, "/marco/guestbook?page=2"))),
+      ),
+    ).toContain("next=/marco/guestbook?page=2&report=guestbook-9");
+  });
+});
+
 describe("방명록 meta", () => {
   const metaArgs = (data: LoaderData | undefined) =>
     ({
