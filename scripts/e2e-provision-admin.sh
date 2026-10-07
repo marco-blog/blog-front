@@ -19,6 +19,8 @@ body="$(E2E_TERMS_VERSION="$terms_version" node -e '
     email: e.E2E_ADMIN_EMAIL, password: e.E2E_ADMIN_PASSWORD, nickname: "E2E 관리자",
     handle: "e2eadmin", agreeTerms: true, agreePrivacy: true, over14: true,
     termsVersion: e.E2E_TERMS_VERSION,
+    // 005: 가입은 CAPTCHA가 필요하다. E2E backend는 BLOG_CAPTCHA_PROVIDER=test라 이 토큰을 통과시킨다.
+    captchaToken: e.E2E_CAPTCHA_TOKEN || "e2e-pass",
   }));')"
 
 response="$(curl -fsS -X POST "$E2E_BACKEND_URL/api/v1/auth/signup" \

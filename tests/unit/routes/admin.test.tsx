@@ -99,7 +99,7 @@ describe("/admin 접근", () => {
 });
 
 describe("/admin 화면", () => {
-  it("좌측 메뉴는 003의 4개와 005의 회원 관리·신고 관리(처리 대기 배지)·숨긴 글", async () => {
+  it("좌측 메뉴는 003의 4개와 005의 회원 관리·신고 관리(처리 대기 배지)·숨긴 글·스팸 방어 설정", async () => {
     mockBackend({
       [ME]: ok(member()),
       "GET /api/v1/admin/topics": ok([adminTopic(1, "dev")]),
@@ -127,6 +127,7 @@ describe("/admin 화면", () => {
       "회원 관리",
       "신고 관리 처리 대기 3건",
       "숨긴 글",
+      "스팸 방어 설정",
     ]);
     expect(links.map((link) => link.getAttribute("href"))).toEqual(
       ADMIN_MENU.map((item) => item.path),
@@ -148,7 +149,7 @@ describe("/admin 화면", () => {
     ]);
   });
 
-  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글)이 /:handle 계열보다 앞에", () => {
+  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글·스팸)이 /:handle 계열보다 앞에", () => {
     const paths = routes.map((route) => route.path);
     const admin = routes.find((route) => route.path === "admin");
     expect(paths.indexOf("admin")).toBeLessThan(firstBlogRoute(paths));
@@ -163,6 +164,7 @@ describe("/admin 화면", () => {
       "users",
       "users/:id",
       "contents/hidden-posts",
+      "spam",
     ]);
   });
 });

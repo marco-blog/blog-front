@@ -10,7 +10,8 @@
     "reports": "通報管理",
     "hiddenPosts": "非表示の記事",
     "pending_one": "未処理 {{count}}件",
-    "pending_other": "未処理 {{count}}件"
+    "pending_other": "未処理 {{count}}件",
+    "spam": "スパム対策設定"
   },
   "timeZone": "時刻は{{timeZone}}基準です。",
   "fields": {
@@ -47,7 +48,14 @@
     "targetType": "種類",
     "targetId": "番号",
     "maxBlogs": "上限",
-    "decision": "処理"
+    "decision": "処理",
+    "duplicate": {
+      "windowMinutes": "基準時間（分）",
+      "maxCount": "許容回数"
+    },
+    "word": "禁止語",
+    "scope": "適用範囲",
+    "action": "処理方法"
   },
   "lookup": {
     "submit": "記事を確認",
@@ -350,5 +358,73 @@
     "COPYRIGHT": "著作権侵害",
     "DEFAMATION": "名誉毀損",
     "OTHER": "その他"
+  },
+  "spam": {
+    "title": "スパム対策設定",
+    "hint": "変更はすぐに反映されます。管理者には投稿速度の上限と繰り返し基準が適用されません。",
+    "rateLimits": "投稿速度の上限",
+    "duplicate": "繰り返しコメントの基準",
+    "limit": "上限",
+    "keys": {
+      "ratelimit-post-publish-per-hour": {
+        "title": "記事の公開（1時間）",
+        "hint": "会員1人が1時間に初めて公開・予約できる記事数（複数ブログの合計、1〜10000）。"
+      },
+      "ratelimit-comment-per-minute": {
+        "title": "コメント（1分）",
+        "hint": "会員1人または非会員IP1つが1分に書けるコメント数（1〜10000）。"
+      },
+      "ratelimit-guestbook-per-minute": {
+        "title": "ゲストブック（1分）",
+        "hint": "会員1人または非会員IP1つが1分に書けるゲストブック数（1〜10000）。"
+      },
+      "ratelimit-media-upload-per-minute": {
+        "title": "画像アップロード（1分）",
+        "hint": "会員1人が1分にアップロードできる画像数（1〜10000）。"
+      },
+      "ratelimit-signup-per-ip-per-hour": {
+        "title": "会員登録（IPごと1時間）",
+        "hint": "同じIPから1時間に登録できる数（1〜100000）。"
+      },
+      "spam-duplicate-comment": {
+        "title": "同じ内容の繰り返し",
+        "hint": "同じ人が基準時間（1〜1440分）内に同じ内容を許容回数（2〜100）より多く書くと拒否します。10文字未満は数えません。"
+      }
+    },
+    "words": {
+      "title": "禁止語",
+      "hint": "名前系はニックネーム・ブログアドレス・ブログタイトル・非会員名に、本文系は記事・コメント・ゲストブックに適用されます。名前系は拒否のみ設定できます。",
+      "search": "禁止語を検索",
+      "searchSubmit": "検索",
+      "add": "禁止語を追加",
+      "addSubmit": "追加",
+      "word": "禁止語",
+      "scope": "適用範囲",
+      "action": "処理方法",
+      "setting": "適用範囲・処理方法",
+      "createdBy": "登録",
+      "update": "変更",
+      "delete": "削除",
+      "deleteLabel": "禁止語を削除: {{word}}",
+      "deleteConfirm": "禁止語「{{word}}」を削除しますか？",
+      "count_one": "禁止語 {{count}}件",
+      "count_other": "禁止語 {{count}}件",
+      "empty": "登録された禁止語はありません。",
+      "noMatch": "検索結果はありません。",
+      "scopes": {
+        "NAME": "名前系",
+        "CONTENT": "本文系",
+        "ALL": "すべて"
+      },
+      "actions": {
+        "REJECT": "拒否",
+        "MASK": "伏せ字"
+      },
+      "done": {
+        "addWord": "禁止語を追加しました。",
+        "updateWord": "禁止語を変更しました。",
+        "deleteWord": "禁止語を削除しました。"
+      }
+    }
   }
 }

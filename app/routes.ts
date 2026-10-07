@@ -56,6 +56,7 @@ export default [
     route("users", "routes/admin/users.tsx"),
     route("users/:id", "routes/admin/user.tsx"),
     route("contents/hidden-posts", "routes/admin/hidden-posts.tsx"),
+    route("spam", "routes/admin/spam.tsx"),
   ]),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
@@ -66,6 +67,7 @@ export default [
     route("posts", "routes/manage/posts.tsx"),
     route("categories", "routes/manage/categories.tsx"),
     route("comments", "routes/manage/comments.tsx"),
+    route("trackbacks", "routes/manage/trackbacks.tsx"),
     route("guestbook", "routes/manage/guestbook.tsx"),
     route("design", "routes/manage/design.tsx"),
     route("stats", "routes/manage/stats.tsx"),

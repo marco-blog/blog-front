@@ -20,6 +20,15 @@ import {
 
 // 에디터(Milkdown Crepe)는 브라우저 전용이라 이 테스트에서는 같은 인터페이스의 입력란으로 바꾼다.
 // `editor.unreported`는 에디터에 들어갔지만 아직 onChange로 알리지 않은 내용(Milkdown은 알림을 늦춰 보낸다)이다.
+const ping = {
+  id: 1,
+  targetUrl: "https://other.example/tb/1",
+  status: "SUCCESS" as const,
+  errorCode: null,
+  errorMessage: null,
+  attemptedAt: "2026-10-06T05:00:00Z",
+  createdAt: "2026-10-06T05:00:00Z",
+};
 const editor = vi.hoisted(() => ({ unreported: null as string | null }));
 vi.mock("~/components/Editor/Editor", async () => {
   const { useImperativeHandle } = await import("react");
@@ -171,6 +180,7 @@ describe("write loader", () => {
         savedAt: "2026-10-06T05:00:00Z",
       }),
       [TOPICS]: ok(topics),
+      "GET /api/v1/posts/123/trackback-pings": ok([ping]),
     });
 
     const result = await callLoader("/marco/write/123", { handle: "marco", postId: "123" });
@@ -198,6 +208,7 @@ describe("write loader", () => {
       categories: tree,
       topics,
       defaultTopicId: null,
+      pings: [ping],
     });
   });
 
@@ -355,6 +366,7 @@ describe("write 화면", () => {
         categories: tree,
         topics,
         defaultTopicId: null,
+        pings: [],
       },
       "/marco/write/123",
     );
@@ -592,6 +604,7 @@ describe("write 화면", () => {
         categories: tree,
         topics,
         defaultTopicId: null,
+        pings: [],
       },
       "/marco/write/123",
     );
@@ -742,6 +755,7 @@ describe("write 화면", () => {
                   categories: tree,
                   topics,
                   defaultTopicId: null,
+                  pings: [],
                 }
               : {
                   ...newPost,

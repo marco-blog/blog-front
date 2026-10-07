@@ -206,6 +206,10 @@ describe("post detail meta", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
     };
   };
   const metaArgs = (loaderData: LoaderData | undefined) =>
@@ -311,6 +315,10 @@ describe("post detail 화면", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
       ...overrides,
     };
   };
@@ -598,6 +606,10 @@ describe("post detail 화면의 댓글", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -621,6 +633,10 @@ describe("post detail 화면의 댓글", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -709,6 +725,10 @@ describe("post detail 좋아요(002 T027)", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -833,6 +853,10 @@ describe("post detail 보호 글(004 T086)", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
     } as unknown as LoaderData;
     const tags = meta({
       data: loaderData,
@@ -857,6 +881,10 @@ describe("post detail 보호 글(004 T086)", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
     } as unknown as LoaderData;
     renderRoutes(
       [
@@ -915,6 +943,10 @@ describe("post detail 신고·숨김(005 T047)", () => {
       blogTitle: "마르코의 블로그",
       topic: null,
       guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [],
+      trackbackTotal: 0,
+      tbPage: 1,
       ...overrides,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {

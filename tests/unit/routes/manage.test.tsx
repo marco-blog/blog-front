@@ -405,6 +405,7 @@ describe("블로그 설정 loader·action", () => {
         defaultTopicId: 11,
         guestbookEnabled: true,
         guestWriteEnabled: false,
+        trackbackEnabled: true,
       },
       topics,
     });
@@ -482,6 +483,7 @@ describe("블로그 설정 loader·action", () => {
       portalEnabled: false,
       guestbookEnabled: false,
       guestWriteEnabled: false,
+      trackbackEnabled: false,
       defaultTopicId: null,
     });
   });
@@ -605,6 +607,7 @@ describe("블로그 관리 화면", () => {
       "글 관리",
       "카테고리",
       "댓글",
+      "받은 트랙백",
       "방명록",
       "꾸미기",
       "통계",
@@ -626,6 +629,7 @@ describe("블로그 관리 화면", () => {
       "posts",
       "categories",
       "comments",
+      "trackbacks",
       "guestbook",
       "design",
       "stats",
@@ -1043,6 +1047,7 @@ describe("블로그 관리 화면", () => {
       portalEnabled: true,
       guestbookEnabled: true,
       guestWriteEnabled: false,
+      trackbackEnabled: true,
       defaultTopicId: null,
     });
 

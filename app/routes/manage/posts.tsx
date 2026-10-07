@@ -27,6 +27,7 @@ import { requireOwnedBlog, throwManageError } from "~/manage/access.server";
 import { postHref } from "~/manage/links";
 import { privatePageMeta } from "~/seo/meta";
 
+import { TrackbackPingDetails } from "~/components/trackback/PingResultList";
 import type { Route } from "./+types/posts";
 
 /** 한 페이지 글 수(backend 기본값과 같다) */
@@ -506,6 +507,7 @@ function BulkList({
                   </>
                 )}
                 <PostMeta post={post} />
+                {post.status === "PUBLISHED" && <TrackbackPingDetails postId={post.id} />}
                 {post.status === "HIDDEN" && (
                   <p className="form-hint">{t("manage:posts.hiddenHint")}</p>
                 )}

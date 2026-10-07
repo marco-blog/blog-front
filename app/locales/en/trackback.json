@@ -1,3 +1,59 @@
 {
-  "title": "Trackbacks"
+  "title": "Trackbacks",
+  "heading_one": "{{count}} trackback",
+  "heading_other": "{{count}} trackbacks",
+  "address": "Trackback URL",
+  "copy": "Copy",
+  "copied": "Trackback URL copied.",
+  "closed": "This post does not accept trackbacks.",
+  "empty": "No trackbacks yet.",
+  "list": "Trackbacks received",
+  "pages": "Trackback pages",
+  "more": "Show more",
+  "newer": "Newer trackbacks",
+  "loadFailed": "Could not load trackbacks.",
+  "send": {
+    "label": "Send trackbacks",
+    "hint": "Enter the trackback URLs of the posts to ping, one per line, up to {{max}}.",
+    "publicOnly": "Trackbacks can only be sent from public posts."
+  },
+  "pings": {
+    "title": "Sent trackbacks",
+    "toggle": "Trackback results",
+    "empty": "No trackbacks sent.",
+    "loadFailed": "Could not load trackback results.",
+    "loading": "Loading…",
+    "needsScript": "Turn on JavaScript to see the results, or check them in the publish settings of the editor.",
+    "status": {
+      "PENDING": "Sending",
+      "SUCCESS": "Sent",
+      "FAILED": "Failed"
+    },
+    "error": {
+      "INVALID_URL": "The URL is not valid.",
+      "BLOCKED_ADDRESS": "This address cannot be pinged.",
+      "TIMEOUT": "The other server did not respond in time.",
+      "HTTP_ERROR": "The other server responded with an error.",
+      "REMOTE_ERROR": "The other blog did not accept it."
+    }
+  },
+  "manage": {
+    "title": "Received trackbacks",
+    "list": "Received trackbacks list",
+    "empty": "No trackbacks received.",
+    "receivingOn": "Trackbacks are being accepted.",
+    "receivingOff": "Receiving trackbacks is off. New trackbacks are not accepted.",
+    "settingsLink": "Change in blog settings",
+    "on": "On: {{title}}",
+    "hidden": "Hidden",
+    "hiddenHint": "Trackbacks hidden by an administrator cannot be deleted.",
+    "delete": "Delete",
+    "deleteLabel": "Delete trackback: {{title}}",
+    "deleteConfirm": "Delete this trackback?",
+    "deleted": "Trackback deleted."
+  },
+  "settings": {
+    "enabled": "Receive trackbacks",
+    "hint": "When off, new trackbacks are refused. Trackbacks already received stay."
+  }
 }

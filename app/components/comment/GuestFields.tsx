@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 
 import { GUEST_NAME_MAX, GUEST_PASSWORD_MAX, GUEST_PASSWORD_MIN } from "~/api/models";
+import { Captcha } from "~/components/captcha/Captcha";
+import { useCaptcha } from "~/components/captcha/CaptchaContext";
 import { FormField } from "~/components/form/FormField";
 
 export interface GuestFieldsProps {
@@ -11,10 +13,12 @@ export interface GuestFieldsProps {
 
 /**
  * 비회원 댓글·방명록의 이름·비밀번호 칸(004 FR-066). 비로그인 방문자에게, 블로그가 비회원 쓰기를 허용할 때만 보인다.
- * 비밀번호는 나중에 고치거나 지울 때 다시 입력한다.
+ * 비밀번호는 나중에 고치거나 지울 때 다시 입력한다. 005: 화면이 `CaptchaContext`로 CAPTCHA 정보를 주면 위젯을 함께 그린다
+ * (FR-141, 숨은 입력 `captchaToken`).
  */
 export function GuestFields({ errors = {}, disabled = false }: GuestFieldsProps) {
   const { t } = useTranslation();
+  const captcha = useCaptcha();
   return (
     <fieldset className="guest-fields">
       <legend>{t("guestbook:guest.legend")}</legend>
@@ -42,6 +46,7 @@ export function GuestFields({ errors = {}, disabled = false }: GuestFieldsProps)
         error={errors.guestPassword}
         disabled={disabled}
       />
+      <Captcha captcha={captcha} />
     </fieldset>
   );
 }

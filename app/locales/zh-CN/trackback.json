@@ -1,3 +1,59 @@
 {
-  "title": "引用通告"
+  "title": "引用通告",
+  "heading_one": "引用通告 {{count}}",
+  "heading_other": "引用通告 {{count}}",
+  "address": "引用通告地址",
+  "copy": "复制",
+  "copied": "已复制引用通告地址。",
+  "closed": "此文章不接收引用通告。",
+  "empty": "还没有引用通告。",
+  "list": "收到的引用通告",
+  "pages": "引用通告分页",
+  "more": "查看更多",
+  "newer": "较新的引用通告",
+  "loadFailed": "无法加载引用通告。",
+  "send": {
+    "label": "发送引用通告",
+    "hint": "请输入目标文章的引用通告地址，每行一个，最多 {{max}} 个。",
+    "publicOnly": "只有公开文章才能发送引用通告。"
+  },
+  "pings": {
+    "title": "已发送的引用通告",
+    "toggle": "引用通告结果",
+    "empty": "没有发送过引用通告。",
+    "loadFailed": "无法加载发送结果。",
+    "loading": "正在加载。",
+    "needsScript": "请开启 JavaScript 查看结果，或在编辑页面的发布设置中查看。",
+    "status": {
+      "PENDING": "发送中",
+      "SUCCESS": "成功",
+      "FAILED": "失败"
+    },
+    "error": {
+      "INVALID_URL": "地址格式不正确。",
+      "BLOCKED_ADDRESS": "无法向此地址发送。",
+      "TIMEOUT": "对方服务器未及时响应。",
+      "HTTP_ERROR": "对方服务器返回了错误。",
+      "REMOTE_ERROR": "对方博客未接收。"
+    }
+  },
+  "manage": {
+    "title": "收到的引用通告",
+    "list": "收到的引用通告列表",
+    "empty": "没有收到引用通告。",
+    "receivingOn": "正在接收引用通告。",
+    "receivingOff": "已关闭接收引用通告，不再接收新的引用通告。",
+    "settingsLink": "在博客设置中更改",
+    "on": "目标文章：{{title}}",
+    "hidden": "已隐藏",
+    "hiddenHint": "管理员隐藏的引用通告无法删除。",
+    "delete": "删除",
+    "deleteLabel": "删除引用通告：{{title}}",
+    "deleteConfirm": "要删除此引用通告吗？",
+    "deleted": "已删除引用通告。"
+  },
+  "settings": {
+    "enabled": "接收引用通告",
+    "hint": "关闭后不再接收新的引用通告，已收到的引用通告会保留。"
+  }
 }

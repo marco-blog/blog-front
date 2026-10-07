@@ -1,5 +1,5 @@
 /**
- * 관리자 콘솔 좌측 메뉴(003 범위 + 005 회원·신고·숨긴 글, 006 FR-102). 006이 대시보드 등 나머지 메뉴를 더한다.
+ * 관리자 콘솔 좌측 메뉴(003 범위 + 005 회원·신고·숨긴 글·스팸 방어, 006 FR-102). 006이 대시보드 등 나머지 메뉴를 더한다.
  * `key`는 문구 `admin:nav.{key}`. 첫 항목이 `/admin`의 첫 화면이다.
  */
 export const ADMIN_MENU = [
@@ -10,6 +10,7 @@ export const ADMIN_MENU = [
   { key: "users", path: "/admin/users" },
   { key: "reports", path: "/admin/reports" },
   { key: "hiddenPosts", path: "/admin/contents/hidden-posts" },
+  { key: "spam", path: "/admin/spam" },
 ] as const;
 
 /** 처리 대기 신고 수 배지를 붙이는 메뉴(005, `GET /admin/reports/summary`) */

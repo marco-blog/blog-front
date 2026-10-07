@@ -7,6 +7,7 @@ import { GUESTBOOK_MAX_LENGTH, type GuestbookEntry, type GuestbookWrite } from "
 import type { ApiFieldError } from "~/api/types";
 import { loginPath } from "~/auth/paths";
 import { guestFieldErrors, guestPasswordErrors } from "~/blog/guestAuthor";
+import { CAPTCHA_FIELD } from "~/components/captcha/Captcha";
 import { parsePostId } from "~/blog/ids";
 
 import { GUESTBOOK_INTENTS, type GuestbookActionData, type GuestbookIntent } from "./actions";
@@ -75,7 +76,9 @@ export async function runGuestbookAction(request: Request, options: GuestbookAct
       const body: GuestbookWrite = {
         content,
         secret,
-        ...(isGuest ? { guestName, guestPassword } : {}),
+        ...(isGuest
+          ? { guestName, guestPassword, captchaToken: String(form.get(CAPTCHA_FIELD) ?? "") }
+          : {}),
       };
       await api.post(`/blogs/${options.handle}/guestbook`, { body });
       throw redirect(options.createdTo ?? options.returnTo);

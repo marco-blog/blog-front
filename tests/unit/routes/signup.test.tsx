@@ -24,6 +24,13 @@ type MetaArgs = Parameters<typeof meta>[0];
 const SIGNUP = "POST /api/v1/auth/signup";
 const TERMS = "GET /api/v1/legal/terms";
 const AVAILABILITY = "GET /api/v1/auth/handle-availability";
+const CONFIG = "GET /api/v1/captcha/config";
+const TEST_CAPTCHA = {
+  provider: "test",
+  siteKey: null,
+  testToken: "e2e-pass",
+  nonce: null,
+} as const;
 const terms = {
   version: "2026-10-06",
   lang: "ko",
@@ -43,6 +50,7 @@ const validForm = {
   termsVersion: "2026-10-06",
   locale: "ko",
   timeZone: "Asia/Seoul",
+  captchaToken: "e2e-pass",
 };
 
 afterEach(() => {
@@ -50,15 +58,26 @@ afterEach(() => {
 });
 
 describe("signup loader", () => {
-  it("화면 언어의 약관 버전을 받아 둔다", async () => {
-    const backend = mockBackend({ [TERMS]: ok(terms) });
+  it("화면 언어의 약관 버전과 CAPTCHA 설정을 받아 둔다", async () => {
+    const backend = mockBackend({
+      [TERMS]: ok(terms),
+      [CONFIG]: ok({ provider: "test", siteKey: null }),
+    });
 
     const result = await loader(
       routeArgs<LoaderArgs>(getRequest("/signup", { "accept-language": "ja" })),
     );
 
-    expect(result).toEqual({ termsVersion: "2026-10-06" });
-    expect(backend.calls[0].url.searchParams.get("lang")).toBe("ja");
+    expect(result).toEqual({ termsVersion: "2026-10-06", captcha: TEST_CAPTCHA });
+    expect(backend.callsTo(TERMS)[0].url.searchParams.get("lang")).toBe("ja");
+  });
+
+  it("CAPTCHA 설정을 받지 못하면 CAPTCHA 없이 그린다", async () => {
+    mockBackend({ [TERMS]: ok(terms), [CONFIG]: fail(503, "INTERNAL_ERROR") });
+
+    const result = await loader(routeArgs<LoaderArgs>(getRequest("/signup")));
+
+    expect(result.captcha.provider).toBe("none");
   });
 
   it("약관을 받지 못하면 그 상태 코드로 오류 화면", async () => {
@@ -93,6 +112,7 @@ describe("signup action", () => {
       termsVersion: "2026-10-06",
       locale: "ko",
       timeZone: "Asia/Seoul",
+      captchaToken: "e2e-pass",
     });
     expect(responseCookies(request)).toEqual([cookie]);
   });
@@ -154,6 +174,23 @@ describe("signup action", () => {
     expect(result.init?.status).toBe(status);
     expect(result.data).toMatchObject({ resultCode: code, field });
   });
+
+  it("CAPTCHA_FAILED·429는 폼 오류로, 입력 값은 그대로", async () => {
+    mockBackend({ [SIGNUP]: fail(400, "CAPTCHA_FAILED") });
+
+    const result = asData<{ resultCode: string; field: string | null; values: unknown }>(
+      await action(
+        routeArgs<ActionArgs>(formRequest("/signup", { ...validForm, captchaToken: "" })),
+      ),
+    );
+
+    expect(result.init?.status).toBe(400);
+    expect(result.data).toMatchObject({
+      resultCode: "CAPTCHA_FAILED",
+      field: null,
+      values: { email: "marco@example.com", nickname: "마르코", handle: "marco" },
+    });
+  });
 });
 
 describe("signup 화면", () => {
@@ -162,7 +199,7 @@ describe("signup 화면", () => {
       [
         {
           path: "signup",
-          loader: () => ({ termsVersion: "2026-10-06" }),
+          loader: () => ({ termsVersion: "2026-10-06", captcha: TEST_CAPTCHA }),
           action,
           Component: Signup,
         },
@@ -327,6 +364,47 @@ describe("signup 화면", () => {
     });
 
     expect(await screen.findByText("blog home")).toBeInTheDocument();
+  });
+
+  it("시험 모드 CAPTCHA와 숨은 captchaToken", async () => {
+    mockBackend();
+    renderSignup();
+
+    const group = await screen.findByRole("group", { name: "자동 등록 방지" });
+    expect(group).toHaveTextContent("시험 모드");
+    expect(group.querySelector('input[name="captchaToken"]')).toHaveValue("e2e-pass");
+  });
+
+  it("닉네임·블로그 주소의 금칙어(BANNED_WORD)는 입력란 문구로", async () => {
+    mockBackend({
+      [SIGNUP]: fail(400, "VALIDATION_FAILED", [
+        { field: "nickname", code: "BANNED_WORD" },
+        { field: "handle", code: "BANNED_WORD" },
+      ]),
+      [AVAILABILITY]: ok({ available: true }),
+    });
+    renderSignup();
+
+    await fill();
+    fireEvent.click(screen.getByRole("button", { name: "가입하기" }));
+
+    await vi.waitFor(() =>
+      expect(screen.getAllByText("사용할 수 없는 단어가 있습니다.")).toHaveLength(2),
+    );
+    expect(screen.getByLabelText("닉네임")).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("429는 잠시 후 다시 시도 안내", async () => {
+    mockBackend({
+      [SIGNUP]: fail(429, "TOO_MANY_REQUESTS", [], { "retry-after": "60" }),
+      [AVAILABILITY]: ok({ available: true }),
+    });
+    renderSignup();
+
+    await fill();
+    fireEvent.click(screen.getByRole("button", { name: "가입하기" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("요청이 너무 많습니다");
   });
 
   it("로그인 링크가 있다", async () => {

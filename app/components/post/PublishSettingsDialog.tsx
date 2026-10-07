@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import type { CategoryNode, TopicNode, Visibility } from "~/api/models";
+import type { CategoryNode, TopicNode, TrackbackPing, Visibility } from "~/api/models";
 import { fieldErrorMessage } from "~/api/errorMessage";
 import { CategorySelect } from "~/components/blog/CategoryTree";
 import {
@@ -13,6 +13,12 @@ import {
 import { ScheduleField } from "~/components/post/ScheduleField";
 import { TagInput } from "~/components/post/TagInput";
 import { TopicSelect } from "~/components/post/TopicSelect";
+import { PingResultList } from "~/components/trackback/PingResultList";
+import {
+  TRACKBACK_TARGETS_MAX,
+  TrackbackTargetsField,
+  parseTrackbackTargets,
+} from "~/components/trackback/TrackbackTargetsField";
 import { DEFAULT_TIME_ZONE } from "~/i18n/format";
 import { localToUtcIso, utcIsoToLocal } from "~/i18n/zonedDateTime";
 import { mediaUrl, thumbnailImage } from "~/media/thumbnail";
@@ -32,6 +38,8 @@ export interface PublishSettingsValue {
   password?: string;
   /** 예약 시각(UTC ISO, 004 FR-064). 바로 발행이면 null */
   scheduledAt: string | null;
+  /** 트랙백을 보낼 주소(005 FR-052). 공개 글이고 입력이 있을 때만 */
+  trackbackUrls?: string[];
 }
 
 export interface PublishSettingsDialogProps {
@@ -58,6 +66,8 @@ export interface PublishSettingsDialogProps {
   pending?: boolean;
   /** 발행 실패 문구 */
   error?: string | null;
+  /** 이 글이 이미 보낸 트랙백(005, 발행된 글만). 없으면 목록을 그리지 않는다 */
+  pings?: TrackbackPing[] | null;
   onClose: () => void;
   /** 카테고리·태그·주제를 바꿀 때마다(닫아도 고른 값이 작성 화면에 남아 임시저장된다) */
   onClassify?: (value: Pick<PublishSettingsValue, "categoryId" | "tags" | "topicId">) => void;
@@ -70,6 +80,7 @@ export interface PublishSettingsDialogProps {
  * 공개 범위(공개·비공개), 카테고리(미분류 포함), 포털 주제(003, 카테고리와 따로), 태그, 대표 이미지(본문 이미지 중 선택, 기본은 첫 이미지),
  * 발행 시각(지금 또는 예약, 004), 댓글 허용, 공지로 등록(004). 공개 범위 "보호"(004)를 고르면 비밀번호를 받는다
  * (이미 보호 글이면 비워 두면 그대로). 예약은 이미 발행된 글에는 보이지 않는다.
+ * 005: "트랙백 보내기"(공개일 때만, 최대 10개)와 이미 보낸 트랙백 결과.
  */
 export function PublishSettingsDialog({
   published,
@@ -80,6 +91,7 @@ export function PublishSettingsDialog({
   timeZone = DEFAULT_TIME_ZONE,
   pending = false,
   error,
+  pings,
   onClose,
   onClassify,
   onPublish,
@@ -100,6 +112,8 @@ export function PublishSettingsDialog({
   );
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [trackbackText, setTrackbackText] = useState("");
+  const [trackbackError, setTrackbackError] = useState<string | null>(null);
   const [thumbnailMediaKey, setThumbnailMediaKey] = useState<string | null>(() =>
     initial.thumbnailMediaKey && images.includes(initial.thumbnailMediaKey)
       ? initial.thumbnailMediaKey
@@ -155,7 +169,14 @@ export function PublishSettingsDialog({
     setScheduleError(
       scheduling && scheduledAt === null ? fieldErrorMessage(t, { code: "INVALID" }) : null,
     );
-    if (passwordCode || (scheduling && scheduledAt === null)) {
+    const trackbackUrls = visibility === "PUBLIC" ? parseTrackbackTargets(trackbackText) : [];
+    const tooManyTargets = trackbackUrls.length > TRACKBACK_TARGETS_MAX;
+    setTrackbackError(
+      tooManyTargets
+        ? fieldErrorMessage(t, { code: "TOO_LONG", params: { max: TRACKBACK_TARGETS_MAX } })
+        : null,
+    );
+    if (passwordCode || (scheduling && scheduledAt === null) || tooManyTargets) {
       return;
     }
     onPublish({
@@ -168,6 +189,7 @@ export function PublishSettingsDialog({
       notice,
       ...(visibility === "PROTECTED" && password !== "" ? { password } : {}),
       scheduledAt,
+      ...(trackbackUrls.length > 0 ? { trackbackUrls } : {}),
     });
   };
 
@@ -280,6 +302,19 @@ export function PublishSettingsDialog({
         />
         {t("post:publish.notice")}
       </label>
+      <TrackbackTargetsField
+        value={trackbackText}
+        onChange={setTrackbackText}
+        enabled={visibility === "PUBLIC"}
+        error={trackbackError}
+        disabled={pending}
+      />
+      {pings !== undefined && (
+        <section className="trackback-ping-results" aria-label={t("trackback:pings.title")}>
+          <h3>{t("trackback:pings.title")}</h3>
+          <PingResultList pings={pings} />
+        </section>
+      )}
       {error && (
         <p role="alert" className="form-alert">
           {error}
