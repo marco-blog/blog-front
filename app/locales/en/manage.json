@@ -94,7 +94,11 @@
     "portalEnabled": "Show this blog's posts on the portal",
     "portalHint": "When off, this blog's posts don't appear on the portal home or topic pages. The blog itself and its feeds are unchanged.",
     "defaultTopic": "Default topic for new posts",
-    "defaultTopicHint": "This topic is preselected when you write a new post. You can change it for each post."
+    "defaultTopicHint": "This topic is preselected when you write a new post. You can change it for each post.",
+    "guestbookEnabled": "Use the guestbook",
+    "guestbookHint": "When off, the guestbook disappears from the blog menu and visitors cannot see it. Existing entries are kept.",
+    "guestWriteEnabled": "Allow comments and guestbook entries from guests",
+    "guestWriteHint": "When on, visitors who are not logged in can write comments and guestbook entries with a name and password. They can edit or delete them only with the same password."
   },
   "comments": {
     "title": "Comments",

@@ -386,9 +386,46 @@ describe("블로그 설정 loader·action", () => {
         commentEnabled: true,
         portalEnabled: false,
         defaultTopicId: 11,
+        guestbookEnabled: true,
+        guestWriteEnabled: false,
       },
       topics,
     });
+  });
+
+  it("loader: 방명록 사용·비회원 허용 값을 그대로 넘긴다(004)", async () => {
+    mockBackend({
+      [ME]: ok(me()),
+      [BLOG]: ok({ ...blog, guestbookEnabled: false, guestWriteEnabled: true }),
+      [TOPICS]: ok([]),
+    });
+
+    await expect(
+      settingsLoader(
+        routeArgs<LoaderArgs<typeof settingsLoader>>(
+          getRequest("/marco/manage/settings", loggedIn),
+          { handle: "marco" },
+        ),
+      ),
+    ).resolves.toMatchObject({ blog: { guestbookEnabled: false, guestWriteEnabled: true } });
+  });
+
+  it("action: 방명록 사용·비회원 허용 체크를 { guestbookEnabled, guestWriteEnabled }로 보낸다(004)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), "PATCH /api/v1/blogs/marco": ok(blog) });
+    const submit = (fields: Record<string, string>) =>
+      settingsAction(
+        routeArgs<LoaderArgs<typeof settingsAction>>(
+          formRequest("/marco/manage/settings", { title: "제목", ...fields }, loggedIn),
+          { handle: "marco" },
+        ),
+      );
+
+    await submit({ guestbookEnabled: "on", guestWriteEnabled: "on" });
+    await submit({ guestbookEnabled: "on" });
+
+    const bodies = backend.callsTo("PATCH /api/v1/blogs/marco").map((call) => call.body);
+    expect(bodies[0]).toMatchObject({ guestbookEnabled: true, guestWriteEnabled: true });
+    expect(bodies[1]).toMatchObject({ guestbookEnabled: true, guestWriteEnabled: false });
   });
 
   it("loader: 주제 트리를 못 읽으면 빈 목록, 포털 값이 없으면 노출·기본 주제 없음", async () => {
@@ -426,6 +463,8 @@ describe("블로그 설정 loader·action", () => {
       description: null,
       commentEnabled: false,
       portalEnabled: false,
+      guestbookEnabled: false,
+      guestWriteEnabled: false,
       defaultTopicId: null,
     });
   });
@@ -863,6 +902,30 @@ describe("블로그 관리 화면", () => {
     });
   });
 
+  it("블로그 설정: 방명록 사용·비회원 허용 체크와 안내(004)", async () => {
+    const backend = renderManage("/marco/manage/settings", {
+      [BLOG]: ok({ ...blog, guestbookEnabled: true, guestWriteEnabled: false }),
+      "PATCH /api/v1/blogs/marco": ok(blog),
+    });
+
+    const guestbook = await screen.findByLabelText("방명록 사용");
+    const guest = screen.getByLabelText("비회원 댓글·방명록 허용");
+    expect(guestbook).toBeChecked();
+    expect(guest).not.toBeChecked();
+    expect(
+      screen.getByText(/이름과 비밀번호를 적고 댓글과 방명록을 쓸 수 있습니다/),
+    ).toBeInTheDocument();
+    fireEvent.click(guestbook);
+    fireEvent.click(guest);
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("블로그 설정을 저장했습니다.");
+    expect(backend.callsTo("PATCH /api/v1/blogs/marco")[0].body).toMatchObject({
+      guestbookEnabled: false,
+      guestWriteEnabled: true,
+    });
+  });
+
   it("블로그 설정: 저장하면 안내, 검증 오류는 입력란에", async () => {
     let fail400 = false;
     const backend = renderManage("/marco/manage/settings", {
@@ -890,6 +953,8 @@ describe("블로그 관리 화면", () => {
       description: blog.description,
       commentEnabled: false,
       portalEnabled: true,
+      guestbookEnabled: true,
+      guestWriteEnabled: false,
       defaultTopicId: null,
     });
 

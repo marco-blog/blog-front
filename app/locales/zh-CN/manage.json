@@ -94,7 +94,11 @@
     "portalEnabled": "在门户中展示此博客的文章",
     "portalHint": "关闭后，此博客的文章不会出现在门户首页和主题页面上。博客本身和订阅源不受影响。",
     "defaultTopic": "新文章的默认主题",
-    "defaultTopicHint": "撰写新文章时会预先选中此主题。每篇文章都可以更改。"
+    "defaultTopicHint": "撰写新文章时会预先选中此主题。每篇文章都可以更改。",
+    "guestbookEnabled": "启用留言板",
+    "guestbookHint": "关闭后，博客菜单中不再显示留言板，访客也无法查看。已有留言不会被删除。",
+    "guestWriteEnabled": "允许非会员评论和留言",
+    "guestWriteHint": "开启后，未登录的访客填写名字和密码即可发表评论和留言，只能用相同密码修改或删除。"
   },
   "comments": {
     "title": "评论管理",
