@@ -14,8 +14,6 @@ export interface RenderRoutesOptions {
   language?: Language;
   user?: RootData["user"];
   timeZone?: string;
-  /** root loader가 넘기는 Kakao JavaScript 키(002) */
-  kakaoJsKey?: string | null;
 }
 
 export function rootData(
@@ -29,10 +27,7 @@ export function rootData(
 /** 프레임워크 모드처럼 id가 root인 상위 라우트(언어·회원·시간대) 아래에 화면 라우트를 그린다. */
 export function renderRoutes(routes: StubRoutes, options: RenderRoutesOptions = {}) {
   const language = options.language ?? "ko";
-  const data = {
-    ...rootData(language, options.user ?? null, options.timeZone),
-    kakaoJsKey: options.kakaoJsKey ?? null,
-  };
+  const data = rootData(language, options.user ?? null, options.timeZone);
   const Stub = createRoutesStub([
     {
       id: "root",

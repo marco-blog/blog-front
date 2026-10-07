@@ -30,18 +30,6 @@
   "related": {
     "title": "Related posts"
   },
-  "share": {
-    "label": "Share",
-    "copy": "Copy link",
-    "copied": "Link copied.",
-    "copyFailed": "Couldn't copy the link. Please copy the address below.",
-    "url": "Post address",
-    "kakao": "KakaoTalk",
-    "kakaoFailed": "Couldn't load KakaoTalk sharing. Please try again later.",
-    "x": "X",
-    "facebook": "Facebook",
-    "newWindow": "opens in a new window"
-  },
   "feedLink": {
     "rss": "{{title}} RSS",
     "atom": "{{title}} Atom",

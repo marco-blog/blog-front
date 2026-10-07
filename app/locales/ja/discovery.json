@@ -30,18 +30,6 @@
   "related": {
     "title": "関連記事"
   },
-  "share": {
-    "label": "共有",
-    "copy": "URLをコピー",
-    "copied": "URLをコピーしました。",
-    "copyFailed": "URLをコピーできませんでした。下のURLを直接コピーしてください。",
-    "url": "記事のURL",
-    "kakao": "カカオトーク",
-    "kakaoFailed": "カカオトーク共有を読み込めませんでした。しばらくしてからもう一度お試しください。",
-    "x": "X",
-    "facebook": "Facebook",
-    "newWindow": "新しいウィンドウ"
-  },
   "feedLink": {
     "rss": "{{title}} RSS",
     "atom": "{{title}} Atom",

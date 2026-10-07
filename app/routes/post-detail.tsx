@@ -33,7 +33,6 @@ import { PostContent } from "~/components/post/PostContent";
 import { ReadCompleteTracker } from "~/components/post/ReadCompleteTracker";
 import { blogTagHref } from "~/components/post/PostList";
 import { RelatedPosts } from "~/components/post/RelatedPosts";
-import { ShareButtons } from "~/components/post/ShareButtons";
 import { TrackbackRdf } from "~/components/trackback/TrackbackRdf";
 import { TrackbackSection } from "~/components/trackback/TrackbackSection";
 import { publicOrigin } from "~/config.server";
@@ -363,15 +362,6 @@ export default function PostDetailPage() {
               loginHref={viewer ? null : loginPath(`/${handle}/${post.id}`)}
               result={likeResult}
             />
-            {post.visibility === "PUBLIC" && (
-              <ShareButtons
-                url={absoluteUrl(origin, `/${handle}/${post.id}`) ?? `/${handle}/${post.id}`}
-                title={post.title}
-                summary={post.summary}
-                imageUrl={absoluteUrl(origin, ogImageUrl(post.thumbnailUrl))}
-                kakaoJsKey={rootData?.kakaoJsKey ?? null}
-              />
-            )}
             {reportable && <ReportButton type="POST" id={post.id} />}
           </footer>
         )}
