@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "label": "블로그 메뉴",
+    "home": "홈",
+    "notice": "공지",
+    "guestbook": "방명록",
+    "tags": "태그"
+  },
+  "sidebar": {
+    "label": "블로그 사이드바",
+    "PROFILE": "프로필",
+    "CATEGORIES": "카테고리",
+    "RECENT_POSTS": "최근 글",
+    "RECENT_COMMENTS": "최근 댓글",
+    "POPULAR_POSTS": "인기 글",
+    "TAGS": "태그",
+    "ARCHIVE": "보관함",
+    "VISITORS": "방문자",
+    "SEARCH": "검색",
+    "FEED_LINKS": "피드",
+    "noPosts": "아직 글이 없습니다.",
+    "noComments": "아직 댓글이 없습니다."
+  },
+  "tags": {
+    "label": "태그 목록",
+    "title": "태그",
+    "empty": "아직 태그가 없습니다."
+  },
+  "archive": {
+    "empty": "아직 발행한 글이 없습니다."
+  },
+  "notice": {
+    "title": "공지",
+    "badge": "공지",
+    "more": "공지 더 보기",
+    "empty": "공지가 없습니다."
+  },
+  "visitors": {
+    "today": "오늘",
+    "yesterday": "어제",
+    "total": "전체"
+  },
+  "search": {
+    "title": "블로그 검색",
+    "label": "이 블로그에서 검색",
+    "submit": "검색",
+    "metaTitle": "{{q}} - {{title}} 검색"
+  }
+}

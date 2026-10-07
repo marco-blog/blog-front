@@ -303,6 +303,19 @@ describe("글 관리 action", () => {
     expect(backend.callsTo(BULK)[0].body).toEqual({ postIds: [9], action: "DELETE" });
   });
 
+  it("공지로·공지 해제: NOTICE·UNNOTICE(004)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), [BULK]: ok({ updated: 2 }) });
+
+    const result = asData(await call({ intent: "bulk", op: "NOTICE", postIds: ["1", "2"] }));
+    await call({ intent: "bulk", op: "UNNOTICE", postIds: "3" });
+
+    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 2 });
+    expect(backend.callsTo(BULK).map((c) => c.body)).toEqual([
+      { postIds: [1, 2], action: "NOTICE" },
+      { postIds: [3], action: "UNNOTICE" },
+    ]);
+  });
+
   it("카테고리 옮기기: MOVE_CATEGORY, 대상이 비면 미분류(null)", async () => {
     const backend = mockBackend({ [ME]: ok(me()), [BULK]: ok({ updated: 2 }) });
 
@@ -386,9 +399,46 @@ describe("블로그 설정 loader·action", () => {
         commentEnabled: true,
         portalEnabled: false,
         defaultTopicId: 11,
+        guestbookEnabled: true,
+        guestWriteEnabled: false,
       },
       topics,
     });
+  });
+
+  it("loader: 방명록 사용·비회원 허용 값을 그대로 넘긴다(004)", async () => {
+    mockBackend({
+      [ME]: ok(me()),
+      [BLOG]: ok({ ...blog, guestbookEnabled: false, guestWriteEnabled: true }),
+      [TOPICS]: ok([]),
+    });
+
+    await expect(
+      settingsLoader(
+        routeArgs<LoaderArgs<typeof settingsLoader>>(
+          getRequest("/marco/manage/settings", loggedIn),
+          { handle: "marco" },
+        ),
+      ),
+    ).resolves.toMatchObject({ blog: { guestbookEnabled: false, guestWriteEnabled: true } });
+  });
+
+  it("action: 방명록 사용·비회원 허용 체크를 { guestbookEnabled, guestWriteEnabled }로 보낸다(004)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), "PATCH /api/v1/blogs/marco": ok(blog) });
+    const submit = (fields: Record<string, string>) =>
+      settingsAction(
+        routeArgs<LoaderArgs<typeof settingsAction>>(
+          formRequest("/marco/manage/settings", { title: "제목", ...fields }, loggedIn),
+          { handle: "marco" },
+        ),
+      );
+
+    await submit({ guestbookEnabled: "on", guestWriteEnabled: "on" });
+    await submit({ guestbookEnabled: "on" });
+
+    const bodies = backend.callsTo("PATCH /api/v1/blogs/marco").map((call) => call.body);
+    expect(bodies[0]).toMatchObject({ guestbookEnabled: true, guestWriteEnabled: true });
+    expect(bodies[1]).toMatchObject({ guestbookEnabled: true, guestWriteEnabled: false });
   });
 
   it("loader: 주제 트리를 못 읽으면 빈 목록, 포털 값이 없으면 노출·기본 주제 없음", async () => {
@@ -426,6 +476,8 @@ describe("블로그 설정 loader·action", () => {
       description: null,
       commentEnabled: false,
       portalEnabled: false,
+      guestbookEnabled: false,
+      guestWriteEnabled: false,
       defaultTopicId: null,
     });
   });
@@ -544,7 +596,17 @@ describe("블로그 관리 화면", () => {
       within(menu)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "블로그 설정", "피드 설정"]);
+    ).toEqual([
+      "대시보드",
+      "글 관리",
+      "카테고리",
+      "댓글",
+      "방명록",
+      "꾸미기",
+      "통계",
+      "블로그 설정",
+      "피드 설정",
+    ]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
       "/marco/manage/categories",
@@ -558,6 +620,9 @@ describe("블로그 관리 화면", () => {
       "posts",
       "categories",
       "comments",
+      "guestbook",
+      "design",
+      "stats",
       "settings",
       "feed",
     ]);
@@ -642,6 +707,25 @@ describe("블로그 관리 화면", () => {
       "/marco/manage/comments",
     );
     expect(screen.getByText("아직 글이 없습니다.")).toBeInTheDocument();
+  });
+
+  it("글 관리: 공지 글 표시와 일괄 공지로·공지 해제 버튼(004)", async () => {
+    const backend = renderManage("/marco/manage/posts", {
+      [POSTS]: ok([postSummary(1, { title: "공지 글", notice: true }), postSummary(2)], {
+        totalCount: 2,
+      }),
+      [BULK]: ok({ updated: 1 }),
+    });
+
+    const list = await screen.findByRole("list", { name: "글 목록" });
+    const items = within(list).getAllByRole("listitem");
+    expect(within(items[0]).getByText("공지", { selector: ".badge" })).toBeInTheDocument();
+    expect(within(items[1]).queryByText("공지", { selector: ".badge" })).toBeNull();
+    fireEvent.click(screen.getByRole("checkbox", { name: "글 2 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "공지로" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("글 1편을 바꿨습니다.");
+    expect(backend.callsTo(BULK)[0].body).toEqual({ postIds: [2], action: "NOTICE" });
+    expect(screen.getByRole("button", { name: "공지 해제" })).toBeInTheDocument();
   });
 
   it("글 관리: 상태·공개 범위·작성 중 사본, 수정·이어 쓰기 링크, 필터 폼은 쿼리 문자열로", async () => {
@@ -863,6 +947,30 @@ describe("블로그 관리 화면", () => {
     });
   });
 
+  it("블로그 설정: 방명록 사용·비회원 허용 체크와 안내(004)", async () => {
+    const backend = renderManage("/marco/manage/settings", {
+      [BLOG]: ok({ ...blog, guestbookEnabled: true, guestWriteEnabled: false }),
+      "PATCH /api/v1/blogs/marco": ok(blog),
+    });
+
+    const guestbook = await screen.findByLabelText("방명록 사용");
+    const guest = screen.getByLabelText("비회원 댓글·방명록 허용");
+    expect(guestbook).toBeChecked();
+    expect(guest).not.toBeChecked();
+    expect(
+      screen.getByText(/이름과 비밀번호를 적고 댓글과 방명록을 쓸 수 있습니다/),
+    ).toBeInTheDocument();
+    fireEvent.click(guestbook);
+    fireEvent.click(guest);
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("블로그 설정을 저장했습니다.");
+    expect(backend.callsTo("PATCH /api/v1/blogs/marco")[0].body).toMatchObject({
+      guestbookEnabled: false,
+      guestWriteEnabled: true,
+    });
+  });
+
   it("블로그 설정: 저장하면 안내, 검증 오류는 입력란에", async () => {
     let fail400 = false;
     const backend = renderManage("/marco/manage/settings", {
@@ -890,6 +998,8 @@ describe("블로그 관리 화면", () => {
       description: blog.description,
       commentEnabled: false,
       portalEnabled: true,
+      guestbookEnabled: true,
+      guestWriteEnabled: false,
       defaultTopicId: null,
     });
 

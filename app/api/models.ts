@@ -3,8 +3,9 @@
  * 지금은 backend와 병행 개발 중이라 계약 문서를 그대로 옮겨 적었다.
  */
 
-export type Visibility = "PUBLIC" | "PRIVATE";
-export type PostStatus = "DRAFT" | "PUBLISHED" | "DELETED";
+/** 004가 보호 글(`PROTECTED`, FR-062)과 예약 글(`SCHEDULED`, FR-064)을 더했다. */
+export type Visibility = "PUBLIC" | "PRIVATE" | "PROTECTED";
+export type PostStatus = "DRAFT" | "PUBLISHED" | "DELETED" | "SCHEDULED";
 
 export interface BlogRef {
   handle: string;
@@ -69,6 +70,10 @@ export interface Blog {
   portalEnabled?: boolean;
   /** 블로그 기본 주제(소분류, 003 FR-077) */
   defaultTopicId?: number | null;
+  /** 방명록 사용(004 FR-058, 기본 true) */
+  guestbookEnabled?: boolean;
+  /** 비회원 댓글·방명록 허용(004 FR-066, 기본 false) */
+  guestWriteEnabled?: boolean;
 }
 
 /** GET /me/blogs */
@@ -104,6 +109,10 @@ export interface PostSummary {
   publishedAt: string | null;
   updatedAt: string;
   hasDraft: boolean;
+  /** 공지(004 FR-059) */
+  notice?: boolean;
+  /** 예약 시각(004 FR-064). 관리 목록에서만 값 */
+  scheduledAt?: string | null;
   deletedAt?: string | null;
   purgeAt?: string | null;
 }
@@ -135,6 +144,12 @@ export interface PostDetail {
   likedByMe: boolean | null;
   /** 글의 주제(소분류, 003). 이름은 GET /topics 트리로 찾는다 */
   topicId?: number | null;
+  /** 열지 않은 보호 글(004 FR-062). true면 본문·요약·대표 이미지·카테고리·주제가 null, 태그는 [] */
+  locked?: boolean;
+  /** 공지(004 FR-059) */
+  notice?: boolean;
+  /** 예약 시각(004 FR-064). 주인에게만 값 */
+  scheduledAt?: string | null;
 }
 
 /** 작성 화면의 내용(DraftWrite). 카테고리·태그는 US2에서 채운다. */
@@ -174,6 +189,12 @@ export interface PublishSettings {
   tags?: string[];
   /** 값이 있으면 그 주제, null·생략이면 작성 중 사본의 값(003) */
   topicId?: number | null;
+  /** 보호 글 비밀번호(004, 4~64자). 이미 보호 글이면 생략해 기존 값 유지 */
+  password?: string;
+  /** 예약 시각(004, UTC ISO). null·생략·지금 이하면 바로 발행 */
+  scheduledAt?: string | null;
+  /** 공지(004). null·생략이면 지금 값 유지 */
+  notice?: boolean | null;
 }
 
 /** GET /me/login-history 한 줄(IP는 backend가 일부 가림) */
@@ -184,11 +205,15 @@ export interface LoginHistoryItem {
   device: string | null;
 }
 
-/** 댓글 작성자. 프로필 이미지가 없으면 profileImageUrl은 null */
+/**
+ * 댓글·방명록 작성자. 프로필 이미지가 없으면 profileImageUrl은 null.
+ * 비회원(004 FR-066)은 `{ userId: null, nickname: 이름, profileImageUrl: null, guest: true }`
+ */
 export interface CommentAuthor {
-  userId: number;
+  userId: number | null;
   nickname: string;
   profileImageUrl: string | null;
+  guest?: boolean;
 }
 
 /**
@@ -200,6 +225,8 @@ export interface Comment {
   content: string | null;
   author: CommentAuthor | null;
   deleted: boolean;
+  /** 비밀 댓글(004 FR-065). 볼 수 없으면 content가 null */
+  secret?: boolean;
   createdAt: string;
   updatedAt: string;
   replies: Comment[];
@@ -226,18 +253,24 @@ export interface ManageComment {
   postTitle: string;
 }
 
-/** GET /blogs/{handle}/manage/dashboard. 방문자 수·방명록은 004가 더한다. */
+/** GET /blogs/{handle}/manage/dashboard. 방문자 수·방명록은 004가 더했다. */
 export interface ManageDashboard {
   draftCount: number;
   recentPosts: PostSummary[];
   newComments7d: number;
   recentComments: ManageComment[];
+  /** 004 FR-067 */
+  visitors?: VisitorCounts;
+  /** 최근 7일 새 방명록 수(004) */
+  newGuestbook7d?: number;
+  /** 최근 방명록 5건(답글 제외, 004) */
+  recentGuestbook?: GuestbookEntry[];
 }
 
-/** POST /blogs/{handle}/manage/posts/bulk. `MOVE_CATEGORY`의 categoryId가 null이면 미분류로 옮긴다. */
+/** POST /blogs/{handle}/manage/posts/bulk. `MOVE_CATEGORY`의 categoryId가 null이면 미분류로 옮긴다. 004가 공지 지정·해제를 더했다. */
 export interface BulkPostRequest {
   postIds: number[];
-  action: "CHANGE_VISIBILITY" | "DELETE" | "MOVE_CATEGORY";
+  action: "CHANGE_VISIBILITY" | "DELETE" | "MOVE_CATEGORY" | "NOTICE" | "UNNOTICE";
   visibility?: Visibility;
   categoryId?: number | null;
 }
@@ -306,6 +339,11 @@ export type SearchPost = PostSummary & { blog: BlogRef };
 
 /** 002가 만드는 알림 종류. 이후 스펙이 더하므로 응답의 `type`은 string으로 받는다(모르는 값은 공통 문구). */
 export const NOTIFICATION_TYPES = ["NEW_COMMENT", "NEW_SUBSCRIBER"] as const;
+/**
+ * 004 백업 준비 알림(target `BLOG_EXPORT`, params `{ blogTitle, handle, expiresAt }`). 문구·링크(`/{handle}/manage/backup`)를
+ * 만드는 004 백업 작업(US7)이 NOTIFICATION_TYPES에 더한다. 그 전에는 공통 문구로 보인다.
+ */
+export const BACKUP_READY_NOTIFICATION = "BACKUP_READY";
 export type KnownNotificationType = (typeof NOTIFICATION_TYPES)[number];
 
 /** GET /me/notifications 한 줄(contracts/api.md `Notification`) */
@@ -518,4 +556,120 @@ export interface ReleaseNoteSearchHit {
 export interface ReleaseNoteRevision {
   revisionNo: number;
   editedAt: string;
+}
+
+// ---- 004 블로그 꾸미기와 글 옵션(004 contracts/api.md) ----
+
+/** 방명록 글(GET /blogs/{handle}/guestbook). 비밀글은 주인·작성 회원 외에 content가 null, 삭제된 자리는 author도 null */
+export interface GuestbookEntry {
+  id: number;
+  content: string | null;
+  secret: boolean;
+  deleted: boolean;
+  author: CommentAuthor | null;
+  createdAt: string;
+  updatedAt: string;
+  replies: GuestbookEntry[];
+}
+
+/** POST /blogs/{handle}/guestbook. 비로그인(비회원 허용 블로그)만 guestName·guestPassword */
+export interface GuestbookWrite {
+  content: string;
+  secret?: boolean;
+  parentId?: number | null;
+  guestName?: string;
+  guestPassword?: string;
+}
+
+/** 방명록·비회원 글 길이 제한(backend와 같다) */
+export const GUESTBOOK_MAX_LENGTH = 1000;
+export const GUEST_NAME_MAX = 30;
+export const GUEST_PASSWORD_MIN = 4;
+export const GUEST_PASSWORD_MAX = 64;
+
+/** 사이드바 항목(배열 순서가 기본 구성 순서) */
+export const SIDEBAR_ITEM_TYPES = [
+  "PROFILE",
+  "CATEGORIES",
+  "RECENT_POSTS",
+  "RECENT_COMMENTS",
+  "POPULAR_POSTS",
+  "TAGS",
+  "ARCHIVE",
+  "VISITORS",
+  "SEARCH",
+  "FEED_LINKS",
+] as const;
+export type SidebarItemType = (typeof SIDEBAR_ITEM_TYPES)[number];
+
+export interface SidebarPost {
+  id: number;
+  title: string;
+  publishedAt: string | null;
+}
+
+export interface SidebarComment {
+  id: number;
+  postId: number;
+  postTitle: string;
+  excerpt: string;
+  authorName: string;
+  guest: boolean;
+  createdAt: string;
+}
+
+/** 방문자 수(GET /blogs/{handle}/sidebar의 visitors, 대시보드·통계) */
+export interface VisitorCounts {
+  today: number;
+  yesterday: number;
+  total: number;
+}
+
+/** 월별 보관함 한 줄(GET /blogs/{handle}/archive). 연·월은 서비스 기준 시간대 */
+export interface ArchiveMonth {
+  year: number;
+  month: number;
+  postCount: number;
+}
+
+/** GET /blogs/{handle}/sidebar: 켜진 항목만 순서대로, 데이터는 그 항목이 켜졌을 때만 값 */
+export interface SidebarView {
+  items: SidebarItemType[];
+  recentPosts: SidebarPost[] | null;
+  popularPosts: SidebarPost[] | null;
+  recentComments: SidebarComment[] | null;
+  tags: BlogTag[] | null;
+  archive: ArchiveMonth[] | null;
+  visitors: VisitorCounts | null;
+}
+
+/** GET /blogs/{handle}/manage/sidebar, PUT /blogs/{handle}/sidebar */
+export interface SidebarConfig {
+  items: { type: SidebarItemType; enabled: boolean }[];
+}
+
+/** GET /blogs/{handle}/manage/stats */
+export interface VisitStats {
+  visitors: VisitorCounts;
+  daily: { date: string; visitors: number }[];
+  topPosts: { id: number; title: string; viewCount: number }[];
+}
+
+export type ExportStatus = "PENDING" | "RUNNING" | "READY" | "FAILED" | "EXPIRED";
+
+/** 블로그 백업(GET /blogs/{handle}/exports) */
+export interface BlogExport {
+  id: number;
+  status: ExportStatus;
+  fileSize: number | null;
+  errorCode: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  expiresAt: string | null;
+}
+
+/** 차단한 회원(GET /blogs/{handle}/blocks) */
+export interface BlockedUser {
+  user: { userId: number; nickname: string; profileImageUrl: string | null };
+  blockedAt: string;
 }

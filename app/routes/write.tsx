@@ -108,6 +108,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       visibility: post.visibility,
       commentEnabled: post.commentEnabled,
       thumbnailUrl: post.thumbnailUrl,
+      notice: post.notice ?? false,
     },
     draft: {
       title: draft.title,
@@ -132,6 +133,7 @@ interface WriteData {
     visibility: Visibility;
     commentEnabled: boolean;
     thumbnailUrl: string | null;
+    notice?: boolean;
   } | null;
   draft: {
     title: string;
@@ -328,6 +330,7 @@ function Writer({
           tags: settings.tags,
           topicId: settings.topicId,
           thumbnailMediaKey: settings.thumbnailMediaKey,
+          notice: settings.notice,
         },
       });
       navigate(`/${handle}/${published.id}`);
@@ -450,6 +453,7 @@ function Writer({
             tags: classification.tags,
             topicId: classification.topicId,
             thumbnailMediaKey: mediaKeyOf(post?.thumbnailUrl),
+            notice: post?.notice ?? false,
           }}
           images={publishImages}
           categories={categories}

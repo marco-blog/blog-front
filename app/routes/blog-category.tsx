@@ -7,7 +7,7 @@ import type { Blog, PostSummary } from "~/api/models";
 import { isValidHandle, parsePostId } from "~/blog/ids";
 import { parsePage, POST_PAGE_SIZE, withPage } from "~/blog/listing";
 import { Pagination } from "~/components/Pagination";
-import { CategoryTree, categoryHref, findCategory } from "~/components/blog/CategoryTree";
+import { categoryHref, findCategory } from "~/components/blog/CategoryTree";
 import { PostList } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { useDateFormat } from "~/i18n/format";
@@ -96,7 +96,6 @@ export default function BlogCategory() {
           </nav>
         )}
       </header>
-      <CategoryTree handle={blog.handle} categories={blog.categories} currentId={category.id} />
       <PostList handle={blog.handle} posts={posts} emptyText={t("category:page.empty")} />
       <Pagination
         page={page}

@@ -16,14 +16,17 @@ export interface PublishSettingsValue {
   topicId: number | null;
   /** 대표 이미지(본문 이미지 중 하나). 본문에 이미지가 없으면 null */
   thumbnailMediaKey: string | null;
+  /** 공지로 등록(004 FR-059) */
+  notice: boolean;
 }
 
 export interface PublishSettingsDialogProps {
   /** 이미 발행한 글이면 버튼이 "수정 발행"(FR-108) */
   published: boolean;
-  initial: Omit<PublishSettingsValue, "thumbnailMediaKey" | "topicId"> & {
+  initial: Omit<PublishSettingsValue, "thumbnailMediaKey" | "topicId" | "notice"> & {
     thumbnailMediaKey?: string | null;
     topicId?: number | null;
+    notice?: boolean;
   };
   /** 본문에 들어간 이미지 키(나온 순서). 대표 이미지 후보다. */
   images?: string[];
@@ -44,7 +47,7 @@ export interface PublishSettingsDialogProps {
  * 발행 설정 레이어(FR-013, FR-107). "완료"를 누르면 열리고, 여기서 발행 버튼을 눌러야만 발행된다.
  * 닫으면 작성 화면으로 돌아가고 글은 임시저장 상태로 남는다(AS8).
  * 공개 범위(공개·비공개), 카테고리(미분류 포함), 포털 주제(003, 카테고리와 따로), 태그, 대표 이미지(본문 이미지 중 선택, 기본은 첫 이미지),
- * 발행 시각(지금), 댓글 허용.
+ * 발행 시각(지금), 댓글 허용, 공지로 등록(004).
  */
 export function PublishSettingsDialog({
   published,
@@ -62,6 +65,7 @@ export function PublishSettingsDialog({
   const titleId = useId();
   const [visibility, setVisibility] = useState<Visibility>(initial.visibility);
   const [commentEnabled, setCommentEnabled] = useState(initial.commentEnabled);
+  const [notice, setNotice] = useState(initial.notice ?? false);
   const [categoryId, setCategoryId] = useState<number | null>(initial.categoryId);
   const [tags, setTags] = useState<string[]>(initial.tags);
   const [topicId, setTopicId] = useState<number | null>(initial.topicId ?? null);
@@ -170,6 +174,15 @@ export function PublishSettingsDialog({
         />
         {t("post:publish.commentEnabled")}
       </label>
+      <label>
+        <input
+          type="checkbox"
+          name="notice"
+          checked={notice}
+          onChange={(event) => setNotice(event.target.checked)}
+        />
+        {t("post:publish.notice")}
+      </label>
       {error && (
         <p role="alert" className="form-alert">
           {error}
@@ -182,7 +195,15 @@ export function PublishSettingsDialog({
         <button
           type="button"
           onClick={() =>
-            onPublish({ visibility, commentEnabled, categoryId, tags, topicId, thumbnailMediaKey })
+            onPublish({
+              visibility,
+              commentEnabled,
+              categoryId,
+              tags,
+              topicId,
+              thumbnailMediaKey,
+              notice,
+            })
           }
           disabled={pending}
           aria-busy={pending || undefined}

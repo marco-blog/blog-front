@@ -67,5 +67,18 @@
   "MEDIA_TEMP_QUOTA_EXCEEDED": "保存していない画像が多すぎます。記事を保存してからもう一度アップロードしてください。",
   "THUMBNAIL_SIZE_NOT_ALLOWED": "対応していない画像サイズです。",
   "NOTIFICATION_NOT_FOUND": "お知らせが見つかりません。",
-  "CANNOT_SUBSCRIBE_OWN_BLOG": "自分のブログは購読できません。"
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "自分のブログは購読できません。",
+  "POST_PASSWORD_MISMATCH": "パスワードが正しくありません。",
+  "POST_LOCKED": "保護された記事です。パスワードを入力すると読めます。",
+  "PASSWORD_ATTEMPTS_EXCEEDED": "パスワードを何度も間違えました。{{minutes}}分後にもう一度お試しください。",
+  "SCHEDULE_NOT_ALLOWED": "公開済みの記事は予約公開できません。",
+  "POST_NOT_SCHEDULED": "予約公開中の記事ではありません。",
+  "GUEST_PASSWORD_MISMATCH": "パスワードが正しくありません。",
+  "GUESTBOOK_DISABLED": "このブログはゲストブックを使っていません。",
+  "GUESTBOOK_ENTRY_NOT_FOUND": "ゲストブックの書き込みが見つかりません。",
+  "EXPORT_LIMIT_EXCEEDED": "バックアップは1日に1回だけ作成できます。",
+  "EXPORT_NOT_FOUND": "バックアップファイルが見つかりません。",
+  "CANNOT_BLOCK_SELF": "自分自身はブロックできません。",
+  "USER_NOT_FOUND": "会員が見つかりません。",
+  "BLOCK_NOT_FOUND": "ブロックしている会員ではありません。"
 }

@@ -36,7 +36,8 @@ test.describe("US1 블로그 관리", () => {
     await expect(page.getByRole("link", { name: "1편" })).toBeVisible();
     await expect(page.getByRole("link", { name: "관리 글 셋" })).toBeVisible();
     await expect(page.getByText("아직 댓글이 없습니다.")).toBeVisible();
-    await expect(page.getByText(/방문자/)).toHaveCount(0);
+    // 004부터 대시보드에 오늘·어제 방문자가 나온다(FR-067).
+    await expect(page.getByText("오늘 방문자")).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
 
     await page
@@ -54,7 +55,7 @@ test.describe("US1 블로그 관리", () => {
     const list = page.getByRole("list", { name: "글 목록" });
     await expect(list.getByRole("listitem")).toHaveCount(3);
     await page.goto(`/${owner.handle}`);
-    await expect(page.getByText("아직 발행한 글이 없습니다.")).toBeVisible();
+    await expect(page.getByRole("main").getByText("아직 발행한 글이 없습니다.")).toBeVisible();
   });
 
   test("휴지통으로 옮긴 글을 복구하면 삭제 전 상태·공개 범위로 돌아온다 (#16)", async ({
@@ -88,7 +89,7 @@ test.describe("US1 블로그 관리", () => {
 
     await page.goto(`/${owner.handle}`);
     await expect(page.getByRole("heading", { name: "관리하는 블로그" })).toBeVisible();
-    await expect(page.getByText("관리 화면에서 바꾼 소개")).toBeVisible();
+    await expect(page.getByRole("main").getByText("관리 화면에서 바꾼 소개")).toBeVisible();
   });
 
   test("남의 블로그 관리 화면은 404, API는 403", async ({ browser }) => {

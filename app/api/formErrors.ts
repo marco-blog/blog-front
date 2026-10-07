@@ -14,6 +14,8 @@ export interface FormErrorData {
   resultCode: string;
   field: string | null;
   fieldErrors: ApiFieldError[];
+  /** 429의 `Retry-After`(초). 있을 때만 */
+  retryAfter?: number;
 }
 
 export const VALIDATION_FAILED = "VALIDATION_FAILED";
@@ -31,6 +33,7 @@ export function toFormError(
       resultCode: error.resultCode,
       field: fieldByCode[error.resultCode] ?? null,
       fieldErrors: error.fieldErrors,
+      ...(error.retryAfter === null ? {} : { retryAfter: error.retryAfter }),
     },
     status: error.status,
   };
@@ -57,8 +60,8 @@ export function useFormMessages(error: FormErrorData | null | undefined): FormMe
   }
   const fields = fieldErrorMessages(t, error.fieldErrors);
   if (error.field) {
-    fields[error.field] = errorMessage(t, error.resultCode);
+    fields[error.field] = errorMessage(t, error);
     return { form: null, fields };
   }
-  return { form: errorMessage(t, error.resultCode), fields };
+  return { form: errorMessage(t, error), fields };
 }

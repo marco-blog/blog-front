@@ -1,4 +1,11 @@
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type Browser,
+  type BrowserContext,
+  type Page,
+} from "@playwright/test";
 
 /**
  * backend가 필요한 E2E 시나리오의 공통 도구.
@@ -20,6 +27,17 @@ export function requirePortalTestSettings() {
   test.skip(
     process.env.E2E_PORTAL_TEST_SETTINGS !== "1",
     "E2E_PORTAL_TEST_SETTINGS=1(포털 시험용 backend 설정)이 아니면 포털 시나리오는 건너뛴다.",
+  );
+}
+
+/**
+ * 004 비회원 글 시나리오는 backend의 비회원 쓰기 속도 제한을 넉넉히 띄웠을 때만 돈다(같은 IP에서 여러 시나리오가 쓰므로):
+ * BLOG_GUEST_COMMENT_PER_MINUTE=1000, BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000. 그렇게 띄웠다는 표시로 E2E_GUEST_TEST_SETTINGS=1을 준다.
+ */
+export function requireGuestTestSettings() {
+  test.skip(
+    process.env.E2E_GUEST_TEST_SETTINGS !== "1",
+    "E2E_GUEST_TEST_SETTINGS=1(비회원 글 시험용 backend 설정)이 아니면 비회원 시나리오는 건너뛴다.",
   );
 }
 
@@ -148,11 +166,17 @@ export async function publishPost(
   post: {
     title: string;
     contentMarkdown: string;
-    visibility?: "PUBLIC" | "PRIVATE";
+    visibility?: "PUBLIC" | "PRIVATE" | "PROTECTED";
     /** 003 주제(소분류 id) */
     topicId?: number;
     /** 대표 이미지 mediaKey(본문 이미지 중 하나) */
     thumbnail?: string;
+    /** 보호 글 비밀번호(004, visibility PROTECTED) */
+    password?: string;
+    /** 예약 시각(004, ISO). 미래면 SCHEDULED */
+    scheduledAt?: string;
+    /** 공지(004) */
+    notice?: boolean;
   },
 ) {
   const draft = await callApi<{ id: number }>(request, "POST", `/blogs/${handle}/posts/drafts`, {
@@ -166,7 +190,40 @@ export async function publishPost(
     commentEnabled: true,
     ...(post.topicId === undefined ? {} : { topicId: post.topicId }),
     ...(post.thumbnail === undefined ? {} : { thumbnailMediaKey: post.thumbnail }),
+    ...(post.password === undefined ? {} : { password: post.password }),
+    ...(post.scheduledAt === undefined ? {} : { scheduledAt: post.scheduledAt }),
+    ...(post.notice === undefined ? {} : { notice: post.notice }),
   });
   expect(published.status).toBe(200);
   return id;
+}
+
+/** 블로그 설정을 바꾼다(PATCH /blogs/{handle}, 주인으로 로그인한 request). 예: `{ guestbookEnabled: false }` */
+export async function setBlogSettings(
+  request: APIRequestContext,
+  handle: string,
+  patch: Record<string, unknown>,
+) {
+  const response = await callApi(request, "PATCH", `/blogs/${handle}`, patch);
+  expect(response.status, `PATCH /blogs/${handle}`).toBe(200);
+  return response.body.result;
+}
+
+/**
+ * 주소가 200이 될 때까지 다시 부른다(예약 발행·백업 같은 배치 작업 기다리기). path가 `/api/`로 시작하면 API, 아니면 화면.
+ * 기본 90초(예약 발행 주기 30초 + 여유).
+ */
+export async function waitForPublic(request: APIRequestContext, path: string, timeoutMs = 90_000) {
+  await expect
+    .poll(async () => (await request.get(path, { failOnStatusCode: false })).status(), {
+      timeout: timeoutMs,
+      intervals: [1_000, 2_000, 5_000],
+    })
+    .toBe(200);
+}
+
+/** 로그인하지 않은 새 브라우저 컨텍스트(비회원·다른 방문자). 쓰고 나면 `context.close()` */
+export async function newGuestContext(browser: Browser): Promise<BrowserContext> {
+  const baseURL = test.info().project.use.baseURL;
+  return browser.newContext({ baseURL, locale: "ko-KR" });
 }

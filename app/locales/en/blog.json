@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "label": "Blog menu",
+    "home": "Home",
+    "notice": "Notices",
+    "guestbook": "Guestbook",
+    "tags": "Tags"
+  },
+  "sidebar": {
+    "label": "Blog sidebar",
+    "PROFILE": "Profile",
+    "CATEGORIES": "Categories",
+    "RECENT_POSTS": "Recent posts",
+    "RECENT_COMMENTS": "Recent comments",
+    "POPULAR_POSTS": "Popular posts",
+    "TAGS": "Tags",
+    "ARCHIVE": "Archive",
+    "VISITORS": "Visitors",
+    "SEARCH": "Search",
+    "FEED_LINKS": "Feeds",
+    "noPosts": "No posts yet.",
+    "noComments": "No comments yet."
+  },
+  "tags": {
+    "label": "Tag list",
+    "title": "Tags",
+    "empty": "No tags yet."
+  },
+  "archive": {
+    "empty": "No published posts yet."
+  },
+  "notice": {
+    "title": "Notices",
+    "badge": "Notice",
+    "more": "More notices",
+    "empty": "There are no notices."
+  },
+  "visitors": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "total": "Total"
+  },
+  "search": {
+    "title": "Search this blog",
+    "label": "Search in this blog",
+    "submit": "Search",
+    "metaTitle": "{{q}} - search {{title}}"
+  }
+}

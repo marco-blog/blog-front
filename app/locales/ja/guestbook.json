@@ -1,0 +1,44 @@
+{
+  "title": "ゲストブック",
+  "list": "ゲストブック一覧",
+  "empty": "まだゲストブックへの書き込みはありません。",
+  "form": {
+    "label": "ゲストブックに書く",
+    "content": "ゲストブックの内容",
+    "submit": "書き込む",
+    "maxLength": "{{max}}文字まで書けます。",
+    "loginToWrite": "ゲストブックに書くにはログインしてください"
+  },
+  "secret": {
+    "label": "シークレット (ブログの持ち主と自分だけに表示)"
+  },
+  "guest": {
+    "legend": "非会員として書く",
+    "name": "名前",
+    "password": "パスワード",
+    "passwordHint": "{{min}}〜{{max}}文字。後で編集・削除するときに必要です。",
+    "passwordPrompt": "書き込み時に入力したパスワード"
+  },
+  "entry": {
+    "unknownAuthor": "不明な投稿者",
+    "guest": "非会員",
+    "secret": "シークレット",
+    "secretHidden": "シークレットの書き込みです。",
+    "deleted": "削除された書き込みです。",
+    "edited": "編集済み",
+    "replies": "返信",
+    "reply": "返信する",
+    "replyForm": "返信を書く",
+    "replyContent": "返信の内容",
+    "replySubmit": "返信を投稿",
+    "edit": "編集",
+    "editForm": "ゲストブックの書き込みを編集",
+    "editContent": "編集する内容",
+    "editSubmit": "編集を保存",
+    "unlockForm": "シークレットを開く",
+    "unlockHint": "シークレットの書き込みを編集するには、まず書き込み時のパスワードで開いてください。",
+    "unlock": "内容を開く",
+    "delete": "削除",
+    "deleteConfirm": "このゲストブックの書き込みを削除しますか？"
+  }
+}

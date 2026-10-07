@@ -178,11 +178,8 @@ describe("/:handle/category/:categoryId", () => {
       "href",
       "/marco/category/13",
     );
-    const tree = screen.getByRole("navigation", { name: "카테고리" });
-    expect(within(tree).getByRole("link", { name: "Spring (3)" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+    // 카테고리 트리(지금 카테고리 표시)는 공개 블로그 레이아웃의 사이드바가 그린다(004, Sidebar.test).
+    expect(screen.queryByRole("navigation", { name: "카테고리" })).toBeNull();
     const list = screen.getByRole("list", { name: "글 목록" });
     expect(within(list).getByRole("link", { name: "JPA 글" })).toHaveAttribute("href", "/marco/2");
     expect(within(list).getByRole("link", { name: "JPA" })).toHaveAttribute(

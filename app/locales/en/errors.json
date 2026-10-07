@@ -67,5 +67,18 @@
   "MEDIA_TEMP_QUOTA_EXCEEDED": "You have too many unsaved images. Save your post and try again.",
   "THUMBNAIL_SIZE_NOT_ALLOWED": "This image size isn't supported.",
   "NOTIFICATION_NOT_FOUND": "Notification not found.",
-  "CANNOT_SUBSCRIBE_OWN_BLOG": "You can't subscribe to your own blog."
+  "CANNOT_SUBSCRIBE_OWN_BLOG": "You can't subscribe to your own blog.",
+  "POST_PASSWORD_MISMATCH": "The password is incorrect.",
+  "POST_LOCKED": "This post is protected. Enter the password to read it.",
+  "PASSWORD_ATTEMPTS_EXCEEDED": "Too many incorrect passwords. Try again in {{minutes}} min.",
+  "SCHEDULE_NOT_ALLOWED": "A post that is already published cannot be scheduled.",
+  "POST_NOT_SCHEDULED": "This post is not scheduled.",
+  "GUEST_PASSWORD_MISMATCH": "The password is incorrect.",
+  "GUESTBOOK_DISABLED": "This blog does not use a guestbook.",
+  "GUESTBOOK_ENTRY_NOT_FOUND": "The guestbook entry could not be found.",
+  "EXPORT_LIMIT_EXCEEDED": "You can create a backup only once a day.",
+  "EXPORT_NOT_FOUND": "The backup file could not be found.",
+  "CANNOT_BLOCK_SELF": "You cannot block yourself.",
+  "USER_NOT_FOUND": "The member could not be found.",
+  "BLOCK_NOT_FOUND": "This member is not blocked."
 }

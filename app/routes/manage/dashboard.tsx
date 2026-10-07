@@ -18,7 +18,7 @@ export function meta({ matches }: Route.MetaArgs) {
 
 /**
  * 블로그 관리 대시보드(`/:handle/manage`, SSR, 006 FR-100의 001 범위): 임시저장 글 수, 최근 7일 새 댓글 수, 최근 글·댓글 5건.
- * 방문자 수(004 FR-067)는 004 전까지 보여주지 않는다.
+ * 004가 오늘·어제 방문자 수, 최근 7일 새 방명록 수와 최근 방명록 5건을 더했다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
@@ -37,6 +37,22 @@ export default function ManageDashboardPage() {
     <main className="manage-dashboard">
       <h1>{t("manage:dashboard.title")}</h1>
       <dl className="manage-stats">
+        {dashboard.visitors && (
+          <>
+            <div>
+              <dt>{t("manage:dashboard.visitorsToday")}</dt>
+              <dd>
+                <Link to={`/${handle}/manage/stats`}>
+                  {format.number(dashboard.visitors.today)}
+                </Link>
+              </dd>
+            </div>
+            <div>
+              <dt>{t("manage:dashboard.visitorsYesterday")}</dt>
+              <dd>{format.number(dashboard.visitors.yesterday)}</dd>
+            </div>
+          </>
+        )}
         <div>
           <dt>{t("manage:dashboard.drafts")}</dt>
           <dd>
@@ -49,6 +65,16 @@ export default function ManageDashboardPage() {
           <dt>{t("manage:dashboard.newComments")}</dt>
           <dd>{t("manage:dashboard.commentCount", { comments: dashboard.newComments7d })}</dd>
         </div>
+        {dashboard.newGuestbook7d !== undefined && (
+          <div>
+            <dt>{t("manage:dashboard.newGuestbook")}</dt>
+            <dd>
+              <Link to={`/${handle}/manage/guestbook`}>
+                {t("manage:dashboard.guestbookCount", { count: dashboard.newGuestbook7d })}
+              </Link>
+            </dd>
+          </div>
+        )}
       </dl>
 
       <section aria-labelledby="recent-posts">
@@ -95,6 +121,34 @@ export default function ManageDashboardPage() {
           <Link to={`/${handle}/manage/comments`}>{t("manage:dashboard.allComments")}</Link>
         </p>
       </section>
+
+      {dashboard.recentGuestbook && (
+        <section aria-labelledby="recent-guestbook">
+          <h2 id="recent-guestbook">{t("manage:dashboard.recentGuestbook")}</h2>
+          {dashboard.recentGuestbook.length === 0 ? (
+            <p>{t("manage:dashboard.noGuestbook")}</p>
+          ) : (
+            <ul>
+              {dashboard.recentGuestbook.map((entry) => (
+                <li key={entry.id}>
+                  <p className="guestbook-content" style={{ whiteSpace: "pre-wrap" }}>
+                    {entry.deleted ? t("guestbook:entry.deleted") : entry.content}
+                  </p>
+                  <p>
+                    {entry.author?.nickname ?? t("guestbook:entry.unknownAuthor")}
+                    {entry.author?.guest && <> ({t("guestbook:entry.guest")})</>}
+                    {entry.secret && <> · {t("guestbook:entry.secret")}</>} ·{" "}
+                    <time dateTime={entry.createdAt}>{format.dateTime(entry.createdAt)}</time>
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p>
+            <Link to={`/${handle}/manage/guestbook`}>{t("manage:dashboard.allGuestbook")}</Link>
+          </p>
+        </section>
+      )}
     </main>
   );
 }

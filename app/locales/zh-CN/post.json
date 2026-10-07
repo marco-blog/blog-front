@@ -33,7 +33,8 @@
     "publishPublic": "公开发布",
     "savePrivate": "私密保存",
     "republish": "更新发布",
-    "publishing": "正在发布。"
+    "publishing": "正在发布。",
+    "notice": "设为公告"
   },
   "topic": {
     "label": "主题",

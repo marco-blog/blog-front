@@ -7,7 +7,10 @@
     "categories": "Categories",
     "comments": "Comments",
     "settings": "Blog settings",
-    "feed": "Feed settings"
+    "feed": "Feed settings",
+    "guestbook": "Guestbook",
+    "design": "Design",
+    "stats": "Statistics"
   },
   "switcher": {
     "label": "Switch blog"
@@ -26,16 +29,26 @@
     "noComments": "No comments yet.",
     "commentOn": "On {{title}}",
     "deletedComment": "Deleted comment",
-    "allComments": "See all comments"
+    "allComments": "See all comments",
+    "newGuestbook": "New guestbook entries (7 days)",
+    "guestbookCount_one": "{{count, number}} entry",
+    "guestbookCount_other": "{{count, number}} entries",
+    "recentGuestbook": "Recent guestbook entries",
+    "noGuestbook": "No guestbook entries yet.",
+    "allGuestbook": "View all guestbook entries",
+    "visitorsToday": "Visitors today",
+    "visitorsYesterday": "Visitors yesterday"
   },
   "status": {
     "DRAFT": "Draft",
     "PUBLISHED": "Published",
-    "DELETED": "Trash"
+    "DELETED": "Trash",
+    "SCHEDULED": "Scheduled"
   },
   "visibility": {
     "PUBLIC": "Public",
-    "PRIVATE": "Private"
+    "PRIVATE": "Private",
+    "PROTECTED": "Protected"
   },
   "posts": {
     "title": "Posts",
@@ -70,7 +83,9 @@
       "done": "Updated {{updated}} post(s).",
       "move": "Move to category",
       "moveTarget": "Target category",
-      "moveSubmit": "Move"
+      "moveSubmit": "Move",
+      "notice": "Pin as notice",
+      "unnotice": "Unpin notice"
     },
     "edit": "Edit",
     "continue": "Continue writing",
@@ -81,7 +96,8 @@
     "purgeAt": "Permanently deleted on {{date}}",
     "restore": "Restore",
     "restored": "The post was restored.",
-    "category": "Category"
+    "category": "Category",
+    "noticeBadge": "Notice"
   },
   "settings": {
     "title": "Blog settings",
@@ -94,7 +110,11 @@
     "portalEnabled": "Show this blog's posts on the portal",
     "portalHint": "When off, this blog's posts don't appear on the portal home or topic pages. The blog itself and its feeds are unchanged.",
     "defaultTopic": "Default topic for new posts",
-    "defaultTopicHint": "This topic is preselected when you write a new post. You can change it for each post."
+    "defaultTopicHint": "This topic is preselected when you write a new post. You can change it for each post.",
+    "guestbookEnabled": "Use the guestbook",
+    "guestbookHint": "When off, the guestbook disappears from the blog menu and visitors cannot see it. Existing entries are kept.",
+    "guestWriteEnabled": "Allow comments and guestbook entries from guests",
+    "guestWriteHint": "When on, visitors who are not logged in can write comments and guestbook entries with a name and password. They can edit or delete them only with the same password."
   },
   "comments": {
     "title": "Comments",
@@ -120,5 +140,38 @@
     "atom": "Atom",
     "categoryRss": "Category RSS",
     "categoryHint": "Each category has an RSS feed at addresses like these (a parent category includes its subcategories)."
+  },
+  "guestbook": {
+    "title": "Manage guestbook",
+    "disabled": "The guestbook is turned off, so visitors cannot see it.",
+    "settingsLink": "Turn it on in blog settings",
+    "viewPublic": "View the blog guestbook"
+  },
+  "design": {
+    "title": "Design",
+    "sidebar": "Sidebar",
+    "sidebarHint": "Checked items appear in the blog sidebar in this order from the top. Moving up or down is saved right away.",
+    "up": "Up",
+    "down": "Down",
+    "moveUp": "Move {{item}} up",
+    "moveDown": "Move {{item}} down",
+    "save": "Save sidebar",
+    "saved": "The sidebar was saved.",
+    "notices": "Notices",
+    "noticesHint": "Set notices with \"Pin as notice\" in the publish settings or with bulk actions in post management.",
+    "noNotices": "No posts are pinned as notices.",
+    "unnotice": "Unpin",
+    "unnoticeFor": "Unpin {{title}}",
+    "unnoticed": "The notice was unpinned."
+  },
+  "stats": {
+    "title": "Statistics",
+    "dailyCaption_one": "Visitors in the last {{count}} day",
+    "dailyCaption_other": "Visitors in the last {{count}} days",
+    "date": "Date",
+    "visitors": "Visitors",
+    "timeZoneNote": "Dates follow the service time zone (Korea time), not your time zone. Each visitor is counted once a day.",
+    "topPosts": "Most viewed posts",
+    "noPosts": "No posts yet."
   }
 }

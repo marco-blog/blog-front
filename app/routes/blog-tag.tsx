@@ -7,7 +7,6 @@ import type { Blog, PostSummary } from "~/api/models";
 import { isValidHandle } from "~/blog/ids";
 import { parsePage, parseTagName, POST_PAGE_SIZE, withPage } from "~/blog/listing";
 import { Pagination } from "~/components/Pagination";
-import { CategoryTree } from "~/components/blog/CategoryTree";
 import { PostList, blogTagHref } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { metaT } from "~/i18n/meta";
@@ -69,7 +68,6 @@ export default function BlogTag() {
         </p>
         <h1>#{tag}</h1>
       </header>
-      <CategoryTree handle={blog.handle} categories={blog.categories} />
       <PostList handle={blog.handle} posts={posts} emptyText={t("tag:page.empty")} />
       <Pagination
         page={page}

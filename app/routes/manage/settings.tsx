@@ -34,7 +34,7 @@ export function meta({ matches }: Route.MetaArgs) {
 
 /**
  * 블로그 설정(`/:handle/manage/settings`, SSR): 제목·소개·대표 이미지·댓글 허용, 그리고 003의 "포털에 내 글 노출"(FR-089)과
- * 블로그 기본 주제(FR-077). 주제 트리(`/topics`)를 읽지 못하면 지금 값만 남긴 고르기를 보여준다.
+ * 블로그 기본 주제(FR-077), 004의 "방명록 사용"(FR-058)·"비회원 댓글·방명록 허용"(FR-066). 주제 트리(`/topics`)를 읽지 못하면 지금 값만 남긴 고르기를 보여준다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
@@ -53,6 +53,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       commentEnabled: blog.commentEnabled,
       portalEnabled: blog.portalEnabled ?? true,
       defaultTopicId: blog.defaultTopicId ?? null,
+      guestbookEnabled: blog.guestbookEnabled ?? true,
+      guestWriteEnabled: blog.guestWriteEnabled ?? false,
     },
   };
 }
@@ -65,6 +67,8 @@ export async function action({ request, params }: Route.ActionArgs) {
   const description = String(form.get("description") ?? "").trim();
   const commentEnabled = form.get("commentEnabled") === "on";
   const portalEnabled = form.get("portalEnabled") === "on";
+  const guestbookEnabled = form.get("guestbookEnabled") === "on";
+  const guestWriteEnabled = form.get("guestWriteEnabled") === "on";
   const topicValue = String(form.get("defaultTopicId") ?? "").trim();
   const defaultTopicId = topicValue ? Number(topicValue) : null;
   const coverImageMediaKey = imageFieldValue(form, "coverImageMediaKey");
@@ -82,6 +86,8 @@ export async function action({ request, params }: Route.ActionArgs) {
         description: description || null,
         commentEnabled,
         portalEnabled,
+        guestbookEnabled,
+        guestWriteEnabled,
         defaultTopicId: Number.isSafeInteger(defaultTopicId) ? defaultTopicId : null,
         ...(coverImageMediaKey === undefined ? {} : { coverImageMediaKey }),
       },
@@ -106,7 +112,7 @@ export default function ManageSettings() {
       {result?.ok && <p role="status">{t("manage:settings.saved")}</p>}
       <Form
         method="post"
-        key={`${blog.title}|${blog.description ?? ""}|${blog.commentEnabled}|${blog.coverImageUrl ?? ""}|${blog.portalEnabled}|${blog.defaultTopicId ?? ""}`}
+        key={`${blog.title}|${blog.description ?? ""}|${blog.commentEnabled}|${blog.coverImageUrl ?? ""}|${blog.portalEnabled}|${blog.defaultTopicId ?? ""}|${blog.guestbookEnabled}|${blog.guestWriteEnabled}`}
       >
         <FormAlert message={messages.form} />
         <FormField
@@ -152,6 +158,24 @@ export default function ManageSettings() {
             {t("manage:settings.portalEnabled")}
           </label>
           <p className="form-hint">{t("manage:settings.portalHint")}</p>
+        </div>
+        <div className="form-field">
+          <label>
+            <input type="checkbox" name="guestbookEnabled" defaultChecked={blog.guestbookEnabled} />{" "}
+            {t("manage:settings.guestbookEnabled")}
+          </label>
+          <p className="form-hint">{t("manage:settings.guestbookHint")}</p>
+        </div>
+        <div className="form-field">
+          <label>
+            <input
+              type="checkbox"
+              name="guestWriteEnabled"
+              defaultChecked={blog.guestWriteEnabled}
+            />{" "}
+            {t("manage:settings.guestWriteEnabled")}
+          </label>
+          <p className="form-hint">{t("manage:settings.guestWriteHint")}</p>
         </div>
         <DefaultTopicField
           topics={topics}

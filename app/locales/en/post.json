@@ -33,7 +33,8 @@
     "publishPublic": "Publish",
     "savePrivate": "Save as private",
     "republish": "Update post",
-    "publishing": "Publishing."
+    "publishing": "Publishing.",
+    "notice": "Pin as notice"
   },
   "topic": {
     "label": "Topic",

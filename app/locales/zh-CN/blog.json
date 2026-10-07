@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "label": "博客菜单",
+    "home": "首页",
+    "notice": "公告",
+    "guestbook": "留言板",
+    "tags": "标签"
+  },
+  "sidebar": {
+    "label": "博客侧边栏",
+    "PROFILE": "个人资料",
+    "CATEGORIES": "分类",
+    "RECENT_POSTS": "最新文章",
+    "RECENT_COMMENTS": "最新评论",
+    "POPULAR_POSTS": "热门文章",
+    "TAGS": "标签",
+    "ARCHIVE": "归档",
+    "VISITORS": "访客",
+    "SEARCH": "搜索",
+    "FEED_LINKS": "订阅源",
+    "noPosts": "还没有文章。",
+    "noComments": "还没有评论。"
+  },
+  "tags": {
+    "label": "标签列表",
+    "title": "标签",
+    "empty": "还没有标签。"
+  },
+  "archive": {
+    "empty": "还没有发布的文章。"
+  },
+  "notice": {
+    "title": "公告",
+    "badge": "公告",
+    "more": "查看更多公告",
+    "empty": "没有公告。"
+  },
+  "visitors": {
+    "today": "今天",
+    "yesterday": "昨天",
+    "total": "总计"
+  },
+  "search": {
+    "title": "博客内搜索",
+    "label": "在此博客中搜索",
+    "submit": "搜索",
+    "metaTitle": "{{q}} - 搜索 {{title}}"
+  }
+}

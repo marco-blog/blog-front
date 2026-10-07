@@ -38,6 +38,8 @@ describe("blog home loader", () => {
       blog,
       posts,
       totalCount: 2,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "http://front.test",
@@ -99,6 +101,8 @@ describe("blog home meta", () => {
       blog,
       posts: [],
       totalCount: 0,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "https://blog.java21.net",
@@ -128,6 +132,8 @@ describe("blog home meta", () => {
       blog: { ...blog, description: null, coverImageUrl: null },
       posts: [],
       totalCount: 30,
+      notices: [],
+      noticeCount: 0,
       page: 2,
       pageSize: 20,
       origin: "https://blog.java21.net",
@@ -149,6 +155,8 @@ describe("blog home meta", () => {
       blog,
       posts: [],
       totalCount: 0,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "https://blog.java21.net",
@@ -187,11 +195,13 @@ describe("blog home 화면", () => {
     });
   }
 
-  it("제목·소개·글쓴이·카테고리, 최신순 글 목록(상세 링크)", async () => {
+  it("제목·소개·글쓴이, 최신순 글 목록(상세 링크). 카테고리는 사이드바가 그린다", async () => {
     renderHome({
       blog,
       posts: [postSummary(2, { title: "두 번째 글" }), postSummary(1, { title: "첫 글" })],
       totalCount: 2,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "http://front.test",
@@ -200,7 +210,6 @@ describe("blog home 화면", () => {
     expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("마르코의 블로그");
     expect(screen.getByText("자바와 스프링 이야기")).toBeInTheDocument();
     expect(screen.getByText("마르코 님의 블로그")).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "카테고리" })).toHaveTextContent("Spring");
     const list = screen.getByRole("list", { name: "글 목록" });
     const links = within(list).getAllByRole("link");
     expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
@@ -219,6 +228,8 @@ describe("blog home 화면", () => {
       blog: { ...blog, owner: { ...blog.owner, profileImageUrl: profile } },
       posts: [postSummary(1, { thumbnailUrl: thumb }), postSummary(2)],
       totalCount: 2,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "http://front.test",
@@ -247,6 +258,8 @@ describe("blog home 화면", () => {
       blog,
       posts: Array.from({ length: 20 }, (_, i) => postSummary(30 - i)),
       totalCount: 45,
+      notices: [],
+      noticeCount: 0,
       page: 2,
       pageSize: 20,
       origin: "http://front.test",
@@ -267,6 +280,8 @@ describe("blog home 화면", () => {
       blog: { ...blog, description: null, categories: [] },
       posts: [],
       totalCount: 0,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "http://front.test",
@@ -360,6 +375,8 @@ describe("blog home 구독(002 T028)", () => {
       blog: { ...blog, ...overrides },
       posts: [],
       totalCount: 0,
+      notices: [],
+      noticeCount: 0,
       page: 1,
       pageSize: 20,
       origin: "http://front.test",
@@ -394,5 +411,94 @@ describe("blog home 구독(002 T028)", () => {
       "href",
       "/login?next=%2Fmarco",
     );
+  });
+});
+
+describe("blog home 공지(004 FR-059)", () => {
+  const NOTICES = "GET /api/v1/blogs/marco/notices";
+
+  it("첫 쪽은 /blogs/{h}/notices?size=5를 함께 부른다", async () => {
+    const notices = [postSummary(9, { notice: true, title: "운영 공지" })];
+    const backend = mockBackend({
+      [BLOG]: ok(blog),
+      [POSTS]: ok([], { totalCount: 0 }),
+      [NOTICES]: ok(notices, { totalCount: 7 }),
+    });
+
+    const result = await callLoader("/marco");
+
+    expect(result).toMatchObject({ notices, noticeCount: 7 });
+    expect(backend.callsTo(NOTICES)[0].url.searchParams.get("size")).toBe("5");
+  });
+
+  it("2쪽부터는 공지를 부르지 않고, 공지를 읽지 못해도 홈은 그린다", async () => {
+    const backend = mockBackend({ [BLOG]: ok(blog), [POSTS]: ok([], { totalCount: 30 }) });
+    expect(await callLoader("/marco?page=2")).toMatchObject({ notices: [], noticeCount: 0 });
+    expect(backend.callsTo(NOTICES)).toHaveLength(0);
+
+    mockBackend({
+      [BLOG]: ok(blog),
+      [POSTS]: ok([], { totalCount: 0 }),
+      [NOTICES]: fail(500, "INTERNAL_ERROR"),
+    });
+    expect(await callLoader("/marco")).toMatchObject({ notices: [], noticeCount: 0 });
+  });
+
+  function renderHome(notices: ReturnType<typeof postSummary>[], noticeCount: number) {
+    renderRoutes(
+      [
+        {
+          path: ":handle",
+          loader: () => ({
+            blog,
+            posts: [postSummary(1, { title: "일반 글" })],
+            totalCount: 1,
+            notices,
+            noticeCount,
+            page: 1,
+            pageSize: 20,
+            origin: "http://front.test",
+          }),
+          Component: BlogHome,
+        },
+      ],
+      { initialEntries: ["/marco"] },
+    );
+  }
+
+  it("글 목록 위에 공지(공지 표시), 더 있으면 '공지 더 보기'", async () => {
+    renderHome(
+      [
+        postSummary(9, { title: "운영 공지", notice: true }),
+        postSummary(8, { title: "두 번째 공지", notice: true }),
+      ],
+      6,
+    );
+
+    const notices = await screen.findByRole("region", { name: "공지" });
+    expect(within(notices).getByRole("link", { name: "운영 공지" })).toHaveAttribute(
+      "href",
+      "/marco/9",
+    );
+    expect(within(notices).getAllByText("공지", { selector: ".badge" })).toHaveLength(2);
+    expect(within(notices).getByRole("link", { name: "공지 더 보기" })).toHaveAttribute(
+      "href",
+      "/marco/notice",
+    );
+    const list = screen.getByRole("list", { name: "글 목록" });
+    expect(list).not.toHaveTextContent("운영 공지");
+    expect(notices.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("공지가 5개 이하면 더 보기 없음, 없으면 영역을 숨긴다", async () => {
+    renderHome([postSummary(9, { title: "운영 공지", notice: true })], 1);
+    const notices = await screen.findByRole("region", { name: "공지" });
+    expect(within(notices).queryByRole("link", { name: "공지 더 보기" })).toBeNull();
+  });
+
+  it("공지가 없으면 영역이 없다", async () => {
+    renderHome([], 0);
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByRole("region", { name: "공지" })).toBeNull();
   });
 });

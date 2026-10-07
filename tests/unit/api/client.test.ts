@@ -199,6 +199,73 @@ describe("createApiClient", () => {
     });
   });
 
+  it("Retry-After(초)를 ApiError에 담는다(004 비밀번호 시도 제한)", async () => {
+    const failure = (retryAfter?: string) =>
+      jsonResponse(
+        {
+          header: {
+            isSuccessful: false,
+            resultCode: "PASSWORD_ATTEMPTS_EXCEEDED",
+            resultMessage: "",
+          },
+          result: null,
+        },
+        { status: 429, headers: retryAfter === undefined ? {} : { "retry-after": retryAfter } },
+      );
+
+    const withHeader = await setup(failure("540"))
+      .client.post("/posts/1/unlock")
+      .catch((e: unknown) => e);
+    const withoutHeader = await setup(failure())
+      .client.post("/posts/1/unlock")
+      .catch((e: unknown) => e);
+    const httpDate = await setup(failure("Wed, 21 Oct 2026 07:28:00 GMT"))
+      .client.post("/posts/1/unlock")
+      .catch((e: unknown) => e);
+
+    expect(withHeader).toMatchObject({ status: 429, retryAfter: 540 });
+    expect(withoutHeader).toMatchObject({ retryAfter: null });
+    expect(httpDate).toMatchObject({ retryAfter: null });
+  });
+
+  it("같은 요청의 GET /blogs/{handle}은 한 번만 보내고, 블로그를 바꾸면 다시 부른다(004 요청 메모)", async () => {
+    const { client, fetchMock } = setup(jsonResponse(ok({ handle: "marco" })));
+
+    const [first, second] = await Promise.all([
+      client.get("/blogs/marco"),
+      client.get("/blogs/marco"),
+    ]);
+    await client.get("/blogs/marco/posts");
+    await client.get("/blogs/marco", { query: { page: 1 } });
+
+    expect(first).toEqual({ handle: "marco" });
+    expect(second).toBe(first);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+
+    // 방문 기록은 블로그 정보를 바꾸지 않는다.
+    await client.post("/blogs/marco/visits");
+    await client.get("/blogs/marco");
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+
+    // 설정을 바꾸거나 구독하면 다시 부른다.
+    await client.patch("/blogs/marco", { body: {} });
+    await client.get("/blogs/marco");
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+    await client.put("/me/subscriptions/marco");
+    await client.get("/blogs/marco");
+    expect(fetchMock).toHaveBeenCalledTimes(8);
+  });
+
+  it("다른 요청끼리는 메모를 나누지 않는다", async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => jsonResponse(ok({ handle: "marco" })));
+    const options = { baseUrl: "http://backend.test", fetch: fetchMock };
+
+    await createApiClient(new Request("http://front.test/a"), options).get("/blogs/marco");
+    await createApiClient(new Request("http://front.test/b"), options).get("/blogs/marco");
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("traceId가 없으면 응답 헤더 X-Request-Id를 쓴다", async () => {
     const { client } = setup(
       jsonResponse(

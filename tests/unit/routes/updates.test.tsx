@@ -17,6 +17,13 @@ import { fail, mockBackend, ok, type BackendHandler } from "../support/backend";
 import { renderRoutes, rootData } from "../support/render";
 import { caught, getRequest, routeArgs, statusOf } from "../support/route";
 
+/** 블로그 주소(`/:handle/...`) 계열의 첫 라우트 위치(004부터 공개 블로그 화면은 경로 없는 레이아웃 안에 있다) */
+function firstBlogRoute(paths: (string | undefined)[]): number {
+  const index = paths.findIndex((path) => path?.startsWith(":handle"));
+  expect(index).toBeGreaterThan(0);
+  return index;
+}
+
 const ME = "GET /api/v1/me";
 const LIST = "GET /api/v1/release-notes";
 const loggedIn = { cookie: "access_token=a" };
@@ -432,7 +439,7 @@ describe("/updates 화면", () => {
 
   it("라우트: /updates 아래 5개가 /:handle 계열보다 앞에", () => {
     const paths = routes.map((route) => route.path);
-    expect(paths.indexOf("updates")).toBeLessThan(paths.indexOf(":handle"));
+    expect(paths.indexOf("updates")).toBeLessThan(firstBlogRoute(paths));
     expect(
       routes.find((route) => route.path === "updates")?.children?.map((c) => c.path ?? "(index)"),
     ).toEqual(["(index)", "seen", ":version", ":version/history", ":version/history/:revisionNo"]);
