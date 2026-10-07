@@ -72,7 +72,7 @@ test.describe("005 US2 스팸 방어", () => {
     await expect(add.getByRole("status")).toHaveText("금칙어를 추가했습니다.");
 
     await page.getByRole("searchbox", { name: "금칙어 검색" }).fill(nameWord);
-    await page.getByRole("button", { name: "검색" }).click();
+    await page.getByRole("main").getByRole("button", { name: "검색" }).click();
     const row = page
       .getByRole("table")
       .getByRole("row")

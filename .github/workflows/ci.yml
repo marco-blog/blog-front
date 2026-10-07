@@ -141,6 +141,9 @@ jobs:
           # 없으면 001~004 E2E가 가입 단계에서 막힌다(005 research M18). CAPTCHA는 test(토큰 e2e-pass, front 기본값과 같음).
           # 004의 BLOG_GUEST_COMMENT_PER_MINUTE·BLOG_GUEST_GUESTBOOK_PER_MINUTE는 005의 blog.ratelimit.*로 옮겨 없어졌다.
           BLOG_CAPTCHA_PROVIDER: test
+          # 로그인 CAPTCHA 기준(같은 이메일·같은 IP 연속 3회 실패)은 모든 시나리오가 같은 IP라 001의 잠금·오류 문구 시나리오를
+          # 서로 막는다. E2E에서는 넉넉히 두고 기준 동작은 backend 시험(LoginCaptchaPolicyTest·LoginServiceTest)과 front 단위 시험이 본다.
+          BLOG_CAPTCHA_LOGIN_FAILURES_BEFORE_CAPTCHA: "100000"
           BLOG_RATELIMIT_SIGNUP_PER_IP_PER_HOUR: "100000"
           BLOG_RATELIMIT_COMMENT_PER_MINUTE: "1000"
           BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE: "1000"
