@@ -1,4 +1,4 @@
-import { type RouteConfig, index, route } from "@react-router/dev/routes";
+import { type RouteConfig, index, layout, route } from "@react-router/dev/routes";
 
 /**
  * 라우트 정의(blog-docs/specs/001-blog-core/contracts/routes.md "001 화면").
@@ -51,19 +51,25 @@ export default [
   ]),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
-  route(":handle", "routes/blog-home.tsx"),
-  route(":handle/category/:categoryId", "routes/blog-category.tsx"),
-  route(":handle/tags/:name", "routes/blog-tag.tsx"),
+  // 글쓰기·관리는 공개 블로그 레이아웃 밖(방문을 세지 않고 블로그 메뉴·사이드바 없음, 004).
   route(":handle/write/:postId?", "routes/write.tsx"),
   route(":handle/manage", "routes/manage/layout.tsx", [
     index("routes/manage/dashboard.tsx"),
     route("posts", "routes/manage/posts.tsx"),
     route("categories", "routes/manage/categories.tsx"),
     route("comments", "routes/manage/comments.tsx"),
+    route("guestbook", "routes/manage/guestbook.tsx"),
     route("settings", "routes/manage/settings.tsx"),
     route("feed", "routes/manage/feed.tsx"),
   ]),
-  route(":handle/:postId", "routes/post-detail.tsx"),
+  // 004 공개 블로그 레이아웃(경로 없음): 블로그 메뉴·사이드바. 고정 이름 경로를 `:handle/:postId`보다 앞에 둔다.
+  layout("routes/blog/layout.tsx", [
+    route(":handle", "routes/blog-home.tsx"),
+    route(":handle/category/:categoryId", "routes/blog-category.tsx"),
+    route(":handle/tags/:name", "routes/blog-tag.tsx"),
+    route(":handle/guestbook", "routes/blog-guestbook.tsx"),
+    route(":handle/:postId", "routes/post-detail.tsx"),
+  ]),
 
   route("*", "routes/not-found.tsx"),
 ] satisfies RouteConfig;
