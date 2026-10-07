@@ -8,7 +8,6 @@
     "settings": "Portal settings",
     "users": "Members",
     "reports": "Reports",
-    "hiddenPosts": "Hidden posts",
     "pending_one": "{{count}} pending",
     "pending_other": "{{count}} pending",
     "menu": "Menu",
@@ -370,15 +369,21 @@
     "done": {
       "suspend": "The member has been suspended.",
       "unsuspend": "The suspension has been lifted.",
-      "blogLimit": "The blog limit has been saved."
+      "blogLimit": "The blog limit has been saved.",
+      "role": "Role changed."
+    },
+    "roleArea": {
+      "title": "Admin role",
+      "current": "Current role: {{role}}",
+      "readOnly": "Only super admins can change roles.",
+      "legend": "Change role",
+      "auditLog": "Audit log for this member"
+    },
+    "contentLinks": {
+      "title": "Posts and comments by this member",
+      "posts": "Posts by this member",
+      "comments": "Comments by this member"
     }
-  },
-  "hiddenPosts": {
-    "title": "Hidden posts",
-    "list": "Hidden post list",
-    "empty": "There are no hidden posts.",
-    "unhide": "Unhide",
-    "done": "The post is visible again."
   },
   "reportReasons": {
     "SPAM": "Spam or advertising",
@@ -473,7 +478,8 @@
     "done": {
       "hide": "Hidden.",
       "unhide": "Unhidden."
-    }
+    },
+    "hideReason": "Reason for hiding"
   },
   "reservedHandles": {
     "title": "Reserved names",

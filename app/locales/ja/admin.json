@@ -8,7 +8,6 @@
     "settings": "ポータル設定",
     "users": "会員管理",
     "reports": "通報管理",
-    "hiddenPosts": "非表示の記事",
     "pending_one": "未処理 {{count}}件",
     "pending_other": "未処理 {{count}}件",
     "menu": "メニュー",
@@ -370,15 +369,21 @@
     "done": {
       "suspend": "会員を停止しました。",
       "unsuspend": "停止を解除しました。",
-      "blogLimit": "ブログ数の上限を保存しました。"
+      "blogLimit": "ブログ数の上限を保存しました。",
+      "role": "権限を変更しました。"
+    },
+    "roleArea": {
+      "title": "管理者権限",
+      "current": "現在の権限: {{role}}",
+      "readOnly": "権限は最高管理者だけが変更できます。",
+      "legend": "権限の変更",
+      "auditLog": "この会員が対象の作業記録"
+    },
+    "contentLinks": {
+      "title": "この会員の記事・コメント",
+      "posts": "この会員の記事",
+      "comments": "この会員のコメント"
     }
-  },
-  "hiddenPosts": {
-    "title": "非表示の記事",
-    "list": "非表示の記事一覧",
-    "empty": "非表示の記事はありません。",
-    "unhide": "非表示を解除",
-    "done": "非表示を解除しました。"
   },
   "reportReasons": {
     "SPAM": "スパム・広告",
@@ -473,7 +478,8 @@
     "done": {
       "hide": "非表示にしました。",
       "unhide": "非表示を解除しました。"
-    }
+    },
+    "hideReason": "非表示の理由"
   },
   "reservedHandles": {
     "title": "予約語",

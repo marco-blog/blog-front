@@ -10,6 +10,7 @@ import { adminActionError, adminInvalid, type AdminActionData } from "./actions.
 import {
   CONTENT_API,
   CONTENT_HIDE_TYPE,
+  HIDE_REASON_MAX,
   contentQuery,
   isScopeRequired,
   needsScope,
@@ -17,7 +18,6 @@ import {
   type ContentFilters,
   type ContentKind,
 } from "./contentSearch";
-import { ADMIN_FEATURES } from "./links";
 
 export interface ContentListData<T> {
   kind: ContentKind;
@@ -27,8 +27,6 @@ export interface ContentListData<T> {
   totalCount: number;
   scopeRequired: boolean;
   fieldErrors: ApiFieldError[];
-  /** 005 숨김 버튼을 보일지(`ADMIN_FEATURES.contentHide`) */
-  canHide: boolean;
 }
 
 /**
@@ -41,7 +39,7 @@ export async function loadContents<T>(
 ): Promise<ContentListData<T>> {
   await requireAdmin(request);
   const filters = parseContentFilters(kind, new URL(request.url).searchParams);
-  const base = { kind, filters, canHide: ADMIN_FEATURES.contentHide };
+  const base = { kind, filters };
   if (needsScope(kind, filters)) {
     return { ...base, rows: null, totalCount: 0, scopeRequired: true, fieldErrors: [] };
   }
@@ -71,26 +69,31 @@ export async function loadContents<T>(
 }
 
 /**
- * 숨김·해제 action(`intent=hide|unhide`, `id`) → 005 `PUT·DELETE /admin/contents/{segment}/{id}/hidden`.
- * `ADMIN_FEATURES.contentHide`가 꺼져 있으면 받지 않는다(400).
+ * 숨김·해제 action(`intent=hide|unhide`, `id`, 숨김은 `reason` 필수 500자) → 005
+ * `PUT /admin/contents/{segment}/{id}/hidden { reason }`·`DELETE …/hidden`(006 T039).
  */
 export async function contentHideAction(request: Request, kind: ContentKind) {
   await requireAdmin(request);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
   const idText = String(form.get("id") ?? "");
-  if (
-    !ADMIN_FEATURES.contentHide ||
-    (intent !== "hide" && intent !== "unhide") ||
-    !/^\d{1,18}$/.test(idText)
-  ) {
+  if ((intent !== "hide" && intent !== "unhide") || !/^\d{1,18}$/.test(idText)) {
     return adminInvalid(intent);
+  }
+  const reason = String(form.get("reason") ?? "").trim();
+  if (intent === "hide" && !reason) {
+    return adminInvalid(intent, [{ field: "reason", code: "REQUIRED" }]);
+  }
+  if (reason.length > HIDE_REASON_MAX) {
+    return adminInvalid(intent, [
+      { field: "reason", code: "TOO_LONG", params: { max: HIDE_REASON_MAX } },
+    ]);
   }
   const path = hiddenContentPath(CONTENT_HIDE_TYPE[kind], Number(idText));
   const api = createApiClient(request);
   try {
     if (intent === "hide") {
-      await api.put(path, { body: {} });
+      await api.put(path, { body: { reason } });
     } else {
       await api.delete(path);
     }

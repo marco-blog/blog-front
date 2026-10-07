@@ -75,6 +75,7 @@
     "USER_UNSUSPEND": "会員停止の解除",
     "REPORT_ACTION": "通報への措置",
     "REPORT_DISMISS": "通報の却下",
+    "REPORT_TARGET_ASSIGN": "通報対象の指定",
     "CONTENT_HIDE": "コンテンツ非表示",
     "CONTENT_UNHIDE": "コンテンツ非表示の解除",
     "BANNED_WORD_CREATE": "禁止語の追加",

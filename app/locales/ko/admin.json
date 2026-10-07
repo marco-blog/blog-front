@@ -8,7 +8,6 @@
     "settings": "포털 설정",
     "users": "회원 관리",
     "reports": "신고 관리",
-    "hiddenPosts": "숨긴 글",
     "pending_one": "처리 대기 {{count}}건",
     "pending_other": "처리 대기 {{count}}건",
     "menu": "메뉴",
@@ -370,15 +369,21 @@
     "done": {
       "suspend": "회원을 정지했습니다.",
       "unsuspend": "정지를 해제했습니다.",
-      "blogLimit": "블로그 수 한도를 저장했습니다."
+      "blogLimit": "블로그 수 한도를 저장했습니다.",
+      "role": "권한을 바꿨습니다."
+    },
+    "roleArea": {
+      "title": "관리자 권한",
+      "current": "지금 권한: {{role}}",
+      "readOnly": "권한은 최고 관리자만 바꿀 수 있습니다.",
+      "legend": "권한 바꾸기",
+      "auditLog": "이 회원 대상 작업 기록"
+    },
+    "contentLinks": {
+      "title": "이 회원의 글·댓글",
+      "posts": "이 회원의 글",
+      "comments": "이 회원의 댓글"
     }
-  },
-  "hiddenPosts": {
-    "title": "숨긴 글",
-    "list": "숨긴 글 목록",
-    "empty": "숨긴 글이 없습니다.",
-    "unhide": "숨김 해제",
-    "done": "숨김을 해제했습니다."
   },
   "reportReasons": {
     "SPAM": "스팸·광고",
@@ -473,7 +478,8 @@
     "done": {
       "hide": "숨겼습니다.",
       "unhide": "숨김을 해제했습니다."
-    }
+    },
+    "hideReason": "숨김 사유"
   },
   "reservedHandles": {
     "title": "예약어",

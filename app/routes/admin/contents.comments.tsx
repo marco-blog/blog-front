@@ -30,8 +30,7 @@ export function action({ request }: Route.ActionArgs) {
 
 export default function AdminContentComments() {
   const { t } = useTranslation();
-  const { filters, rows, totalCount, scopeRequired, fieldErrors, canHide } =
-    useLoaderData<typeof loader>();
+  const { filters, rows, totalCount, scopeRequired, fieldErrors } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   return (
     <main className="admin-contents">
@@ -49,7 +48,7 @@ export default function AdminContentComments() {
         (rows.length === 0 ? (
           <p>{t("admin:contents.empty")}</p>
         ) : (
-          <ContentEntryTable kind="comments" rows={rows} canHide={canHide} />
+          <ContentEntryTable kind="comments" rows={rows} />
         ))}
       {rows !== null && (
         <Pagination

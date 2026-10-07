@@ -75,6 +75,7 @@
     "USER_UNSUSPEND": "解除会员停用",
     "REPORT_ACTION": "处理举报",
     "REPORT_DISMISS": "驳回举报",
+    "REPORT_TARGET_ASSIGN": "指定举报对象",
     "CONTENT_HIDE": "隐藏内容",
     "CONTENT_UNHIDE": "取消隐藏内容",
     "BANNED_WORD_CREATE": "添加违禁词",

@@ -50,12 +50,12 @@ export default [
     route("portal/curations", "routes/admin/curations.tsx"),
     route("portal/exclusions", "routes/admin/exclusions.tsx"),
     route("portal/settings", "routes/admin/settings.tsx"),
-    // 005 신고·회원·숨긴 글
+    // 005 신고·회원(숨긴 글 옛 주소는 006 콘텐츠 관리로 리다이렉트)
     route("reports", "routes/admin/reports.tsx"),
     route("reports/:id", "routes/admin/report.tsx"),
     route("users", "routes/admin/users.tsx"),
     route("users/:id", "routes/admin/user.tsx"),
-    route("contents/hidden-posts", "routes/admin/hidden-posts.tsx"),
+    route("contents/hidden-posts", "routes/admin/hidden-posts.ts"),
     route("spam", "routes/admin/spam.tsx"),
     // 006 콘텐츠 관리·예약어·서비스 설정·관리자 권한·작업 기록·릴리스 노트
     route("contents", "routes/admin/contents.tsx"),

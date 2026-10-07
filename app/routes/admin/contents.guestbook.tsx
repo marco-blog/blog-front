@@ -30,8 +30,7 @@ export function action({ request }: Route.ActionArgs) {
 
 export default function AdminContentGuestbook() {
   const { t } = useTranslation();
-  const { filters, rows, totalCount, scopeRequired, fieldErrors, canHide } =
-    useLoaderData<typeof loader>();
+  const { filters, rows, totalCount, scopeRequired, fieldErrors } = useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   return (
     <main className="admin-contents">
@@ -49,7 +48,7 @@ export default function AdminContentGuestbook() {
         (rows.length === 0 ? (
           <p>{t("admin:contents.empty")}</p>
         ) : (
-          <ContentEntryTable kind="guestbook" rows={rows} canHide={canHide} />
+          <ContentEntryTable kind="guestbook" rows={rows} />
         ))}
       {rows !== null && (
         <Pagination
