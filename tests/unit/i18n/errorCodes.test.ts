@@ -63,7 +63,31 @@ const CONTRACT_001_CODES = [
   "MEDIA_TEMP_QUOTA_EXCEEDED",
 ];
 
+/** 003 contracts/api.md "오류 코드 (003에서 추가)" 표와 001 표의 릴리스 노트 코드(003 T024) */
+const CONTRACT_003_CODES = [
+  "TOPIC_NOT_FOUND",
+  "TOPIC_NOT_SELECTABLE",
+  "TOPIC_SLUG_TAKEN",
+  "TOPIC_DEPTH_EXCEEDED",
+  "CURATION_NOT_FOUND",
+  "CURATION_LIMIT_EXCEEDED",
+  "POST_NOT_PORTAL_ELIGIBLE",
+  "PORTAL_EXCLUSION_NOT_FOUND",
+  "SETTING_NOT_FOUND",
+  "RELEASE_NOTE_NOT_FOUND",
+  "RELEASE_NOTE_VERSION_TAKEN",
+  "RELEASE_NOTE_REVISION_CONFLICT",
+  "RELEASE_NOTE_ONCE_PUBLISHED",
+  "RELEASE_NOTE_VERSION_LOCKED",
+];
+
 describe("오류 코드 목록", () => {
+  it("003 오류 코드 14개를 모두 담는다", () => {
+    expect(
+      CONTRACT_003_CODES.filter((code) => !(API_ERROR_CODES as readonly string[]).includes(code)),
+    ).toEqual([]);
+  });
+
   it("contracts/api.md 오류 코드 표의 001 코드를 모두 담는다", () => {
     expect(
       CONTRACT_001_CODES.filter((code) => !(API_ERROR_CODES as readonly string[]).includes(code)),

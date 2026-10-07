@@ -1,11 +1,5 @@
 {
   "appName": "Blog",
-  "home": {
-    "title": "Blog",
-    "intro": "A blog service for writing and sharing your posts.",
-    "signup": "Sign up and create your blog",
-    "login": "Log in"
-  },
   "notFound": {
     "title": "Page not found",
     "description": "The address is wrong or the page has been removed.",

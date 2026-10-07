@@ -30,6 +30,9 @@ export default [
   route("feed", "routes/feed.tsx"),
   route("notifications", "routes/notifications.tsx"),
   route("search", "routes/search.tsx"),
+  // 003 주제 페이지(대분류·소분류 공용 모듈). `/:handle` 계열보다 앞에 둔다.
+  route("topics/:major", "routes/topic.tsx", { id: "topic-major" }),
+  route("topics/:major/:minor", "routes/topic.tsx", { id: "topic-minor" }),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
   route(":handle", "routes/blog-home.tsx"),

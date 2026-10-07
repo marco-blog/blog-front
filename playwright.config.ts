@@ -15,7 +15,8 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run build && npm start",
-    url: `http://localhost:${PORT}/`,
+    // 첫 화면(/)은 포털(003)이라 backend가 있어야 200이다. 준비 확인은 backend 없이 뜨는 /login으로 한다.
+    url: `http://localhost:${PORT}/login`,
     // backend가 필요한 시나리오(tests/e2e/us1-*)는 E2E_BACKEND_URL이 있을 때만 돈다. 그때 front도 같은 backend를 본다.
     env: {
       PORT: String(PORT),

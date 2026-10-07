@@ -1,4 +1,4 @@
-import type { Blog, PostDetail, PostSummary } from "~/api/models";
+import type { Blog, PortalCard, PostDetail, PostSummary, TopicNode } from "~/api/models";
 
 /** contracts/api.md 형식의 예시 데이터 */
 export const blog: Blog = {
@@ -63,4 +63,40 @@ export function postWithoutMarkdown(): Omit<PostDetail, "contentMarkdown"> {
   const copy: Partial<PostDetail> = { ...postDetail };
   delete copy.contentMarkdown;
   return copy as Omit<PostDetail, "contentMarkdown">;
+}
+
+/** 003 주제 노드. 이름은 slug로 4개 언어를 채운다. */
+export function topicNode(
+  id: number,
+  slug: string,
+  overrides: Partial<TopicNode> = {},
+  children: TopicNode[] = [],
+): TopicNode {
+  return {
+    id,
+    slug,
+    parentId: null,
+    names: { ko: `${slug} 한`, en: `${slug} en`, ja: `${slug} ja`, "zh-CN": `${slug} zh` },
+    cardColor: null,
+    onTab: false,
+    children,
+    ...overrides,
+  };
+}
+
+/** 003 포털 카드 */
+export function portalCard(id: number, overrides: Partial<PortalCard> = {}): PortalCard {
+  return {
+    id,
+    title: `포털 글 ${id}`,
+    summary: `요약 ${id}`,
+    thumbnailUrl: null,
+    topicId: null,
+    blog: { handle: "marco", title: "마르코의 블로그" },
+    author: { nickname: "마르코", profileImageUrl: null },
+    publishedAt: "2026-10-06T04:24:19Z",
+    likeCount: 3,
+    commentCount: 2,
+    ...overrides,
+  };
 }

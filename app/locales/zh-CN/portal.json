@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "description": "撰写并分享文章的博客服务。按主题浏览热门文章和最新文章。"
+  },
+  "home": {
+    "title": "博客门户",
+    "feedLink": "查看订阅动态",
+    "releaseNote": "新动态：{{title}}",
+    "releaseNoteLink": "查看更新",
+    "curations": "编辑推荐",
+    "topics": "主题",
+    "popular": "热门文章",
+    "latest": "最新文章",
+    "more": "查看更多",
+    "loading": "加载中…",
+    "popularTags": "热门标签",
+    "newBlogs": "新开的博客",
+    "newBlogSince": "{{time}}开始",
+    "emptyTitle": "门户中还没有可展示的文章",
+    "emptyWrite": "写下第一篇文章",
+    "emptySignup": "注册并写下第一篇文章"
+  },
+  "card": {
+    "likes": "点赞 {{count, number}}",
+    "comments": "评论 {{count, number}}",
+    "noTopic": "无主题",
+    "author": "作者"
+  },
+  "topic": {
+    "description": "浏览{{name}}主题的文章。",
+    "subtopics": "子主题",
+    "all": "全部",
+    "sortLabel": "排序",
+    "latest": "最新",
+    "popular": "热门",
+    "posts": "文章列表",
+    "empty": "该主题下还没有文章。",
+    "popularEmpty": "最近 7 天没有获得反应的文章。请按最新查看。"
+  }
+}

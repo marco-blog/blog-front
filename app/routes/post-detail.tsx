@@ -21,6 +21,7 @@ import { CommentSection } from "~/components/comment/CommentSection";
 import { Avatar } from "~/components/media/Avatar";
 import { LikeButton } from "~/components/post/LikeButton";
 import { PostContent } from "~/components/post/PostContent";
+import { ReadCompleteTracker } from "~/components/post/ReadCompleteTracker";
 import { blogTagHref } from "~/components/post/PostList";
 import { RelatedPosts } from "~/components/post/RelatedPosts";
 import { ShareButtons } from "~/components/post/ShareButtons";
@@ -195,6 +196,8 @@ export default function PostDetailPage() {
           <p>{t("post:views", { views: post.viewCount })}</p>
         </header>
         <PostContent html={post.contentHtml} />
+        {/* 003 끝까지 읽음: 본문 끝이 화면에 들어오면 한 번 보낸다(인기 점수) */}
+        {post.status === "PUBLISHED" && <ReadCompleteTracker postId={post.id} />}
         {post.status === "PUBLISHED" && (
           <footer className="post-actions">
             <LikeButton

@@ -281,6 +281,25 @@ describe("post detail 화면", () => {
     };
   };
 
+  it("본문 뒤에 끝까지 읽음 감시 요소(003 T045), 발행 전 글에는 없다", async () => {
+    renderPost(loaded());
+
+    const article = await screen.findByRole("article");
+    const sentinel = article.querySelector(".read-complete-sentinel");
+    expect(sentinel).not.toBeNull();
+    expect(
+      article.querySelector(".post-content")?.compareDocumentPosition(sentinel!) ??
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("임시저장 글에는 끝까지 읽음 감시 요소가 없다", async () => {
+    renderPost(loaded({ post: { ...postWithoutMarkdown(), status: "DRAFT" }, isOwner: true }));
+
+    const article = await screen.findByRole("article");
+    expect(article.querySelector(".read-complete-sentinel")).toBeNull();
+  });
+
   it("작성자 프로필 이미지는 50x50 썸네일", async () => {
     const profile = "/media/Pf9Yy8Xx7Ww6Vv5Uu4Tt3S";
     const post = postWithoutMarkdown();

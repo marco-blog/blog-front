@@ -7,6 +7,8 @@ import {
   formatDate,
   formatDateTime,
   formatNumber,
+  formatRelativeTime,
+  useRelativeTime,
   useDateFormat,
 } from "~/i18n/format";
 
@@ -96,5 +98,45 @@ describe("useDateFormat", () => {
     expect(
       await screen.findByText("Oct 6, 2026 | Oct 6, 2026, 12:24 AM | 4,321"),
     ).toBeInTheDocument();
+  });
+});
+
+/** 상대 시각(003 T041, research P7, 결정 표 23번) */
+describe("formatRelativeTime", () => {
+  const NOW = "2026-10-06T12:00:00Z";
+  const ago = (ms: number) => new Date(Date.parse(NOW) - ms).toISOString();
+  const MIN = 60_000;
+
+  it.each([
+    ["ko", "지금", "5분 전", "3시간 전", "1일 전", "6일 전"],
+    ["en", "now", "5 minutes ago", "3 hours ago", "1 day ago", "6 days ago"],
+    ["ja", "今", "5 分前", "3 時間前", "1 日前", "6 日前"],
+    ["zh-CN", "现在", "5分钟前", "3小时前", "1天前", "6天前"],
+  ])("%s: 방금·N분·N시간·N일 전", (language, now, minutes, hours, day, days) => {
+    expect(formatRelativeTime(ago(30_000), NOW, language)).toBe(now);
+    expect(formatRelativeTime(ago(5 * MIN + 10_000), NOW, language)).toBe(minutes);
+    expect(formatRelativeTime(ago(3 * 60 * MIN + MIN), NOW, language)).toBe(hours);
+    expect(formatRelativeTime(ago(25 * 60 * MIN), NOW, language)).toBe(day);
+    expect(formatRelativeTime(ago(6 * 24 * 60 * MIN), NOW, language)).toBe(days);
+  });
+
+  it("7일을 넘으면 날짜, 미래는 방금, 잘못된 값은 빈 문자열", () => {
+    expect(formatRelativeTime("2026-09-20T00:00:00Z", NOW, "ko")).toBe("2026년 9월 20일");
+    expect(formatRelativeTime("2026-09-20T00:00:00Z", new Date(NOW), "en", "UTC")).toBe(
+      "Sep 20, 2026",
+    );
+    expect(formatRelativeTime("2026-10-06T12:05:00Z", NOW, "ko")).toBe("지금");
+    expect(formatRelativeTime(null, NOW, "ko")).toBe("");
+    expect(formatRelativeTime("bad", NOW, "ko")).toBe("");
+    expect(formatRelativeTime(ago(0), "bad", "ko")).toBe("");
+  });
+
+  it("서버 시각 기준이라 브라우저 시각과 무관하게 같은 결과(SSR·hydration 일치)", async () => {
+    function Relative() {
+      const relative = useRelativeTime(NOW);
+      return <p>{relative(ago(2 * 60 * MIN))}</p>;
+    }
+    renderRoutes([{ index: true, Component: Relative }], { language: "ko" });
+    expect(await screen.findByText("2시간 전")).toBeInTheDocument();
   });
 });
