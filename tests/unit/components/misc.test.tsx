@@ -53,6 +53,7 @@ describe("PublishSettingsDialog", () => {
       tags: [],
       topicId: null,
       thumbnailMediaKey: null,
+      notice: false,
     });
   });
 });

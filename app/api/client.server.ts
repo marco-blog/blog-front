@@ -35,7 +35,9 @@ const FORWARDED_HEADERS = [
 ] as const;
 
 /** 요청 메모 대상(쿼리·헤더 없는 블로그 정보 조회) */
-const MEMO_PATH = /^\/blogs\/[a-z0-9-]{1,40}$/;
+const MEMO_PATH = /^\/blogs\/([a-z0-9-]{1,40})$/;
+/** 구독·구독 취소(블로그 구독자 수가 바뀐다) */
+const SUBSCRIPTION_PATH = /^\/me\/subscriptions\/([a-z0-9-]{1,40})$/;
 
 function isMemoizable(path: string, init: Omit<ApiRequestInit, "method">): boolean {
   return MEMO_PATH.test(path) && !init.query && !init.headers && !init.signal;
@@ -139,11 +141,21 @@ export function createApiClient(request: Request, options: ApiClientOptions = {}
     (method: string) =>
     async <T>(path: string, init: Omit<ApiRequestInit, "method"> = {}): Promise<T> => {
       if (method !== "GET") {
-        // 상태를 바꾸면 이 요청에서 기억해 둔 조회를 버린다(바뀐 블로그 설정을 다시 읽도록).
-        session.memo.clear();
+        forgetChangedBlog(path);
       }
       return (await send<T>(path, { ...init, method })).result;
     };
+
+  /**
+   * 블로그 정보를 바꾸는 요청(설정 `PATCH /blogs/{handle}`, 구독 `/me/subscriptions/{handle}`) 뒤에는 기억해 둔 그 블로그 조회를 버린다.
+   * 방문 기록(`POST /blogs/{handle}/visits`) 같은 하위 경로는 블로그 정보를 바꾸지 않으므로 그대로 둔다.
+   */
+  function forgetChangedBlog(path: string) {
+    const handle = MEMO_PATH.exec(path)?.[1] ?? SUBSCRIPTION_PATH.exec(path)?.[1];
+    if (handle) {
+      session.memo.delete(`GET /blogs/${handle}`);
+    }
+  }
 
   /**
    * GET. 같은 요청 안에서 여러 loader가 부르는 조회(`/blogs/{handle}`: 공개 블로그 레이아웃과 자식 화면, 004)는

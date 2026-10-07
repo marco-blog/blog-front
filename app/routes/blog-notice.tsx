@@ -1,41 +1,41 @@
 import { useTranslation } from "react-i18next";
-import { Link, data, useLoaderData } from "react-router";
+import { data, Link, useLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
 import type { Blog, PostSummary } from "~/api/models";
 import { isValidHandle } from "~/blog/ids";
-import { parsePage, parseTagName, POST_PAGE_SIZE, withPage } from "~/blog/listing";
+import { parsePage, POST_PAGE_SIZE, withPage } from "~/blog/listing";
 import { Pagination } from "~/components/Pagination";
-import { PostList, blogTagHref } from "~/components/post/PostList";
+import { PostList } from "~/components/post/PostList";
 import { publicOrigin } from "~/config.server";
 import { metaT } from "~/i18n/meta";
-import { ogImageUrl } from "~/media/thumbnail";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
 
-import type { Route } from "./+types/blog-tag";
+import type { Route } from "./+types/blog-notice";
 
-/**
- * 블로그 안 태그별 글(`/:handle/tags/:name`, SSR). 태그 이름은 backend와 같은 규칙으로 정규화한다
- * (`/marco/tags/Spring`과 `/marco/tags/spring`은 같은 목록).
- */
+export function noticeHref(handle: string, page = 1): string {
+  return withPage(`/${handle}/notice`, page);
+}
+
+/** 공지 목록(`/:handle/notice?page=`, SSR, 004 FR-059): 목록 노출 가능한 공지 글, 발행 최신순 20개 */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = params;
-  const tag = parseTagName(params.name);
-  if (!isValidHandle(handle) || tag === null) {
+  if (!isValidHandle(handle)) {
     throw data(null, { status: 404 });
   }
   const page = parsePage(new URL(request.url).searchParams.get("page"));
   const api = createApiClient(request);
-  const [blog, posts] = await Promise.all([
+  const [blog, notices] = await Promise.all([
     api.get<Blog>(`/blogs/${handle}`),
-    api.send<PostSummary[]>(`/blogs/${handle}/posts`, { query: { tag, page: page - 1 } }),
+    api.send<PostSummary[]>(`/blogs/${handle}/notices`, {
+      query: { page: page - 1, size: POST_PAGE_SIZE },
+    }),
   ]).catch(throwApiErrorResponse);
   return {
-    blog,
-    tag,
-    posts: posts.result,
-    totalCount: posts.totalCount ?? posts.result.length,
+    blog: { handle: blog.handle, title: blog.title, description: blog.description },
+    posts: notices.result,
+    totalCount: notices.totalCount ?? notices.result.length,
     page,
     pageSize: POST_PAGE_SIZE,
     origin: publicOrigin(request),
@@ -47,33 +47,32 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
   if (!loaderData) {
     return privatePageMeta(t("notFound.title"), t("appName"));
   }
-  const { blog, tag, page, origin } = loaderData;
+  const { blog, page, origin } = loaderData;
   return pageMeta({
-    title: `#${tag} - ${blog.title}`,
+    title: `${t("blog:notice.title")} - ${blog.title}`,
     description: blog.description,
-    image: absoluteUrl(origin, ogImageUrl(blog.coverImageUrl)),
-    url: absoluteUrl(origin, withPage(blogTagHref(blog.handle, tag), page)),
+    url: absoluteUrl(origin, noticeHref(blog.handle, page)),
     siteName: t("appName"),
   });
 }
 
-export default function BlogTag() {
+export default function BlogNotice() {
   const { t } = useTranslation();
-  const { blog, tag, posts, totalCount, page, pageSize } = useLoaderData<typeof loader>();
+  const { blog, posts, totalCount, page, pageSize } = useLoaderData<typeof loader>();
   return (
-    <main className="blog-tag">
+    <main className="blog-notice">
       <header>
         <p>
           <Link to={`/${blog.handle}`}>{blog.title}</Link>
         </p>
-        <h1>#{tag}</h1>
+        <h1>{t("blog:notice.title")}</h1>
       </header>
-      <PostList handle={blog.handle} posts={posts} emptyText={t("tag:page.empty")} />
+      <PostList handle={blog.handle} posts={posts} emptyText={t("blog:notice.empty")} />
       <Pagination
         page={page}
         totalCount={totalCount}
         pageSize={pageSize}
-        hrefFor={(target) => withPage(blogTagHref(blog.handle, tag), target)}
+        hrefFor={(target) => noticeHref(blog.handle, target)}
       />
     </main>
   );

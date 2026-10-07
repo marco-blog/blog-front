@@ -1,0 +1,57 @@
+/* 공개 블로그 레이아웃(004): 넓은 화면은 본문 오른쪽에 사이드바, 좁은 화면(모바일)은 본문 아래 */
+.blog-layout-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-start;
+}
+.blog-layout-main {
+  flex: 1 1 36rem;
+  min-width: 0;
+}
+.blog-sidebar {
+  flex: 0 1 16rem;
+  min-width: 0;
+}
+@media (max-width: 48rem) {
+  .blog-layout-body {
+    flex-direction: column;
+  }
+  .blog-layout-main,
+  .blog-sidebar {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+.blog-nav ul,
+.blog-sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+.blog-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding-left: 0;
+}
+.tag-weight-1 {
+  font-size: 0.85rem;
+}
+.tag-weight-2 {
+  font-size: 1rem;
+}
+.tag-weight-3 {
+  font-size: 1.15rem;
+}
+.tag-weight-4 {
+  font-size: 1.35rem;
+}
+.tag-weight-5 {
+  font-size: 1.6rem;
+}

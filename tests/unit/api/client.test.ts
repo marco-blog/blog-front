@@ -228,7 +228,7 @@ describe("createApiClient", () => {
     expect(httpDate).toMatchObject({ retryAfter: null });
   });
 
-  it("같은 요청의 GET /blogs/{handle}은 한 번만 보내고, 상태를 바꾸면 다시 부른다(004 요청 메모)", async () => {
+  it("같은 요청의 GET /blogs/{handle}은 한 번만 보내고, 블로그를 바꾸면 다시 부른다(004 요청 메모)", async () => {
     const { client, fetchMock } = setup(jsonResponse(ok({ handle: "marco" })));
 
     const [first, second] = await Promise.all([
@@ -242,9 +242,18 @@ describe("createApiClient", () => {
     expect(second).toBe(first);
     expect(fetchMock).toHaveBeenCalledTimes(3);
 
+    // 방문 기록은 블로그 정보를 바꾸지 않는다.
     await client.post("/blogs/marco/visits");
     await client.get("/blogs/marco");
-    expect(fetchMock).toHaveBeenCalledTimes(5);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+
+    // 설정을 바꾸거나 구독하면 다시 부른다.
+    await client.patch("/blogs/marco", { body: {} });
+    await client.get("/blogs/marco");
+    expect(fetchMock).toHaveBeenCalledTimes(6);
+    await client.put("/me/subscriptions/marco");
+    await client.get("/blogs/marco");
+    expect(fetchMock).toHaveBeenCalledTimes(8);
   });
 
   it("다른 요청끼리는 메모를 나누지 않는다", async () => {

@@ -29,3 +29,9 @@ export function metaT(matches: ReadonlyArray<MatchLike | undefined>): TFunction 
     : createI18n(DEFAULT_LANGUAGE, {});
   return i18n.t;
 }
+
+/** 라우트 `meta`에서 쓰는 화면 언어(root loader 값, 없으면 기본 언어). 날짜·연월 표기에 쓴다. */
+export function metaLanguage(matches: ReadonlyArray<MatchLike | undefined>): string {
+  const data = matches.find((match) => match?.id === "root")?.loaderData;
+  return isRootLoaderData(data) ? data.language : DEFAULT_LANGUAGE;
+}

@@ -5,5 +5,45 @@
     "notice": "お知らせ",
     "guestbook": "ゲストブック",
     "tags": "タグ"
+  },
+  "sidebar": {
+    "label": "ブログのサイドバー",
+    "PROFILE": "プロフィール",
+    "CATEGORIES": "カテゴリー",
+    "RECENT_POSTS": "最近の記事",
+    "RECENT_COMMENTS": "最近のコメント",
+    "POPULAR_POSTS": "人気記事",
+    "TAGS": "タグ",
+    "ARCHIVE": "アーカイブ",
+    "VISITORS": "訪問者",
+    "SEARCH": "検索",
+    "FEED_LINKS": "フィード",
+    "noPosts": "まだ記事がありません。",
+    "noComments": "まだコメントはありません。"
+  },
+  "tags": {
+    "label": "タグ一覧",
+    "title": "タグ",
+    "empty": "まだタグがありません。"
+  },
+  "archive": {
+    "empty": "まだ公開した記事がありません。"
+  },
+  "notice": {
+    "title": "お知らせ",
+    "badge": "お知らせ",
+    "more": "お知らせをもっと見る",
+    "empty": "お知らせはありません。"
+  },
+  "visitors": {
+    "today": "今日",
+    "yesterday": "昨日",
+    "total": "合計"
+  },
+  "search": {
+    "title": "ブログ内検索",
+    "label": "このブログを検索",
+    "submit": "検索",
+    "metaTitle": "{{q}} - {{title}}の検索"
   }
 }
