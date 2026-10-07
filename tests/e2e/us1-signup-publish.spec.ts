@@ -21,7 +21,7 @@ test.describe("US1 가입 → 글 발행 → 공개 화면", () => {
   test("가입하면 바로 로그인되고 빈 블로그가 열린다 (#1)", async ({ page }) => {
     await signUp(page, owner);
 
-    await expect(page.getByText("아직 발행한 글이 없습니다.")).toBeVisible();
+    await expect(page.getByRole("main").getByText("아직 발행한 글이 없습니다.")).toBeVisible();
   });
 
   test("같은 주소·예약어 주소는 가입 화면에서 막는다 (#2)", async ({ page }) => {

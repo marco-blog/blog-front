@@ -60,7 +60,10 @@ test.describe("US1 여러 블로그", () => {
 
     expect((await page.goto(`/${dev}/${id}`))?.status()).toBe(200);
     await page.goto(`/${dev}`);
-    await expect(page.getByRole("link", { name: "개발 블로그 글" })).toBeVisible();
+    // 사이드바(최근 글)에도 같은 링크가 있으므로 본문 글 목록에서 찾는다.
+    await expect(
+      page.getByRole("list", { name: "글 목록" }).getByRole("link", { name: "개발 블로그 글" }),
+    ).toBeVisible();
     await page.goto(`/${owner.handle}`);
     await expect(page.getByRole("link", { name: "개발 블로그 글" })).toHaveCount(0);
     expect((await page.goto(`/${owner.handle}/${id}`))?.status()).toBe(404);
