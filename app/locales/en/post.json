@@ -19,7 +19,9 @@
     "next": "Next post",
     "draft": "Draft",
     "private": "Private",
-    "topic": "Topic"
+    "topic": "Topic",
+    "scheduled": "Scheduled for {{time}}",
+    "protected": "Protected"
   },
   "publish": {
     "title": "Publish settings",
@@ -34,12 +36,30 @@
     "savePrivate": "Save as private",
     "republish": "Update post",
     "publishing": "Publishing.",
-    "notice": "Pin as notice"
+    "notice": "Pin as notice",
+    "protected": "Protected (only people with the password)",
+    "password": "Post password",
+    "passwordKeep": "Leave blank to keep the current password.",
+    "passwordHint": "{{min}}–{{max}} characters. Only people who know this password can read the post.",
+    "scheduleToggle": "Schedule",
+    "scheduledAt": "Publish date and time",
+    "scheduleHint": "In {{timeZone}} time.",
+    "schedule": "Schedule post"
   },
   "topic": {
     "label": "Topic",
     "none": "None",
     "hiddenCurrent": "Current topic (hidden)",
     "hint": "Choosing a topic lets this post appear on the portal's topic page."
+  },
+  "scheduled": {
+    "notice": "This post is scheduled to be published at {{time}}.",
+    "cancel": "Cancel schedule"
+  },
+  "locked": {
+    "form": "Open protected post",
+    "message": "This post is protected. Enter the password to read it.",
+    "password": "Password",
+    "submit": "Open"
   }
 }

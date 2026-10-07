@@ -224,3 +224,58 @@ describe("backendProxy 연결 실패", () => {
     expect(await response.text()).toBe("Bad Gateway");
   });
 });
+
+describe("backendProxy 백업 파일 내려받기(004 US4)", () => {
+  let backend: Server;
+  let front: Server;
+  let frontUrl: string;
+  let finish: () => void = () => undefined;
+
+  beforeAll(async () => {
+    backend = createServer((req, res) => {
+      res.writeHead(200, {
+        "content-type": "application/zip",
+        "content-disposition": 'attachment; filename="marco-20261007-1200.zip"',
+        "cache-control": "no-store",
+      });
+      // 첫 조각만 보내고 끝내지 않는다 — 프록시가 버퍼링하면 front 응답이 오지 않는다.
+      res.write("PK\u0003\u0004first");
+      finish = () => res.end("rest");
+      req.on("close", () => res.end());
+    });
+    const backendUrl = await listen(backend);
+
+    const app = express();
+    app.use(requestId());
+    app.use(backendProxy(backendUrl));
+    front = createServer(app);
+    frontUrl = await listen(front);
+  });
+
+  afterAll(async () => {
+    finish();
+    await Promise.all([close(front), close(backend)]);
+  });
+
+  it("zip 응답을 버퍼링하지 않고 헤더·첫 조각부터 그대로 넘긴다", async () => {
+    const response = await fetch(`${frontUrl}/api/v1/blogs/marco/exports/7/file`);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("application/zip");
+    expect(response.headers.get("content-disposition")).toBe(
+      'attachment; filename="marco-20261007-1200.zip"',
+    );
+    expect(response.headers.get("cache-control")).toBe("no-store");
+
+    const reader = response.body!.getReader();
+    const first = await reader.read();
+    expect(new TextDecoder().decode(first.value)).toBe("PK\u0003\u0004first");
+
+    finish();
+    let rest = "";
+    for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+      rest += new TextDecoder().decode(chunk.value);
+    }
+    expect(rest).toBe("rest");
+  });
+});

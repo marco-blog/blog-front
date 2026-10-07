@@ -1,11 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, data, useLoaderData, useNavigate } from "react-router";
+import {
+  Form,
+  Link,
+  data,
+  redirect,
+  useActionData,
+  useLoaderData,
+  useNavigate,
+  useNavigation,
+} from "react-router";
 
 import { api } from "~/api/client";
 import { createApiClient } from "~/api/client.server";
 import { errorMessage, fieldErrorMessage } from "~/api/errorMessage";
 import { apiErrorResponse, isApiError } from "~/api/errors";
+import {
+  VALIDATION_FAILED,
+  toFormError,
+  useFormMessages,
+  type FormErrorData,
+} from "~/api/formErrors";
 import type {
   Blog,
   CategoryNode,
@@ -21,12 +36,14 @@ import { rememberLastBlog } from "~/auth/lastBlog.server";
 import { requireUser } from "~/auth/session.server";
 import { parsePostId } from "~/blog/ids";
 import { Editor, type EditorHandle } from "~/components/Editor/Editor";
+import { FormAlert } from "~/components/form/FormField";
 import {
   PublishSettingsDialog,
   type PublishSettingsValue,
 } from "~/components/post/PublishSettingsDialog";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
+import { useTimeZone } from "~/i18n/zonedDateTime";
 import { mediaKeyOf, mediaKeysIn } from "~/media/thumbnail";
 import { uploadMedia } from "~/media/upload";
 import { privatePageMeta } from "~/seo/meta";
@@ -109,6 +126,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       commentEnabled: post.commentEnabled,
       thumbnailUrl: post.thumbnailUrl,
       notice: post.notice ?? false,
+      scheduledAt: post.scheduledAt ?? null,
     },
     draft: {
       title: draft.title,
@@ -125,6 +143,39 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
+type WriteActionData = FormErrorData & { intent: string; ok: false };
+
+/**
+ * 예약 취소(`intent=unschedule` → `POST /posts/{id}/unschedule`, 004 FR-064). 글은 임시저장(DRAFT)으로 돌아가고
+ * 같은 작성 화면을 다시 연다. 주인이 아니면 loader와 같이 404.
+ */
+export async function action({ request, params }: Route.ActionArgs) {
+  const user = await requireUser(request);
+  const { handle } = params;
+  const postId = parsePostId(params.postId);
+  if (!user.blogs.some((blog) => blog.handle === handle) || postId === null) {
+    throw notFound();
+  }
+  const form = await request.formData();
+  const intent = String(form.get("intent") ?? "");
+  if (intent !== "unschedule") {
+    return data<WriteActionData>(
+      { intent, ok: false, resultCode: VALIDATION_FAILED, field: null, fieldErrors: [] },
+      { status: 400 },
+    );
+  }
+  try {
+    await createApiClient(request).post(`/posts/${postId}/unschedule`);
+  } catch (error) {
+    if (isApiError(error) && (error.status === 403 || error.status === 404)) {
+      throw notFound();
+    }
+    const { data: formError, status } = toFormError(error);
+    return data<WriteActionData>({ ...formError, intent, ok: false }, { status });
+  }
+  throw redirect(`/${handle}/write/${postId}`);
+}
+
 interface WriteData {
   handle: string;
   post: {
@@ -134,6 +185,8 @@ interface WriteData {
     commentEnabled: boolean;
     thumbnailUrl: string | null;
     notice?: boolean;
+    /** 예약 글의 예약 시각(004) */
+    scheduledAt?: string | null;
   } | null;
   draft: {
     title: string;
@@ -178,6 +231,7 @@ function Writer({
 }: WriteData) {
   const { t } = useTranslation();
   const format = useDateFormat();
+  const timeZone = useTimeZone();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState(draft?.title ?? "");
@@ -331,9 +385,16 @@ function Writer({
           topicId: settings.topicId,
           thumbnailMediaKey: settings.thumbnailMediaKey,
           notice: settings.notice,
+          ...(settings.password === undefined ? {} : { password: settings.password }),
+          scheduledAt: settings.scheduledAt,
         },
       });
-      navigate(`/${handle}/${published.id}`);
+      // 예약한 글은 아직 공개 주소가 없으므로 예약 글 목록으로 간다.
+      navigate(
+        published.status === "SCHEDULED"
+          ? `/${handle}/manage/posts?status=SCHEDULED`
+          : `/${handle}/${published.id}`,
+      );
     } catch (error) {
       setPublishError(publishErrorMessage(error));
       setPublishing(false);
@@ -389,6 +450,7 @@ function Writer({
           </button>
         </div>
       )}
+      {post?.status === "SCHEDULED" && <ScheduledNotice scheduledAt={post.scheduledAt ?? null} />}
       <div className="write-title">
         <label htmlFor="post-title">{t("editor:titleLabel")}</label>
         <input
@@ -454,7 +516,9 @@ function Writer({
             topicId: classification.topicId,
             thumbnailMediaKey: mediaKeyOf(post?.thumbnailUrl),
             notice: post?.notice ?? false,
+            scheduledAt: post?.status === "SCHEDULED" ? (post.scheduledAt ?? null) : null,
           }}
+          timeZone={timeZone}
           images={publishImages}
           categories={categories}
           topics={topics}
@@ -472,5 +536,26 @@ function Writer({
         />
       )}
     </main>
+  );
+}
+
+/** 예약 글 안내와 "예약 취소"(JS 없이도 동작하는 폼, `intent=unschedule`) */
+function ScheduledNotice({ scheduledAt }: { scheduledAt: string | null }) {
+  const { t } = useTranslation();
+  const format = useDateFormat();
+  const result = useActionData<WriteActionData>();
+  const messages = useFormMessages(result && !result.ok ? result : null);
+  const submitting = useNavigation().state === "submitting";
+  return (
+    <div className="scheduled-notice" role="note">
+      <p>{t("post:scheduled.notice", { time: format.dateTime(scheduledAt) })}</p>
+      <FormAlert message={messages.form} />
+      <Form method="post">
+        <input type="hidden" name="intent" value="unschedule" />
+        <button type="submit" disabled={submitting}>
+          {t("post:scheduled.cancel")}
+        </button>
+      </Form>
+    </div>
   );
 }

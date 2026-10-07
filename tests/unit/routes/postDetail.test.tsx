@@ -10,6 +10,8 @@ import PostDetailRoute, {
   shouldRevalidate,
 } from "~/routes/post-detail";
 
+import { backendSession } from "~/api/backendCookies.server";
+
 import { fail, mockBackend, ok } from "../support/backend";
 import { postDetail, postSummary, postWithoutMarkdown, topicNode } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
@@ -203,6 +205,7 @@ describe("post detail meta", () => {
       related: [],
       blogTitle: "마르코의 블로그",
       topic: null,
+      guestWriteEnabled: false,
     };
   };
   const metaArgs = (loaderData: LoaderData | undefined) =>
@@ -307,6 +310,7 @@ describe("post detail 화면", () => {
       related: [],
       blogTitle: "마르코의 블로그",
       topic: null,
+      guestWriteEnabled: false,
       ...overrides,
     };
   };
@@ -480,8 +484,8 @@ describe("post detail action(댓글)", () => {
     expect(created.data).toEqual({ intent: "create", target: "new", ok: true });
     expect(reply.data).toEqual({ intent: "create", target: "reply-7", ok: true });
     expect(backend.callsTo(COMMENT_POST).map((call) => call.body)).toEqual([
-      { content: "안녕", parentId: null },
-      { content: "답", parentId: 7 },
+      { content: "안녕", parentId: null, secret: false },
+      { content: "답", parentId: 7, secret: false },
     ]);
   });
 
@@ -494,7 +498,10 @@ describe("post detail action(댓글)", () => {
     await callAction({ intent: "edit", target: "edit-5", commentId: "5", content: "고침" });
     await callAction({ intent: "delete", target: "delete-5", commentId: "5" });
 
-    expect(backend.callsTo("PATCH /api/v1/comments/5")[0].body).toEqual({ content: "고침" });
+    expect(backend.callsTo("PATCH /api/v1/comments/5")[0].body).toEqual({
+      content: "고침",
+      secret: false,
+    });
     expect(backend.callsTo("DELETE /api/v1/comments/5")).toHaveLength(1);
   });
 
@@ -590,6 +597,7 @@ describe("post detail 화면의 댓글", () => {
       related: [],
       blogTitle: "마르코의 블로그",
       topic: null,
+      guestWriteEnabled: false,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -612,6 +620,7 @@ describe("post detail 화면의 댓글", () => {
       related: [],
       blogTitle: "마르코의 블로그",
       topic: null,
+      guestWriteEnabled: false,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -699,6 +708,7 @@ describe("post detail 좋아요(002 T027)", () => {
       related: [],
       blogTitle: "마르코의 블로그",
       topic: null,
+      guestWriteEnabled: false,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -728,5 +738,153 @@ describe("post detail 좋아요(002 T027)", () => {
 
     await screen.findByRole("article");
     expect(screen.queryByText(/^좋아요/)).toBeNull();
+  });
+});
+
+describe("post detail 보호 글(004 T086)", () => {
+  type ActionArgs = Parameters<typeof action>[0];
+  const UNLOCK = "POST /api/v1/posts/123/unlock";
+  const lockedPost = {
+    ...postDetail,
+    visibility: "PROTECTED" as const,
+    locked: true,
+    contentHtml: null as unknown as string,
+    contentMarkdown: null,
+    summary: null,
+    thumbnailUrl: null,
+    category: null,
+    tags: [],
+  };
+  const callUnlock = (fields: Record<string, string>) => {
+    const request = formRequest("/marco/123", { intent: "unlock", ...fields });
+    return {
+      request,
+      result: action(routeArgs<ActionArgs>(request, { handle: "marco", postId: "123" })),
+    };
+  };
+
+  it("잠긴 글은 댓글을 읽지 않고 조회수도 기록하지 않는다", async () => {
+    const backend = mockBackend({ [POST]: ok(lockedPost) });
+
+    const result = await callLoader("marco", "123");
+
+    expect(result.post.locked).toBe(true);
+    expect(result.post.contentHtml).toBe("");
+    expect(result.comments).toBeNull();
+    expect(backend.callsTo(COMMENTS)).toHaveLength(0);
+    expect(backend.callsTo(VIEWS)).toHaveLength(0);
+  });
+
+  it("비밀번호가 맞으면 backend 열람 쿠키를 싣고 같은 주소로 다시 연다", async () => {
+    const cookie = "post_unlock_123=jwt; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1800";
+    const backend = mockBackend({
+      [UNLOCK]: ok({ ...postDetail, locked: false }, { headers: { "set-cookie": cookie } }),
+    });
+    const { request, result } = callUnlock({ password: "open-sesame" });
+
+    expect(expectRedirect(await caught(result))).toBe("/marco/123");
+    expect(backend.callsTo(UNLOCK)[0].body).toEqual({ password: "open-sesame" });
+    expect(backendSession(request).setCookies).toContain(cookie);
+  });
+
+  it("빈 비밀번호는 backend를 부르지 않는다", async () => {
+    const backend = mockBackend();
+    const { result } = callUnlock({ password: "" });
+    const failed = asData<{ fieldErrors: unknown[] }>(await result);
+    expect(failed.data.fieldErrors).toEqual([{ field: "password", code: "REQUIRED" }]);
+    expect(backend.calls).toHaveLength(0);
+  });
+
+  it("틀린 비밀번호는 입력란 오류, 막히면 남은 시간(Retry-After)을 넘긴다", async () => {
+    mockBackend({ [UNLOCK]: fail(400, "POST_PASSWORD_MISMATCH") });
+    const mismatch = asData<Record<string, unknown>>(
+      await callUnlock({ password: "wrong" }).result,
+    );
+    expect(mismatch.data).toMatchObject({
+      intent: "unlock",
+      ok: false,
+      resultCode: "POST_PASSWORD_MISMATCH",
+      field: "password",
+    });
+
+    mockBackend({
+      [UNLOCK]: fail(429, "PASSWORD_ATTEMPTS_EXCEEDED", [], { "retry-after": "540" }),
+    });
+    const locked = asData<Record<string, unknown>>(await callUnlock({ password: "wrong" }).result);
+    expect(locked.data).toMatchObject({
+      resultCode: "PASSWORD_ATTEMPTS_EXCEEDED",
+      retryAfter: 540,
+    });
+    expect(locked.init?.status).toBe(429);
+  });
+
+  it("목록에 없는 글이면 404", async () => {
+    mockBackend({ [UNLOCK]: fail(404, "POST_NOT_FOUND") });
+    expect(statusOf(await caught(callUnlock({ password: "x" }).result))).toBe(404);
+  });
+
+  it("meta는 제목만·noindex(설명·대표 이미지 없음)", () => {
+    const loaderData = {
+      post: { ...postWithoutMarkdown(), ...lockedPost, contentHtml: "" },
+      isOwner: false,
+      origin: "https://blog.java21.net",
+      comments: null,
+      related: [],
+      blogTitle: "마르코의 블로그",
+      topic: null,
+      guestWriteEnabled: false,
+    } as unknown as LoaderData;
+    const tags = meta({
+      data: loaderData,
+      loaderData,
+      params: { handle: "marco", postId: "123" },
+      matches: [{ id: "root", loaderData: rootData("ko") }],
+    } as unknown as MetaArgs);
+
+    expect(tags).toContainEqual({ title: postDetail.title });
+    expect(tags).toContainEqual({ name: "robots", content: "noindex" });
+    expect(tags.some((tag) => "name" in tag && tag.name === "description")).toBe(false);
+    expect(tags.some((tag) => "property" in tag && tag.property === "og:image")).toBe(false);
+  });
+
+  it("잠긴 글 화면: 제목·작성자·발행일과 비밀번호 폼만(본문·댓글·좋아요 없음), 실패 문구", async () => {
+    const data = {
+      post: { ...postWithoutMarkdown(), ...lockedPost, contentHtml: "" },
+      isOwner: false,
+      origin: "http://front.test",
+      comments: null,
+      related: [],
+      blogTitle: "마르코의 블로그",
+      topic: null,
+      guestWriteEnabled: false,
+    } as unknown as LoaderData;
+    renderRoutes(
+      [
+        {
+          path: ":handle/:postId",
+          loader: () => data,
+          action: () => ({
+            intent: "unlock",
+            ok: false,
+            resultCode: "PASSWORD_ATTEMPTS_EXCEEDED",
+            field: null,
+            fieldErrors: [],
+            retryAfter: 540,
+          }),
+          Component: PostDetailRoute,
+        },
+      ],
+      { initialEntries: ["/marco/123"] },
+    );
+
+    expect(await screen.findByRole("heading", { name: postDetail.title })).toBeInTheDocument();
+    expect(screen.getByText(/보호된 글입니다/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /댓글/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /좋아요/ })).toBeNull();
+    const form = screen.getByRole("form", { name: "보호 글 열기" });
+    within(form).getByLabelText("비밀번호");
+    (within(form).getByLabelText("비밀번호") as HTMLInputElement).value = "wrong";
+    within(form).getByRole("button", { name: "열기" }).click();
+    expect(await screen.findByRole("alert")).toHaveTextContent("9분 뒤에 다시 시도해 주세요.");
   });
 });

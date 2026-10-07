@@ -9,6 +9,7 @@
   "types": {
     "NEW_COMMENT": "{{actor}} commented on \"{{postTitle}}\".",
     "NEW_SUBSCRIBER": "{{actor}} subscribed to {{blogTitle}}.",
-    "UNKNOWN": "You have a new notification."
+    "UNKNOWN": "You have a new notification.",
+    "BACKUP_READY": "The backup of {{blogTitle}} is ready. You can download it until {{expiresAt}}."
   }
 }

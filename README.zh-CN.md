@@ -77,6 +77,7 @@ npm run e2e                          # = npx playwright test
 | `E2E_BACKEND_URL`                       | `http://localhost:8080` | 跳过注册、文章、分类、评论、图片、语言场景（`tests/e2e/us*`）。设置后 front 服务器也使用该 backend（`BLOG_BACKEND_URL`） |
 | `MAILPIT_URL`                           | `http://localhost:8025` | 跳过读取密码重置邮件的场景（backend 必须把邮件发送到同一个 Mailpit）                                                     |
 | `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | 跳过门户（003）场景（`tests/e2e/portal-*`）。表示 backend 已使用下面的门户测试设置启动                                   |
+| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 跳过非会员评论和留言板（004）场景。表示 backend 已使用下面的非会员测试设置启动                                           |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理员账号              | 跳过管理控制台和发布说明场景。该账号使用与 backend 的 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` 相同的邮箱注册            |
 
 要连同 backend 全部运行，请按 backend README 启动 MySQL（已导入表结构）、Mailpit 和 backend（local profile），然后：
@@ -91,6 +92,8 @@ E2E_BACKEND_URL=http://localhost:8080 MAILPIT_URL=http://localhost:8025 npm run 
 E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<管理员邮箱> E2E_ADMIN_PASSWORD=<密码> npm run e2e
 ```
+
+004 博客功能场景（`tests/e2e/blog-*`）使用 backend local 配置的默认值运行。非会员写入场景会从同一 IP（localhost）多次写入，因此需放宽非会员写入频率限制启动 backend，并设置 `E2E_GUEST_TEST_SETTINGS=1`：`BLOG_GUEST_COMMENT_PER_MINUTE=1000`、`BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`。备份场景中 backend 会把 zip 写到 `BLOG_EXPORT_DIR`（local 默认 `./data/exports`）。定时发布和备份场景需要等待批处理周期（30 秒），因此需要 1～2 分钟。
 
 门户场景查看全站唯一的画面（首页"最新文章"、推荐、门户设置），因此作为 Playwright 项目 `portal` 在其余场景（`e2e`）结束后一次一个文件地运行。CI（`ci.yml` 的 e2e-backend、`e2e.yml`）以上述测试设置启动 backend，并用 `scripts/e2e-provision-admin.sh` 在一次性数据库中创建管理员账号（注册 API → 将 `role` 改为 SUPER_ADMIN）。
 

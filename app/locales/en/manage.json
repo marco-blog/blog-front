@@ -10,7 +10,9 @@
     "feed": "Feed settings",
     "guestbook": "Guestbook",
     "design": "Design",
-    "stats": "Statistics"
+    "stats": "Statistics",
+    "backup": "Backup",
+    "blocks": "Blocked members"
   },
   "switcher": {
     "label": "Switch blog"
@@ -97,7 +99,10 @@
     "restore": "Restore",
     "restored": "The post was restored.",
     "category": "Category",
-    "noticeBadge": "Notice"
+    "noticeBadge": "Notice",
+    "scheduledAt": "Scheduled for {{date}}",
+    "unschedule": "Cancel schedule",
+    "unscheduled": "The schedule was cancelled. The post is a draft again."
   },
   "settings": {
     "title": "Blog settings",
@@ -173,5 +178,41 @@
     "timeZoneNote": "Dates follow the service time zone (Korea time), not your time zone. Each visitor is counted once a day.",
     "topPosts": "Most viewed posts",
     "noPosts": "No posts yet."
+  },
+  "backup": {
+    "title": "Backup",
+    "description": "Packs your blog's posts (Markdown), drafts, categories and the images used in posts into one zip file. Comments, guestbook entries and protected post passwords are not included.",
+    "limit": "You can create one backup per blog per day. Each file can be downloaded for 7 days.",
+    "requested": "Backup requested. We'll notify you when it's ready.",
+    "create": "Create backup",
+    "recent": "Recent backups",
+    "empty": "No backups yet.",
+    "status": {
+      "PENDING": "Waiting",
+      "RUNNING": "In progress",
+      "READY": "Ready",
+      "FAILED": "Failed",
+      "EXPIRED": "Expired"
+    },
+    "createdAt": "Requested {{time}}",
+    "expiresAt": "Available until {{time}}",
+    "download": "Download",
+    "failed": "The backup could not be created. Please request it again.",
+    "working": "Creating the backup. This page refreshes every 30 seconds."
+  },
+  "blocks": {
+    "title": "Blocked members",
+    "description": "Blocked members can't comment, write in the guestbook or subscribe to this blog. What they already wrote stays.",
+    "list": "Blocked members",
+    "empty": "You haven't blocked anyone.",
+    "blockedAt": "Blocked {{time}}",
+    "block": "Block",
+    "blockUser": "Block {{nickname}}",
+    "confirm": "Block {{nickname}}? They won't be able to comment, write in the guestbook or subscribe to this blog, and their subscription will be removed.",
+    "blocked": "{{nickname}} has been blocked.",
+    "unblock": "Unblock",
+    "unblockUser": "Unblock {{nickname}}",
+    "unblockConfirm": "Unblock {{nickname}}?",
+    "unblocked": "{{nickname}} has been unblocked."
   }
 }

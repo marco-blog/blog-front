@@ -34,8 +34,8 @@ export const MANAGE_PAGE_SIZE = 20;
 const MAX_PAGE = 100_000;
 const QUERY_MAX = 200;
 
-const STATUSES: readonly PostStatus[] = ["DRAFT", "PUBLISHED", "DELETED"];
-const VISIBILITIES: readonly Visibility[] = ["PUBLIC", "PRIVATE"];
+const STATUSES: readonly PostStatus[] = ["DRAFT", "PUBLISHED", "SCHEDULED", "DELETED"];
+const VISIBILITIES: readonly Visibility[] = ["PUBLIC", "PRIVATE", "PROTECTED"];
 /** 일괄 작업 버튼 값 → backend 요청 */
 const BULK_OPS = {
   PUBLIC: { action: "CHANGE_VISIBILITY", visibility: "PUBLIC" },
@@ -141,12 +141,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 type PostsActionData =
   | { intent: "bulk"; ok: true; updated: number }
   | { intent: "restore"; ok: true }
+  | { intent: "unschedule"; ok: true }
   | { intent: "bulk"; ok: false; noSelection: true }
   | (FormErrorData & { intent: string; ok: false; noSelection?: false });
 
 /**
  * 일괄 작업(`POST /blogs/{handle}/manage/posts/bulk`: 공개·비공개로 바꾸기, 휴지통으로, 카테고리 옮기기)과
- * 휴지통 복구(`POST /posts/{id}/restore`). 끝나면 loader가 목록을 다시 읽는다.
+ * 휴지통 복구(`POST /posts/{id}/restore`), 예약 취소(`POST /posts/{id}/unschedule`, 004 FR-064). 끝나면 loader가 목록을 다시 읽는다.
  */
 export async function action({ request, params }: Route.ActionArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
@@ -185,13 +186,13 @@ export async function action({ request, params }: Route.ActionArgs) {
     }
   }
 
-  if (intent === "restore") {
+  if (intent === "restore" || intent === "unschedule") {
     const postId = parsePostId(String(form.get("postId") ?? ""));
     if (postId === null) {
       return invalid(intent);
     }
     try {
-      await api.post(`/posts/${postId}/restore`);
+      await api.post(`/posts/${postId}/${intent}`);
       return data<PostsActionData>({ intent, ok: true });
     } catch (error) {
       const { data: formError, status } = toFormError(error);
@@ -272,6 +273,7 @@ function FilterForm({
             <option value="">{t("manage:posts.filter.all")}</option>
             <option value="DRAFT">{t("manage:status.DRAFT")}</option>
             <option value="PUBLISHED">{t("manage:status.PUBLISHED")}</option>
+            <option value="SCHEDULED">{t("manage:status.SCHEDULED")}</option>
           </select>
         </label>
       )}{" "}
@@ -320,7 +322,9 @@ function ActionResult({ result }: { result: PostsActionData | undefined }) {
       <p role="status">
         {result.intent === "bulk"
           ? t("manage:posts.bulk.done", { updated: result.updated })
-          : t("manage:posts.restored")}
+          : result.intent === "unschedule"
+            ? t("manage:posts.unscheduled")
+            : t("manage:posts.restored")}
       </p>
     );
   }
@@ -357,6 +361,10 @@ function PostMeta({ post }: { post: PostSummary }) {
           <span>{t("manage:posts.deletedAt", { date: format.date(post.deletedAt) })}</span> ·{" "}
           <strong>{t("manage:posts.purgeAt", { date: format.date(post.purgeAt) })}</strong>
         </>
+      ) : post.status === "SCHEDULED" && post.scheduledAt ? (
+        <strong>
+          {t("manage:posts.scheduledAt", { date: format.dateTime(post.scheduledAt) })}
+        </strong>
       ) : post.publishedAt ? (
         <span>{t("manage:posts.publishedAt", { date: format.date(post.publishedAt) })}</span>
       ) : (
@@ -394,77 +402,101 @@ function BulkList({
     });
 
   return (
-    <Form method="post" className="bulk-form">
-      <input type="hidden" name="intent" value="bulk" />
-      <fieldset>
-        <legend>{t("manage:posts.bulk.label")}</legend>
-        <button type="submit" name="op" value="PUBLIC" disabled={submitting}>
-          {t("manage:posts.bulk.makePublic")}
-        </button>{" "}
-        <button type="submit" name="op" value="PRIVATE" disabled={submitting}>
-          {t("manage:posts.bulk.makePrivate")}
-        </button>{" "}
-        <button type="submit" name="op" value="DELETE" disabled={submitting}>
-          {t("manage:posts.bulk.delete")}
-        </button>{" "}
-        <button type="submit" name="op" value="NOTICE" disabled={submitting}>
-          {t("manage:posts.bulk.notice")}
-        </button>{" "}
-        <button type="submit" name="op" value="UNNOTICE" disabled={submitting}>
-          {t("manage:posts.bulk.unnotice")}
-        </button>{" "}
-        <span className="bulk-move">
-          {t("manage:posts.bulk.move")}:{" "}
-          <label>
-            {t("manage:posts.bulk.moveTarget")}{" "}
-            <select name="moveCategoryId" defaultValue="">
-              <option value="">{t("category:uncategorized")}</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {`${"— ".repeat(category.depth)}${category.name}`}
-                </option>
-              ))}
-            </select>
-          </label>{" "}
-          <button type="submit" name="op" value="MOVE" disabled={submitting}>
-            {t("manage:posts.bulk.moveSubmit")}
-          </button>
-        </span>
-      </fieldset>
-      <label>
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={() =>
-            setSelected(allSelected ? new Set() : new Set(posts.map((post) => post.id)))
-          }
-        />{" "}
-        {t("manage:posts.selectAll")}
-      </label>
-      <ul className="manage-post-list" aria-label={t("manage:posts.list")}>
-        {posts.map((post) => {
-          const title = post.title || t("manage:posts.untitled");
-          const resume = post.status === "DRAFT" || post.hasDraft;
-          return (
-            <li key={post.id}>
-              <input
-                type="checkbox"
-                name="postIds"
-                value={post.id}
-                aria-label={t("manage:posts.select", { title })}
-                checked={selected.has(post.id)}
-                onChange={() => toggle(post.id)}
-              />{" "}
-              <Link to={postHref(handle, post)}>{title}</Link>{" "}
-              <Link to={`/${handle}/write/${post.id}`}>
-                {t(resume ? "manage:posts.continue" : "manage:posts.edit")}
-              </Link>
-              <PostMeta post={post} />
-            </li>
-          );
-        })}
-      </ul>
-    </Form>
+    <>
+      <Form method="post" className="bulk-form">
+        <input type="hidden" name="intent" value="bulk" />
+        <fieldset>
+          <legend>{t("manage:posts.bulk.label")}</legend>
+          <button type="submit" name="op" value="PUBLIC" disabled={submitting}>
+            {t("manage:posts.bulk.makePublic")}
+          </button>{" "}
+          <button type="submit" name="op" value="PRIVATE" disabled={submitting}>
+            {t("manage:posts.bulk.makePrivate")}
+          </button>{" "}
+          <button type="submit" name="op" value="DELETE" disabled={submitting}>
+            {t("manage:posts.bulk.delete")}
+          </button>{" "}
+          <button type="submit" name="op" value="NOTICE" disabled={submitting}>
+            {t("manage:posts.bulk.notice")}
+          </button>{" "}
+          <button type="submit" name="op" value="UNNOTICE" disabled={submitting}>
+            {t("manage:posts.bulk.unnotice")}
+          </button>{" "}
+          <span className="bulk-move">
+            {t("manage:posts.bulk.move")}:{" "}
+            <label>
+              {t("manage:posts.bulk.moveTarget")}{" "}
+              <select name="moveCategoryId" defaultValue="">
+                <option value="">{t("category:uncategorized")}</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {`${"— ".repeat(category.depth)}${category.name}`}
+                  </option>
+                ))}
+              </select>
+            </label>{" "}
+            <button type="submit" name="op" value="MOVE" disabled={submitting}>
+              {t("manage:posts.bulk.moveSubmit")}
+            </button>
+          </span>
+        </fieldset>
+        <label>
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={() =>
+              setSelected(allSelected ? new Set() : new Set(posts.map((post) => post.id)))
+            }
+          />{" "}
+          {t("manage:posts.selectAll")}
+        </label>
+        <ul className="manage-post-list" aria-label={t("manage:posts.list")}>
+          {posts.map((post) => {
+            const title = post.title || t("manage:posts.untitled");
+            const resume = post.status === "DRAFT" || post.hasDraft;
+            return (
+              <li key={post.id}>
+                <input
+                  type="checkbox"
+                  name="postIds"
+                  value={post.id}
+                  aria-label={t("manage:posts.select", { title })}
+                  checked={selected.has(post.id)}
+                  onChange={() => toggle(post.id)}
+                />{" "}
+                <Link to={postHref(handle, post)}>{title}</Link>{" "}
+                <Link to={`/${handle}/write/${post.id}`}>
+                  {t(resume ? "manage:posts.continue" : "manage:posts.edit")}
+                </Link>
+                {post.status === "SCHEDULED" && (
+                  <>
+                    {" "}
+                    {/* 목록 폼 안에 폼을 둘 수 없어 아래 예약 취소 폼을 form 속성으로 가리킨다 */}
+                    <button
+                      type="submit"
+                      form={`unschedule-${post.id}`}
+                      disabled={submitting}
+                      aria-label={`${t("manage:posts.unschedule")}: ${title}`}
+                    >
+                      {t("manage:posts.unschedule")}
+                    </button>
+                  </>
+                )}
+                <PostMeta post={post} />
+              </li>
+            );
+          })}
+        </ul>
+      </Form>
+      {posts
+        .filter((post) => post.status === "SCHEDULED")
+        .map((post) => (
+          <Form key={post.id} method="post" id={`unschedule-${post.id}`} hidden>
+            <input type="hidden" name="intent" value="unschedule" />
+            <input type="hidden" name="postId" value={post.id} />
+          </Form>
+        ))}
+    </>
   );
 }
 

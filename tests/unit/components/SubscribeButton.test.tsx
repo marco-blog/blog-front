@@ -75,6 +75,14 @@ describe("SubscribeButton", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("내 블로그는 구독할 수 없습니다.");
   });
 
+  it("차단된 회원(FORBIDDEN)은 차단을 말하지 않는 일반 문구", async () => {
+    renderButton({ result: { intent: "subscribe", ok: false, resultCode: "FORBIDDEN" } });
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("이 작업을 할 권한이 없습니다.");
+    expect(alert).not.toHaveTextContent("차단");
+  });
+
   it("비로그인은 로그인 링크", async () => {
     renderButton({ loginHref: "/login?next=%2Fmarco" });
 

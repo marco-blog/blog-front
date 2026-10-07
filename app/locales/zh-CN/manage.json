@@ -10,7 +10,9 @@
     "feed": "订阅源设置",
     "guestbook": "留言板",
     "design": "装饰",
-    "stats": "统计"
+    "stats": "统计",
+    "backup": "备份",
+    "blocks": "屏蔽列表"
   },
   "switcher": {
     "label": "切换博客"
@@ -97,7 +99,10 @@
     "restore": "恢复",
     "restored": "文章已恢复。",
     "category": "分类",
-    "noticeBadge": "公告"
+    "noticeBadge": "公告",
+    "scheduledAt": "{{date}} 定时发布",
+    "unschedule": "取消定时",
+    "unscheduled": "已取消定时发布。文章已恢复为草稿。"
   },
   "settings": {
     "title": "博客设置",
@@ -173,5 +178,41 @@
     "timeZoneNote": "日期按服务基准时区（韩国时间）计算，而不是你的时区。同一访客每天只计一次。",
     "topPosts": "浏览最多的文章",
     "noPosts": "还没有文章。"
+  },
+  "backup": {
+    "title": "备份",
+    "description": "将博客的文章(Markdown)、草稿、分类和文章中使用的图片打包成一个 zip 文件。不包含评论、留言板和受保护文章的密码。",
+    "limit": "每个博客每天可以创建一次备份,创建的文件可在 7 天内下载。",
+    "requested": "已请求备份。准备好后会通过通知告诉你。",
+    "create": "创建备份",
+    "recent": "最近的备份",
+    "empty": "还没有备份。",
+    "status": {
+      "PENDING": "等待中",
+      "RUNNING": "正在创建",
+      "READY": "已完成",
+      "FAILED": "失败",
+      "EXPIRED": "已过期"
+    },
+    "createdAt": "{{time}} 请求",
+    "expiresAt": "可下载至 {{time}}",
+    "download": "下载",
+    "failed": "未能创建备份。请重新请求。",
+    "working": "正在创建备份。此页面每 30 秒刷新一次。"
+  },
+  "blocks": {
+    "title": "屏蔽列表",
+    "description": "被屏蔽的会员不能在此博客发表评论、留言或订阅。已经写过的内容会保留。",
+    "list": "已屏蔽的会员",
+    "empty": "没有屏蔽任何会员。",
+    "blockedAt": "{{time}} 屏蔽",
+    "block": "屏蔽",
+    "blockUser": "屏蔽 {{nickname}}",
+    "confirm": "要屏蔽 {{nickname}} 吗?对方将无法在此博客发表评论、留言或订阅,正在订阅的也会被取消。",
+    "blocked": "已屏蔽 {{nickname}}。",
+    "unblock": "解除",
+    "unblockUser": "解除屏蔽 {{nickname}}",
+    "unblockConfirm": "要解除对 {{nickname}} 的屏蔽吗?",
+    "unblocked": "已解除对 {{nickname}} 的屏蔽。"
   }
 }

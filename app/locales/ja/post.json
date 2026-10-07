@@ -19,7 +19,9 @@
     "next": "次の記事",
     "draft": "下書き",
     "private": "非公開",
-    "topic": "トピック"
+    "topic": "トピック",
+    "scheduled": "予約投稿 {{time}}",
+    "protected": "保護記事"
   },
   "publish": {
     "title": "公開設定",
@@ -34,12 +36,30 @@
     "savePrivate": "非公開で保存",
     "republish": "更新して公開",
     "publishing": "公開しています。",
-    "notice": "お知らせに登録"
+    "notice": "お知らせに登録",
+    "protected": "保護(パスワードを知っている人のみ)",
+    "password": "保護記事のパスワード",
+    "passwordKeep": "変更しない場合は空欄のままにしてください。",
+    "passwordHint": "{{min}}〜{{max}}文字。このパスワードを知っている人だけが本文を読めます。",
+    "scheduleToggle": "予約投稿",
+    "scheduledAt": "公開する日時",
+    "scheduleHint": "{{timeZone}} の時刻です。",
+    "schedule": "予約投稿"
   },
   "topic": {
     "label": "トピック",
     "none": "選択しない",
     "hiddenCurrent": "現在のトピック(非表示)",
     "hint": "トピックを選ぶと、ポータルのトピックページでこの記事が紹介されることがあります。"
+  },
+  "scheduled": {
+    "notice": "{{time}}に公開するよう予約された記事です。",
+    "cancel": "予約を取り消す"
+  },
+  "locked": {
+    "form": "保護記事を開く",
+    "message": "保護された記事です。パスワードを入力すると本文を読めます。",
+    "password": "パスワード",
+    "submit": "開く"
   }
 }

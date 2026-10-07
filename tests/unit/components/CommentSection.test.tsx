@@ -355,3 +355,144 @@ describe("CommentSection", () => {
     );
   });
 });
+
+describe("CommentSection 비밀·비회원 댓글(004 T087)", () => {
+  const guestAuthor = { userId: null, nickname: "나그네", profileImageUrl: null, guest: true };
+  const mixed: Comment[] = [
+    comment(10, { secret: true, content: null }),
+    comment(11, { author: guestAuthor, content: "비회원 공개 댓글" }),
+    comment(12, { author: guestAuthor, secret: true, content: null }),
+  ];
+
+  it('볼 수 없는 비밀 댓글은 "비밀 댓글입니다", 비회원은 표시', async () => {
+    renderSection({ comments: mixed, commentCount: 3 });
+    expect(await screen.findAllByText("비밀 댓글입니다.")).toHaveLength(2);
+    expect(screen.getAllByText("비회원")).toHaveLength(2);
+  });
+
+  it('회원 쓰기 폼에는 "비밀 댓글" 체크가 있고 secret=on으로 보낸다', async () => {
+    const action = renderSection({}, { user: WRITER });
+    const form = await screen.findByRole("form", { name: "댓글 내용" });
+    fireEvent.change(within(form).getByLabelText("댓글 내용"), { target: { value: "비밀" } });
+    fireEvent.click(within(form).getByLabelText("비밀 댓글"));
+    expect(within(form).queryByLabelText("이름")).toBeNull();
+    fireEvent.click(within(form).getByRole("button", { name: "댓글 등록" }));
+
+    await vi.waitFor(() => expect(action).toHaveBeenCalledTimes(1));
+    const sent = await action.mock.calls[0][0].request.formData();
+    expect(sent.get("secret")).toBe("on");
+  });
+
+  it("비로그인 + 비회원 허용이면 이름·비밀번호 칸, 허용하지 않으면 로그인 안내", async () => {
+    const action = renderSection({ guestWriteEnabled: true });
+    const form = await screen.findByRole("form", { name: "댓글 내용" });
+    fireEvent.change(within(form).getByLabelText("댓글 내용"), { target: { value: "안녕" } });
+    fireEvent.change(within(form).getByLabelText("이름"), { target: { value: "나그네" } });
+    fireEvent.change(within(form).getByLabelText("비밀번호"), { target: { value: "1234" } });
+    fireEvent.click(within(form).getByRole("button", { name: "댓글 등록" }));
+    await vi.waitFor(() => expect(action).toHaveBeenCalledTimes(1));
+    const sent = Object.fromEntries(await action.mock.calls[0][0].request.formData());
+    expect(sent).toMatchObject({ guestName: "나그네", guestPassword: "1234", content: "안녕" });
+    expect(screen.queryByRole("link", { name: "댓글을 쓰려면 로그인하세요" })).toBeNull();
+  });
+
+  it("비회원 댓글은 비로그인 방문자가 비밀번호로 고치고 지운다", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const forms: Record<string, string>[] = [];
+    renderSection(
+      { comments: mixed, commentCount: 3, guestWriteEnabled: true },
+      {
+        action: (form) => {
+          forms.push(Object.fromEntries(form) as Record<string, string>);
+          return { intent: "edit", target: String(form.get("target")), ok: true };
+        },
+      },
+    );
+
+    const guest = (await screen.findAllByRole("article", { name: "나그네" }))[0];
+    const edit = within(guest).getByRole("form", { name: "고칠 내용" });
+    fireEvent.change(within(edit).getByLabelText("고칠 내용"), { target: { value: "고침" } });
+    fireEvent.change(within(edit).getByLabelText("작성할 때 입력한 비밀번호"), {
+      target: { value: "1234" },
+    });
+    fireEvent.click(within(edit).getByRole("button", { name: "수정 완료" }));
+    await vi.waitFor(() => expect(forms).toHaveLength(1));
+    expect(forms[0]).toMatchObject({
+      intent: "edit",
+      target: "edit-11",
+      commentId: "11",
+      content: "고침",
+      guestPassword: "1234",
+    });
+
+    const del = within(guest)
+      .getAllByRole("button", { name: "삭제" })
+      .map((button) => button.closest("form"))
+      .find((form) => form !== null && within(form).queryByLabelText("작성할 때 입력한 비밀번호"));
+    expect(del).toBeDefined();
+    fireEvent.change(within(del!).getByLabelText("작성할 때 입력한 비밀번호"), {
+      target: { value: "1234" },
+    });
+    fireEvent.click(within(del!).getByRole("button", { name: "삭제" }));
+    await vi.waitFor(() => expect(forms).toHaveLength(2));
+    expect(forms[1]).toMatchObject({ intent: "delete", commentId: "11", guestPassword: "1234" });
+  });
+
+  it("비회원 비밀 댓글은 먼저 비밀번호로 내용을 불러오고(intent=unlockComment), 받은 내용으로 고친다", async () => {
+    const forms: Record<string, string>[] = [];
+    renderSection(
+      { comments: mixed, commentCount: 3, guestWriteEnabled: true },
+      {
+        action: (form) => {
+          forms.push(Object.fromEntries(form) as Record<string, string>);
+          return {
+            intent: "unlockComment",
+            target: "unlock-12",
+            ok: true,
+            comment: comment(12, { author: guestAuthor, secret: true, content: "숨긴 내용" }),
+          };
+        },
+      },
+    );
+
+    const unlock = await screen.findByRole("form", { name: "비밀 댓글 내용 불러오기" });
+    fireEvent.change(within(unlock).getByLabelText("작성할 때 입력한 비밀번호"), {
+      target: { value: "1234" },
+    });
+    fireEvent.click(within(unlock).getByRole("button", { name: "내용 불러오기" }));
+    await vi.waitFor(() => expect(forms).toHaveLength(1));
+    expect(forms[0]).toMatchObject({
+      intent: "unlockComment",
+      target: "unlock-12",
+      commentId: "12",
+    });
+    const edit = await screen.findByDisplayValue("숨긴 내용");
+    const editForm = edit.closest("form")!;
+    expect(within(editForm).getByLabelText("비밀 댓글")).toBeChecked();
+  });
+
+  it("비밀번호가 틀리면 그 폼에 알린다(GUEST_PASSWORD_MISMATCH)", async () => {
+    renderSection(
+      { comments: mixed, commentCount: 3, guestWriteEnabled: true },
+      {
+        action: () => ({
+          intent: "unlockComment",
+          target: "unlock-12",
+          ok: false,
+          resultCode: "GUEST_PASSWORD_MISMATCH",
+          field: "guestPassword",
+          fieldErrors: [],
+        }),
+      },
+    );
+    const unlock = await screen.findByRole("form", { name: "비밀 댓글 내용 불러오기" });
+    fireEvent.change(within(unlock).getByLabelText("작성할 때 입력한 비밀번호"), {
+      target: { value: "0000" },
+    });
+    fireEvent.click(within(unlock).getByRole("button", { name: "내용 불러오기" }));
+    expect(await screen.findByText("비밀번호가 맞지 않습니다.")).toBeInTheDocument();
+  });
+});

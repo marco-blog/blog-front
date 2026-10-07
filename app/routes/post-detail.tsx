@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
   Link,
   data,
+  redirect,
   useActionData,
   useLoaderData,
   useRouteLoaderData,
@@ -10,7 +11,8 @@ import {
 } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
-import { throwApiErrorResponse } from "~/api/errors";
+import { isApiError, throwApiErrorResponse } from "~/api/errors";
+import { VALIDATION_FAILED, toFormError } from "~/api/formErrors";
 import type { Blog, Comment, PostDetail, PostSummary, TopicNode } from "~/api/models";
 import { loginPath } from "~/auth/paths";
 import { isValidHandle, parsePostId } from "~/blog/ids";
@@ -20,6 +22,7 @@ import { runCommentAction } from "~/components/comment/actions.server";
 import { CommentSection } from "~/components/comment/CommentSection";
 import { Avatar } from "~/components/media/Avatar";
 import { LikeButton } from "~/components/post/LikeButton";
+import { LockedPost, type UnlockActionData } from "~/components/post/LockedPost";
 import { PostContent } from "~/components/post/PostContent";
 import { ReadCompleteTracker } from "~/components/post/ReadCompleteTracker";
 import { blogTagHref } from "~/components/post/PostList";
@@ -52,6 +55,7 @@ export function links() {
  * 002: 관련 글(`GET /posts/{id}/related`, 실패하면 `[]`)과 피드 자동 발견 링크 제목에 쓸 블로그 제목(`GET /blogs/{handle}`,
  * 실패하면 블로그 주소)도 함께 읽는다.
  * 003: 글에 주제가 있으면 주제 트리(`GET /topics`)로 주제 페이지 링크를 만든다. 트리를 읽지 못하거나 숨긴 주제면 링크를 뺀다.
+ * 004: 열지 않은 보호 글(`locked`)은 댓글을 읽지 않고 조회수도 기록하지 않는다(열면 쿠키로 다시 읽는다).
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const postId = parsePostId(params.postId);
@@ -59,9 +63,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
   const api = createApiClient(request);
-  const [post, comments, related, blog, topics] = await Promise.all([
+  const [post, related, blog, topics] = await Promise.all([
     api.get<PostDetail>(`/posts/${postId}`).catch(throwApiErrorResponse),
-    api.get<Comment[]>(`/posts/${postId}/comments`).catch(() => null),
     api.get<PostSummary[]>(`/posts/${postId}/related`).catch((): PostSummary[] => []),
     api.get<Blog>(`/blogs/${params.handle}`).catch(() => null),
     api.get<TopicNode[]>("/topics").catch((): TopicNode[] => []),
@@ -69,18 +72,28 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (post.blogHandle !== params.handle) {
     throw data(null, { status: 404 });
   }
-  // 조회수 기록(FR-020). 중복 판단은 backend가 한다. 실패해도 글은 보여준다.
-  await api.post(`/posts/${postId}/views`).catch(() => null);
+  const locked = post.locked === true;
+  // 조회수 기록(FR-020)은 댓글과 함께. 중복 판단은 backend가 한다. 실패해도 글은 보여준다.
+  const [comments] = locked
+    ? [null]
+    : await Promise.all([
+        api.get<Comment[]>(`/posts/${postId}/comments`).catch(() => null),
+        api.post(`/posts/${postId}/views`).catch(() => null),
+      ]);
 
   const { contentMarkdown, ...rest } = post;
   return {
-    post: { ...rest, contentHtml: highlightCodeBlocks(post.contentHtml) },
+    post: {
+      ...rest,
+      contentHtml: post.contentHtml ? highlightCodeBlocks(post.contentHtml) : "",
+    },
     // contentMarkdown은 주인에게만 온다(contracts/api.md). 원문은 화면에 넘기지 않는다.
     isOwner: contentMarkdown !== null,
     origin: publicOrigin(request),
     comments,
     related,
     blogTitle: blog?.title ?? post.blogHandle,
+    guestWriteEnabled: blog?.guestWriteEnabled ?? false,
     topic: topicLink(topics, post.topicId),
   };
 }
@@ -95,7 +108,7 @@ function topicLink(topics: TopicNode[], topicId: number | null | undefined) {
 }
 
 /**
- * 좋아요(`intent=like|unlike`, 002)와 댓글 쓰기·답글·수정·삭제(US3).
+ * 좋아요(`intent=like|unlike`, 002)와 댓글 쓰기·답글·수정·삭제(US3), 보호 글 열기(`intent=unlock`, 004).
  * 로그인이 필요하면 이 글로 돌아오는 로그인 화면으로 보낸다.
  */
 export async function action({ request, params }: Route.ActionArgs) {
@@ -108,7 +121,41 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (isLikeIntent(intent)) {
     return runLikeAction(request, intent, { postId, returnTo });
   }
+  if (intent === "unlock") {
+    return runUnlockAction(request, postId, returnTo);
+  }
   return runCommentAction(request, { postId, returnTo });
+}
+
+/**
+ * 보호 글 열기: `POST /posts/{id}/unlock`이 준 열람 쿠키(`Set-Cookie`)를 브라우저에 그대로 싣고 같은 주소로 다시 연다.
+ * 틀린 비밀번호는 입력란 오류, 막혔으면(429) 남은 분을 알린다.
+ */
+async function runUnlockAction(request: Request, postId: number, returnTo: string) {
+  const form = await request.formData();
+  const password = String(form.get("password") ?? "");
+  if (password === "") {
+    return data<UnlockActionData>(
+      {
+        intent: "unlock",
+        ok: false,
+        resultCode: VALIDATION_FAILED,
+        field: null,
+        fieldErrors: [{ field: "password", code: "REQUIRED" }],
+      },
+      { status: 400 },
+    );
+  }
+  try {
+    await createApiClient(request).post(`/posts/${postId}/unlock`, { body: { password } });
+  } catch (error) {
+    if (isApiError(error) && error.status === 404) {
+      throw data(null, { status: 404 });
+    }
+    const { data: formError, status } = toFormError(error, { POST_PASSWORD_MISMATCH: "password" });
+    return data<UnlockActionData>({ ...formError, intent: "unlock", ok: false }, { status });
+  }
+  throw redirect(returnTo);
 }
 
 /** 좋아요는 응답의 수로 화면을 고치므로 글을 다시 읽지 않는다(조회수 기록도 다시 하지 않음). */
@@ -128,6 +175,19 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
     return privatePageMeta(t("notFound.title"), t("appName"));
   }
   const { post, origin, blogTitle } = loaderData;
+  if (post.locked) {
+    // 열지 않은 보호 글: 제목만(요약·대표 이미지 없음), 검색에 넣지 않는다(004 contracts/routes.md).
+    return [
+      ...pageMeta({
+        title: post.title,
+        url: absoluteUrl(origin, `/${post.blogHandle}/${post.id}`),
+        type: "article",
+        siteName: t("appName"),
+        noindex: true,
+      }),
+      ...blogFeedLinks(t, origin, { handle: post.blogHandle, title: blogTitle }),
+    ];
+  }
   return [
     ...pageMeta({
       title: post.title,
@@ -147,15 +207,28 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 export default function PostDetailPage() {
   const { t, i18n } = useTranslation();
   const format = useDateFormat();
-  const { post, isOwner, comments, related, origin, topic } = useLoaderData<typeof loader>();
-  const actionData = useActionData<CommentActionData | LikeActionData>();
+  const { post, isOwner, comments, related, origin, topic, guestWriteEnabled } =
+    useLoaderData<typeof loader>();
+  const actionData = useActionData<CommentActionData | LikeActionData | UnlockActionData>();
   const rootData = useRouteLoaderData<RootData>("root");
   const viewer = rootData?.user ?? null;
   const likeResult =
     actionData && isLikeIntent(actionData.intent) ? (actionData as LikeActionData) : undefined;
+  const unlockResult =
+    actionData?.intent === "unlock" ? (actionData as UnlockActionData) : undefined;
   const result =
-    actionData && !isLikeIntent(actionData.intent) ? (actionData as CommentActionData) : undefined;
+    actionData && !isLikeIntent(actionData.intent) && actionData.intent !== "unlock"
+      ? (actionData as CommentActionData)
+      : undefined;
   const handle = post.blogHandle;
+
+  if (post.locked) {
+    return (
+      <main>
+        <LockedPost post={post} result={unlockResult} />
+      </main>
+    );
+  }
 
   return (
     <main>
@@ -165,7 +238,13 @@ export default function PostDetailPage() {
           {isOwner && (
             <p className="post-status">
               {post.status === "DRAFT" && <span>{t("post:detail.draft")}</span>}{" "}
+              {post.status === "SCHEDULED" && (
+                <span>
+                  {t("post:detail.scheduled", { time: format.dateTime(post.scheduledAt ?? null) })}
+                </span>
+              )}{" "}
               {post.visibility === "PRIVATE" && <span>{t("post:detail.private")}</span>}{" "}
+              {post.visibility === "PROTECTED" && <span>{t("post:detail.protected")}</span>}{" "}
               <Link to={`/${handle}/write/${post.id}`}>{t("post:detail.edit")}</Link>
             </p>
           )}
@@ -259,6 +338,7 @@ export default function PostDetailPage() {
         commentCount={post.commentCount}
         commentEnabled={post.commentEnabled && post.status === "PUBLISHED"}
         isPostOwner={isOwner}
+        guestWriteEnabled={guestWriteEnabled}
         loginHref={loginPath(`/${handle}/${post.id}`)}
         result={result}
       />

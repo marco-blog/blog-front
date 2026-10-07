@@ -337,6 +337,15 @@ describe("blog home 구독(002 T028)", () => {
     });
   });
 
+  it("차단된 회원(403 FORBIDDEN)은 일반 오류 코드만(004 FR-146)", async () => {
+    mockBackend({ [SUBSCRIBE]: fail(403, "FORBIDDEN") });
+
+    const result = asData(await callAction({ intent: "subscribe" }));
+
+    expect(result.init?.status).toBe(403);
+    expect(result.data).toEqual({ intent: "subscribe", ok: false, resultCode: "FORBIDDEN" });
+  });
+
   it("비로그인(401)은 이 블로그로 돌아오는 로그인 화면으로", async () => {
     mockBackend({ [SUBSCRIBE]: fail(401, "UNAUTHENTICATED") });
 

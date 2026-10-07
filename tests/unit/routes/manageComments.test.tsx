@@ -232,3 +232,62 @@ describe("댓글 관리 화면", () => {
     );
   });
 });
+
+describe("댓글 관리 — 비밀·비회원 표시와 회원 차단(004 US3·US5)", () => {
+  function renderComments(routes: Record<string, BackendHandler | Response>) {
+    const backend = mockBackend({ [ME]: ok(me()), ...routes });
+    renderRoutes(
+      [
+        {
+          path: ":handle/manage/comments",
+          loader: stub(commentsLoader),
+          action: stub(commentsAction),
+          Component: Comments,
+        },
+      ],
+      { initialEntries: ["/marco/manage/comments"] },
+    );
+    return backend;
+  }
+
+  it("회원 작성자에게만 차단 버튼(비회원·주인 자신·알 수 없음은 없음), 비밀·비회원 표시", async () => {
+    renderComments({
+      [COMMENTS]: ok([
+        managed(1, { secret: true }),
+        managed(2, {
+          author: { userId: null, nickname: "나그네", profileImageUrl: null, guest: true },
+        }),
+        managed(3, { author: { userId: 7, nickname: "마르코", profileImageUrl: null } }),
+        managed(4, { author: null }),
+      ]),
+    });
+    const rows = within(await screen.findByRole("list", { name: "댓글 목록" })).getAllByRole(
+      "listitem",
+    );
+    expect(within(rows[0]).getByRole("button", { name: "방문객 님 차단" })).toBeInTheDocument();
+    expect(rows[0]).toHaveTextContent("비밀 댓글");
+    expect(rows[1]).toHaveTextContent("비회원");
+    for (const row of rows.slice(1)) {
+      expect(within(row).queryByRole("button", { name: /차단/ })).toBeNull();
+    }
+  });
+
+  it("확인하면 PUT /blogs/{handle}/blocks/{userId} 뒤 안내, 취소하면 보내지 않는다", async () => {
+    const confirm = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
+    vi.stubGlobal("confirm", confirm);
+    const backend = renderComments({
+      [COMMENTS]: ok([managed(1)]),
+      "PUT /api/v1/blogs/marco/blocks/9": ok(null),
+    });
+    const button = await screen.findByRole("button", { name: "방문객 님 차단" });
+    fireEvent.click(button);
+    expect(confirm).toHaveBeenCalledWith(
+      "방문객 님을 차단할까요? 이 블로그에 댓글·방명록을 쓰거나 구독할 수 없게 되고, 구독 중이면 구독이 풀립니다.",
+    );
+    expect(backend.callsTo("PUT /api/v1/blogs/marco/blocks/9")).toHaveLength(0);
+
+    fireEvent.click(button);
+    expect(await screen.findByRole("status")).toHaveTextContent("방문객 님을 차단했습니다.");
+    expect(backend.callsTo("PUT /api/v1/blogs/marco/blocks/9")).toHaveLength(1);
+  });
+});

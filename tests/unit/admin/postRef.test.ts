@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { hoursToIsoDuration, isoDurationToHours } from "~/admin/duration";
 import { parsePostRef } from "~/admin/postRef";
-import { localToUtcIso, utcIsoToLocal } from "~/admin/zonedTime";
+import { localToUtcIso, utcIsoToLocal } from "~/i18n/zonedDateTime";
 
 /** 콘솔의 글 지정 값(003 T091) */
 describe("parsePostRef", () => {
