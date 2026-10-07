@@ -11,7 +11,7 @@ export interface ErrorPageProps {
 export function ErrorPage({ message, stack }: ErrorPageProps) {
   const { t } = useTranslation();
   return (
-    <main>
+    <main className="error-page">
       <h1>{t("error.title")}</h1>
       <p>{message ?? t("error.description")}</p>
       {stack && (

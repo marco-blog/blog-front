@@ -67,7 +67,7 @@ export default function PasswordResetConfirm() {
 
   if (result?.done) {
     return (
-      <main>
+      <main className="auth">
         <h1>{t("auth:passwordReset.confirm.title")}</h1>
         <p role="status">{t("auth:passwordReset.confirm.done")}</p>
         <p>
@@ -79,7 +79,7 @@ export default function PasswordResetConfirm() {
 
   if (!token) {
     return (
-      <main>
+      <main className="auth">
         <h1>{t("auth:passwordReset.confirm.title")}</h1>
         <FormAlert message={errorMessage(t, TOKEN_INVALID)} />
         <p>{requestAgain}</p>
@@ -89,7 +89,7 @@ export default function PasswordResetConfirm() {
 
   const tokenInvalid = result && !result.done && result.resultCode === TOKEN_INVALID;
   return (
-    <main>
+    <main className="auth">
       <h1>{t("auth:passwordReset.confirm.title")}</h1>
       <Form method="post">
         <FormAlert message={messages.form} />

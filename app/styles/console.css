@@ -1,53 +1,243 @@
 /*
  * 관리 화면 공통(006 T019·T068): 블로그 관리(`/:handle/manage/**`)와 시스템 관리자 콘솔(`/admin/**`).
  * 폭 360px에서도 가로 스크롤 없이 쓰도록 메뉴·버튼 막대는 줄바꿈하고, 넓은 표는 자기 상자 안에서만 가로로 움직인다.
+ * 넓은 화면은 왼쪽 메뉴 + 오른쪽 내용. 색·간격은 tokens.css.
  */
 .manage,
 .admin {
   max-width: 100%;
   overflow-wrap: anywhere;
 }
-.console-menu > summary {
-  cursor: pointer;
-  font-weight: bold;
+
+body > :is(.manage, .admin) {
+  padding-top: var(--space-6);
 }
+
+.manage-header,
+.admin-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.manage-header p,
+.admin-header p {
+  margin: 0;
+}
+
+.manage-title,
+.admin-title {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+}
+
+.manage-title strong,
+.admin-title strong {
+  color: var(--color-text);
+  font-weight: var(--weight-heavy);
+}
+
+.admin-role {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  vertical-align: 0.15em;
+}
+
+.manage-header > p:not(.manage-title) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.manage-header > p:not(.manage-title) a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.125rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.manage-header > p:not(.manage-title) a:last-child {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.manage-header > p:not(.manage-title) a:hover {
+  text-decoration: none;
+}
+
+/* 메뉴 */
+.console-menu {
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.console-menu > summary {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  font-weight: var(--weight-bold);
+}
+
+.console-menu > nav {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+}
+
 .console-menu ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  gap: var(--space-1);
   list-style: none;
+  margin: 0;
   padding-left: 0;
 }
-.console-menu h2 {
-  font-size: 0.85rem;
-  margin: 0.5rem 0 0.25rem;
+
+.console-menu a {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
+
+.console-menu a:hover {
+  background: var(--color-subtle);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.console-menu a[aria-current="page"],
+.console-menu a.active {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--weight-bold);
+}
+
+.console-menu a[aria-current="page"] .badge,
+.console-menu a.active .badge {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.console-menu h2 {
+  margin: var(--space-3) var(--space-3) var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+}
+
+.console-menu section:first-child h2 {
+  margin-top: var(--space-1);
+}
+
 .blog-switcher ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  gap: var(--space-1) var(--space-4);
   list-style: none;
+  margin: 0;
   padding-left: 0;
+  font-size: var(--text-sm);
 }
-/* 넓은 화면에서는 메뉴가 늘 펼쳐져 있으므로 접기 제목을 감춘다(JS 없음). */
+
+.blog-switcher [aria-current] {
+  font-weight: var(--weight-bold);
+}
+
+/* 넓은 화면: 메뉴는 늘 펼쳐 왼쪽에 세로로, 접기 제목은 감춘다(JS 없음). */
 @media (min-width: 48rem) {
+  .manage,
+  .admin {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    gap: 0 var(--space-8);
+    align-items: start;
+  }
+
+  .manage > *,
+  .admin > * {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .manage > .manage-header,
+  .admin > .admin-header {
+    grid-column: 1 / -1;
+  }
+
+  .manage > .console-menu,
+  .admin > .console-menu {
+    grid-column: 1;
+    grid-row: 2 / span 20;
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-4));
+    margin: 0;
+  }
+
   .console-menu > summary {
     display: none;
   }
+
+  .console-menu > nav {
+    padding: var(--space-2);
+  }
+
+  .console-menu ul {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
 }
+
+/* 내용 */
+:is(.manage, .admin-content) h1 {
+  margin-bottom: var(--space-6);
+  font-size: var(--text-xl);
+}
+
+:is(.manage, .admin-content) h2 {
+  margin-top: var(--space-8);
+  font-size: var(--text-md);
+}
+
+:is(.manage, .admin-content) section {
+  margin-bottom: var(--space-8);
+}
+
+:is(.manage, .admin-content) form {
+  margin-bottom: var(--space-4);
+}
+
 .bulk-form fieldset {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: center;
   min-width: 0;
 }
+
 .bulk-move {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: var(--space-1);
   align-items: center;
 }
+
 .manage select,
 .manage input,
 .manage textarea,
@@ -56,37 +246,236 @@
 .admin textarea {
   max-width: 100%;
 }
+
 .table-scroll {
   max-width: 100%;
   overflow-x: auto;
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
-.dashboard-cards {
+
+.table-scroll table {
+  margin: 0;
+}
+
+.table-scroll tr:last-child td {
+  border-bottom: 0;
+}
+
+:is(.admin-table, .manage-table, .review-table, .audit-table) tbody tr:hover {
+  background: var(--color-subtle);
+}
+
+:is(.admin-table, .manage-table, .review-table, .audit-table) td form {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+:is(.admin-table, .manage-table, .review-table, .audit-table) button {
+  min-height: 1.875rem;
+  padding-inline: var(--space-3);
+  font-size: var(--text-xs);
+}
+
+/* 대시보드 카드 */
+.dashboard-cards,
+.stats-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: var(--space-3);
   list-style: none;
+  margin: 0 0 var(--space-8);
   padding-left: 0;
 }
-.dashboard-card {
-  border: 1px solid currentColor;
-  border-radius: 0.25rem;
-  padding: 0.5rem 0.75rem;
+
+.dashboard-card,
+.stats-card {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
-.dashboard-card strong {
+
+.dashboard-card strong,
+.stats-card strong,
+.stats-value {
   display: block;
-  font-size: 1.5rem;
+  margin-top: var(--space-1);
+  color: var(--color-text);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--tracking-tight);
 }
+
+/* 막대 그래프(표 모양). 막대 색은 인라인 background: currentColor라 color로 바꾼다 */
+.daily-bar,
+[class*="stats-bar"] {
+  border-radius: var(--radius-pill);
+  color: var(--color-accent);
+  vertical-align: middle;
+}
+
+.table-scroll tbody th[scope="row"] {
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+/* 글·댓글 관리 목록 */
+.manage-post-list,
+.manage-comment-list,
+.manage-trackback-list,
+.category-manage-list,
+.block-list,
+.backup-list,
+.reserved-handle-list,
+.admin-curation-list,
+.admin-exclusion-list {
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+}
+
+:is(
+    .manage-post-list,
+    .manage-comment-list,
+    .manage-trackback-list,
+    .category-manage-list,
+    .block-list,
+    .backup-list,
+    .reserved-handle-list,
+    .admin-curation-list,
+    .admin-exclusion-list
+  )
+  > li {
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .json-diff .same {
   opacity: 0.6;
 }
+
+.json-diff .changed {
+  background: var(--color-warning-soft);
+}
+
 .language-tabs ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--space-2);
   list-style: none;
   padding-left: 0;
 }
+
 .release-note-editor textarea {
   width: 100%;
   min-height: 12rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/* 검색·필터 폼은 가로로 */
+:is(.admin-search, .user-search, .report-filter, .rule-form, .role-form, .curation-lookup) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-3);
+}
+
+:is(.admin-search, .user-search, .report-filter, .rule-form, .role-form, .curation-lookup)
+  .form-field {
+  margin-bottom: 0;
+}
+
+.admin-user-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.admin-user-facts dt {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.admin-user-facts dd {
+  margin: 0;
+}
+
+/* 대시보드·통계 수치(dl > div > dt + dd) */
+.manage-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-8);
+}
+
+.manage-stats > div {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.manage-stats dt {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.manage-stats dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heavy);
+  letter-spacing: var(--tracking-tight);
+}
+
+.manage-stats dd a {
+  color: var(--color-text);
+}
+
+/* 콘솔 안의 간단한 목록(최근 글·댓글 등): 줄 구분, 보조 정보는 옅게 */
+:is(.manage, .admin-content) section > ul:not([class]) {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+:is(.manage, .admin-content) section > ul:not([class]) > li {
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+:is(.manage, .admin-content) section > ul:not([class]) > li > :is(span, time, p) {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+:is(.manage, .admin-content) section > ul:not([class]) > li > p {
+  margin: var(--space-1) 0 0;
+}
+
+:is(.manage, .admin-content) section > p:last-child > a {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.dashboard-card > a {
+  color: var(--color-text-secondary);
 }

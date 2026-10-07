@@ -1,0 +1,557 @@
+/*
+ * 공통 화면 요소: 상단 막대, 하단, 릴리스 노트 배너, 폼 묶음, 알림 문구, 배지, 탭, 페이지 이동, 빈 상태,
+ * 로그인·가입, 찾을 수 없음·오류 화면.
+ */
+
+/* ---------- 상단 막대 ---------- */
+body > header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--header-height);
+  padding-block: var(--space-2);
+  background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* 서비스 이름(첫 링크) */
+body > header > a:first-child {
+  flex: none;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-heavy);
+  letter-spacing: -0.04em;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+body > header > a:first-child::after {
+  content: "";
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  margin-left: 0.15em;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.header-search {
+  display: flex;
+  flex: 1 1 10rem;
+  min-width: 0;
+  max-width: 22rem;
+  margin: 0;
+}
+
+.header-search input[type="search"] {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding-inline: var(--space-4);
+  border-color: transparent;
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  background: var(--color-subtle);
+  font-size: var(--text-sm);
+}
+
+.header-search button {
+  border-color: transparent;
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--color-subtle);
+  color: var(--color-text-secondary);
+}
+
+.header-search button:hover {
+  border-color: transparent;
+  color: var(--color-text);
+}
+
+body > header > nav {
+  margin-left: auto;
+  min-width: 0;
+}
+
+body > header > nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body > header > nav a,
+body > header > nav button {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+body > header > nav a:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+body > header > nav form {
+  margin: 0;
+}
+
+/* 로그아웃 버튼은 링크처럼 */
+body > header > nav button {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+body > header > nav button:hover {
+  color: var(--color-text);
+}
+
+/* 글쓰기·회원가입은 눈에 띄는 알약 버튼 */
+body > header > nav a:is([href="/write"], [href="/signup"]) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+body > header > nav a:is([href="/write"], [href="/signup"]):hover {
+  background: var(--color-primary-hover);
+  color: var(--color-on-primary);
+}
+
+body > header .badge {
+  min-width: 1.25rem;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* 좁은 화면: 첫 줄 이름·검색, 둘째 줄 메뉴(줄바꿈) */
+@media (max-width: 47.99rem) {
+  body > header {
+    padding-block: var(--space-2) var(--space-3);
+  }
+
+  body > header > nav {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+
+  body > header > nav ul {
+    gap: var(--space-2) var(--space-4);
+  }
+}
+
+/* ---------- 릴리스 노트 배너 ---------- */
+.release-note-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-2);
+  background: var(--color-accent-soft);
+  font-size: var(--text-sm);
+}
+
+.release-note-banner p,
+.release-note-banner form {
+  margin: 0;
+}
+
+.release-note-banner a {
+  font-weight: var(--weight-bold);
+  text-decoration: underline;
+}
+
+.release-note-banner button {
+  min-height: 1.75rem;
+  background: transparent;
+}
+
+/* ---------- 하단 ---------- */
+body > footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+  margin-top: auto;
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-subtle);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+body > footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+body > footer a {
+  color: var(--color-text-secondary);
+}
+
+.language-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.language-selector select {
+  min-height: 2rem;
+  padding-block: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.language-selector button {
+  min-height: 2rem;
+}
+
+/* ---------- 폼 묶음 ---------- */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+  min-width: 0;
+}
+
+.form-field > label,
+.write-title > label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.form-field > :is(input:not([type="checkbox"], [type="radio"], [type="file"]), select, textarea) {
+  width: 100%;
+}
+
+.form-hint,
+.field-hint,
+.form-status {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.form-error,
+.field-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.form-alert {
+  display: block;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  border-radius: var(--radius-md);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+span.form-alert {
+  display: inline-block;
+  margin: 0 0 0 var(--space-2);
+  padding: var(--space-1) var(--space-2);
+}
+
+.form-check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.form-check > a {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  text-decoration: underline;
+}
+
+.form-check > .form-error {
+  flex-basis: 100%;
+}
+
+.form-check label {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.form-check input {
+  margin-top: 0.2em;
+}
+
+/* 저장·완료 안내 */
+main > p[role="status"],
+.settings main > p[role="status"],
+form > p[role="status"] {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--text-sm);
+}
+
+/* 관리·검토가 남긴 안내(숨김, 예약 등) */
+.moderation-hidden,
+.scheduled-notice,
+.old-revision-notice,
+.language-edition-notice,
+.warning,
+[role="note"] {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  font-size: var(--text-sm);
+}
+
+.scheduled-notice p,
+.scheduled-notice form {
+  margin: 0 0 var(--space-2);
+}
+
+/* ---------- 배지 ---------- */
+.badge,
+.status-badge,
+.portal-card-badge,
+.notification-unread-mark,
+[class^="badge-"],
+[class*=" badge-"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  min-height: 1.25rem;
+  padding: 0 0.5em;
+  border-radius: var(--radius-pill);
+  background: var(--color-muted-bg);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  line-height: 1.6;
+  white-space: nowrap;
+  vertical-align: 0.1em;
+}
+
+.badge-notice,
+.notification-unread-mark,
+.portal-card-badge {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+.badge-hidden,
+.badge-rights,
+.badge-state-hidden {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+/* ---------- 탭(가로 메뉴) ---------- */
+.tabs,
+.status-tabs,
+.admin-tabs,
+.portal-source,
+.portal-sort,
+.language-tabs ul,
+.settings > nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+:is(.tabs, .status-tabs, .admin-tabs, .portal-source, .portal-sort, .language-tabs, .settings > nav)
+  a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.125rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+:is(.tabs, .status-tabs, .admin-tabs, .portal-source, .portal-sort, .language-tabs, .settings > nav)
+  a:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+:is(.tabs, .status-tabs, .admin-tabs, .portal-source, .portal-sort, .language-tabs, .settings > nav)
+  a:is([aria-current], .active) {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+:is(.tabs, .status-tabs, .admin-tabs, .language-tabs) li {
+  margin: 0;
+}
+
+/* ---------- 페이지 이동 ---------- */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1);
+  margin: var(--space-8) 0;
+}
+
+.pagination > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.pagination a:hover {
+  background: var(--color-subtle);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.pagination [aria-current="page"] {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--weight-bold);
+}
+
+/* ---------- 빈 상태 ---------- */
+.portal-empty,
+.post-list-empty,
+.guestbook-empty,
+.release-note-empty,
+.image-upload-empty {
+  padding: var(--space-8) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ---------- 로그인·가입·비밀번호 찾기 ---------- */
+main.auth {
+  width: 100%;
+  max-width: calc(var(--width-narrow) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  padding-block: var(--space-12) var(--space-16);
+}
+
+main.auth h1 {
+  margin-bottom: var(--space-6);
+  font-size: var(--text-2xl);
+  text-align: center;
+}
+
+main.auth form {
+  margin-bottom: var(--space-6);
+}
+
+main.auth form button[type="submit"] {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+}
+
+main.auth fieldset {
+  padding: var(--space-3) var(--space-4) var(--space-1);
+}
+
+main.auth > p {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+main.auth > p a {
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+}
+
+/* ---------- 찾을 수 없음·오류 ---------- */
+main:is(.not-found, .error-page) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--space-16);
+  text-align: center;
+}
+
+main:is(.not-found, .error-page) h1 {
+  font-size: var(--text-3xl);
+}
+
+main:is(.not-found, .error-page) h1::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 0.375rem;
+  margin: 0 auto var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+
+main:is(.not-found, .error-page) > p {
+  max-width: 32rem;
+  color: var(--color-text-secondary);
+}
+
+main.not-found a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: var(--space-4);
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: var(--weight-bold);
+}
+
+main.not-found a:hover {
+  background: var(--color-primary-hover);
+  text-decoration: none;
+}
+
+main.error-page pre {
+  max-width: 100%;
+  text-align: left;
+}
