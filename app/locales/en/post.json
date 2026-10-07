@@ -18,7 +18,8 @@
     "prev": "Previous post",
     "next": "Next post",
     "draft": "Draft",
-    "private": "Private"
+    "private": "Private",
+    "topic": "Topic"
   },
   "publish": {
     "title": "Publish settings",
@@ -33,5 +34,11 @@
     "savePrivate": "Save as private",
     "republish": "Update post",
     "publishing": "Publishing."
+  },
+  "topic": {
+    "label": "Topic",
+    "none": "None",
+    "hiddenCurrent": "Current topic (hidden)",
+    "hint": "Choosing a topic lets this post appear on the portal's topic page."
   }
 }

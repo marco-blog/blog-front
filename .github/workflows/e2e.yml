@@ -27,6 +27,9 @@ jobs:
     # 비밀 값은 실행마다 새로 만드는 일회용 값이고, MySQL 비밀번호는 작업이 끝나면 사라지는 컨테이너용 고정값이다.
     env:
       MYSQL_ROOT_PASSWORD: ci-only-root-pw
+      # 관리자 시나리오(portal-us4·us5)용 CI 전용 일회용 계정. 일회용 MySQL에만 만들어지고 작업이 끝나면 사라진다.
+      E2E_ADMIN_EMAIL: e2e-admin@example.test
+      E2E_ADMIN_PASSWORD: ci-only-admin-pw-1234
 
     services:
       # 개발용 메일 서버. backend local 프로필의 기본 메일 설정(localhost:1025, 인증·STARTTLS 없음)이 여기로 보낸다.
@@ -101,6 +104,10 @@ jobs:
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: ci-only-root-pw
           DB_PASSWORD: unused
+          # 포털 시험용 운영 설정(E2E_PORTAL_TEST_SETTINGS=1과 짝): 캐시 끔, 가입 직후 노출, 주제 탭은 글 1편부터
+          BLOG_PORTAL_CACHE_TTL: 0s
+          BLOG_PORTAL_NEW_MEMBER_DELAY: PT0S
+          BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD: "1"
           BLOG_MAIL_HOST: localhost
           BLOG_MAIL_PORT: "1025"
           BLOG_MAIL_STARTTLS: "false"
@@ -127,6 +134,14 @@ jobs:
           cat backend.log
           exit 1
 
+      # 가입 API로 관리자 계정을 만들고 일회용 MySQL에서 role을 SUPER_ADMIN으로 바꾼다(scripts/e2e-provision-admin.sh).
+      - name: Provision E2E admin
+        run: ./scripts/e2e-provision-admin.sh
+        env:
+          E2E_BACKEND_URL: http://localhost:8080
+          MYSQL_CONTAINER: blog-mysql
+          MYSQL_DATABASE: blog_e2e
+
       - run: npm ci
 
       - name: Build front
@@ -142,6 +157,7 @@ jobs:
           CI: "true"
           E2E_BACKEND_URL: http://localhost:8080
           MAILPIT_URL: http://localhost:8025
+          E2E_PORTAL_TEST_SETTINGS: "1"
 
       - name: Upload logs
         if: failure()

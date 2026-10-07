@@ -18,13 +18,17 @@
     "newBlogSince": "{{time}} 시작",
     "emptyTitle": "아직 포털에 소개할 글이 없습니다",
     "emptyWrite": "첫 글을 써 보세요",
-    "emptySignup": "가입하고 첫 글을 써 보세요"
+    "emptySignup": "가입하고 첫 글을 써 보세요",
+    "tagPosts_one": "글 {{count, number}}개",
+    "tagPosts_other": "글 {{count, number}}개"
   },
   "card": {
-    "likes": "좋아요 {{count, number}}",
-    "comments": "댓글 {{count, number}}",
     "noTopic": "주제 없음",
-    "author": "작성자"
+    "author": "작성자",
+    "likes_one": "좋아요 {{count, number}}",
+    "likes_other": "좋아요 {{count, number}}",
+    "comments_one": "댓글 {{count, number}}",
+    "comments_other": "댓글 {{count, number}}"
   },
   "topic": {
     "description": "{{name}} 주제의 글을 모아 봅니다.",

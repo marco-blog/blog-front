@@ -1,3 +1,38 @@
 {
-  "title": "Updates"
+  "title": "Updates",
+  "description": "New features and changes to the blog service, version by version.",
+  "empty": "There are no updates yet.",
+  "tree": {
+    "label": "Versions",
+    "group": "v{{version}}"
+  },
+  "toc": "Contents",
+  "releaseDate": "Released {{date}}",
+  "edition": "There's no {{requested}} edition, so the {{shown}} edition is shown.",
+  "versionNav": "Previous and next versions",
+  "prev": "Previous version",
+  "next": "Next version",
+  "search": {
+    "label": "Search updates",
+    "submit": "Search",
+    "title": "Results for “{{q}}”",
+    "count_one": "{{count, number}} result",
+    "count_other": "{{count, number}} results",
+    "empty": "No results found."
+  },
+  "history": {
+    "link": "Revision history",
+    "title": "v{{version}} revision history",
+    "revision": "Revision {{no}}",
+    "revisionTitle": "v{{version}} revision {{no}}",
+    "old": "This is an earlier revision (revision {{no}}). It may differ from the current content.",
+    "current": "View the current version",
+    "list": "Revisions"
+  },
+  "banner": {
+    "label": "New update",
+    "text": "New version v{{version}}: {{title}}",
+    "view": "View",
+    "dismiss": "Dismiss"
+  }
 }

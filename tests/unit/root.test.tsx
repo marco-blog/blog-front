@@ -123,6 +123,20 @@ describe("root loader", () => {
     }
   });
 
+  it("로그인 회원의 unseenReleaseNote를 배너용으로 넘기고, 비로그인은 null(003 T115)", async () => {
+    getSessionUserMock.mockResolvedValue({
+      ...member,
+      unseenReleaseNote: { version: "1.3.0", title: "새 소식" },
+    });
+    expect((await callRootLoader({ cookie: "access_token=a" })).unseenReleaseNote).toEqual({
+      version: "1.3.0",
+      title: "새 소식",
+    });
+
+    getSessionUserMock.mockResolvedValue(null);
+    expect((await callRootLoader({})).unseenReleaseNote).toBeNull();
+  });
+
   it("ApiError가 아닌 오류는 그대로 던진다", async () => {
     getSessionUserMock.mockRejectedValue(new Error("bug"));
 
@@ -257,6 +271,31 @@ function stub(children: Parameters<typeof createRoutesStub>[0], data: RootData |
 }
 
 describe("Layout", () => {
+  it("로그인 회원에게 새 릴리스 노트가 있으면 상단 아래 배너(003 T115), 비로그인에는 없다", async () => {
+    const note = { version: "1.3.0", title: "새 소식" };
+    const Stub = stub([{ index: true, Component: Home }], {
+      ...rootData("ko", headerUser),
+      unseenReleaseNote: note,
+    });
+    const { unmount } = render(<Stub />);
+
+    const banner = await screen.findByRole("complementary", { name: "새 업데이트 소식" });
+    expect(banner).toHaveTextContent("새 버전 v1.3.0: 새 소식");
+    expect(
+      screen.getByRole("navigation", { name: "주 메뉴" }).compareDocumentPosition(banner) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    unmount();
+
+    const Anonymous = stub([{ index: true, Component: Home }], {
+      ...rootData("ko"),
+      unseenReleaseNote: note,
+    });
+    render(<Anonymous />);
+    await screen.findByRole("main");
+    expect(screen.queryByRole("complementary", { name: "새 업데이트 소식" })).toBeNull();
+  });
+
   it("root loader의 언어로 html lang, 상단·본문·하단을 그린다", async () => {
     const Stub = stub([{ index: true, Component: Home }], rootData("ja", headerUser));
 

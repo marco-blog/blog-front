@@ -33,6 +33,22 @@ export default [
   // 003 주제 페이지(대분류·소분류 공용 모듈). `/:handle` 계열보다 앞에 둔다.
   route("topics/:major", "routes/topic.tsx", { id: "topic-major" }),
   route("topics/:major/:minor", "routes/topic.tsx", { id: "topic-minor" }),
+  // 003 릴리스 노트 위키(`/updates/v1.2.3`). 버전 조각은 loader가 `v` + SemVer인지 검사한다.
+  route("updates", "routes/updates/layout.tsx", [
+    index("routes/updates/index.tsx"),
+    route("seen", "routes/updates/seen.ts"),
+    route(":version", "routes/updates/version.tsx"),
+    route(":version/history", "routes/updates/history.tsx"),
+    route(":version/history/:revisionNo", "routes/updates/revision.tsx"),
+  ]),
+  // 003 시스템 관리자 콘솔(관리자만, 아니면 404). 006이 나머지 메뉴를 더한다.
+  route("admin", "routes/admin/layout.tsx", [
+    index("routes/admin/index.ts"),
+    route("topics", "routes/admin/topics.tsx"),
+    route("portal/curations", "routes/admin/curations.tsx"),
+    route("portal/exclusions", "routes/admin/exclusions.tsx"),
+    route("portal/settings", "routes/admin/settings.tsx"),
+  ]),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
   route(":handle", "routes/blog-home.tsx"),

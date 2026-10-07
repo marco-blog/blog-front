@@ -135,7 +135,9 @@ describe("소스에서 쓰는 키", () => {
   it("모든 키가 기준 언어(ko)에 있다", () => {
     const missing = used.filter(({ key }) => {
       const [namespace, path] = key.includes(":") ? key.split(":", 2) : [DEFAULT_NAMESPACE, key];
-      return !base[namespace] || !flatten(base[namespace]).has(path);
+      // 복수형 키(i18next `count`)는 `key_other`가 있으면 된다.
+      const keys = base[namespace] ? flatten(base[namespace]) : new Map<string, unknown>();
+      return !keys.has(path) && !keys.has(`${path}_other`);
     });
     expect(missing).toEqual([]);
   });

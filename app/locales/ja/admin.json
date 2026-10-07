@@ -1,3 +1,165 @@
 {
-  "title": "管理コンソール"
+  "title": "管理コンソール",
+  "nav": {
+    "label": "管理メニュー",
+    "topics": "トピック",
+    "curations": "ポータルのおすすめ",
+    "exclusions": "ポータル除外",
+    "settings": "ポータル設定"
+  },
+  "timeZone": "時刻は{{timeZone}}基準です。",
+  "fields": {
+    "slug": "アドレス(slug)",
+    "names": {
+      "ko": "名前(韓国語)",
+      "en": "名前(英語)",
+      "ja": "名前(日本語)",
+      "zh-CN": "名前(簡体字中国語)"
+    },
+    "cardColor": "カードの色",
+    "parentId": "親トピック",
+    "ids": "順序",
+    "adminHidden": "非表示",
+    "pinnedOnTab": "タブに固定",
+    "postRef": "記事のアドレスまたは番号",
+    "postId": "記事",
+    "startsAt": "開始",
+    "endsAt": "終了",
+    "sortOrder": "順序",
+    "reason": "理由",
+    "value": "値",
+    "weights": {
+      "view": "閲覧の重み",
+      "readComplete": "最後まで読んだ重み",
+      "like": "いいねの重み",
+      "comment": "コメントの重み",
+      "halfLifeHours": "半減期(時間)",
+      "reportPenalty": "通報による減点(0〜1)"
+    }
+  },
+  "lookup": {
+    "submit": "記事を確認",
+    "hint": "記事のアドレス(https://…/{ブログ}/{番号} または /{ブログ}/{番号})か記事番号を入力してください。",
+    "result": "確認した記事",
+    "eligible": "ポータルに表示できる記事です。",
+    "ineligible": "現在ポータルに表示されない記事です。",
+    "excluded": "ポータルから除外された記事です(理由: {{reason}})。"
+  },
+  "reasons": {
+    "NOT_BODY_VISIBLE": "公開記事でない、または閲覧できない記事",
+    "BLOG_PORTAL_DISABLED": "ブログがポータル表示をオフにしている",
+    "EXCLUDED": "運営者がポータルから除外した",
+    "NEW_MEMBER": "作成者の登録直後の待機時間が過ぎていない",
+    "TOO_SHORT": "本文が最小の長さより短い"
+  },
+  "topics": {
+    "title": "トピック管理",
+    "hint": "大分類と小分類を管理します。非表示のトピックはポータルと記事作成のトピック一覧から外れます。",
+    "list": "トピック一覧",
+    "empty": "まだトピックがありません。",
+    "create": {
+      "label": "トピックを追加",
+      "parent": "位置",
+      "major": "大分類として追加",
+      "slugHint": "アドレスは英小文字・数字・ハイフンで、作成後は変更できません。色は #RRGGBB 形式です。",
+      "submit": "追加"
+    },
+    "hidden": "非表示",
+    "hiddenByParent": "大分類が非表示のため一緒に非表示",
+    "pinned": "タブに固定",
+    "offTab": "記事が少ないためタブから自動で外れた",
+    "recentPosts_one": "直近30日の記事 {{count, number}}件",
+    "recentPosts_other": "直近30日の記事 {{count, number}}件",
+    "save": "名前と色を保存",
+    "hide": "非表示にする",
+    "unhide": "非表示を解除",
+    "pin": "タブに固定",
+    "unpin": "タブの固定を解除",
+    "up": "{{name}}を上へ",
+    "down": "{{name}}を下へ",
+    "done": {
+      "create": "トピックを追加しました。",
+      "update": "名前と色を保存しました。",
+      "hide": "トピックを非表示にしました。",
+      "unhide": "トピックの非表示を解除しました。",
+      "pin": "トピックタブに固定しました。",
+      "unpin": "タブの固定を解除しました。",
+      "order": "順序を変更しました。"
+    }
+  },
+  "curations": {
+    "title": "ポータルのおすすめ",
+    "hint": "ポータルのメインにある運営者のおすすめに表示する記事を期間を決めて指定します。期間が重なるおすすめは5件までです。",
+    "add": "おすすめを追加",
+    "create": "おすすめを追加",
+    "tabs": "おすすめの状態",
+    "status": {
+      "ACTIVE": "進行中",
+      "UPCOMING": "予定",
+      "ENDED": "終了"
+    },
+    "empty": "この状態のおすすめはありません。",
+    "period": "{{start}} 〜 {{end}}",
+    "sortOrder": "順序 {{order}}",
+    "createdBy": "指定: {{nickname}}",
+    "ineligible": "ポータル表示の条件を満たさなくなったため、現在は表示されません。",
+    "save": "期間と順序を保存",
+    "delete": "削除",
+    "done": {
+      "create": "おすすめを追加しました。",
+      "update": "おすすめを修正しました。",
+      "delete": "おすすめを削除しました。"
+    }
+  },
+  "exclusions": {
+    "title": "ポータル除外",
+    "hint": "除外した記事はポータルのメインとトピックページからのみ外れ、ブログ・検索・購読フィードにはそのまま残ります。",
+    "add": "記事を除外",
+    "exclude": "除外",
+    "list": "除外した記事",
+    "empty": "除外した記事はありません。",
+    "by": "{{nickname}} · {{time}}",
+    "saveReason": "理由を保存",
+    "unexclude": "除外を解除",
+    "done": {
+      "exclude": "ポータルから除外しました。",
+      "unexclude": "除外を解除しました。"
+    }
+  },
+  "settings": {
+    "title": "ポータル設定",
+    "hint": "変更した値は次のポータルのリクエストから適用されます。",
+    "save": "保存",
+    "reset": "既定値に戻す",
+    "default": "既定値: {{value}}",
+    "usingDefault": "既定値を使っています。",
+    "changedBy": "{{nickname}}さんが{{time}}に変更",
+    "done": {
+      "save": "設定を保存しました。",
+      "reset": "既定値に戻しました。"
+    },
+    "keys": {
+      "portal": {
+        "score-weights": {
+          "title": "人気スコアの重み",
+          "hint": "閲覧・最後まで読んだ・いいね・コメントの重み(0〜1000)、半減期(1〜720時間)、通報による減点(0〜1)。"
+        },
+        "new-member-delay": {
+          "title": "新規会員の待機時間",
+          "hint": "登録からこの時間が過ぎると記事がポータルに表示されます(0〜720時間)。",
+          "input": "待機時間(時間)"
+        },
+        "min-content-length": {
+          "title": "本文の最小の長さ",
+          "hint": "本文がこの文字数より短い記事はポータルに表示されません(0〜10000)。",
+          "input": "文字数"
+        },
+        "topic-auto-hide-threshold": {
+          "title": "トピック自動非表示の基準",
+          "hint": "直近30日の記事がこの数より少ない大分類はトピックタブから外れます(0〜1000)。",
+          "input": "記事数"
+        }
+      }
+    }
+  }
 }

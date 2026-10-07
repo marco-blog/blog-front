@@ -1,3 +1,165 @@
 {
-  "title": "Admin console"
+  "title": "Admin console",
+  "nav": {
+    "label": "Admin menu",
+    "topics": "Topics",
+    "curations": "Portal picks",
+    "exclusions": "Portal exclusions",
+    "settings": "Portal settings"
+  },
+  "timeZone": "Times are in {{timeZone}}.",
+  "fields": {
+    "slug": "Address (slug)",
+    "names": {
+      "ko": "Name (Korean)",
+      "en": "Name (English)",
+      "ja": "Name (Japanese)",
+      "zh-CN": "Name (Simplified Chinese)"
+    },
+    "cardColor": "Card color",
+    "parentId": "Parent topic",
+    "ids": "Order",
+    "adminHidden": "Hidden",
+    "pinnedOnTab": "Pinned to tabs",
+    "postRef": "Post URL or number",
+    "postId": "Post",
+    "startsAt": "Starts",
+    "endsAt": "Ends",
+    "sortOrder": "Order",
+    "reason": "Reason",
+    "value": "Value",
+    "weights": {
+      "view": "View weight",
+      "readComplete": "Read-to-end weight",
+      "like": "Like weight",
+      "comment": "Comment weight",
+      "halfLifeHours": "Half-life (hours)",
+      "reportPenalty": "Report penalty (0–1)"
+    }
+  },
+  "lookup": {
+    "submit": "Check post",
+    "hint": "Enter a post URL (https://…/{blog}/{number} or /{blog}/{number}) or a post number.",
+    "result": "Checked post",
+    "eligible": "This post can appear on the portal.",
+    "ineligible": "This post doesn't appear on the portal right now.",
+    "excluded": "This post is excluded from the portal (reason: {{reason}})."
+  },
+  "reasons": {
+    "NOT_BODY_VISIBLE": "Not public or not viewable",
+    "BLOG_PORTAL_DISABLED": "The blog turned off portal display",
+    "EXCLUDED": "Excluded from the portal by an operator",
+    "NEW_MEMBER": "The author's new-member waiting time hasn't passed",
+    "TOO_SHORT": "The body is shorter than the minimum length"
+  },
+  "topics": {
+    "title": "Topics",
+    "hint": "Manage major topics and subtopics. Hidden topics are removed from the portal and the topic list when writing.",
+    "list": "Topic list",
+    "empty": "There are no topics yet.",
+    "create": {
+      "label": "Add topic",
+      "parent": "Position",
+      "major": "Add as a major topic",
+      "slugHint": "Use lowercase letters, numbers and hyphens for the address; it can't be changed later. Colors use #RRGGBB.",
+      "submit": "Add"
+    },
+    "hidden": "Hidden",
+    "hiddenByParent": "Hidden with its major topic",
+    "pinned": "Pinned to tabs",
+    "offTab": "Removed from tabs automatically (few posts)",
+    "recentPosts_one": "{{count, number}} post in the last 30 days",
+    "recentPosts_other": "{{count, number}} posts in the last 30 days",
+    "save": "Save names and color",
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "pin": "Pin to tabs",
+    "unpin": "Unpin from tabs",
+    "up": "Move {{name}} up",
+    "down": "Move {{name}} down",
+    "done": {
+      "create": "Topic added.",
+      "update": "Names and color saved.",
+      "hide": "Topic hidden.",
+      "unhide": "Topic unhidden.",
+      "pin": "Pinned to the topic tabs.",
+      "unpin": "Unpinned from the tabs.",
+      "order": "Order changed."
+    }
+  },
+  "curations": {
+    "title": "Portal picks",
+    "hint": "Choose posts for the operator picks on the portal home for a set period. Up to 5 picks can overlap in time.",
+    "add": "Add pick",
+    "create": "Add pick",
+    "tabs": "Pick status",
+    "status": {
+      "ACTIVE": "Active",
+      "UPCOMING": "Upcoming",
+      "ENDED": "Ended"
+    },
+    "empty": "No picks with this status.",
+    "period": "{{start}} – {{end}}",
+    "sortOrder": "Order {{order}}",
+    "createdBy": "Picked by {{nickname}}",
+    "ineligible": "No longer meets the portal conditions, so it isn't shown now.",
+    "save": "Save period and order",
+    "delete": "Delete",
+    "done": {
+      "create": "Pick added.",
+      "update": "Pick updated.",
+      "delete": "Pick deleted."
+    }
+  },
+  "exclusions": {
+    "title": "Portal exclusions",
+    "hint": "Excluded posts are removed only from the portal home and topic pages. They stay on the blog, in search and in feeds.",
+    "add": "Exclude a post",
+    "exclude": "Exclude",
+    "list": "Excluded posts",
+    "empty": "No excluded posts.",
+    "by": "{{nickname}} · {{time}}",
+    "saveReason": "Save reason",
+    "unexclude": "Remove exclusion",
+    "done": {
+      "exclude": "Excluded from the portal.",
+      "unexclude": "Exclusion removed."
+    }
+  },
+  "settings": {
+    "title": "Portal settings",
+    "hint": "Changes apply from the next portal request.",
+    "save": "Save",
+    "reset": "Restore default",
+    "default": "Default: {{value}}",
+    "usingDefault": "Using the default value.",
+    "changedBy": "Changed by {{nickname}} on {{time}}",
+    "done": {
+      "save": "Setting saved.",
+      "reset": "Restored the default."
+    },
+    "keys": {
+      "portal": {
+        "score-weights": {
+          "title": "Popularity score weights",
+          "hint": "Weights for views, reads to the end, likes and comments (0–1000), half-life (1–720 hours) and report penalty (0–1)."
+        },
+        "new-member-delay": {
+          "title": "New member waiting time",
+          "hint": "Posts appear on the portal only after this much time since sign-up (0–720 hours).",
+          "input": "Waiting time (hours)"
+        },
+        "min-content-length": {
+          "title": "Minimum body length",
+          "hint": "Posts with a body shorter than this many characters don't appear on the portal (0–10000).",
+          "input": "Characters"
+        },
+        "topic-auto-hide-threshold": {
+          "title": "Topic auto-hide threshold",
+          "hint": "Major topics with fewer posts than this in the last 30 days are removed from the topic tabs (0–1000).",
+          "input": "Posts"
+        }
+      }
+    }
+  }
 }

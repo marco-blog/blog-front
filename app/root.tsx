@@ -18,6 +18,7 @@ import { kakaoJsKey } from "~/config.server";
 import { ErrorPage } from "~/components/ErrorPage";
 import { Footer } from "~/components/layout/Footer";
 import { Header, type HeaderUser } from "~/components/layout/Header";
+import { ReleaseNoteBanner, type UnseenReleaseNote } from "~/components/layout/ReleaseNoteBanner";
 import { NotFound } from "~/components/NotFound";
 import { DEFAULT_LANGUAGE } from "~/i18n/config";
 import { FALLBACK_RESOURCES } from "~/i18n/fallback-resources";
@@ -36,6 +37,8 @@ export interface RootData extends RootLoaderData {
   timeZone?: string;
   /** Kakao JavaScript 키(공개 값, 002 research D9). 없으면 카카오톡 공유 버튼을 숨긴다. */
   kakaoJsKey?: string | null;
+  /** 로그인 회원이 아직 보지 않은 새 릴리스 노트(003 FR-163 배너). 없거나 비로그인이면 null */
+  unseenReleaseNote?: UnseenReleaseNote | null;
 }
 
 /**
@@ -68,6 +71,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<RootData> {
     },
     timeZone: member?.timeZone || DEFAULT_TIME_ZONE,
     kakaoJsKey: kakaoJsKey(),
+    unseenReleaseNote: member?.unseenReleaseNote ?? null,
   };
 }
 
@@ -89,6 +93,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <I18nextProvider i18n={i18n}>
           <Header user={data?.user ?? null} />
+          {data?.user && data.unseenReleaseNote && (
+            <ReleaseNoteBanner note={data.unseenReleaseNote} />
+          )}
           {children}
           <Footer />
         </I18nextProvider>

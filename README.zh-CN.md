@@ -71,17 +71,28 @@ npm run e2e                          # = npx playwright test
 
 `playwright.config.ts` 通过 `npm run build && npm start` 启动 front 服务器（`E2E_PORT`，默认 5173）后进行测试。运行哪些场景取决于环境变量：
 
-| 环境变量          | 示例                    | 未设置时                                                                                                                 |
-| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| （无）            |                         | 只运行首页、404、安全响应头等 smoke 场景                                                                                 |
-| `E2E_BACKEND_URL` | `http://localhost:8080` | 跳过注册、文章、分类、评论、图片、语言场景（`tests/e2e/us*`）。设置后 front 服务器也使用该 backend（`BLOG_BACKEND_URL`） |
-| `MAILPIT_URL`     | `http://localhost:8025` | 跳过读取密码重置邮件的场景（backend 必须把邮件发送到同一个 Mailpit）                                                     |
+| 环境变量                                | 示例                    | 未设置时                                                                                                                 |
+| --------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| （无）                                  |                         | 只运行首页、404、安全响应头等 smoke 场景                                                                                 |
+| `E2E_BACKEND_URL`                       | `http://localhost:8080` | 跳过注册、文章、分类、评论、图片、语言场景（`tests/e2e/us*`）。设置后 front 服务器也使用该 backend（`BLOG_BACKEND_URL`） |
+| `MAILPIT_URL`                           | `http://localhost:8025` | 跳过读取密码重置邮件的场景（backend 必须把邮件发送到同一个 Mailpit）                                                     |
+| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | 跳过门户（003）场景（`tests/e2e/portal-*`）。表示 backend 已使用下面的门户测试设置启动                                   |
+| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理员账号              | 跳过管理控制台和发布说明场景。该账号使用与 backend 的 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` 相同的邮箱注册            |
 
 要连同 backend 全部运行，请按 backend README 启动 MySQL（已导入表结构）、Mailpit 和 backend（local profile），然后：
 
 ```bash
 E2E_BACKEND_URL=http://localhost:8080 MAILPIT_URL=http://localhost:8025 npm run e2e
 ```
+
+门户（003）场景需要以测试设置启动 backend：`BLOG_PORTAL_CACHE_TTL=0s`（关闭缓存）、`BLOG_PORTAL_NEW_MEMBER_DELAY=PT0S`（注册后立即展示）、`BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD=1`，以及第一位管理员 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL=<管理员邮箱>`（该值只放在 `.env` 中，不要提交）。front 测试地址（默认 `http://localhost:5173`）必须包含在 backend 的 `blog.security.allowed-origins` 中。然后：
+
+```bash
+E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
+  E2E_ADMIN_EMAIL=<管理员邮箱> E2E_ADMIN_PASSWORD=<密码> npm run e2e
+```
+
+门户场景查看全站唯一的画面（首页"最新文章"、推荐、门户设置），因此作为 Playwright 项目 `portal` 在其余场景（`e2e`）结束后一次一个文件地运行。CI（`ci.yml` 的 e2e-backend、`e2e.yml`）以上述测试设置启动 backend，并用 `scripts/e2e-provision-admin.sh` 在一次性数据库中创建管理员账号（注册 API → 将 `role` 改为 SUPER_ADMIN）。
 
 未设置 `CI` 时，会复用同一端口上已在运行的 front 服务器。每次运行都会创建新账号，因此可以在同一个数据库上反复运行。
 

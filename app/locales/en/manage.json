@@ -90,7 +90,11 @@
     "commentEnabled": "Allow comments on this blog",
     "commentHint": "When off, no new comments can be added to any post on this blog.",
     "submit": "Save",
-    "saved": "Blog settings saved."
+    "saved": "Blog settings saved.",
+    "portalEnabled": "Show this blog's posts on the portal",
+    "portalHint": "When off, this blog's posts don't appear on the portal home or topic pages. The blog itself and its feeds are unchanged.",
+    "defaultTopic": "Default topic for new posts",
+    "defaultTopicHint": "This topic is preselected when you write a new post. You can change it for each post."
   },
   "comments": {
     "title": "Comments",

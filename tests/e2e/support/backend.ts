@@ -105,6 +105,15 @@ export async function logIn(page: Page, account: Account) {
   await expect(page).not.toHaveURL(/\/login/);
 }
 
+/** 이메일·비밀번호로 로그인(관리자 계정 등) */
+export async function logInWith(page: Page, email: string, password: string) {
+  await page.goto("/login");
+  await page.getByLabel("이메일").fill(email);
+  await page.getByLabel("비밀번호").fill(password);
+  await page.getByRole("button", { name: "로그인" }).click();
+  await expect(page).not.toHaveURL(/\/login/);
+}
+
 export async function logOut(page: Page) {
   await page.context().clearCookies();
 }
@@ -140,7 +149,7 @@ export async function publishPost(
     title: string;
     contentMarkdown: string;
     visibility?: "PUBLIC" | "PRIVATE";
-    /** 003 주제(소분류 id). 주제 지정은 003 US3에서 발행 API에 붙는다 */
+    /** 003 주제(소분류 id) */
     topicId?: number;
     /** 대표 이미지 mediaKey(본문 이미지 중 하나) */
     thumbnail?: string;

@@ -11,7 +11,7 @@ import {
 
 import { createApiClient } from "~/api/client.server";
 import { throwApiErrorResponse } from "~/api/errors";
-import type { Blog, Comment, PostDetail, PostSummary } from "~/api/models";
+import type { Blog, Comment, PostDetail, PostSummary, TopicNode } from "~/api/models";
 import { loginPath } from "~/auth/paths";
 import { isValidHandle, parsePostId } from "~/blog/ids";
 import { categoryHref } from "~/components/blog/CategoryTree";
@@ -32,6 +32,7 @@ import { runLikeAction } from "~/discovery/actions.server";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { ogImageUrl } from "~/media/thumbnail";
+import { findTopicById, topicHref, topicName } from "~/portal/topics";
 import type { RootData } from "~/root";
 import { blogFeedLinks } from "~/seo/feedLinks";
 import { absoluteUrl, pageMeta, privatePageMeta } from "~/seo/meta";
@@ -50,6 +51,7 @@ export function links() {
  * 댓글(US3)은 글과 함께 읽고(`GET /posts/{id}/comments`), 댓글을 읽지 못해도 글은 보여준다.
  * 002: 관련 글(`GET /posts/{id}/related`, 실패하면 `[]`)과 피드 자동 발견 링크 제목에 쓸 블로그 제목(`GET /blogs/{handle}`,
  * 실패하면 블로그 주소)도 함께 읽는다.
+ * 003: 글에 주제가 있으면 주제 트리(`GET /topics`)로 주제 페이지 링크를 만든다. 트리를 읽지 못하거나 숨긴 주제면 링크를 뺀다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const postId = parsePostId(params.postId);
@@ -57,11 +59,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
   const api = createApiClient(request);
-  const [post, comments, related, blog] = await Promise.all([
+  const [post, comments, related, blog, topics] = await Promise.all([
     api.get<PostDetail>(`/posts/${postId}`).catch(throwApiErrorResponse),
     api.get<Comment[]>(`/posts/${postId}/comments`).catch(() => null),
     api.get<PostSummary[]>(`/posts/${postId}/related`).catch((): PostSummary[] => []),
     api.get<Blog>(`/blogs/${params.handle}`).catch(() => null),
+    api.get<TopicNode[]>("/topics").catch((): TopicNode[] => []),
   ]);
   if (post.blogHandle !== params.handle) {
     throw data(null, { status: 404 });
@@ -78,7 +81,17 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     comments,
     related,
     blogTitle: blog?.title ?? post.blogHandle,
+    topic: topicLink(topics, post.topicId),
   };
+}
+
+/** 글 주제의 링크 정보(소분류만). 트리에 없으면 null. */
+function topicLink(topics: TopicNode[], topicId: number | null | undefined) {
+  const found = findTopicById(topics, topicId);
+  if (!found || found.parent === null) {
+    return null;
+  }
+  return { href: topicHref(found), names: found.topic.names };
 }
 
 /**
@@ -132,9 +145,9 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 }
 
 export default function PostDetailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const format = useDateFormat();
-  const { post, isOwner, comments, related, origin } = useLoaderData<typeof loader>();
+  const { post, isOwner, comments, related, origin, topic } = useLoaderData<typeof loader>();
   const actionData = useActionData<CommentActionData | LikeActionData>();
   const rootData = useRouteLoaderData<RootData>("root");
   const viewer = rootData?.user ?? null;
@@ -176,6 +189,14 @@ export default function PostDetailPage() {
                   <Link to={categoryHref(post.blogHandle, post.category.id)}>
                     {post.category.name}
                   </Link>
+                </dd>
+              </>
+            )}
+            {topic && (
+              <>
+                <dt>{t("post:detail.topic")}</dt>
+                <dd>
+                  <Link to={topic.href}>{topicName(topic.names, i18n.language)}</Link>
                 </dd>
               </>
             )}

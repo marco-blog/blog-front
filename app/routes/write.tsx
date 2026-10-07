@@ -7,12 +7,14 @@ import { createApiClient } from "~/api/client.server";
 import { errorMessage, fieldErrorMessage } from "~/api/errorMessage";
 import { apiErrorResponse, isApiError } from "~/api/errors";
 import type {
+  Blog,
   CategoryNode,
   DraftContent,
   LatestDraft,
   PostDetail,
   PostStatus,
   SavedDraft,
+  TopicNode,
   Visibility,
 } from "~/api/models";
 import { rememberLastBlog } from "~/auth/lastBlog.server";
@@ -53,6 +55,8 @@ function toNotFound(error: unknown): never {
  * 글쓰기(`/:handle/write`)와 글 수정(`/:handle/write/:postId`). 로그인한 주인만 쓰고, 내 블로그가 아니거나
  * `:handle` 블로그의 글이 아니면 404. 연 블로그를 쿠키 `last_blog`로 기억한다(`/write` 진입점).
  * 화면은 SSR하되 에디터는 브라우저에서만 불러온다(R7).
+ * 003: 포털 주제 트리(`/topics`)를 함께 읽고(실패하면 주제 고르기만 비운다), 새 글은 블로그 기본 주제를 미리 고른다
+ * (backend는 자동으로 채우지 않으므로 첫 사본 저장에 넣는다, 결정 표 12번).
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await requireUser(request);
@@ -63,22 +67,35 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   rememberLastBlog(request, handle);
   const backend = createApiClient(request);
 
+  const topicsRequest = backend.get<TopicNode[]>("/topics").catch(() => [] as TopicNode[]);
+
   if (params.postId === undefined) {
-    const [latestDraft, categories] = await Promise.all([
+    const [latestDraft, categories, blog, topics] = await Promise.all([
       backend.get<LatestDraft | null>(`/blogs/${handle}/posts/drafts/latest`),
       backend.get<CategoryNode[]>(`/blogs/${handle}/categories`),
+      backend.get<Blog>(`/blogs/${handle}`).catch(() => null),
+      topicsRequest,
     ]).catch(toNotFound);
-    return { handle, post: null, draft: null, latestDraft, categories };
+    return {
+      handle,
+      post: null,
+      draft: null,
+      latestDraft,
+      categories,
+      topics,
+      defaultTopicId: blog?.defaultTopicId ?? null,
+    };
   }
 
   const postId = parsePostId(params.postId);
   if (postId === null) {
     throw notFound();
   }
-  const [post, draft, categories] = await Promise.all([
+  const [post, draft, categories, topics] = await Promise.all([
     backend.get<PostDetail>(`/posts/${postId}`),
     backend.get<DraftContent>(`/posts/${postId}/draft`),
     backend.get<CategoryNode[]>(`/blogs/${handle}/categories`),
+    topicsRequest,
   ]).catch(toNotFound);
   if (post.blogHandle !== handle) {
     throw notFound();
@@ -97,10 +114,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
       contentMarkdown: draft.contentMarkdown,
       categoryId: draft.categoryId ?? null,
       tags: draft.tags ?? [],
+      topicId: draft.topicId ?? null,
       savedAt: draft.savedAt,
     },
     latestDraft: null,
     categories,
+    topics,
+    defaultTopicId: null,
   };
 }
 
@@ -118,10 +138,14 @@ interface WriteData {
     contentMarkdown: string;
     categoryId: number | null;
     tags: string[];
+    topicId: number | null;
     savedAt: string | null;
   } | null;
   latestDraft: LatestDraft | null;
   categories: CategoryNode[];
+  topics: TopicNode[];
+  /** 새 글에 미리 고를 블로그 기본 주제 */
+  defaultTopicId: number | null;
 }
 
 export default function WritePage() {
@@ -137,10 +161,19 @@ interface DraftState {
   content: string;
   categoryId: number | null;
   tags: string[];
+  topicId: number | null;
   dirty: boolean;
 }
 
-function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
+function Writer({
+  handle,
+  post,
+  draft,
+  latestDraft,
+  categories,
+  topics,
+  defaultTopicId,
+}: WriteData) {
   const { t } = useTranslation();
   const format = useDateFormat();
   const navigate = useNavigate();
@@ -157,9 +190,11 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
   /** 발행 설정을 열 때 본문에 있던 이미지(대표 이미지 후보) */
   const [publishImages, setPublishImages] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const initialTopicId = draft ? draft.topicId : defaultTopicId;
   const [classification, setClassification] = useState({
     categoryId: draft?.categoryId ?? null,
     tags: draft?.tags ?? [],
+    topicId: initialTopicId,
   });
 
   const state = useRef<DraftState>({
@@ -168,6 +203,7 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
     content: draft?.contentMarkdown ?? "",
     categoryId: draft?.categoryId ?? null,
     tags: draft?.tags ?? [],
+    topicId: initialTopicId,
     dirty: false,
   });
   /** 저장은 한 번에 하나씩(새 글이 두 번 만들어지지 않게) */
@@ -195,12 +231,13 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
       if (!force && current.postId === null && !current.title.trim() && !current.content.trim()) {
         return null;
       }
-      // 카테고리·태그는 사본에 그대로 저장하고 검사는 발행할 때 한다(contracts/api.md DraftWrite).
+      // 카테고리·태그·주제는 사본에 그대로 저장하고 검사는 발행할 때 한다(contracts/api.md DraftWrite, 003 research P9).
       const snapshot = {
         title: current.title,
         contentMarkdown: current.content,
         categoryId: current.categoryId,
         tags: current.tags,
+        topicId: current.topicId,
       };
       setSaving(true);
       try {
@@ -281,6 +318,7 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
       // 발행은 작성 중 사본을 발행본으로 옮긴다. 고른 카테고리·태그를 담아 지금 내용을 먼저 저장한다.
       state.current.categoryId = settings.categoryId;
       state.current.tags = settings.tags;
+      state.current.topicId = settings.topicId;
       const id = await save(true);
       const published = await api.post<PostDetail>(`/posts/${id}/publish`, {
         body: {
@@ -288,6 +326,7 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
           commentEnabled: settings.commentEnabled,
           categoryId: settings.categoryId,
           tags: settings.tags,
+          topicId: settings.topicId,
           thumbnailMediaKey: settings.thumbnailMediaKey,
         },
       });
@@ -301,6 +340,9 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
   function fieldLabel(field: string): string | null {
     if (field === "title") {
       return t("editor:titleLabel");
+    }
+    if (field === "topicId") {
+      return t("post:topic.label");
     }
     return field.startsWith("tags") ? t("tag:input.label") : null;
   }
@@ -406,13 +448,16 @@ function Writer({ handle, post, draft, latestDraft, categories }: WriteData) {
             commentEnabled: post?.commentEnabled ?? true,
             categoryId: classification.categoryId,
             tags: classification.tags,
+            topicId: classification.topicId,
             thumbnailMediaKey: mediaKeyOf(post?.thumbnailUrl),
           }}
           images={publishImages}
           categories={categories}
+          topics={topics}
           onClassify={(value) => {
             state.current.categoryId = value.categoryId;
             state.current.tags = value.tags;
+            state.current.topicId = value.topicId;
             setClassification(value);
             markDirty();
           }}

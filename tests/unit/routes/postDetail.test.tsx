@@ -11,7 +11,7 @@ import PostDetailRoute, {
 } from "~/routes/post-detail";
 
 import { fail, mockBackend, ok } from "../support/backend";
-import { postDetail, postSummary, postWithoutMarkdown } from "../support/fixtures";
+import { postDetail, postSummary, postWithoutMarkdown, topicNode } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
 import {
   asData,
@@ -32,6 +32,8 @@ const VIEWS = "POST /api/v1/posts/123/views";
 const COMMENTS = "GET /api/v1/posts/123/comments";
 const RELATED = "GET /api/v1/posts/123/related";
 const BLOG = "GET /api/v1/blogs/marco";
+const TOPICS = "GET /api/v1/topics";
+const topics = [topicNode(1, "dev", {}, [topicNode(11, "java", { parentId: 1 })])];
 
 const callLoader = (handle: string, postId: string, headers: Record<string, string> = {}) =>
   loader(routeArgs<LoaderArgs>(getRequest(`/${handle}/${postId}`, headers), { handle, postId }));
@@ -93,6 +95,7 @@ describe("post detail loader", () => {
     await expect(callLoader("marco", "123")).resolves.toMatchObject({
       related,
       blogTitle: "마르코의 블로그",
+      topic: null,
     });
     expect(backend.callsTo(RELATED)).toHaveLength(1);
     expect(backend.callsTo(BLOG)).toHaveLength(1);
@@ -111,6 +114,31 @@ describe("post detail loader", () => {
       related: [],
       blogTitle: "marco",
     });
+  });
+
+  it("글의 주제(소분류)를 주제 페이지 링크로 넘기고, 트리에 없거나 대분류면 null(003 T081)", async () => {
+    mockBackend({
+      [POST]: ok({ ...postDetail, topicId: 11 }),
+      [VIEWS]: ok(null),
+      [TOPICS]: ok(topics),
+    });
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({
+      topic: { href: "/topics/dev/java", names: topics[0].children[0].names },
+    });
+
+    mockBackend({
+      [POST]: ok({ ...postDetail, topicId: 1 }),
+      [VIEWS]: ok(null),
+      [TOPICS]: ok(topics),
+    });
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({ topic: null });
+
+    mockBackend({
+      [POST]: ok({ ...postDetail, topicId: 11 }),
+      [VIEWS]: ok(null),
+      [TOPICS]: fail(500, "INTERNAL_ERROR"),
+    });
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({ topic: null });
   });
 
   it("조회수 기록이 실패해도 글은 보여준다", async () => {
@@ -174,6 +202,7 @@ describe("post detail meta", () => {
       comments: [],
       related: [],
       blogTitle: "마르코의 블로그",
+      topic: null,
     };
   };
   const metaArgs = (loaderData: LoaderData | undefined) =>
@@ -277,6 +306,7 @@ describe("post detail 화면", () => {
       comments: [],
       related: [],
       blogTitle: "마르코의 블로그",
+      topic: null,
       ...overrides,
     };
   };
@@ -344,6 +374,17 @@ describe("post detail 화면", () => {
     );
     expect(within(nav).queryByText("다음 글")).toBeNull();
     expect(screen.queryByRole("link", { name: "수정" })).toBeNull();
+  });
+
+  it("주제가 있으면 화면 언어 이름으로 주제 페이지 링크(003 T081)", async () => {
+    renderPost(loaded({ topic: { href: "/topics/dev/java", names: topics[0].children[0].names } }));
+
+    const article = await screen.findByRole("article");
+    expect(within(article).getByRole("link", { name: "java 한" })).toHaveAttribute(
+      "href",
+      "/topics/dev/java",
+    );
+    expect(article).toHaveTextContent("주제");
   });
 
   it("관련 글 영역(002 T081), 없으면 영역 없음", async () => {
@@ -548,6 +589,7 @@ describe("post detail 화면의 댓글", () => {
       ],
       related: [],
       blogTitle: "마르코의 블로그",
+      topic: null,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -569,6 +611,7 @@ describe("post detail 화면의 댓글", () => {
       comments: [],
       related: [],
       blogTitle: "마르코의 블로그",
+      topic: null,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],
@@ -655,6 +698,7 @@ describe("post detail 좋아요(002 T027)", () => {
       comments: [],
       related: [],
       blogTitle: "마르코의 블로그",
+      topic: null,
     };
     renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
       initialEntries: ["/marco/123"],

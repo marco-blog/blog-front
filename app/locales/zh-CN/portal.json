@@ -18,13 +18,17 @@
     "newBlogSince": "{{time}}开始",
     "emptyTitle": "门户中还没有可展示的文章",
     "emptyWrite": "写下第一篇文章",
-    "emptySignup": "注册并写下第一篇文章"
+    "emptySignup": "注册并写下第一篇文章",
+    "tagPosts_one": "{{count, number}} 篇文章",
+    "tagPosts_other": "{{count, number}} 篇文章"
   },
   "card": {
-    "likes": "点赞 {{count, number}}",
-    "comments": "评论 {{count, number}}",
     "noTopic": "无主题",
-    "author": "作者"
+    "author": "作者",
+    "likes_one": "点赞 {{count, number}}",
+    "likes_other": "点赞 {{count, number}}",
+    "comments_one": "评论 {{count, number}}",
+    "comments_other": "评论 {{count, number}}"
   },
   "topic": {
     "description": "浏览{{name}}主题的文章。",

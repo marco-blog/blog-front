@@ -90,7 +90,11 @@
     "commentEnabled": "이 블로그에 댓글 허용",
     "commentHint": "끄면 이 블로그의 모든 글에 새 댓글을 달 수 없습니다.",
     "submit": "저장",
-    "saved": "블로그 설정을 저장했습니다."
+    "saved": "블로그 설정을 저장했습니다.",
+    "portalEnabled": "포털에 이 블로그의 글 소개하기",
+    "portalHint": "끄면 이 블로그의 글이 포털 메인과 주제 페이지에 나오지 않습니다. 블로그 자체와 구독 피드는 그대로입니다.",
+    "defaultTopic": "새 글의 기본 주제",
+    "defaultTopicHint": "새 글을 쓸 때 이 주제가 미리 선택됩니다. 글마다 바꿀 수 있습니다."
   },
   "comments": {
     "title": "댓글 관리",
