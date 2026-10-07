@@ -38,15 +38,12 @@ npm start                 # 以 NODE_ENV=production 运行构建产物
 
 如果存在 `.env`，`npm run dev` 和 `npm start` 会读取它（`node --env-file-if-exists`）。不要提交 `.env`，只保留 `.env.example`。这里没有密钥。
 
-| 名称                | 默认值                                                      | 说明                                                                                                                                                                                                                                                                             |
-| ------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BLOG_BACKEND_URL`  | `http://localhost:8080`                                     | backend 地址。是 `/api/**`、`/media/**` 等的代理目标，也是 SSR loader、action 直接调用的地址                                                                                                                                                                                     |
-| `PORT`              | `5173`                                                      | front 服务器端口。需与 backend 允许的 Origin 一致（本地为 `http://localhost:5173`、`http://localhost:3000`）                                                                                                                                                                     |
-| `BLOG_PUBLIC_URL`   | 收到的请求的地址                                            | 站点公开地址（scheme+host）。用作 SSR 发给 backend 的 POST（令牌刷新、浏览数）的 `Origin`。应与 backend 的 `blog.base-url` 相同                                                                                                                                                  |
-| `BLOG_KAKAO_JS_KEY` | 无（隐藏 KakaoTalk 按钮）                                   | Kakao JavaScript 密钥（KakaoTalk 分享）。虽然是公开值，但必须在 Kakao Developers 应用的 Web 平台站点域名中登记服务地址（生产环境 `https://blog.java21.net`）才能使用。仅在设置时，CSP 才会加入 `https://t1.kakaocdn.net`（script-src）和 `https://kapi.kakao.com`（connect-src） |
-| `NODE_ENV`          | `npm run dev` 为 `development`，`npm start` 为 `production` | 开发模式下通过 Vite 中间件渲染                                                                                                                                                                                                                                                   |
-
-KakaoTalk 分享仅在首次点击时，以 `app/share/kakao.client.ts` 中固定的版本和 SRI 哈希加载 SDK。升级 SDK 版本时，请同时按 Kakao Developers 文档更新 integrity 值。
+| 名称               | 默认值                                                      | 说明                                                                                                                            |
+| ------------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `BLOG_BACKEND_URL` | `http://localhost:8080`                                     | backend 地址。是 `/api/**`、`/media/**` 等的代理目标，也是 SSR loader、action 直接调用的地址                                    |
+| `PORT`             | `5173`                                                      | front 服务器端口。需与 backend 允许的 Origin 一致（本地为 `http://localhost:5173`、`http://localhost:3000`）                    |
+| `BLOG_PUBLIC_URL`  | 收到的请求的地址                                            | 站点公开地址（scheme+host）。用作 SSR 发给 backend 的 POST（令牌刷新、浏览数）的 `Origin`。应与 backend 的 `blog.base-url` 相同 |
+| `NODE_ENV`         | `npm run dev` 为 `development`，`npm start` 为 `production` | 开发模式下通过 Vite 中间件渲染                                                                                                  |
 
 ## 检查与测试
 

@@ -294,13 +294,10 @@ describe("post detail meta", () => {
 });
 
 describe("post detail 화면", () => {
-  function renderPost(data: LoaderData, kakaoJsKey: string | null = null) {
+  function renderPost(data: LoaderData) {
     return renderRoutes(
       [{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }],
-      {
-        initialEntries: ["/marco/123"],
-        kakaoJsKey,
-      },
+      { initialEntries: ["/marco/123"] },
     );
   }
 
@@ -416,31 +413,12 @@ describe("post detail 화면", () => {
     expect(screen.queryByRole("region", { name: "관련 글" })).toBeNull();
   });
 
-  it("공개 글은 공유 영역: 글 절대 주소로 X·페이스북 링크, 키가 있으면 카카오톡", async () => {
-    renderPost(loaded({ origin: "https://blog.java21.net" }), "kakao-key");
+  it("공개 글에도 공유 영역을 그리지 않는다(1.0에서 공유 기능을 뺐다)", async () => {
+    renderPost(loaded({ origin: "https://blog.java21.net" }));
 
-    const share = await screen.findByRole("region", { name: "공유하기" });
-    expect(within(share).getByRole("link", { name: "X" }).getAttribute("href")).toContain(
-      "url=https%3A%2F%2Fblog.java21.net%2Fmarco%2F123",
-    );
-    expect(within(share).getByRole("link", { name: "페이스북" }).getAttribute("href")).toContain(
-      "u=https%3A%2F%2Fblog.java21.net%2Fmarco%2F123",
-    );
-    expect(await within(share).findByRole("button", { name: "카카오톡" })).toBeInTheDocument();
-  });
-
-  it("키가 없으면 카카오톡 버튼이 없고, 비공개·임시저장 글에는 공유 영역이 없다", async () => {
-    const { unmount } = renderPost(loaded());
-    const share = await screen.findByRole("region", { name: "공유하기" });
-    await within(share).findByRole("button", { name: "주소 복사" });
-    expect(within(share).queryByRole("button", { name: "카카오톡" })).toBeNull();
-    unmount();
-
-    renderPost(
-      loaded({ isOwner: true, post: { ...postWithoutMarkdown(), visibility: "PRIVATE" } }),
-    );
     await screen.findByRole("article");
     expect(screen.queryByRole("region", { name: "공유하기" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "주소 복사" })).toBeNull();
   });
 
   it("주인에게는 수정 링크와 상태(임시저장·비공개)를 보여준다", async () => {

@@ -38,15 +38,12 @@ npm start                 # NODE_ENV=production でビルド成果物を実行
 
 `.env` があれば `npm run dev`・`npm start` が読み込みます（`node --env-file-if-exists`）。`.env` はコミットせず、`.env.example` だけを置きます。秘密値はありません。
 
-| 名前                | 既定値                                                      | 説明                                                                                                                                                                                                                                                                                                                         |
-| ------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BLOG_BACKEND_URL`  | `http://localhost:8080`                                     | backend のアドレス。`/api/**`・`/media/**` などのプロキシ先であり、SSR の loader・action が直接呼び出すアドレス                                                                                                                                                                                                              |
-| `PORT`              | `5173`                                                      | front サーバーのポート。backend の許可 Origin（ローカルでは `http://localhost:5173`、`http://localhost:3000`）に合わせます                                                                                                                                                                                                   |
-| `BLOG_PUBLIC_URL`   | 受け取ったリクエストのアドレス                              | サイトの公開アドレス（scheme+host）。SSR が backend に送る POST（トークン更新・閲覧数）の `Origin` に使います。backend の `blog.base-url` と同じにします                                                                                                                                                                     |
-| `BLOG_KAKAO_JS_KEY` | なし（カカオトークボタンを隠す）                            | Kakao JavaScript キー（カカオトーク共有）。公開値ですが、Kakao Developers のアプリの Web プラットフォームのサイトドメインにサービスのアドレス（本番 `https://blog.java21.net`）を登録する必要があります。値があるときだけ CSP に `https://t1.kakaocdn.net`（script-src）と `https://kapi.kakao.com`（connect-src）を加えます |
-| `NODE_ENV`          | `npm run dev` は `development`、`npm start` は `production` | 開発モードでは Vite ミドルウェアでレンダリングします                                                                                                                                                                                                                                                                         |
-
-カカオトーク共有は、`app/share/kakao.client.ts` に固定したバージョン・SRI ハッシュで、最初に押したときだけ SDK を読み込みます。SDK のバージョンを上げるときは Kakao Developers のドキュメントの integrity 値も一緒に変えます。
+| 名前               | 既定値                                                      | 説明                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BLOG_BACKEND_URL` | `http://localhost:8080`                                     | backend のアドレス。`/api/**`・`/media/**` などのプロキシ先であり、SSR の loader・action が直接呼び出すアドレス                                          |
+| `PORT`             | `5173`                                                      | front サーバーのポート。backend の許可 Origin（ローカルでは `http://localhost:5173`、`http://localhost:3000`）に合わせます                               |
+| `BLOG_PUBLIC_URL`  | 受け取ったリクエストのアドレス                              | サイトの公開アドレス（scheme+host）。SSR が backend に送る POST（トークン更新・閲覧数）の `Origin` に使います。backend の `blog.base-url` と同じにします |
+| `NODE_ENV`         | `npm run dev` は `development`、`npm start` は `production` | 開発モードでは Vite ミドルウェアでレンダリングします                                                                                                     |
 
 ## チェック・テスト
 

@@ -30,18 +30,6 @@
   "related": {
     "title": "관련 글"
   },
-  "share": {
-    "label": "공유하기",
-    "copy": "주소 복사",
-    "copied": "주소를 복사했습니다.",
-    "copyFailed": "주소를 복사하지 못했습니다. 아래 주소를 직접 복사해 주세요.",
-    "url": "글 주소",
-    "kakao": "카카오톡",
-    "kakaoFailed": "카카오톡 공유를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
-    "x": "X",
-    "facebook": "페이스북",
-    "newWindow": "새 창"
-  },
   "feedLink": {
     "rss": "{{title}} RSS",
     "atom": "{{title}} Atom",

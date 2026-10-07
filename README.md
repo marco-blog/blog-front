@@ -38,15 +38,12 @@ npm start                 # NODE_ENV=production으로 build 산출물 실행
 
 `.env`가 있으면 `npm run dev`·`npm start`가 읽는다(`node --env-file-if-exists`). `.env`는 커밋하지 않고 `.env.example`만 둔다. 비밀 값은 없다.
 
-| 이름                | 기본값                                                    | 설명                                                                                                                                                                                                                                                                            |
-| ------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `BLOG_BACKEND_URL`  | `http://localhost:8080`                                   | backend 주소. `/api/**`·`/media/**` 등 프록시 대상이며, SSR loader·action이 직접 호출하는 주소                                                                                                                                                                                  |
-| `PORT`              | `5173`                                                    | front 서버 포트. backend의 허용 Origin(로컬 `http://localhost:5173`, `http://localhost:3000`)에 맞춘다                                                                                                                                                                          |
-| `BLOG_PUBLIC_URL`   | 들어온 요청의 주소                                        | 사이트의 공개 주소(scheme+host). SSR이 backend에 보내는 POST(토큰 갱신·조회수)의 `Origin`. backend의 `blog.base-url`과 같게 둔다                                                                                                                                                |
-| `BLOG_KAKAO_JS_KEY` | 없음(카카오톡 버튼 숨김)                                  | Kakao JavaScript 키(카카오톡 공유). 공개 값이지만 Kakao Developers 앱의 Web 플랫폼 사이트 도메인에 서비스 주소(운영 `https://blog.java21.net`)를 등록해야 동작한다. 값이 있을 때만 CSP에 `https://t1.kakaocdn.net`(script-src)과 `https://kapi.kakao.com`(connect-src)을 더한다 |
-| `NODE_ENV`          | `npm run dev`는 `development`, `npm start`는 `production` | 개발 모드에서는 Vite 미들웨어로 렌더링한다                                                                                                                                                                                                                                      |
-
-카카오톡 공유는 SDK를 `app/share/kakao.client.ts`에 고정한 버전·SRI 해시로 처음 누를 때만 불러온다. SDK 버전을 올리면 Kakao Developers 문서의 integrity 값으로 함께 바꾼다.
+| 이름               | 기본값                                                    | 설명                                                                                                                             |
+| ------------------ | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `BLOG_BACKEND_URL` | `http://localhost:8080`                                   | backend 주소. `/api/**`·`/media/**` 등 프록시 대상이며, SSR loader·action이 직접 호출하는 주소                                   |
+| `PORT`             | `5173`                                                    | front 서버 포트. backend의 허용 Origin(로컬 `http://localhost:5173`, `http://localhost:3000`)에 맞춘다                           |
+| `BLOG_PUBLIC_URL`  | 들어온 요청의 주소                                        | 사이트의 공개 주소(scheme+host). SSR이 backend에 보내는 POST(토큰 갱신·조회수)의 `Origin`. backend의 `blog.base-url`과 같게 둔다 |
+| `NODE_ENV`         | `npm run dev`는 `development`, `npm start`는 `production` | 개발 모드에서는 Vite 미들웨어로 렌더링한다                                                                                       |
 
 ## 검사·테스트
 

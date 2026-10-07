@@ -33,11 +33,10 @@ async function createCategory(request: APIRequestContext, handle: string, name: 
 }
 
 /**
- * 관련 글·공유(002 FR-068·069, quickstart #21~23, T078): 점수(겹치는 태그 수 + 같은 카테고리 1)·발행 최신순·점수 0 제외,
- * 주소 복사(클립보드), X·페이스북 링크, og 메타. `BLOG_KAKAO_JS_KEY`가 없는 E2E에서는 카카오톡 버튼이 없는지만 본다.
- * backend가 있어야 돈다(E2E_BACKEND_URL).
+ * 관련 글·링크 미리보기 메타(002 FR-068, quickstart #21·#23, T078): 점수(겹치는 태그 수 + 같은 카테고리 1)·발행 최신순·
+ * 점수 0 제외, og 메타. 공유 버튼은 1.0에서 뺐다. backend가 있어야 돈다(E2E_BACKEND_URL).
  */
-test.describe("002 관련 글·공유", () => {
+test.describe("002 관련 글·og 메타", () => {
   requireBackend();
   test.describe.configure({ mode: "serial" });
 
@@ -85,41 +84,6 @@ test.describe("002 관련 글·공유", () => {
     await expect(related.getByRole("link")).toHaveText(["Z 글", "W 글", "Y 글"]);
     await expect(related.getByRole("link", { name: "V 글" })).toHaveCount(0);
     await expect(related.getByRole("link", { name: "X 기준 글" })).toHaveCount(0);
-  });
-
-  test("공유: 주소 복사, X·페이스북 새 창 링크, 키가 없으면 카카오톡 버튼 없음(quickstart #22)", async ({
-    page,
-    context,
-    baseURL,
-  }) => {
-    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto(xPath);
-    const url = new URL(xPath, baseURL).toString();
-    const share = page.getByRole("region", { name: "공유하기" });
-
-    await share.getByRole("button", { name: "주소 복사" }).click();
-    await expect(share.getByRole("status")).toHaveText("주소를 복사했습니다.");
-    // E2E tsconfig에는 DOM 타입이 없어 브라우저 객체 모양만 적는다.
-    const clipboardText = await page.evaluate(() =>
-      (
-        globalThis as unknown as { navigator: { clipboard: { readText(): Promise<string> } } }
-      ).navigator.clipboard.readText(),
-    );
-    expect(clipboardText).toBe(url);
-
-    const x = share.getByRole("link", { name: "X" });
-    await expect(x).toHaveAttribute("target", "_blank");
-    await expect(x).toHaveAttribute("rel", "noopener noreferrer");
-    const xHref = new URL((await x.getAttribute("href")) ?? "");
-    expect(xHref.origin + xHref.pathname).toBe("https://x.com/intent/tweet");
-    expect(xHref.searchParams.get("url")).toBe(url);
-    expect(xHref.searchParams.get("text")).toBe("X 기준 글");
-    const facebook = new URL(
-      (await share.getByRole("link", { name: "페이스북" }).getAttribute("href")) ?? "",
-    );
-    expect(facebook.searchParams.get("u")).toBe(url);
-
-    await expect(share.getByRole("button", { name: "카카오톡" })).toHaveCount(0);
   });
 
   test("og 메타와 대표 이미지가 없을 때 twitter:card=summary(quickstart #23)", async ({
