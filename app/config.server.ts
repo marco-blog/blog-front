@@ -25,14 +25,6 @@ export function publicOrigin(request: Request, env: NodeJS.ProcessEnv = process.
 }
 
 /**
- * Kakao JavaScript 키(002 research D9). 카카오톡 공유 버튼은 이 값이 있을 때만 보인다.
- * 환경 변수 BLOG_KAKAO_JS_KEY가 없거나 비었으면 null.
- */
-export function kakaoJsKey(env: NodeJS.ProcessEnv = process.env): string | null {
-  return env.BLOG_KAKAO_JS_KEY?.trim() || null;
-}
-
-/**
  * 화면 서버가 CSP에 Turnstile 출처를 더할지(005 FR-141). backend `blog.captcha.provider`와 같은 값을 환경 변수
  * BLOG_CAPTCHA_PROVIDER로 받는다(`turnstile`일 때만 true). 화면의 위젯 여부는 backend `GET /captcha/config`가 정한다.
  */

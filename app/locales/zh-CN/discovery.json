@@ -30,18 +30,6 @@
   "related": {
     "title": "相关文章"
   },
-  "share": {
-    "label": "分享",
-    "copy": "复制链接",
-    "copied": "链接已复制。",
-    "copyFailed": "无法复制链接。请直接复制下面的地址。",
-    "url": "文章地址",
-    "kakao": "KakaoTalk",
-    "kakaoFailed": "无法加载 KakaoTalk 分享，请稍后再试。",
-    "x": "X",
-    "facebook": "Facebook",
-    "newWindow": "在新窗口中打开"
-  },
   "feedLink": {
     "rss": "{{title}} RSS",
     "atom": "{{title}} Atom",

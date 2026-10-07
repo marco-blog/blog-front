@@ -108,21 +108,6 @@ describe("root loader", () => {
     expect(result).toMatchObject({ language: "ko", user: null });
   });
 
-  it("Kakao JavaScript 키를 브라우저로 넘긴다(없으면 null, 002 T081)", async () => {
-    vi.stubEnv("BLOG_KAKAO_JS_KEY", "kakao-js-key");
-    try {
-      expect((await callRootLoader({})).kakaoJsKey).toBe("kakao-js-key");
-    } finally {
-      vi.unstubAllEnvs();
-    }
-    vi.stubEnv("BLOG_KAKAO_JS_KEY", "");
-    try {
-      expect((await callRootLoader({})).kakaoJsKey).toBeNull();
-    } finally {
-      vi.unstubAllEnvs();
-    }
-  });
-
   it("로그인 회원의 unseenReleaseNote를 배너용으로 넘기고, 비로그인은 null(003 T115)", async () => {
     getSessionUserMock.mockResolvedValue({
       ...member,
