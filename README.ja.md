@@ -77,6 +77,7 @@ npm run e2e                          # = npx playwright test
 | `E2E_BACKEND_URL`                       | `http://localhost:8080` | 登録・記事・カテゴリ・コメント・画像・言語のシナリオ（`tests/e2e/us*`）をスキップ。設定すると front サーバーもこの backend を使います（`BLOG_BACKEND_URL`） |
 | `MAILPIT_URL`                           | `http://localhost:8025` | パスワード再設定メールを読むシナリオをスキップ（backend が同じ Mailpit へメールを送る必要があります）                                                       |
 | `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | ポータル（003）のシナリオ（`tests/e2e/portal-*`）をスキップ。backend を下記のポータル試験用設定で起動したという印です                                       |
+| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 非会員のコメント・ゲストブック（004）のシナリオをスキップ。backend を下記の非会員試験用設定で起動したという印です                                           |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理者アカウント        | 管理コンソールとリリースノートのシナリオをスキップ。backend の `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` と同じメールアドレスで登録したアカウントです        |
 
 backend を含めてすべて実行するには、backend の README のとおりに MySQL（スキーマ適用）・Mailpit・backend（local プロファイル）を起動してから:
@@ -91,6 +92,8 @@ E2E_BACKEND_URL=http://localhost:8080 MAILPIT_URL=http://localhost:8025 npm run 
 E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<管理者メールアドレス> E2E_ADMIN_PASSWORD=<パスワード> npm run e2e
 ```
+
+004 のブログ機能シナリオ（`tests/e2e/blog-*`）は backend の local プロファイルの既定値で動きます。非会員の書き込みシナリオは同じ IP（localhost）から何度も書くため、非会員の書き込み制限を緩めて起動し `E2E_GUEST_TEST_SETTINGS=1` を指定します: `BLOG_GUEST_COMMENT_PER_MINUTE=1000`、`BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`。バックアップのシナリオでは backend が `BLOG_EXPORT_DIR`（local の既定は `./data/exports`）に zip を書きます。予約公開とバックアップのシナリオはバッチ処理の周期（30 秒）を待つため 1〜2 分かかります。
 
 ポータルのシナリオはメインの「最新記事」・おすすめ・ポータル設定のようなサイトに一つしかない画面を見るため、Playwright プロジェクト `portal` として残り（`e2e`）が終わった後に一度に1ファイルずつ実行します。CI（`ci.yml` の e2e-backend、`e2e.yml`）は上記の試験用設定で backend を起動し、`scripts/e2e-provision-admin.sh` で使い捨て DB に管理者アカウントを作ります（登録 API → `role` を SUPER_ADMIN に）。
 

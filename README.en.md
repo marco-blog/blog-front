@@ -77,6 +77,7 @@ npm run e2e                          # = npx playwright test
 | `E2E_BACKEND_URL`                       | `http://localhost:8080` | Sign-up, post, category, comment, image and language scenarios (`tests/e2e/us*`) are skipped. When set, the front server also uses this backend (`BLOG_BACKEND_URL`) |
 | `MAILPIT_URL`                           | `http://localhost:8025` | Scenarios that read password-reset mail are skipped (the backend must send mail to the same Mailpit)                                                                 |
 | `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | Portal (003) scenarios (`tests/e2e/portal-*`) are skipped. It signals that the backend runs with the portal test settings below                                      |
+| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | Guest comment and guestbook (004) scenarios are skipped. It signals that the backend runs with the guest test settings below                                         |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | an admin account        | Admin console and release note scenarios are skipped. The account signs up with the same email as the backend's `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL`             |
 
 To run everything including the backend, start MySQL (with the schema), Mailpit and the backend (local profile) as described in the backend README, then:
@@ -91,6 +92,8 @@ Portal (003) scenarios need the backend started with test settings: `BLOG_PORTAL
 E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<admin email> E2E_ADMIN_PASSWORD=<password> npm run e2e
 ```
+
+004 blog feature scenarios (`tests/e2e/blog-*`) run with the backend's local profile defaults. Guest writing scenarios write many times from the same IP (localhost), so start the backend with generous guest write limits and set `E2E_GUEST_TEST_SETTINGS=1`: `BLOG_GUEST_COMMENT_PER_MINUTE=1000`, `BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`. The backup scenario has the backend write zip files to `BLOG_EXPORT_DIR` (local default `./data/exports`). Scheduled publishing and backup scenarios wait for the batch jobs (every 30 seconds), so they take 1–2 minutes.
 
 Portal scenarios look at site-wide screens (the main "latest" list, featured posts, portal settings), so they run in the Playwright project `portal`, one file at a time, after the rest (`e2e`) finish. CI (`ci.yml` e2e-backend, `e2e.yml`) starts the backend with the test settings above and creates an admin account in the throwaway DB with `scripts/e2e-provision-admin.sh` (signup API, then `role` SUPER_ADMIN).
 
