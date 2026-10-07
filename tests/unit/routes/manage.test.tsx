@@ -583,7 +583,7 @@ describe("블로그 관리 화면", () => {
       within(menu)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "블로그 설정", "피드 설정"]);
+    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "방명록", "블로그 설정", "피드 설정"]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
       "/marco/manage/categories",
@@ -597,6 +597,7 @@ describe("블로그 관리 화면", () => {
       "posts",
       "categories",
       "comments",
+      "guestbook",
       "settings",
       "feed",
     ]);

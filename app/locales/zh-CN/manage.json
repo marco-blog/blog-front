@@ -7,7 +7,8 @@
     "categories": "分类",
     "comments": "评论",
     "settings": "博客设置",
-    "feed": "订阅源设置"
+    "feed": "订阅源设置",
+    "guestbook": "留言板"
   },
   "switcher": {
     "label": "切换博客"
@@ -26,7 +27,13 @@
     "noComments": "还没有评论。",
     "commentOn": "评论于 {{title}}",
     "deletedComment": "已删除的评论",
-    "allComments": "查看全部评论"
+    "allComments": "查看全部评论",
+    "newGuestbook": "最近 7 天新留言",
+    "guestbookCount_one": "{{count, number}} 条",
+    "guestbookCount_other": "{{count, number}} 条",
+    "recentGuestbook": "最近留言",
+    "noGuestbook": "还没有留言。",
+    "allGuestbook": "查看全部留言"
   },
   "status": {
     "DRAFT": "草稿",
@@ -124,5 +131,11 @@
     "atom": "Atom",
     "categoryRss": "分类 RSS",
     "categoryHint": "每个分类的 RSS 地址如下（上级分类包含下级分类的文章）。"
+  },
+  "guestbook": {
+    "title": "留言板管理",
+    "disabled": "留言板已关闭，访客看不到。",
+    "settingsLink": "在博客设置中开启",
+    "viewPublic": "查看博客留言板"
   }
 }

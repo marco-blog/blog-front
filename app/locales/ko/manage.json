@@ -7,7 +7,8 @@
     "categories": "카테고리",
     "comments": "댓글",
     "settings": "블로그 설정",
-    "feed": "피드 설정"
+    "feed": "피드 설정",
+    "guestbook": "방명록"
   },
   "switcher": {
     "label": "블로그 전환"
@@ -26,7 +27,13 @@
     "noComments": "아직 댓글이 없습니다.",
     "commentOn": "{{title}}에 남긴 댓글",
     "deletedComment": "삭제된 댓글",
-    "allComments": "댓글 모두 보기"
+    "allComments": "댓글 모두 보기",
+    "newGuestbook": "최근 7일 새 방명록",
+    "guestbookCount_one": "{{count, number}}개",
+    "guestbookCount_other": "{{count, number}}개",
+    "recentGuestbook": "최근 방명록",
+    "noGuestbook": "아직 방명록 글이 없습니다.",
+    "allGuestbook": "방명록 모두 보기"
   },
   "status": {
     "DRAFT": "임시저장",
@@ -124,5 +131,11 @@
     "atom": "Atom",
     "categoryRss": "카테고리 RSS",
     "categoryHint": "카테고리별 RSS는 아래와 같은 주소입니다(상위 카테고리는 하위 카테고리 글을 포함)."
+  },
+  "guestbook": {
+    "title": "방명록 관리",
+    "disabled": "방명록이 꺼져 있어 방문자에게 보이지 않습니다.",
+    "settingsLink": "블로그 설정에서 켜기",
+    "viewPublic": "블로그의 방명록 보기"
   }
 }

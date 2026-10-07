@@ -1,3 +1,44 @@
 {
-  "title": "留言板"
+  "title": "留言板",
+  "list": "留言列表",
+  "empty": "还没有留言。",
+  "form": {
+    "label": "写留言",
+    "content": "留言内容",
+    "submit": "留言",
+    "maxLength": "最多 {{max}} 个字符。",
+    "loginToWrite": "登录后才能留言"
+  },
+  "secret": {
+    "label": "悄悄话（仅博主和我可见）"
+  },
+  "guest": {
+    "legend": "以非会员身份留言",
+    "name": "名字",
+    "password": "密码",
+    "passwordHint": "{{min}}～{{max}} 个字符。以后修改或删除时需要。",
+    "passwordPrompt": "留言时输入的密码"
+  },
+  "entry": {
+    "unknownAuthor": "未知作者",
+    "guest": "非会员",
+    "secret": "悄悄话",
+    "secretHidden": "这是一条悄悄话。",
+    "deleted": "该留言已删除。",
+    "edited": "已编辑",
+    "replies": "回复",
+    "reply": "回复",
+    "replyForm": "写回复",
+    "replyContent": "回复内容",
+    "replySubmit": "发表回复",
+    "edit": "编辑",
+    "editForm": "编辑留言",
+    "editContent": "修改内容",
+    "editSubmit": "保存修改",
+    "unlockForm": "打开悄悄话",
+    "unlockHint": "要编辑悄悄话，请先用留言时输入的密码打开。",
+    "unlock": "打开内容",
+    "delete": "删除",
+    "deleteConfirm": "要删除这条留言吗？"
+  }
 }

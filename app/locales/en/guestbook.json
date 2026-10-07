@@ -1,3 +1,44 @@
 {
-  "title": "Guestbook"
+  "title": "Guestbook",
+  "list": "Guestbook entries",
+  "empty": "No guestbook entries yet.",
+  "form": {
+    "label": "Write in the guestbook",
+    "content": "Guestbook message",
+    "submit": "Leave a message",
+    "maxLength": "Up to {{max}} characters.",
+    "loginToWrite": "Log in to write in the guestbook"
+  },
+  "secret": {
+    "label": "Secret (visible only to the blog owner and me)"
+  },
+  "guest": {
+    "legend": "Write as a guest",
+    "name": "Name",
+    "password": "Password",
+    "passwordHint": "{{min}}-{{max}} characters. You need it to edit or delete later.",
+    "passwordPrompt": "Password you entered when writing"
+  },
+  "entry": {
+    "unknownAuthor": "Unknown author",
+    "guest": "Guest",
+    "secret": "Secret",
+    "secretHidden": "This is a secret entry.",
+    "deleted": "This entry was deleted.",
+    "edited": "edited",
+    "replies": "Replies",
+    "reply": "Reply",
+    "replyForm": "Write a reply",
+    "replyContent": "Reply",
+    "replySubmit": "Post reply",
+    "edit": "Edit",
+    "editForm": "Edit guestbook entry",
+    "editContent": "New message",
+    "editSubmit": "Save changes",
+    "unlockForm": "Open secret entry",
+    "unlockHint": "To edit a secret entry, first open it with the password you entered when writing.",
+    "unlock": "Open",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this guestbook entry?"
+  }
 }

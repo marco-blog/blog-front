@@ -7,7 +7,8 @@
     "categories": "カテゴリー",
     "comments": "コメント",
     "settings": "ブログ設定",
-    "feed": "フィード設定"
+    "feed": "フィード設定",
+    "guestbook": "ゲストブック"
   },
   "switcher": {
     "label": "ブログ切り替え"
@@ -26,7 +27,13 @@
     "noComments": "まだコメントがありません。",
     "commentOn": "{{title}}へのコメント",
     "deletedComment": "削除されたコメント",
-    "allComments": "コメントをすべて見る"
+    "allComments": "コメントをすべて見る",
+    "newGuestbook": "直近7日間の新しいゲストブック",
+    "guestbookCount_one": "{{count, number}}件",
+    "guestbookCount_other": "{{count, number}}件",
+    "recentGuestbook": "最近のゲストブック",
+    "noGuestbook": "まだゲストブックの書き込みはありません。",
+    "allGuestbook": "ゲストブックをすべて見る"
   },
   "status": {
     "DRAFT": "下書き",
@@ -124,5 +131,11 @@
     "atom": "Atom",
     "categoryRss": "カテゴリーRSS",
     "categoryHint": "カテゴリーごとのRSSは次のようなURLです(上位カテゴリーは下位カテゴリーの記事を含みます)。"
+  },
+  "guestbook": {
+    "title": "ゲストブック管理",
+    "disabled": "ゲストブックがオフのため、訪問者には表示されません。",
+    "settingsLink": "ブログ設定でオンにする",
+    "viewPublic": "ブログのゲストブックを見る"
   }
 }

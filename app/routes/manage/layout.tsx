@@ -10,13 +10,14 @@ import type { Route } from "./+types/layout";
 
 /**
  * 블로그 관리 메뉴(006 FR-099의 001 범위).
- * 002가 "피드 설정"을 더했고, 003~007의 메뉴(방명록, 통계 등)는 해당 스펙이 더한다.
+ * 002가 "피드 설정"을, 004가 "방명록"을 더했다. 나머지(통계 등)는 해당 스펙이 더한다.
  */
 export const MANAGE_MENU = [
   { key: "dashboard", path: "", available: true },
   { key: "posts", path: "/posts", available: true },
   { key: "categories", path: "/categories", available: true },
   { key: "comments", path: "/comments", available: true },
+  { key: "guestbook", path: "/guestbook", available: true },
   { key: "settings", path: "/settings", available: true },
   { key: "feed", path: "/feed", available: true },
 ] as const;

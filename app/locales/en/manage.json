@@ -7,7 +7,8 @@
     "categories": "Categories",
     "comments": "Comments",
     "settings": "Blog settings",
-    "feed": "Feed settings"
+    "feed": "Feed settings",
+    "guestbook": "Guestbook"
   },
   "switcher": {
     "label": "Switch blog"
@@ -26,7 +27,13 @@
     "noComments": "No comments yet.",
     "commentOn": "On {{title}}",
     "deletedComment": "Deleted comment",
-    "allComments": "See all comments"
+    "allComments": "See all comments",
+    "newGuestbook": "New guestbook entries (7 days)",
+    "guestbookCount_one": "{{count, number}} entry",
+    "guestbookCount_other": "{{count, number}} entries",
+    "recentGuestbook": "Recent guestbook entries",
+    "noGuestbook": "No guestbook entries yet.",
+    "allGuestbook": "View all guestbook entries"
   },
   "status": {
     "DRAFT": "Draft",
@@ -124,5 +131,11 @@
     "atom": "Atom",
     "categoryRss": "Category RSS",
     "categoryHint": "Each category has an RSS feed at addresses like these (a parent category includes its subcategories)."
+  },
+  "guestbook": {
+    "title": "Manage guestbook",
+    "disabled": "The guestbook is turned off, so visitors cannot see it.",
+    "settingsLink": "Turn it on in blog settings",
+    "viewPublic": "View the blog guestbook"
   }
 }
