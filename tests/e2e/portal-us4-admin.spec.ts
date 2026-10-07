@@ -125,7 +125,16 @@ test.describe("003 US4 관리자 콘솔", () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
     await expect(
       page.getByRole("navigation", { name: "관리자 메뉴" }).getByRole("link"),
-    ).toHaveText(["주제", "포털 추천", "포털 제외", "포털 설정"]);
+    ).toHaveText([
+      "주제",
+      "포털 추천",
+      "포털 제외",
+      "포털 설정",
+      // 005: 회원·신고·숨긴 글. 신고 관리에는 처리 대기 배지가 붙을 수 있다.
+      "회원 관리",
+      /^신고 관리/,
+      "숨긴 글",
+    ]);
   });
 
   test("추천 3편을 순서 2·1·3으로 지정하면 메인 맨 위에 1·2·3 순서, 기간을 과거로 고치면 빠진다(#23, #26)", async ({
