@@ -50,7 +50,8 @@
     "moderation": "Reports and hiding",
     "setting": "Settings",
     "releaseNote": "Release notes",
-    "role": "Roles"
+    "role": "Roles",
+    "external": "External blogs"
   },
   "actions": {
     "TOPIC_CREATE": "Add topic",
@@ -82,7 +83,19 @@
     "BANNED_WORD_DELETE": "Delete banned word",
     "USER_BLOG_LIMIT_CHANGE": "Change blog limit",
     "ROLE_GRANT": "Grant administrator role",
-    "ROLE_REVOKE": "Revoke administrator role"
+    "ROLE_REVOKE": "Revoke administrator role",
+    "EXTERNAL_BLOG_CREATE": "Add external blog",
+    "EXTERNAL_BLOG_APPROVE": "Approve external blog",
+    "EXTERNAL_BLOG_REJECT": "Reject external blog",
+    "EXTERNAL_BLOG_UPDATE": "Change external blog topic",
+    "EXTERNAL_BLOG_PAUSE": "Pause external blog",
+    "EXTERNAL_BLOG_RESUME": "Resume external blog",
+    "EXTERNAL_BLOG_BLOCK": "Block external blog",
+    "EXTERNAL_POST_REMOVE": "Remove external post",
+    "TOPIC_MAPPING_RULE_CREATE": "Add mapping rule",
+    "TOPIC_MAPPING_RULE_UPDATE": "Update mapping rule",
+    "TOPIC_MAPPING_RULE_DELETE": "Delete mapping rule",
+    "CLASSIFICATION_CONFIRM": "Confirm classification"
   },
   "targets": {
     "USER": "Member",
@@ -95,6 +108,10 @@
     "COMMENT": "Comment",
     "GUESTBOOK": "Guestbook entry",
     "TRACKBACK": "Trackback",
-    "BANNED_WORD": "Banned word"
+    "BANNED_WORD": "Banned word",
+    "EXTERNAL_BLOG": "External blog",
+    "EXTERNAL_POST": "External post",
+    "TOPIC_MAPPING_RULE": "Mapping rule",
+    "CLASSIFICATION_REVIEW": "Classification review"
   }
 }

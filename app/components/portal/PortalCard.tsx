@@ -34,41 +34,85 @@ export function PortalCard({ card, topics, now }: PortalCardProps) {
   const format = useDateFormat();
   const topic = findTopicById(topics, card.topicId);
   const name = topic ? topicName(topic.topic.names, i18n.language) : t("portal:card.noTopic");
+  const external = card.source === "EXTERNAL";
+  const body = (
+    <>
+      {card.thumbnailUrl ? (
+        <img
+          {...thumbnailImage(card.thumbnailUrl, "card")}
+          alt=""
+          loading="lazy"
+          className="portal-card-image"
+        />
+      ) : (
+        <div
+          className="portal-card-image portal-card-placeholder"
+          style={{ backgroundColor: cardColor(topics, card.topicId) }}
+          data-testid="portal-card-placeholder"
+        >
+          <span>{name}</span>
+        </div>
+      )}
+      <h3>
+        {card.title}
+        {external && (
+          <>
+            {" "}
+            <span className="portal-card-badge">{t("portal:card.external")}</span>
+          </>
+        )}
+      </h3>
+      {card.summary && (
+        <p className="portal-card-summary" style={SUMMARY_CLAMP}>
+          {card.summary}
+        </p>
+      )}
+    </>
+  );
+  const time = (
+    <time dateTime={card.publishedAt} title={format.dateTime(card.publishedAt)}>
+      {relative(card.publishedAt)}
+    </time>
+  );
+  if (external) {
+    // 007: 외부 글은 원래 블로그로(클릭 수를 세는 visit 경로, 새 탭). 외부 블로그 이름·호스트는 일반 텍스트로만.
+    return (
+      <article className="portal-card portal-card-external" data-source="EXTERNAL">
+        <a
+          href={card.visitUrl ?? "#"}
+          target="_blank"
+          rel="noopener nofollow"
+          className="portal-card-link"
+          aria-description={t("portal:card.newTab")}
+          title={t("portal:card.newTab")}
+        >
+          {body}
+        </a>
+        <p className="portal-card-meta">
+          <span className="portal-card-external-blog">
+            {card.externalBlog?.title ?? card.blog.title}
+          </span>{" "}
+          {card.externalBlog?.siteHost && (
+            <span className="portal-card-host">{card.externalBlog.siteHost}</span>
+          )}{" "}
+          {time}
+        </p>
+      </article>
+    );
+  }
   return (
     <article className="portal-card">
       <Link to={`/${card.blog.handle}/${card.id}`} className="portal-card-link">
-        {card.thumbnailUrl ? (
-          <img
-            {...thumbnailImage(card.thumbnailUrl, "card")}
-            alt=""
-            loading="lazy"
-            className="portal-card-image"
-          />
-        ) : (
-          <div
-            className="portal-card-image portal-card-placeholder"
-            style={{ backgroundColor: cardColor(topics, card.topicId) }}
-            data-testid="portal-card-placeholder"
-          >
-            <span>{name}</span>
-          </div>
-        )}
-        <h3>{card.title}</h3>
-        {card.summary && (
-          <p className="portal-card-summary" style={SUMMARY_CLAMP}>
-            {card.summary}
-          </p>
-        )}
+        {body}
       </Link>
       <p className="portal-card-meta">
         <Link to={`/${card.blog.handle}`}>{card.blog.title}</Link>{" "}
-        <span className="portal-card-author">
-          <Avatar url={card.author.profileImageUrl} /> {card.author.nickname}
-        </span>{" "}
-        <time dateTime={card.publishedAt} title={format.dateTime(card.publishedAt)}>
-          {relative(card.publishedAt)}
-        </time>{" "}
-        <span>{t("portal:card.likes", { count: card.likeCount })}</span>{" "}
+        {card.author && (
+          <span className="portal-card-author">
+            <Avatar url={card.author.profileImageUrl} /> {card.author.nickname}
+          </span>
+        )}{" "}
+        {time} <span>{t("portal:card.likes", { count: card.likeCount })}</span>{" "}
         <span>{t("portal:card.comments", { count: card.commentCount })}</span>
       </p>
     </article>
@@ -85,7 +129,7 @@ export function PortalCardList({ cards, label, topics, now }: PortalCardListProp
   return (
     <ul className="portal-cards" aria-label={label}>
       {cards.map((card) => (
-        <li key={card.id}>
+        <li key={`${card.source}-${card.id}`}>
           <PortalCard card={card} topics={topics} now={now} />
         </li>
       ))}

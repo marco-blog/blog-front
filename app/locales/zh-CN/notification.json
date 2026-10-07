@@ -13,6 +13,9 @@
     "BACKUP_READY": "{{blogTitle}} 的备份已准备好。可在 {{expiresAt}} 之前下载。",
     "REPORT_RESOLVED": "你举报的内容已审核完毕。",
     "REPORT_RESOLVED_ACTIONED": "我们已审核你举报的内容并采取了措施。",
-    "REPORT_RESOLVED_DISMISSED": "我们已审核你举报的内容，但未采取措施。"
+    "REPORT_RESOLVED_DISMISSED": "我们已审核你举报的内容，但未采取措施。",
+    "EXTERNAL_BLOG_APPROVED": "外部博客 {{externalBlogTitle}} 的登记已获批准，即将开始收集文章。",
+    "EXTERNAL_BLOG_REJECTED": "外部博客 {{externalBlogTitle}} 的登记被拒绝。原因：{{reason}}",
+    "EXTERNAL_FEED_STOPPED": "外部博客 {{externalBlogTitle}} 的订阅源连续 7 天以上无法读取，已停止收集(最近结果：{{lastResult}})。"
   }
 }

@@ -37,13 +37,7 @@ const admins: AdminMember[] = [
   },
 ];
 const choices = {
-  actions: [
-    "TOPIC_HIDE",
-    "ROLE_GRANT",
-    "ROLE_REVOKE",
-    "USER_BLOG_LIMIT_CHANGE",
-    "EXTERNAL_BLOG_BLOCK",
-  ],
+  actions: ["TOPIC_HIDE", "ROLE_GRANT", "ROLE_REVOKE", "USER_BLOG_LIMIT_CHANGE", "FUTURE_ACTION"],
   targetTypes: ["USER", "TOPIC", "RELEASE_NOTE"],
 };
 const entry = (id: number, overrides: Partial<AuditLogEntry> = {}): AuditLogEntry => ({
@@ -143,7 +137,7 @@ describe("admin audit log 화면", () => {
     expect(options).toContain("주제 숨김");
     expect(options).toContain("권한 · 모든 작업");
     expect(options).not.toContain("주제 추가");
-    expect(options.at(-1)).toBe("EXTERNAL_BLOG_BLOCK");
+    expect(options.at(-1)).toBe("FUTURE_ACTION");
     expect(within(form).getByRole("combobox", { name: "대상 종류" })).toHaveValue("USER");
     expect(within(form).getByRole("link", { name: "조건 지우기" })).toHaveAttribute(
       "href",
@@ -158,8 +152,8 @@ describe("admin audit log 화면", () => {
         [
           entry(1),
           entry(2, {
-            action: "EXTERNAL_BLOG_BLOCK",
-            targetType: "EXTERNAL_BLOG",
+            action: "FUTURE_ACTION",
+            targetType: "FUTURE_TARGET",
             targetId: null,
             targetKey: "feed.example",
             reason: "스팸",
@@ -178,8 +172,8 @@ describe("admin audit log 화면", () => {
       "href",
       "/admin/users/12",
     );
-    expect(within(table).getByText("EXTERNAL_BLOG_BLOCK")).toBeInTheDocument();
-    expect(within(table).getByText("EXTERNAL_BLOG feed.example")).toBeInTheDocument();
+    expect(within(table).getByText("FUTURE_ACTION")).toBeInTheDocument();
+    expect(within(table).getByText("FUTURE_TARGET feed.example")).toBeInTheDocument();
     expect(within(table).getByText("스팸")).toBeInTheDocument();
     expect(within(table).getByRole("link", { name: "릴리스 노트 #5" })).toHaveAttribute(
       "href",

@@ -88,12 +88,15 @@ export function topicNode(
 export function portalCard(id: number, overrides: Partial<PortalCard> = {}): PortalCard {
   return {
     id,
+    source: "INTERNAL",
     title: `포털 글 ${id}`,
     summary: `요약 ${id}`,
     thumbnailUrl: null,
     topicId: null,
     blog: { handle: "marco", title: "마르코의 블로그" },
     author: { nickname: "마르코", profileImageUrl: null },
+    externalBlog: null,
+    visitUrl: null,
     publishedAt: "2026-10-06T04:24:19Z",
     likeCount: 3,
     commentCount: 2,

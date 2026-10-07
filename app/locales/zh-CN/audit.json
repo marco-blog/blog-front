@@ -50,7 +50,8 @@
     "moderation": "举报与隐藏",
     "setting": "设置",
     "releaseNote": "发布说明",
-    "role": "权限"
+    "role": "权限",
+    "external": "外部博客"
   },
   "actions": {
     "TOPIC_CREATE": "添加主题",
@@ -82,7 +83,19 @@
     "BANNED_WORD_DELETE": "删除违禁词",
     "USER_BLOG_LIMIT_CHANGE": "更改博客数上限",
     "ROLE_GRANT": "授予管理员权限",
-    "ROLE_REVOKE": "撤销管理员权限"
+    "ROLE_REVOKE": "撤销管理员权限",
+    "EXTERNAL_BLOG_CREATE": "直接登记外部博客",
+    "EXTERNAL_BLOG_APPROVE": "批准外部博客",
+    "EXTERNAL_BLOG_REJECT": "拒绝外部博客",
+    "EXTERNAL_BLOG_UPDATE": "更改外部博客默认主题",
+    "EXTERNAL_BLOG_PAUSE": "暂停外部博客",
+    "EXTERNAL_BLOG_RESUME": "恢复外部博客",
+    "EXTERNAL_BLOG_BLOCK": "屏蔽外部博客",
+    "EXTERNAL_POST_REMOVE": "下架外部文章",
+    "TOPIC_MAPPING_RULE_CREATE": "添加映射规则",
+    "TOPIC_MAPPING_RULE_UPDATE": "更新映射规则",
+    "TOPIC_MAPPING_RULE_DELETE": "删除映射规则",
+    "CLASSIFICATION_CONFIRM": "确认分类审核"
   },
   "targets": {
     "USER": "会员",
@@ -95,6 +108,10 @@
     "COMMENT": "评论",
     "GUESTBOOK": "留言",
     "TRACKBACK": "引用通告",
-    "BANNED_WORD": "违禁词"
+    "BANNED_WORD": "违禁词",
+    "EXTERNAL_BLOG": "外部博客",
+    "EXTERNAL_POST": "外部文章",
+    "TOPIC_MAPPING_RULE": "映射规则",
+    "CLASSIFICATION_REVIEW": "分类审核"
   }
 }

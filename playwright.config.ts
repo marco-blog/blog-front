@@ -1,6 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
 const PORT = Number(process.env.E2E_PORT ?? 5173);
+const FEED_STUB_PORT = Number(process.env.E2E_FEED_STUB_PORT ?? 4610);
 
 /**
  * E2E(헌법 원칙 III). 스토리별 Independent Test 시나리오는 각 기능과 함께 tests/e2e에 더한다.
@@ -20,7 +21,12 @@ export default defineConfig({
   projects: [
     {
       name: "e2e",
-      testIgnore: [/portal-.*\.spec\.ts$/, /moderation-.*\.spec\.ts$/, /admin-.*\.spec\.ts$/],
+      testIgnore: [
+        /portal-.*\.spec\.ts$/,
+        /moderation-.*\.spec\.ts$/,
+        /admin-.*\.spec\.ts$/,
+        /external-.*\.spec\.ts$/,
+      ],
     },
     { name: "portal", testMatch: /portal-.*\.spec\.ts$/, dependencies: ["e2e"], workers: 1 },
     {
@@ -37,17 +43,35 @@ export default defineConfig({
       dependencies: ["portal", "moderation"],
       workers: 1,
     },
-  ],
-  webServer: {
-    command: "npm run build && npm start",
-    // 첫 화면(/)은 포털(003)이라 backend가 있어야 200이다. 준비 확인은 backend 없이 뜨는 /login으로 한다.
-    url: `http://localhost:${PORT}/login`,
-    // backend가 필요한 시나리오(tests/e2e/us1-*)는 E2E_BACKEND_URL이 있을 때만 돈다. 그때 front도 같은 backend를 본다.
-    env: {
-      PORT: String(PORT),
-      ...(process.env.E2E_BACKEND_URL ? { BLOG_BACKEND_URL: process.env.E2E_BACKEND_URL } : {}),
+    // 007 외부 블로그 시나리오(external-*)는 포털 "최신 글"에 외부 글을 섞고 운영 설정(외부 글 가중치 등)을 바꾸므로 맨 마지막에
+    // 한 번에 한 파일씩 돈다. 피드는 아래 webServer의 스텁 서버가 준다(인터넷에 나가지 않음).
+    {
+      name: "external",
+      testMatch: /external-.*\.spec\.ts$/,
+      dependencies: ["portal", "moderation", "admin"],
+      workers: 1,
     },
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  ],
+  webServer: [
+    {
+      command: "npm run build && npm start",
+      // 첫 화면(/)은 포털(003)이라 backend가 있어야 200이다. 준비 확인은 backend 없이 뜨는 /login으로 한다.
+      url: `http://localhost:${PORT}/login`,
+      // backend가 필요한 시나리오(tests/e2e/us1-*)는 E2E_BACKEND_URL이 있을 때만 돈다. 그때 front도 같은 backend를 본다.
+      env: {
+        PORT: String(PORT),
+        ...(process.env.E2E_BACKEND_URL ? { BLOG_BACKEND_URL: process.env.E2E_BACKEND_URL } : {}),
+      },
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      // 007 피드 스텁 서버(127.0.0.1:E2E_FEED_STUB_PORT, 기본 4610).
+      command: "node tests/e2e/support/feed-stub-server.mjs",
+      url: `http://127.0.0.1:${FEED_STUB_PORT}/__stub/health`,
+      env: { E2E_FEED_STUB_PORT: String(FEED_STUB_PORT) },
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+    },
+  ],
 });

@@ -28,7 +28,10 @@
     "likes_one": "いいね {{count, number}}",
     "likes_other": "いいね {{count, number}}",
     "comments_one": "コメント {{count, number}}",
-    "comments_other": "コメント {{count, number}}"
+    "comments_other": "コメント {{count, number}}",
+    "external": "外部",
+    "newTab": "新しいタブで元のブログへ移動",
+    "removalRequest": "削除リクエスト"
   },
   "topic": {
     "description": "{{name}}の記事をまとめて見られます。",
@@ -40,5 +43,11 @@
     "posts": "記事一覧",
     "empty": "このトピックにはまだ記事がありません。",
     "popularEmpty": "最近7日間に反応のあった記事はありません。新着順でご覧ください。"
+  },
+  "source": {
+    "label": "出典",
+    "all": "すべて",
+    "internal": "内部の記事のみ",
+    "external": "外部の記事のみ"
   }
 }

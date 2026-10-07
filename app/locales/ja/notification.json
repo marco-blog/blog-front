@@ -13,6 +13,9 @@
     "BACKUP_READY": "{{blogTitle}} のバックアップの準備ができました。{{expiresAt}} までダウンロードできます。",
     "REPORT_RESOLVED": "通報いただいた内容の確認が終わりました。",
     "REPORT_RESOLVED_ACTIONED": "通報いただいた内容を確認し、措置を行いました。",
-    "REPORT_RESOLVED_DISMISSED": "通報いただいた内容を確認しましたが、措置は行いませんでした。"
+    "REPORT_RESOLVED_DISMISSED": "通報いただいた内容を確認しましたが、措置は行いませんでした。",
+    "EXTERNAL_BLOG_APPROVED": "外部ブログ {{externalBlogTitle}} の登録が承認されました。まもなく記事を収集します。",
+    "EXTERNAL_BLOG_REJECTED": "外部ブログ {{externalBlogTitle}} の登録が却下されました。理由: {{reason}}",
+    "EXTERNAL_FEED_STOPPED": "外部ブログ {{externalBlogTitle}} のフィードを 7 日以上読めなかったため収集を止めました(最後の結果: {{lastResult}})。"
   }
 }

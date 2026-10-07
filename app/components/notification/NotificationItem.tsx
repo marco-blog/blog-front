@@ -51,6 +51,12 @@ export function NotificationItem({ notification }: { notification: Notification 
     blogTitle: text(notification.params.blogTitle) || notification.blog?.title || "",
     // BACKUP_READY(004): 내려받을 수 있는 마지막 시각을 화면 언어·회원 시간대로
     expiresAt: format.dateTime(text(notification.params.expiresAt) || null),
+    // 007 외부 블로그: 이름(외부 텍스트), 거절 사유, 마지막 수집 결과(코드 → 문구)
+    externalBlogTitle: text(notification.params.externalBlogTitle),
+    reason: text(notification.params.reason),
+    lastResult: t(`external:fetchResult.${text(notification.params.lastResult) || "HTTP_ERROR"}`, {
+      defaultValue: text(notification.params.lastResult),
+    }),
   });
 
   return (

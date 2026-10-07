@@ -133,6 +133,15 @@ jobs:
           BLOG_MEDIA_THUMBNAIL_DIR: ${{ runner.temp }}/blog-media/thumb
           # 006 대시보드 수치를 바로 확인(E2E_ADMIN_TEST_SETTINGS=1과 짝): 대시보드 캐시 끔
           BLOG_ADMIN_DASHBOARD_CACHE_TTL: 0s
+          # 007 외부 블로그 시험용 설정(E2E_EXTERNAL_TEST_SETTINGS=1과 짝). E2E 피드 스텁이 127.0.0.1:4610, 시험 전용:
+          # 내부망 주소와 4610 포트를 허용하고(prod 프로필에서는 기동 실패), 2초마다 고르고 5초마다 수집, 미리보기·인증 확인 한도를 넉넉히.
+          BLOG_OUTBOUND_ALLOW_PRIVATE: "true"
+          BLOG_OUTBOUND_ALLOWED_PORTS: "80,443,8080,8443,4610"
+          BLOG_EXTERNAL_POLL_INTERVAL: 2s
+          BLOG_EXTERNAL_FETCH_INTERVAL: PT5S
+          BLOG_EXTERNAL_FETCH_JITTER: PT0S
+          BLOG_EXTERNAL_PREVIEW_PER_HOUR: "1000"
+          BLOG_EXTERNAL_VERIFY_CHECKS_PER_HOUR: "1000"
         run: |
           BLOG_CRYPTO_KEY_V1="$(openssl rand -base64 32)"
           BLOG_CRYPTO_HASH_KEY="$(openssl rand -base64 32)"
@@ -180,6 +189,9 @@ jobs:
           E2E_MODERATION_TEST_SETTINGS: "1"
           # 006 관리 콘솔 시나리오(admin 프로젝트): 위 BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s로 띄웠다는 표시
           E2E_ADMIN_TEST_SETTINGS: "1"
+          # 007 외부 블로그 시나리오(external 프로젝트): 위 BLOG_OUTBOUND_*·BLOG_EXTERNAL_*로 띄웠다는 표시와 피드 스텁 포트
+          E2E_EXTERNAL_TEST_SETTINGS: "1"
+          E2E_FEED_STUB_PORT: "4610"
 
       - name: Upload logs
         if: failure()

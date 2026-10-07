@@ -96,4 +96,30 @@ describe("PortalCard", () => {
     expect(placeholder).toHaveTextContent("トピックなし");
     expect(screen.getByRole("article").querySelector(".portal-card-summary")).toBeNull();
   });
+
+  it("외부 카드(007): visit 링크 새 탭·nofollow, 외부 배지, 블로그 이름과 호스트, 좋아요·댓글 없음", async () => {
+    renderCard(
+      portalCard(77, {
+        source: "EXTERNAL",
+        title: "Rust 소유권 정리",
+        blog: { handle: null, title: "Dev Log" },
+        author: null,
+        externalBlog: { id: 3, title: "Dev Log", siteHost: "dev.example.com" },
+        visitUrl: "/api/v1/external-posts/77/visit",
+        likeCount: 0,
+        commentCount: 0,
+      }),
+    );
+
+    const article = await screen.findByRole("article");
+    const link = within(article).getByRole("link", { name: /Rust 소유권 정리/ });
+    expect(link).toHaveAttribute("href", "/api/v1/external-posts/77/visit");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener nofollow");
+    expect(article).toHaveTextContent("외부");
+    expect(article).toHaveTextContent("Dev Log");
+    expect(article).toHaveTextContent("dev.example.com");
+    expect(article).not.toHaveTextContent("좋아요");
+    expect(article).not.toHaveTextContent("댓글");
+  });
 });

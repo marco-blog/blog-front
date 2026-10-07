@@ -50,7 +50,8 @@
     "moderation": "通報・非表示",
     "setting": "設定",
     "releaseNote": "リリースノート",
-    "role": "権限"
+    "role": "権限",
+    "external": "外部ブログ"
   },
   "actions": {
     "TOPIC_CREATE": "トピック追加",
@@ -82,7 +83,19 @@
     "BANNED_WORD_DELETE": "禁止語の削除",
     "USER_BLOG_LIMIT_CHANGE": "ブログ数上限の変更",
     "ROLE_GRANT": "管理者権限の付与",
-    "ROLE_REVOKE": "管理者権限の取り消し"
+    "ROLE_REVOKE": "管理者権限の取り消し",
+    "EXTERNAL_BLOG_CREATE": "外部ブログを直接登録",
+    "EXTERNAL_BLOG_APPROVE": "外部ブログを承認",
+    "EXTERNAL_BLOG_REJECT": "外部ブログを却下",
+    "EXTERNAL_BLOG_UPDATE": "外部ブログの既定トピック変更",
+    "EXTERNAL_BLOG_PAUSE": "外部ブログを一時停止",
+    "EXTERNAL_BLOG_RESUME": "外部ブログを再開",
+    "EXTERNAL_BLOG_BLOCK": "外部ブログをブロック",
+    "EXTERNAL_POST_REMOVE": "外部記事を非表示",
+    "TOPIC_MAPPING_RULE_CREATE": "マッピングルールを追加",
+    "TOPIC_MAPPING_RULE_UPDATE": "マッピングルールを更新",
+    "TOPIC_MAPPING_RULE_DELETE": "マッピングルールを削除",
+    "CLASSIFICATION_CONFIRM": "分類レビューを確定"
   },
   "targets": {
     "USER": "会員",
@@ -95,6 +108,10 @@
     "COMMENT": "コメント",
     "GUESTBOOK": "ゲストブック",
     "TRACKBACK": "トラックバック",
-    "BANNED_WORD": "禁止語"
+    "BANNED_WORD": "禁止語",
+    "EXTERNAL_BLOG": "外部ブログ",
+    "EXTERNAL_POST": "外部記事",
+    "TOPIC_MAPPING_RULE": "マッピングルール",
+    "CLASSIFICATION_REVIEW": "分類レビュー"
   }
 }

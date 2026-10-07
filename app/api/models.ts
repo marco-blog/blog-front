@@ -370,11 +370,18 @@ export const BACKUP_READY_NOTIFICATION = "BACKUP_READY";
 /** 005 신고 처리 알림(target `REPORT`, params `{ targetType, decision: "ACTIONED" | "DISMISSED" }`). 링크 없음 */
 export const REPORT_RESOLVED_NOTIFICATION = "REPORT_RESOLVED";
 /** 아는 알림 종류(002 댓글·구독, 004 백업). 이후 스펙이 더하므로 응답의 `type`은 string으로 받는다(모르는 값은 공통 문구). */
+/** 007 외부 블로그 알림(target `EXTERNAL_BLOG`, params `{ externalBlogTitle, reason? , lastResult? }`). 링크는 그 등록의 관리 화면 */
+export const EXTERNAL_BLOG_NOTIFICATIONS = [
+  "EXTERNAL_BLOG_APPROVED",
+  "EXTERNAL_BLOG_REJECTED",
+  "EXTERNAL_FEED_STOPPED",
+] as const;
 export const NOTIFICATION_TYPES = [
   "NEW_COMMENT",
   "NEW_SUBSCRIBER",
   BACKUP_READY_NOTIFICATION,
   REPORT_RESOLVED_NOTIFICATION,
+  ...EXTERNAL_BLOG_NOTIFICATIONS,
 ] as const;
 export type KnownNotificationType = (typeof NOTIFICATION_TYPES)[number];
 
@@ -430,14 +437,28 @@ export interface TopicNode {
 }
 
 /** 포털 카드(FR-085) */
+/** 포털 카드 출처(007). 내부 글(posts)과 외부 블로그에서 수집한 글(external_posts) */
+export type PortalCardSource = "INTERNAL" | "EXTERNAL";
+
+/** 포털 최신 글·주제 글의 출처 필터(007 `?source=`) */
+export type PortalSource = "all" | "internal" | "external";
+export const PORTAL_SOURCES: readonly PortalSource[] = ["all", "internal", "external"];
+
+/**
+ * 포털 카드(003, 007 확장). `id`는 출처별 id라 React 키는 `${source}-${id}`. 외부 카드는 `blog.handle`·`author`가 null,
+ * `visitUrl`(`/api/v1/external-posts/{id}/visit`)과 `externalBlog`가 값이다.
+ */
 export interface PortalCard {
   id: number;
+  source: PortalCardSource;
   title: string;
   summary: string | null;
   thumbnailUrl: string | null;
   topicId: number | null;
-  blog: BlogRef;
-  author: { nickname: string; profileImageUrl: string | null };
+  blog: { handle: string | null; title: string };
+  author: { nickname: string; profileImageUrl: string | null } | null;
+  externalBlog: { id: number; title: string; siteHost: string } | null;
+  visitUrl: string | null;
   publishedAt: string;
   likeCount: number;
   commentCount: number;
@@ -1027,4 +1048,193 @@ export interface AdminRevision {
 export interface ReleaseNotePreview {
   contentHtml: string;
   toc: ReleaseNoteTocEntry[];
+}
+
+/* ---------- 007 외부 블로그(007 contracts/api.md) ---------- */
+
+export type ExternalBlogStatus =
+  "PENDING" | "REJECTED" | "ACTIVE" | "PAUSED" | "STOPPED" | "BLOCKED" | "RELEASED";
+export const EXTERNAL_BLOG_STATUSES: readonly ExternalBlogStatus[] = [
+  "PENDING",
+  "ACTIVE",
+  "PAUSED",
+  "STOPPED",
+  "BLOCKED",
+  "REJECTED",
+  "RELEASED",
+];
+
+export type FeedFormat = "RSS" | "ATOM";
+
+export type FetchResultCode =
+  | "OK"
+  | "NOT_MODIFIED"
+  | "HTTP_ERROR"
+  | "TIMEOUT"
+  | "TOO_LARGE"
+  | "PARSE_ERROR"
+  | "BLOCKED_ADDRESS"
+  | "DNS_ERROR";
+
+export type ExternalTopicSource = "OWNER" | "REVIEW" | "RULE" | "AUTO" | "DEFAULT";
+export const EXTERNAL_TOPIC_SOURCES: readonly ExternalTopicSource[] = [
+  "OWNER",
+  "REVIEW",
+  "RULE",
+  "AUTO",
+  "DEFAULT",
+];
+
+export type ExternalPostStatus = "ACTIVE" | "REMOVED";
+export type ExternalRemovedReason =
+  "LINK_BROKEN" | "BLOG_BLOCKED" | "MEMBER_WITHDRAWN" | "REPORT" | "ADMIN";
+
+/** POST /external-blog-previews */
+export interface FeedPreview {
+  feedUrl: string;
+  siteUrl: string | null;
+  title: string | null;
+  format: FeedFormat;
+  recentPosts: { title: string; link: string; publishedAt: string | null }[];
+  registered: {
+    externalBlogId: number;
+    status: ExternalBlogStatus;
+    claimable: boolean;
+    mine: boolean;
+  } | null;
+}
+
+/** POST /me/external-blog-verifications, …/{id}/check */
+export interface Verification {
+  id: number;
+  feedUrl: string;
+  code: string;
+  expiresAt: string;
+  verifiedAt: string | null;
+  claimableExternalBlogId: number | null;
+}
+
+/** GET /me/external-blogs 한 줄 */
+export interface MyExternalBlog {
+  id: number;
+  title: string | null;
+  siteUrl: string | null;
+  feedUrl: string;
+  feedFormat: FeedFormat | null;
+  status: ExternalBlogStatus;
+  registrationType: "MEMBER_REQUEST" | "ADMIN_DIRECT";
+  ownershipVerified: boolean;
+  defaultTopicId: number;
+  rejectReason: string | null;
+  lastFetchedAt: string | null;
+  lastSuccessAt: string | null;
+  lastFetchResult: FetchResultCode | null;
+  postCount: number;
+  createdAt: string;
+}
+
+/** GET /me/external-blogs/{id}/posts 한 줄 */
+export interface MyExternalPost {
+  id: number;
+  title: string;
+  summary: string | null;
+  link: string;
+  thumbnailUrl: string | null;
+  publishedAt: string | null;
+  topicId: number;
+  topicSource: ExternalTopicSource;
+  status: ExternalPostStatus;
+  removedReason: ExternalRemovedReason | null;
+  clickCount: number;
+}
+
+/** GET /admin/external-blogs 한 줄 */
+export type AdminExternalBlog = MyExternalBlog & {
+  member: { userId: number; nickname: string; status: "ACTIVE" | "SUSPENDED" | "WITHDRAWN" } | null;
+  registrationBasis: string | null;
+  reviewedBy: UserRef | null;
+  reviewedAt: string | null;
+  ownershipVerifiedAt: string | null;
+  nextFetchAt: string | null;
+  lastHttpStatus: number | null;
+  consecutiveFailures: number;
+  firstFailedAt: string | null;
+  pendingReviewCount: number;
+};
+
+/** GET /admin/external-blogs/{id}/posts 한 줄 */
+export type AdminExternalPost = MyExternalPost & {
+  guid: string | null;
+  imageUrl: string | null;
+  feedTerms: string[];
+  classifierTopicId: number | null;
+  classifierConfidence: number | null;
+  classifierVersion: string | null;
+  excluded: { reason: string; excludedBy: UserRef; createdAt: string } | null;
+  linkCheckedAt: string | null;
+};
+
+/** PUT /admin/portal/external-exclusions/{externalPostId} */
+export interface ExternalExclusion {
+  externalPostId: number;
+  reason: string;
+  excludedBy: UserRef;
+  createdAt: string;
+}
+
+export type ClassificationReviewStatus = "PENDING" | "CONFIRMED" | "SKIPPED";
+
+/** GET /admin/classification-reviews 한 줄 */
+export interface ClassificationReview {
+  id: number;
+  status: ClassificationReviewStatus;
+  post: {
+    id: number;
+    title: string;
+    summary: string | null;
+    link: string;
+    feedTerms: string[];
+    topicId: number;
+    topicSource: string;
+  };
+  externalBlog: { id: number; title: string | null; defaultTopicId: number };
+  predictedTopicId: number | null;
+  confidence: number | null;
+  confirmedTopicId: number | null;
+  reviewedBy: UserRef | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+/** POST /admin/classification-reviews/confirm-batch */
+export interface ClassificationBatchResult {
+  confirmed: number[];
+  skipped: { id: number; status: ClassificationReviewStatus }[];
+}
+
+/** GET /admin/classification-stats */
+export interface ClassificationStats {
+  window: { from: string; to: string };
+  classifierAccuracy: { sample: number; correct: number; rate: number | null };
+  finalAccuracy: { sample: number; unchanged: number; rate: number | null };
+  distribution: {
+    topicId: number;
+    total: number;
+    bySource: Record<ExternalTopicSource, number>;
+  }[];
+  pendingReviews: number;
+  minConfidence: number;
+  classifierVersion: string;
+  generatedAt: string;
+}
+
+/** GET /admin/topic-mapping-rules 한 줄 */
+export interface TopicMappingRule {
+  id: number;
+  keyword: string;
+  topicId: number;
+  priority: number;
+  createdBy: UserRef;
+  createdAt: string;
+  updatedAt: string;
 }

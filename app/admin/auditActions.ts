@@ -51,6 +51,23 @@ export const AUDIT_ACTION_GROUPS = [
     ],
   },
   { group: "role", actions: ["ROLE_GRANT", "ROLE_REVOKE"] },
+  {
+    group: "external",
+    actions: [
+      "EXTERNAL_BLOG_CREATE",
+      "EXTERNAL_BLOG_APPROVE",
+      "EXTERNAL_BLOG_REJECT",
+      "EXTERNAL_BLOG_UPDATE",
+      "EXTERNAL_BLOG_PAUSE",
+      "EXTERNAL_BLOG_RESUME",
+      "EXTERNAL_BLOG_BLOCK",
+      "EXTERNAL_POST_REMOVE",
+      "TOPIC_MAPPING_RULE_CREATE",
+      "TOPIC_MAPPING_RULE_UPDATE",
+      "TOPIC_MAPPING_RULE_DELETE",
+      "CLASSIFICATION_CONFIRM",
+    ],
+  },
 ] as const;
 
 export type AuditActionGroup = (typeof AUDIT_ACTION_GROUPS)[number]["group"];
@@ -73,6 +90,10 @@ export const AUDIT_TARGETS: readonly string[] = [
   "GUESTBOOK",
   "TRACKBACK",
   "BANNED_WORD",
+  "EXTERNAL_BLOG",
+  "EXTERNAL_POST",
+  "TOPIC_MAPPING_RULE",
+  "CLASSIFICATION_REVIEW",
 ];
 
 /** 묶음 하나를 고르면 그 묶음의 작업 전부(쉼표로 이어 `action` 쿼리로). 값 앞에 붙는 표시 */

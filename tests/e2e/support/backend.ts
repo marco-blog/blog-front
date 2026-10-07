@@ -55,6 +55,19 @@ export function requireModerationTestSettings() {
   );
 }
 
+/**
+ * 007 외부 블로그 시나리오(external 프로젝트)는 backend를 시험용 설정으로 띄웠을 때만 돈다: 사설 주소 허용
+ * (BLOG_OUTBOUND_ALLOW_PRIVATE=true, 포트 4610 허용), 짧은 수집 주기(BLOG_EXTERNAL_FETCH_INTERVAL=PT5S, 지터 없음),
+ * 미리보기·인증 확인 한도를 넉넉히(.github/workflows/ci.yml "Start backend"). 피드 스텁 서버는 playwright.config.ts가 띄운다.
+ * 그렇게 띄웠다는 표시로 E2E_EXTERNAL_TEST_SETTINGS=1을 준다.
+ */
+export function requireExternalTestSettings() {
+  test.skip(
+    process.env.E2E_EXTERNAL_TEST_SETTINGS !== "1",
+    "E2E_EXTERNAL_TEST_SETTINGS=1(007 시험용 backend 설정)이 아니면 외부 블로그 시나리오는 건너뛴다.",
+  );
+}
+
 /** 관리자 계정(E2E_ADMIN_EMAIL·E2E_ADMIN_PASSWORD). 없으면 관리자 시나리오는 건너뛴다. */
 export function requireAdmin() {
   test.skip(

@@ -33,6 +33,13 @@ export function auditTargetHref(
       return "/admin/portal/curations";
     case "SETTING":
       return "/admin/portal/settings";
+    // 007
+    case "EXTERNAL_BLOG":
+      return id === null ? null : `/admin/external-blogs/${id}`;
+    case "TOPIC_MAPPING_RULE":
+      return "/admin/external-blogs/rules";
+    case "CLASSIFICATION_REVIEW":
+      return "/admin/external-blogs/reviews";
     default:
       return null;
   }

@@ -57,3 +57,49 @@ describe("BACKUP_READY 알림", () => {
     );
   });
 });
+
+/** 007 외부 블로그 알림(T021) */
+describe("EXTERNAL_* 알림", () => {
+  const external = (type: string, params: Record<string, unknown>): Notification => ({
+    ...backupReady,
+    id: 20,
+    type,
+    blog: null,
+    targetType: "EXTERNAL_BLOG",
+    targetId: 7,
+    params,
+  });
+
+  it("승인·거절(사유)·자동 중지(마지막 결과 문구)", async () => {
+    for (const type of [
+      "EXTERNAL_BLOG_APPROVED",
+      "EXTERNAL_BLOG_REJECTED",
+      "EXTERNAL_FEED_STOPPED",
+    ]) {
+      expect(isKnownNotificationType(type)).toBe(true);
+    }
+    renderItem(
+      external("EXTERNAL_BLOG_REJECTED", { externalBlogTitle: "Dev Log", reason: "광고" }),
+    );
+    expect(
+      await screen.findByText(/외부 블로그 Dev Log 등록이 거절되었습니다\. 사유: 광고/),
+    ).toBeInTheDocument();
+  });
+
+  it("자동 중지는 결과 코드를 화면 언어 문구로", async () => {
+    renderItem(
+      external("EXTERNAL_FEED_STOPPED", { externalBlogTitle: "Dev Log", lastResult: "TIMEOUT" }),
+      "en",
+    );
+    expect(await screen.findByText(/last result: Timed out/)).toBeInTheDocument();
+  });
+
+  it("링크는 /manage/external-blogs/{id}, id가 없으면 알림 목록", () => {
+    expect(notificationHref(external("EXTERNAL_BLOG_APPROVED", {}))).toBe(
+      "/manage/external-blogs/7",
+    );
+    expect(notificationHref({ ...external("EXTERNAL_BLOG_APPROVED", {}), targetId: null })).toBe(
+      "/notifications",
+    );
+  });
+});
