@@ -20,6 +20,8 @@ import {
   type FormErrorData,
 } from "~/api/formErrors";
 import type { LegalDocument, SignupResult } from "~/api/models";
+import { Captcha, CAPTCHA_FIELD } from "~/components/captcha/Captcha";
+import { captchaView } from "~/components/captcha/captcha.server";
 import { FormAlert, FormField } from "~/components/form/FormField";
 import { HandleField } from "~/components/form/HandleField";
 import { isSupportedLanguage } from "~/i18n/config";
@@ -51,12 +53,18 @@ export function meta({ matches }: Route.MetaArgs) {
   return privatePageMeta(t("auth:signup.title"), t("appName"));
 }
 
-/** 약관 버전(4개 언어 공통 하나, FR-081·155). 가입 요청의 termsVersion으로 그대로 보낸다. */
-export async function loader({ request }: Route.LoaderArgs) {
-  const terms = await createApiClient(request)
-    .get<LegalDocument>("/legal/terms", { query: { lang: resolveLanguage(request) } })
-    .catch(throwApiErrorResponse);
-  return { termsVersion: terms.version };
+/**
+ * 약관 버전(4개 언어 공통 하나, FR-081·155). 가입 요청의 termsVersion으로 그대로 보낸다.
+ * 가입은 CAPTCHA를 거친다(005 FR-141). 위젯 정보는 `GET /captcha/config`로 함께 읽는다.
+ */
+export async function loader({ request, context }: Route.LoaderArgs) {
+  const [terms, captcha] = await Promise.all([
+    createApiClient(request)
+      .get<LegalDocument>("/legal/terms", { query: { lang: resolveLanguage(request) } })
+      .catch(throwApiErrorResponse),
+    captchaView(request, context),
+  ]);
+  return { termsVersion: terms.version, captcha };
 }
 
 /**
@@ -101,6 +109,7 @@ export async function action({ request }: Route.ActionArgs) {
     termsVersion: text("termsVersion"),
     ...(isSupportedLanguage(locale) ? { locale } : {}),
     ...(TIME_ZONE_PATTERN.test(timeZone) ? { timeZone } : {}),
+    captchaToken: text(CAPTCHA_FIELD),
   };
   let result: SignupResult;
   try {
@@ -114,7 +123,7 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function Signup() {
   const { t, i18n } = useTranslation();
-  const { termsVersion } = useLoaderData<typeof loader>();
+  const { termsVersion, captcha } = useLoaderData<typeof loader>();
   const actionData = useActionData<SignupActionData>();
   const messages = useFormMessages(actionData);
   const submitting = useNavigation().state === "submitting";
@@ -192,6 +201,7 @@ export default function Signup() {
           </Agreement>
           <Agreement name="over14" label={t("auth:signup.over14")} error={messages.fields.over14} />
         </fieldset>
+        <Captcha captcha={captcha} />
         <button type="submit" disabled={submitting}>
           {t("auth:signup.submit")}
         </button>

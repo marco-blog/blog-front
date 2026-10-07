@@ -19,7 +19,7 @@ export const MANAGE_MENU = [
   { key: "design", path: "/design", available: true },
   { key: "feed", path: "/feed", available: true },
   { key: "stats", path: "/stats", available: true },
-  { key: "trackbacks", path: "/trackbacks", available: false },
+  { key: "trackbacks", path: "/trackbacks", available: true },
   { key: "backup", path: "/backup", available: true },
   { key: "blocks", path: "/blocks", available: true },
   { key: "externalBlogs", path: "/external-blogs", available: false },

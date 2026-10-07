@@ -405,6 +405,7 @@ describe("블로그 설정 loader·action", () => {
         defaultTopicId: 11,
         guestbookEnabled: true,
         guestWriteEnabled: false,
+        trackbackEnabled: true,
       },
       topics,
     });
@@ -482,6 +483,7 @@ describe("블로그 설정 loader·action", () => {
       portalEnabled: false,
       guestbookEnabled: false,
       guestWriteEnabled: false,
+      trackbackEnabled: false,
       defaultTopicId: null,
     });
   });
@@ -610,6 +612,7 @@ describe("블로그 관리 화면", () => {
       "꾸미기",
       "피드 설정",
       "통계",
+      "받은 트랙백",
       "백업",
       "차단 목록",
     ]);
@@ -621,7 +624,7 @@ describe("블로그 관리 화면", () => {
       "href",
       "/marco/manage/posts",
     );
-    // 006 FR-099 표 순서(받은 트랙백·외부 블로그는 그 스펙이 켤 때까지 숨김)
+    // 006 FR-099 표 순서(005가 받은 트랙백을 켰다. 외부 블로그는 007이 켤 때까지 숨김)
     expect(MANAGE_MENU.filter((item) => item.available).map((item) => item.key)).toEqual([
       "dashboard",
       "posts",
@@ -632,6 +635,7 @@ describe("블로그 관리 화면", () => {
       "design",
       "feed",
       "stats",
+      "trackbacks",
       "backup",
       "blocks",
     ]);
@@ -1038,6 +1042,39 @@ describe("블로그 관리 화면", () => {
     });
   });
 
+  it("블로그 설정: 트랙백 받기 체크 상태를 보여주고 PATCH에 trackbackEnabled(005)", async () => {
+    const backend = renderManage("/marco/manage/settings", {
+      [BLOG]: ok({ ...blog, trackbackEnabled: false }),
+      "PATCH /api/v1/blogs/marco": ok(blog),
+    });
+
+    const toggle = await screen.findByRole("checkbox", { name: "트랙백 받기" });
+    expect(toggle).not.toBeChecked();
+    expect(
+      screen.getByText("끄면 새 트랙백을 받지 않습니다. 이미 받은 트랙백은 그대로 남습니다."),
+    ).toBeInTheDocument();
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("블로그 설정을 저장했습니다.");
+    expect(backend.callsTo("PATCH /api/v1/blogs/marco")[0].body).toMatchObject({
+      trackbackEnabled: true,
+    });
+  });
+
+  it("블로그 설정: 제목 금칙어(BANNED_WORD, 005)는 제목 입력란에", async () => {
+    renderManage("/marco/manage/settings", {
+      "PATCH /api/v1/blogs/marco": fail(400, "VALIDATION_FAILED", [
+        { field: "title", code: "BANNED_WORD" },
+      ]),
+    });
+
+    fireEvent.click(await screen.findByRole("button", { name: "저장" }));
+
+    expect(await screen.findByText("사용할 수 없는 단어가 있습니다.")).toBeInTheDocument();
+    expect(screen.getByLabelText("블로그 제목")).toHaveAttribute("aria-invalid", "true");
+  });
+
   it("블로그 설정: 저장하면 안내, 검증 오류는 입력란에", async () => {
     let fail400 = false;
     const backend = renderManage("/marco/manage/settings", {
@@ -1067,6 +1104,7 @@ describe("블로그 관리 화면", () => {
       portalEnabled: true,
       guestbookEnabled: true,
       guestWriteEnabled: false,
+      trackbackEnabled: true,
       defaultTopicId: null,
     });
 

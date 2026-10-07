@@ -23,5 +23,8 @@
   },
   "cover": {
     "label": "Blog cover image"
+  },
+  "upload": {
+    "tooMany": "Too many images uploaded. Please try again in a moment."
   }
 }

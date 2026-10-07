@@ -22,6 +22,7 @@ type ActionArgs = Parameters<typeof action>[0];
 type MetaArgs = Parameters<typeof meta>[0];
 
 const LOGIN = "POST /api/v1/auth/login";
+const CONFIG = "GET /api/v1/captcha/config";
 const loginResult = {
   userId: 7,
   nickname: "마르코",
@@ -109,6 +110,66 @@ describe("login action", () => {
     expect(result.init?.status).toBe(code === "ACCOUNT_LOCKED" ? 423 : 401);
   });
 
+  it("CAPTCHA_REQUIRED면 CAPTCHA 정보를 함께 돌려주고 이메일을 유지한다", async () => {
+    const backend = mockBackend({
+      [LOGIN]: fail(400, "CAPTCHA_REQUIRED"),
+      [CONFIG]: ok({ provider: "test", siteKey: null }),
+    });
+
+    const result = asData<{ resultCode: string; values: unknown; captcha: unknown }>(
+      await action(
+        routeArgs<ActionArgs>(formRequest("/login", { email: "a@b.c", password: "wrong1234" })),
+      ),
+    );
+
+    expect(result.init?.status).toBe(400);
+    expect(result.data).toMatchObject({
+      resultCode: "CAPTCHA_REQUIRED",
+      values: { email: "a@b.c" },
+      captcha: { provider: "test", testToken: "e2e-pass" },
+    });
+    expect(backend.callsTo(LOGIN)[0].body).toEqual({ email: "a@b.c", password: "wrong1234" });
+  });
+
+  it("captchaToken이 있으면 함께 보내고, CAPTCHA가 보였던 폼은 다른 실패에도 계속 보인다", async () => {
+    const backend = mockBackend({
+      [LOGIN]: fail(401, "INVALID_CREDENTIALS"),
+      [CONFIG]: ok({ provider: "test", siteKey: null }),
+    });
+
+    const result = asData<{ resultCode: string; captcha?: unknown }>(
+      await action(
+        routeArgs<ActionArgs>(
+          formRequest("/login", {
+            email: "a@b.c",
+            password: "wrong1234",
+            captchaToken: "e2e-pass",
+            captchaShown: "1",
+          }),
+        ),
+      ),
+    );
+
+    expect(backend.callsTo(LOGIN)[0].body).toEqual({
+      email: "a@b.c",
+      password: "wrong1234",
+      captchaToken: "e2e-pass",
+    });
+    expect(result.data.captcha).toMatchObject({ provider: "test" });
+  });
+
+  it("CAPTCHA가 필요 없는 실패에는 CAPTCHA 정보가 없다", async () => {
+    mockBackend({ [LOGIN]: fail(401, "INVALID_CREDENTIALS") });
+
+    const result = asData<{ captcha?: unknown }>(
+      await action(
+        routeArgs<ActionArgs>(formRequest("/login", { email: "a@b.c", password: "wrong1234" })),
+      ),
+    );
+
+    expect(result.data).not.toHaveProperty("captcha");
+  });
+
   it("빈 입력은 backend를 부르지 않고 필드 오류", async () => {
     const backend = mockBackend();
 
@@ -171,6 +232,45 @@ describe("login 화면", () => {
     fireEvent.click(screen.getByRole("button", { name: "로그인" }));
 
     expect(await screen.findByText("write page")).toBeInTheDocument();
+  });
+
+  it("CAPTCHA_REQUIRED면 같은 화면에 CAPTCHA를 보이고, 다시 누르면 토큰과 함께 로그인한다", async () => {
+    let attempts = 0;
+    const backend = mockBackend({
+      [LOGIN]: () => (++attempts === 1 ? fail(400, "CAPTCHA_REQUIRED") : loginOk()),
+      [CONFIG]: ok({ provider: "test", siteKey: null }),
+    });
+    renderLogin();
+
+    fireEvent.change(await screen.findByLabelText("이메일"), { target: { value: "a@b.c" } });
+    fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "secret123" } });
+    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("자동 등록 방지 확인을 마친 뒤");
+    expect(screen.getByRole("group", { name: "자동 등록 방지" })).toBeInTheDocument();
+    expect(screen.getByLabelText("이메일")).toHaveValue("a@b.c");
+
+    fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "secret123" } });
+    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+
+    expect(await screen.findByText("write page")).toBeInTheDocument();
+    expect(backend.callsTo(LOGIN)[1].body).toMatchObject({ captchaToken: "e2e-pass" });
+  });
+
+  it("CAPTCHA_FAILED 문구", async () => {
+    mockBackend({
+      [LOGIN]: fail(400, "CAPTCHA_FAILED"),
+      [CONFIG]: ok({ provider: "test", siteKey: null }),
+    });
+    renderLogin();
+
+    fireEvent.change(await screen.findByLabelText("이메일"), { target: { value: "a@b.c" } });
+    fireEvent.change(screen.getByLabelText("비밀번호"), { target: { value: "x" } });
+    fireEvent.click(screen.getByRole("button", { name: "로그인" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "자동 등록 방지 확인에 실패했습니다",
+    );
   });
 
   it("가입 링크가 있다", async () => {

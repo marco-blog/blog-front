@@ -78,6 +78,7 @@ npm run e2e                          # = npx playwright test
 | `MAILPIT_URL`                           | `http://localhost:8025` | パスワード再設定メールを読むシナリオをスキップ（backend が同じ Mailpit へメールを送る必要があります）                                                              |
 | `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | ポータル（003）のシナリオ（`tests/e2e/portal-*`）をスキップ。backend を下記のポータル試験用設定で起動したという印です                                              |
 | `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 非会員のコメント・ゲストブック（004）のシナリオをスキップ。backend を下記の非会員試験用設定で起動したという印です                                                  |
+| `E2E_MODERATION_TEST_SETTINGS`          | `1`                     | 通報・スパム対策・トラックバック(005)のシナリオ(`tests/e2e/moderation-*`)をスキップする。backend を下記の 005 試験用設定で起動したという印                         |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理者アカウント        | 管理コンソールとリリースノートのシナリオをスキップ。backend の `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` と同じメールアドレスで登録したアカウントです               |
 | `E2E_ADMIN_TEST_SETTINGS`               | `1`                     | 管理コンソール(006)のシナリオ(`tests/e2e/admin-*`)をスキップする。backend を `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`(ダッシュボードのキャッシュなし)で起動したという印 |
 
@@ -94,9 +95,11 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<管理者メールアドレス> E2E_ADMIN_PASSWORD=<パスワード> npm run e2e
 ```
 
-004 のブログ機能シナリオ（`tests/e2e/blog-*`）は backend の local プロファイルの既定値で動きます。非会員の書き込みシナリオは同じ IP（localhost）から何度も書くため、非会員の書き込み制限を緩めて起動し `E2E_GUEST_TEST_SETTINGS=1` を指定します: `BLOG_GUEST_COMMENT_PER_MINUTE=1000`、`BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`。バックアップのシナリオでは backend が `BLOG_EXPORT_DIR`（local の既定は `./data/exports`）に zip を書きます。予約公開とバックアップのシナリオはバッチ処理の周期（30 秒）を待つため 1〜2 分かかります。
+004 のブログ機能シナリオ（`tests/e2e/blog-*`）は backend の local プロファイルの既定値で動きます。非会員の書き込みシナリオは同じ IP（localhost）から何度も書くため、書き込み速度の制限を緩めて起動し `E2E_GUEST_TEST_SETTINGS=1` を指定します（004 の `BLOG_GUEST_*_PER_MINUTE` は 005 の `BLOG_RATELIMIT_*` に変わりました。下記の 005 設定）。バックアップのシナリオでは backend が `BLOG_EXPORT_DIR`（local の既定は `./data/exports`）に zip を書きます。予約公開とバックアップのシナリオはバッチ処理の周期（30 秒）を待つため 1〜2 分かかります。
 
 ポータルのシナリオはメインの「最新記事」・おすすめ・ポータル設定のようなサイトに一つしかない画面を見るため、Playwright プロジェクト `portal` として残り（`e2e`）が終わった後に一度に1ファイルずつ実行します。CI（`ci.yml` の e2e-backend、`e2e.yml`）は上記の試験用設定で backend を起動し、`scripts/e2e-provision-admin.sh` で使い捨て DB に管理者アカウントを作ります（登録 API → `role` を SUPER_ADMIN に）。
+
+通報・スパム対策・トラックバック(005)のシナリオ(`tests/e2e/moderation-*`)は禁止語や運用設定のようにサイト全体の値を変えるため、Playwright プロジェクト `moderation` で `portal` の後に 1 ファイルずつ実行する。すべてのシナリオが同じ IP(localhost)から登録・コメント・公開・アップロード・通報・トラックバックを行うので、backend を次の値で起動し `E2E_MODERATION_TEST_SETTINGS=1` を指定する(登録の IP 制限が既定値のままだと 001〜004 のシナリオも登録で止まる): `BLOG_CAPTCHA_PROVIDER=test`, `BLOG_CAPTCHA_LOGIN_FAILURES_BEFORE_CAPTCHA=100000`, `BLOG_RATELIMIT_SIGNUP_PER_IP_PER_HOUR=100000`, `BLOG_RATELIMIT_COMMENT_PER_MINUTE=1000`, `BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE=1000`, `BLOG_RATELIMIT_POST_PUBLISH_PER_HOUR=100000`, `BLOG_RATELIMIT_MEDIA_UPLOAD_PER_MINUTE=1000`, `BLOG_TRACKBACK_RECEIVE_LIMIT=100000`, `BLOG_REPORTS_MEMBER_PER_HOUR=100000`, `BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR=100000`。CAPTCHA の `test` はトークン `e2e-pass` だけを通し、front の試験用ウィジェットと E2E ヘルパー(`scripts/e2e-provision-admin.sh`、`tests/e2e/support/backend.ts`)がこのトークンを送る。ログイン CAPTCHA の基準を大きくするのは、001 のログインロックのシナリオが同じ IP の連続 3 回失敗の基準にかからないようにするためである。トラックバック送信のシナリオでは backend の `blog.base-url` が front のアドレスと同じでなければサービス内の記事として扱われない(local プロファイルの既定は `http://localhost:5173`、別のポートなら `BLOG_BASE_URL`)。
 
 管理コンソール(006)のシナリオ(`tests/e2e/admin-*`)は権限の付与・取り消しやリリースノートの公開のようにサイト全体の状態を変えるため、Playwright プロジェクト `admin` で `portal`・`moderation` の後に 1 ファイルずつ実行する。ダッシュボードの数値がすぐ変わる必要があるので、backend を `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s` で起動し `E2E_ADMIN_TEST_SETTINGS=1` を指定する。管理者アカウントは最高管理者でなければならず、シナリオはそのアカウント自身の権限は変えない。
 

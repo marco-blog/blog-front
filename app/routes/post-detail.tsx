@@ -13,9 +13,12 @@ import {
 import { createApiClient } from "~/api/client.server";
 import { isApiError, throwApiErrorResponse } from "~/api/errors";
 import { VALIDATION_FAILED, toFormError } from "~/api/formErrors";
-import type { Blog, Comment, PostDetail, PostSummary, TopicNode } from "~/api/models";
+import type { Blog, Comment, PostDetail, PostSummary, TopicNode, Trackback } from "~/api/models";
 import { loginPath } from "~/auth/paths";
 import { isValidHandle, parsePostId } from "~/blog/ids";
+import { parsePage } from "~/blog/listing";
+import { captchaView } from "~/components/captcha/captcha.server";
+import { CaptchaContext } from "~/components/captcha/CaptchaContext";
 import { categoryHref } from "~/components/blog/CategoryTree";
 import type { CommentActionData } from "~/components/comment/actions";
 import { runCommentAction } from "~/components/comment/actions.server";
@@ -31,6 +34,8 @@ import { ReadCompleteTracker } from "~/components/post/ReadCompleteTracker";
 import { blogTagHref } from "~/components/post/PostList";
 import { RelatedPosts } from "~/components/post/RelatedPosts";
 import { ShareButtons } from "~/components/post/ShareButtons";
+import { TrackbackRdf } from "~/components/trackback/TrackbackRdf";
+import { TrackbackSection } from "~/components/trackback/TrackbackSection";
 import { publicOrigin } from "~/config.server";
 import { highlightCodeBlocks } from "~/content/highlight.server";
 import { formIntent, isLikeIntent, type LikeActionData } from "~/discovery/actions";
@@ -59,8 +64,10 @@ export function links() {
  * 실패하면 블로그 주소)도 함께 읽는다.
  * 003: 글에 주제가 있으면 주제 트리(`GET /topics`)로 주제 페이지 링크를 만든다. 트리를 읽지 못하거나 숨긴 주제면 링크를 뺀다.
  * 004: 열지 않은 보호 글(`locked`)은 댓글을 읽지 않고 조회수도 기록하지 않는다(열면 쿠키로 다시 읽는다).
+ * 005: 받은 트랙백(`GET /posts/{id}/trackbacks?page=`, 한 쪽 10개, `?tbPage=`)을 댓글과 함께 읽고(실패하면 목록 대신 안내),
+ * 비회원 쓰기를 허용한 블로그면 비회원 댓글 폼에 그릴 CAPTCHA 정보도 읽는다.
  */
-export async function loader({ request, params }: Route.LoaderArgs) {
+export async function loader({ request, params, context }: Route.LoaderArgs) {
   const postId = parsePostId(params.postId);
   if (!isValidHandle(params.handle) || postId === null) {
     throw data(null, { status: 404 });
@@ -76,12 +83,20 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     throw data(null, { status: 404 });
   }
   const locked = post.locked === true;
+  const tbPage = parsePage(new URL(request.url).searchParams.get("tbPage"));
+  const guestWriteEnabled = blog?.guestWriteEnabled ?? false;
   // 조회수 기록(FR-020)은 댓글과 함께. 중복 판단은 backend가 한다. 실패해도 글은 보여준다.
-  const [comments] = locked
-    ? [null]
+  const [comments, , trackbacks, captcha] = locked
+    ? [null, null, null, null]
     : await Promise.all([
         api.get<Comment[]>(`/posts/${postId}/comments`).catch(() => null),
         api.post(`/posts/${postId}/views`).catch(() => null),
+        api
+          .send<Trackback[]>(`/posts/${postId}/trackbacks`, {
+            query: { page: tbPage - 1, size: TRACKBACK_PAGE_SIZE },
+          })
+          .catch(() => null),
+        guestWriteEnabled ? captchaView(request, context) : null,
       ]);
 
   const { contentMarkdown, ...rest } = post;
@@ -96,9 +111,22 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     comments,
     related,
     blogTitle: blog?.title ?? post.blogHandle,
-    guestWriteEnabled: blog?.guestWriteEnabled ?? false,
+    guestWriteEnabled,
+    captcha,
+    trackbacks: trackbacks?.result ?? null,
+    trackbackTotal: trackbacks ? (trackbacks.totalCount ?? trackbacks.result.length) : 0,
+    tbPage,
     topic: topicLink(topics, post.topicId),
   };
+}
+
+/** 글 상세 트랙백 한 쪽의 수(005 contracts/routes.md "최신 10개") */
+export const TRACKBACK_PAGE_SIZE = 10;
+
+/** 트랙백 목록의 다른 쪽(`?tbPage=`, 첫 쪽은 쿼리 없음) */
+export function trackbackPageHref(handle: string, postId: number, page: number): string {
+  const path = `/${handle}/${postId}`;
+  return `${page <= 1 ? path : `${path}?tbPage=${page}`}#trackbacks`;
 }
 
 /** 글 주제의 링크 정보(소분류만). 트리에 없으면 null. */
@@ -213,8 +241,19 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 export default function PostDetailPage() {
   const { t, i18n } = useTranslation();
   const format = useDateFormat();
-  const { post, isOwner, comments, related, origin, topic, guestWriteEnabled } =
-    useLoaderData<typeof loader>();
+  const {
+    post,
+    isOwner,
+    comments,
+    related,
+    origin,
+    topic,
+    guestWriteEnabled,
+    captcha,
+    trackbacks,
+    trackbackTotal,
+    tbPage,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<
     CommentActionData | LikeActionData | UnlockActionData | ReportActionData
   >();
@@ -352,16 +391,36 @@ export default function PostDetailPage() {
         </nav>
       )}
       <RelatedPosts handle={handle} posts={related} />
-      <CommentSection
-        comments={comments}
-        commentCount={post.commentCount}
-        commentEnabled={post.commentEnabled && post.status === "PUBLISHED"}
-        isPostOwner={isOwner}
-        guestWriteEnabled={guestWriteEnabled}
-        loginHref={loginPath(`/${handle}/${post.id}`)}
-        result={result}
-        reportable={reportable}
-      />
+      {post.status === "PUBLISHED" && (
+        <TrackbackSection
+          trackbackUrl={post.trackbackUrl}
+          trackbacks={trackbacks}
+          totalCount={trackbackTotal}
+          page={tbPage}
+          pageSize={TRACKBACK_PAGE_SIZE}
+          hrefFor={(page) => trackbackPageHref(handle, post.id, page)}
+          reportable={reportable}
+        />
+      )}
+      {post.trackbackUrl && (
+        <TrackbackRdf
+          postUrl={absoluteUrl(origin, `/${handle}/${post.id}`) ?? `/${handle}/${post.id}`}
+          title={post.title}
+          trackbackUrl={post.trackbackUrl}
+        />
+      )}
+      <CaptchaContext value={captcha ?? null}>
+        <CommentSection
+          comments={comments}
+          commentCount={post.commentCount}
+          commentEnabled={post.commentEnabled && post.status === "PUBLISHED"}
+          isPostOwner={isOwner}
+          guestWriteEnabled={guestWriteEnabled}
+          loginHref={loginPath(`/${handle}/${post.id}`)}
+          result={result}
+          reportable={reportable}
+        />
+      </CaptchaContext>
     </main>
   );
 }

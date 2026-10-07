@@ -30,13 +30,12 @@ describe("MANAGE_MENU", () => {
     ]);
   });
 
-  it("보이는 항목의 경로는 routes.ts의 manage 자식에 있고, 받은 트랙백·외부 블로그는 숨김", () => {
+  it("보이는 항목의 경로는 routes.ts의 manage 자식에 있고, 외부 블로그는 숨김(받은 트랙백은 005가 켰다)", () => {
     const paths = managePaths();
     for (const item of MANAGE_MENU) {
       expect(paths.includes(item.path), item.key).toBe(item.available);
     }
     expect(MANAGE_MENU.filter((item) => !item.available).map((item) => item.key)).toEqual([
-      "trackbacks",
       "externalBlogs",
     ]);
   });

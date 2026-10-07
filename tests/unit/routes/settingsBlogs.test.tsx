@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import Settings, { loader as settingsLoader } from "~/routes/settings";
 import SettingsBlogs, { action, loader, meta } from "~/routes/settings.blogs";
@@ -242,6 +242,28 @@ describe("settings/blogs 화면", () => {
     fireEvent.click(within(form).getByRole("button", { name: "만들기" }));
 
     expect(await within(form).findByText(message)).toBeInTheDocument();
+  });
+
+  it("주소·제목 금칙어(BANNED_WORD, 005)는 각 입력란에", async () => {
+    renderPage({
+      "POST /api/v1/blogs": fail(400, "VALIDATION_FAILED", [
+        { field: "handle", code: "BANNED_WORD" },
+        { field: "title", code: "BANNED_WORD" },
+      ]),
+      "GET /api/v1/auth/handle-availability": ok({ available: true }),
+    });
+
+    const form = (await screen.findByRole("heading", { name: "새 블로그 만들기" })).closest(
+      "form",
+    )!;
+    fireEvent.change(within(form).getByLabelText("블로그 주소"), { target: { value: "spam-x" } });
+    fireEvent.change(within(form).getByLabelText("블로그 제목"), { target: { value: "광고" } });
+    fireEvent.click(within(form).getByRole("button", { name: "만들기" }));
+
+    await vi.waitFor(() =>
+      expect(within(form).getByLabelText("블로그 제목")).toHaveAttribute("aria-invalid", "true"),
+    );
+    expect(within(form).getAllByText(/사용할 수 없는 단어가 있습니다/).length).toBeGreaterThan(0);
   });
 
   it("만들면 목록이 다시 그려지고 안내한다", async () => {
