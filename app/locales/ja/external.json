@@ -168,7 +168,9 @@
       "deleteKept": "残した記事を削除",
       "deleteKeptConfirm": "残した記事をすべて削除します。ポータルからすぐに消え、元に戻せません。",
       "confirm": "確認しました",
-      "released": "登録を解除しました。"
+      "released": "登録を解除しました。",
+      "verifyToEdit": "所有を認証すると、既定トピックと記事のトピックを変更できます。",
+      "postTopicFor": "{{title}} のトピック"
     }
   },
   "admin": {
@@ -232,15 +234,29 @@
       "select": "選択",
       "confirmBatch": "選択した記事を一括確定",
       "batchDone": "{{confirmed}} 件確定、{{skipped}} 件は処理済みのためスキップしました。",
-      "none": "なし"
+      "none": "なし",
+      "statusLabel": "レビュー状態",
+      "blog": "ブログ",
+      "post": "記事",
+      "confidence": "信頼度",
+      "confirmTo": "確定するトピック",
+      "confirmFor": "{{title}} の確定トピック",
+      "selectFor": "{{title}} を選択",
+      "confirmed": "確定しました。",
+      "confirmedTopic": "確定トピック",
+      "reviewedBy": "レビュー担当",
+      "batchLimit": "一度に確定できるのは {{max}} 件までです。",
+      "batchEmpty": "確定する記事を選んでください。",
+      "blogFilter": "ブログ #{{id}} のみ表示中",
+      "clearFilter": "すべてのブログを表示"
     },
     "stats": {
       "title": "分類状況",
       "window": "直近 30 日({{from}} 〜 {{to}})",
       "classifierAccuracy": "自動分類の正確度",
-      "classifierHint": "レビューで確定したトピックと自動分類の予測が一致した割合",
+      "classifierHint": "オーナーやレビューがトピックを決めた記事のうち、自動分類の予測が最終トピックと一致した割合",
       "finalAccuracy": "最終トピックの正確度",
-      "finalHint": "自動・ルール・既定で決まった記事のうち、オーナーやレビューで変更されなかった割合(近似)",
+      "finalHint": "確定したレビューのうち、確定トピックがレビュー待ちの間に表示されていた既定トピックと同じ割合(近似)",
       "sample": "サンプル {{count, number}} 件",
       "rate": "{{rate}}%",
       "noData": "データなし",
@@ -250,7 +266,9 @@
       "goReviews": "レビューへ",
       "minConfidence": "現在の信頼度の基準",
       "classifierVersion": "分類方式",
-      "generatedAt": "計算日時"
+      "generatedAt": "計算日時",
+      "chart": "トピック別の外部記事数(出所別)",
+      "unknownTopic": "不明なトピック"
     },
     "rules": {
       "title": "マッピングルール",
@@ -262,7 +280,13 @@
       "update": "更新",
       "delete": "削除",
       "empty": "ルールはありません。",
-      "search": "キーワード検索"
+      "search": "キーワード検索",
+      "priorityHint": "-1000 〜 1000。大きい値から先に照合します。",
+      "created": "ルールを追加しました。",
+      "updated": "ルールを更新しました。",
+      "deleted": "ルールを削除しました。",
+      "editFor": "{{keyword}} のルールを編集",
+      "existing": "同じキーワードのルール #{{id}} があります。"
     },
     "settings": {
       "title": "外部ブログの設定",
@@ -273,7 +297,14 @@
       "scoreWeight": "外部記事の人気スコアの重み",
       "scoreWeightHint": "0 〜 10。ポータルの人気記事で外部記事のスコアに掛けます。",
       "default": "既定値: {{value}}",
-      "reset": "既定値に戻す"
+      "reset": "既定値に戻す",
+      "saved": "保存しました。次回の取得から適用されます。",
+      "resetDone": "既定値に戻しました。"
+    },
+    "reviewStatus": {
+      "PENDING": "レビュー待ち",
+      "CONFIRMED": "確定",
+      "SKIPPED": "スキップ"
     }
   }
 }

@@ -99,6 +99,10 @@ describe("목록", () => {
     expect(meta(metaArgs())).toContainEqual({ name: "robots", content: "noindex" });
     expect(ADMIN_EXTERNAL_TABS.filter((tab) => tab.available).map((tab) => tab.key)).toEqual([
       "blogs",
+      "reviews",
+      "stats",
+      "rules",
+      "settings",
     ]);
   });
 

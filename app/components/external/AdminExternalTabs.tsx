@@ -6,10 +6,10 @@ import { NavLink } from "react-router";
  */
 export const ADMIN_EXTERNAL_TABS = [
   { key: "blogs", path: "/admin/external-blogs", available: true },
-  { key: "reviews", path: "/admin/external-blogs/reviews", available: false },
-  { key: "stats", path: "/admin/external-blogs/stats", available: false },
-  { key: "rules", path: "/admin/external-blogs/rules", available: false },
-  { key: "settings", path: "/admin/external-blogs/settings", available: false },
+  { key: "reviews", path: "/admin/external-blogs/reviews", available: true },
+  { key: "stats", path: "/admin/external-blogs/stats", available: true },
+  { key: "rules", path: "/admin/external-blogs/rules", available: true },
+  { key: "settings", path: "/admin/external-blogs/settings", available: true },
 ] as const;
 
 export function AdminExternalTabs() {

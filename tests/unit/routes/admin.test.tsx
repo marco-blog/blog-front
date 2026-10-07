@@ -223,6 +223,10 @@ describe("/admin 화면", () => {
       "release-notes/:id/revisions/:revisionNo",
       "external-blogs",
       "external-blogs/new",
+      "external-blogs/reviews",
+      "external-blogs/stats",
+      "external-blogs/rules",
+      "external-blogs/settings",
       "external-blogs/:id",
     ]);
   });

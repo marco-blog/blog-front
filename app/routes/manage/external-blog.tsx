@@ -1,10 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { Link, useActionData, useLoaderData } from "react-router";
+import { Form, Link, useActionData, useLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import type { MyExternalBlog, MyExternalPost, TopicNode, Verification } from "~/api/models";
 import { parsePage, withPage } from "~/blog/listing";
 import { ExternalBlogStatusBadge } from "~/components/external/ExternalBlogStatusBadge";
+import { ExternalPostTable } from "~/components/external/ExternalPostTable";
+import { TopicSelect } from "~/components/external/TopicSelect";
 import { VerificationPanel } from "~/components/external/VerificationPanel";
 import { FormAlert } from "~/components/form/FormField";
 import { Pagination } from "~/components/Pagination";
@@ -39,8 +41,8 @@ function parseId(value: string | undefined): number {
 }
 
 /**
- * 내 외부 블로그 상세(`/:handle/manage/external-blogs/:id`, 007 T040): 상태와 안내, 소유 인증(미인증이면 코드 발급·확인),
- * 수집된 글 표(읽기 전용). 남의 등록이면 backend 404를 그대로 404로.
+ * 내 외부 블로그 상세(`/:handle/manage/external-blogs/:id`, 007 T040·T070): 상태와 안내, 소유 인증(미인증이면 코드 발급·확인),
+ * 수집된 글 표. 인증된 주인은 기본 주제와 글마다 주제를 바꾼다(해제된 등록은 못 바꿈). 남의 등록이면 backend 404를 그대로 404로.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
@@ -65,8 +67,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 /**
- * `intent=issue-code|check`. 확인에 성공하면 같은 요청에서 넘겨받기(`POST /external-blogs/{id}/claim`)로 이 등록에 인증을 붙인다
- * (내 등록이면 한도를 세지 않는다).
+ * `intent=issue-code|check|default-topic|post-topic`. 확인에 성공하면 같은 요청에서 넘겨받기(`POST /external-blogs/{id}/claim`)로
+ * 이 등록에 인증을 붙인다(내 등록이면 한도를 세지 않는다). 주제 변경은 인증된 주인만(아니면 backend 403).
  */
 export async function action({ request, params }: Route.ActionArgs) {
   await requireOwnedBlog(request, params.handle);
@@ -101,6 +103,35 @@ export async function action({ request, params }: Route.ActionArgs) {
         return externalActionError(intent, error, { verification: verificationFromForm(form) });
       }
     }
+    case "default-topic":
+      try {
+        const defaultTopicId = formId(form, "defaultTopicId");
+        if (defaultTopicId === null) {
+          throw invalidField("defaultTopicId", "REQUIRED");
+        }
+        await api.patch<MyExternalBlog>(`/me/external-blogs/${id}`, { body: { defaultTopicId } });
+        return { intent, ok: true as const, verification: null };
+      } catch (error) {
+        return externalActionError(intent, error, { verification: null });
+      }
+    case "post-topic": {
+      const postId = formId(form, "postId");
+      try {
+        const topicId = formId(form, "topicId");
+        if (postId === null) {
+          throw invalidField("postId");
+        }
+        if (topicId === null) {
+          throw invalidField("topicId", "REQUIRED");
+        }
+        await api.put<MyExternalPost>(`/me/external-blogs/${id}/posts/${postId}/topic`, {
+          body: { topicId },
+        });
+        return { intent, ok: true as const, verification: null, postId };
+      } catch (error) {
+        return externalActionError(intent, error, { verification: null, postId });
+      }
+    }
     default:
       return externalActionError(intent, invalidField("intent"), { verification: null });
   }
@@ -115,6 +146,9 @@ export default function ManageExternalBlog() {
   const message = error ? externalErrorMessage(t, error) : null;
   const verification = (result?.verification ?? null) as Verification | null;
   const base = `/${handle}/manage/external-blogs`;
+  const detailPath = `${base}/${blog.id}`;
+  const editable = blog.ownershipVerified && blog.status !== "RELEASED";
+  const topicIntent = result?.intent === "default-topic" || result?.intent === "post-topic";
   const title = blog.title ?? t("external:common.untitled");
   const guide =
     blog.status === "RELEASED"
@@ -180,55 +214,48 @@ export default function ManageExternalBlog() {
         </section>
       )}
 
+      {editable ? (
+        <section className="external-topic-section">
+          <h2>{t("external:common.defaultTopic")}</h2>
+          <Form method="post" action={detailPath}>
+            <input type="hidden" name="intent" value="default-topic" />
+            <TopicSelect
+              topics={topics}
+              defaultValue={blog.defaultTopicId}
+              hint={t("external:manage.detail.defaultTopicHint")}
+            />
+            <button type="submit">{t("external:common.save")}</button>
+          </Form>
+        </section>
+      ) : (
+        blog.status !== "RELEASED" && (
+          <p className="field-hint">{t("external:manage.detail.verifyToEdit")}</p>
+        )
+      )}
+      {topicIntent &&
+        (result?.ok ? (
+          <p role="status">{t("external:common.saved")}</p>
+        ) : (
+          <FormAlert message={message} />
+        ))}
+
       <section className="external-posts">
         <h2>{t("external:manage.detail.posts")}</h2>
         {posts.length === 0 ? (
           <p>{t("external:manage.detail.noPosts")}</p>
         ) : (
-          <table className="manage-table" aria-label={t("external:manage.detail.posts")}>
-            <thead>
-              <tr>
-                <th>{t("external:common.title")}</th>
-                <th>{t("external:common.publishedAt")}</th>
-                <th>{t("external:common.topic")}</th>
-                <th>{t("external:common.status")}</th>
-                <th>{t("external:common.clicks")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {posts.map((post) => (
-                <tr key={post.id}>
-                  <td>
-                    <a
-                      href={post.link}
-                      target="_blank"
-                      rel="noopener nofollow noreferrer"
-                      title={t("external:common.newTab")}
-                    >
-                      {post.title}
-                    </a>
-                  </td>
-                  <td>{post.publishedAt ? format.dateTime(post.publishedAt) : "-"}</td>
-                  <td>
-                    {topicLabel(topics, post.topicId, i18n.language)} (
-                    {t(`external:topicSource.${post.topicSource}`)})
-                  </td>
-                  <td>
-                    {t(`external:postStatus.${post.status}`)}
-                    {post.removedReason &&
-                      ` · ${t(`external:removedReason.${post.removedReason}`)}`}
-                  </td>
-                  <td>{format.number(post.clickCount)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ExternalPostTable
+            posts={posts}
+            topics={topics}
+            editable={editable}
+            action={detailPath}
+          />
         )}
         <Pagination
           page={page}
           totalCount={totalCount}
           pageSize={EXTERNAL_POSTS_PAGE_SIZE}
-          hrefFor={(target) => withPage(`${base}/${blog.id}`, target)}
+          hrefFor={(target) => withPage(detailPath, target)}
         />
       </section>
     </main>

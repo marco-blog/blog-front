@@ -84,6 +84,10 @@ export default [
     // 007 외부 블로그 관리
     route("external-blogs", "routes/admin/external-blogs.tsx"),
     route("external-blogs/new", "routes/admin/external-blog-new.tsx"),
+    route("external-blogs/reviews", "routes/admin/external-reviews.tsx"),
+    route("external-blogs/stats", "routes/admin/external-stats.tsx"),
+    route("external-blogs/rules", "routes/admin/external-rules.tsx"),
+    route("external-blogs/settings", "routes/admin/external-settings.tsx"),
     route("external-blogs/:id", "routes/admin/external-blog.tsx"),
   ]),
 

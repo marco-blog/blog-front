@@ -1213,7 +1213,8 @@ export interface ClassificationReview {
 /** POST /admin/classification-reviews/confirm-batch */
 export interface ClassificationBatchResult {
   confirmed: number[];
-  skipped: { id: number; status: ClassificationReviewStatus }[];
+  /** 이미 처리된 검수는 그 상태, 없는 id는 `NOT_FOUND` */
+  skipped: { id: number; status: ClassificationReviewStatus | "NOT_FOUND" }[];
 }
 
 /** GET /admin/classification-stats */

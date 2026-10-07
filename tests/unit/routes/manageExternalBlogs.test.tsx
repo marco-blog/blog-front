@@ -44,6 +44,8 @@ const CLAIM_9 = "POST /api/v1/external-blogs/9/claim";
 const DETAIL_3 = "GET /api/v1/me/external-blogs/3";
 const POSTS_3 = "GET /api/v1/me/external-blogs/3/posts";
 const CLAIM_3 = "POST /api/v1/external-blogs/3/claim";
+const PATCH_MINE_3 = "PATCH /api/v1/me/external-blogs/3";
+const POST_TOPIC_31 = "PUT /api/v1/me/external-blogs/3/posts/31/topic";
 const FEED = "https://remote.example/feed.xml";
 const loggedIn = { cookie: "access_token=a" };
 const me = {
@@ -573,13 +575,115 @@ describe("상세", () => {
     const link = within(table).getByRole("link", { name: "External 31" });
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener nofollow noreferrer");
-    expect(table).toHaveTextContent("knowledge 한 › science 한 (자동)");
+    expect(table).toHaveTextContent("knowledge 한 › science 한 자동");
+    expect(
+      screen.getByText("소유 인증을 하면 기본 주제와 글 주제를 바꿀 수 있습니다."),
+    ).toBeInTheDocument();
+    expect(within(table).queryByRole("button", { name: "바꾸기" })).toBeNull();
     expect(table).toHaveTextContent("내림 · 운영자");
 
     fireEvent.click(screen.getByRole("button", { name: "인증 코드 받기" }));
     fireEvent.click(await screen.findByRole("button", { name: "인증 확인" }));
     await vi.waitFor(() => expect(backend.callsTo(CLAIM_3)).toHaveLength(1));
     expect(backend.callsTo(CLAIM_3)[0].body).toEqual({ verificationId: 5 });
+  });
+
+  it("인증된 주인: 기본 주제·글 주제 바꾸기(T070), 해제된 등록은 폼이 없다", async () => {
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [DETAIL_3]: ok(myExternalBlog(3, { ownershipVerified: true, defaultTopicId: 11 })),
+      [POSTS_3]: ok(
+        [
+          myExternalPost(31, { topicSource: "AUTO", topicId: 12 }),
+          myExternalPost(32, { status: "REMOVED", removedReason: "ADMIN" }),
+        ],
+        { totalCount: 2 },
+      ),
+      [TOPICS]: ok(externalTopics()),
+      [PATCH_MINE_3]: ok(myExternalBlog(3, { ownershipVerified: true, defaultTopicId: 12 })),
+      [POST_TOPIC_31]: ok(myExternalPost(31, { topicSource: "OWNER", topicId: 11 })),
+    });
+    renderRoutes(
+      [
+        {
+          path: ":handle/manage/external-blogs/:id",
+          loader: withCookie(detailLoader as never) as never,
+          action: withCookie(detailAction as never) as never,
+          Component: ManageExternalBlog,
+        },
+      ],
+      { initialEntries: ["/marco/manage/external-blogs/3"] },
+    );
+    const table = await screen.findByRole("table", { name: "수집된 글" });
+    expect(within(table).getAllByRole("button", { name: "바꾸기" })).toHaveLength(1);
+    const select = within(table).getByLabelText("External 31 주제");
+    expect(select).toHaveValue("12");
+    expect(within(table).getByText("자동")).toHaveClass("topic-source", "topic-source-auto");
+    fireEvent.change(select, { target: { value: "11" } });
+    fireEvent.click(within(table).getByRole("button", { name: "바꾸기" }));
+    await vi.waitFor(() => expect(backend.callsTo(POST_TOPIC_31)).toHaveLength(1));
+    expect(backend.callsTo(POST_TOPIC_31)[0].body).toEqual({ topicId: 11 });
+    expect(await screen.findByText("저장했습니다.")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("기본 주제"), { target: { value: "12" } });
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    await vi.waitFor(() => expect(backend.callsTo(PATCH_MINE_3)).toHaveLength(1));
+    expect(backend.callsTo(PATCH_MINE_3)[0].body).toEqual({ defaultTopicId: 12 });
+  });
+
+  it("해제된 등록은 주제 폼도 인증 안내도 없다", async () => {
+    mockBackend({
+      [ME]: ok(me),
+      [DETAIL_3]: ok(myExternalBlog(3, { ownershipVerified: true, status: "RELEASED" })),
+      [POSTS_3]: ok([myExternalPost(31)], { totalCount: 1 }),
+      [TOPICS]: ok(externalTopics()),
+    });
+    renderRoutes(
+      [
+        {
+          path: ":handle/manage/external-blogs/:id",
+          loader: withCookie(detailLoader as never) as never,
+          Component: ManageExternalBlog,
+        },
+      ],
+      { initialEntries: ["/marco/manage/external-blogs/3"] },
+    );
+    const table = await screen.findByRole("table", { name: "수집된 글" });
+    expect(within(table).queryByRole("button", { name: "바꾸기" })).toBeNull();
+    expect(screen.queryByLabelText("기본 주제")).toBeNull();
+    expect(screen.queryByText(/소유 인증을 하면/)).toBeNull();
+  });
+
+  it("action: 주제 값 검사, 미인증 403 문구, 성공하면 postId", async () => {
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [PATCH_MINE_3]: fail(403, "EXTERNAL_BLOG_OWNERSHIP_REQUIRED"),
+      [POST_TOPIC_31]: ok(myExternalPost(31, { topicSource: "OWNER" })),
+    });
+    const call = (fields: Record<string, string>) =>
+      detailAction(
+        routeArgs<DetailActionArgs>(
+          formRequest("/marco/manage/external-blogs/3", fields, loggedIn),
+          { handle: "marco", id: "3" },
+        ),
+      );
+    expect(asData(await call({ intent: "default-topic", defaultTopicId: "" })).init?.status).toBe(
+      400,
+    );
+    const denied = asData<{ error: { resultCode: string } }>(
+      await call({ intent: "default-topic", defaultTopicId: "12" }),
+    );
+    expect(denied.init?.status).toBe(403);
+    expect(denied.data.error.resultCode).toBe("EXTERNAL_BLOG_OWNERSHIP_REQUIRED");
+    expect(asData(await call({ intent: "post-topic", topicId: "11" })).init?.status).toBe(400);
+    expect(asData(await call({ intent: "post-topic", postId: "31" })).init?.status).toBe(400);
+    expect(await call({ intent: "post-topic", postId: "31", topicId: "11" })).toEqual({
+      intent: "post-topic",
+      ok: true,
+      verification: null,
+      postId: 31,
+    });
+    expect(backend.callsTo(POST_TOPIC_31)[0].body).toEqual({ topicId: 11 });
   });
 
   it("action: 잘못된 intent는 400", async () => {

@@ -168,7 +168,9 @@
       "deleteKept": "Delete kept posts",
       "deleteKeptConfirm": "Delete all kept posts. They disappear from the portal immediately and cannot be restored.",
       "confirm": "I understand",
-      "released": "Registration released."
+      "released": "Registration released.",
+      "verifyToEdit": "Verify ownership to change the default topic and post topics.",
+      "postTopicFor": "Topic of {{title}}"
     }
   },
   "admin": {
@@ -232,15 +234,29 @@
       "select": "Select",
       "confirmBatch": "Confirm selected",
       "batchDone": "Confirmed {{confirmed}}; skipped {{skipped}} already handled.",
-      "none": "None"
+      "none": "None",
+      "statusLabel": "Review status",
+      "blog": "Blog",
+      "post": "Post",
+      "confidence": "Confidence",
+      "confirmTo": "Topic to confirm",
+      "confirmFor": "Confirmed topic for {{title}}",
+      "selectFor": "Select {{title}}",
+      "confirmed": "Confirmed.",
+      "confirmedTopic": "Confirmed topic",
+      "reviewedBy": "Reviewer",
+      "batchLimit": "You can confirm up to {{max}} at a time.",
+      "batchEmpty": "Select posts to confirm.",
+      "blogFilter": "Showing blog #{{id}} only",
+      "clearFilter": "Show all blogs"
     },
     "stats": {
       "title": "Classification statistics",
       "window": "Last 30 days ({{from}} – {{to}})",
       "classifierAccuracy": "Classifier accuracy",
-      "classifierHint": "Share of reviewed posts where the prediction matched the confirmed topic",
+      "classifierHint": "Among posts whose topic an owner or reviewer set, the share where the classifier prediction matched the final topic",
       "finalAccuracy": "Final topic accuracy",
-      "finalHint": "Share of auto, rule or default topics that the owner or reviewers did not change (approximation)",
+      "finalHint": "Among confirmed reviews, the share where the confirmed topic equals the default topic shown while pending (approximation)",
       "sample": "{{count, number}} samples",
       "rate": "{{rate}}%",
       "noData": "No data",
@@ -250,7 +266,9 @@
       "goReviews": "Go to review",
       "minConfidence": "Current confidence threshold",
       "classifierVersion": "Classifier",
-      "generatedAt": "Computed at"
+      "generatedAt": "Computed at",
+      "chart": "External posts per topic (by source)",
+      "unknownTopic": "Unknown topic"
     },
     "rules": {
       "title": "Topic mapping rules",
@@ -262,7 +280,13 @@
       "update": "Update",
       "delete": "Delete",
       "empty": "No rules.",
-      "search": "Search keywords"
+      "search": "Search keywords",
+      "priorityHint": "-1000 to 1000. Higher values match first.",
+      "created": "Rule added.",
+      "updated": "Rule updated.",
+      "deleted": "Rule deleted.",
+      "editFor": "Edit rule {{keyword}}",
+      "existing": "Rule #{{id}} already uses this keyword."
     },
     "settings": {
       "title": "External blog settings",
@@ -273,7 +297,14 @@
       "scoreWeight": "External post score weight",
       "scoreWeightHint": "0 – 10. Multiplies external post scores in popular posts.",
       "default": "Default: {{value}}",
-      "reset": "Reset to default"
+      "reset": "Reset to default",
+      "saved": "Saved. Applies from the next fetch.",
+      "resetDone": "Reset to default."
+    },
+    "reviewStatus": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "SKIPPED": "Skipped"
     }
   }
 }

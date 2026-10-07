@@ -168,7 +168,9 @@
       "deleteKept": "删除保留的文章",
       "deleteKeptConfirm": "将删除全部保留的文章。它们会立即从门户消失且无法恢复。",
       "confirm": "我已了解",
-      "released": "已解除登记。"
+      "released": "已解除登记。",
+      "verifyToEdit": "完成所有权验证后即可更改默认主题和文章主题。",
+      "postTopicFor": "{{title}} 的主题"
     }
   },
   "admin": {
@@ -232,15 +234,29 @@
       "select": "选择",
       "confirmBatch": "批量确认所选",
       "batchDone": "已确认 {{confirmed}} 条，跳过已处理的 {{skipped}} 条。",
-      "none": "无"
+      "none": "无",
+      "statusLabel": "审核状态",
+      "blog": "博客",
+      "post": "文章",
+      "confidence": "置信度",
+      "confirmTo": "要确认的主题",
+      "confirmFor": "{{title}} 的确认主题",
+      "selectFor": "选择 {{title}}",
+      "confirmed": "已确认。",
+      "confirmedTopic": "确认的主题",
+      "reviewedBy": "审核人",
+      "batchLimit": "一次最多可确认 {{max}} 条。",
+      "batchEmpty": "请选择要确认的文章。",
+      "blogFilter": "仅显示博客 #{{id}}",
+      "clearFilter": "显示全部博客"
     },
     "stats": {
       "title": "分类统计",
       "window": "最近 30 天({{from}} ~ {{to}})",
       "classifierAccuracy": "自动分类准确率",
-      "classifierHint": "审核确认的主题与自动分类预测一致的比例",
+      "classifierHint": "在博主或审核确定主题的文章中，自动分类预测与最终主题一致的比例",
       "finalAccuracy": "最终主题准确率",
-      "finalHint": "由自动、规则或默认决定的主题中，未被博主或审核更改的比例(近似值)",
+      "finalHint": "在已确认的审核中，确认主题与待审核期间显示的默认主题相同的比例(近似值)",
       "sample": "样本 {{count, number}} 条",
       "rate": "{{rate}}%",
       "noData": "无数据",
@@ -250,7 +266,9 @@
       "goReviews": "前往审核",
       "minConfidence": "当前置信度阈值",
       "classifierVersion": "分类方式",
-      "generatedAt": "计算时间"
+      "generatedAt": "计算时间",
+      "chart": "各主题外部文章数(按来源)",
+      "unknownTopic": "未知主题"
     },
     "rules": {
       "title": "主题映射规则",
@@ -262,7 +280,13 @@
       "update": "更新",
       "delete": "删除",
       "empty": "没有规则。",
-      "search": "搜索关键词"
+      "search": "搜索关键词",
+      "priorityHint": "-1000 ~ 1000。数值越大越先匹配。",
+      "created": "已添加规则。",
+      "updated": "已修改规则。",
+      "deleted": "已删除规则。",
+      "editFor": "修改规则 {{keyword}}",
+      "existing": "已有相同关键词的规则 #{{id}}。"
     },
     "settings": {
       "title": "外部博客设置",
@@ -273,7 +297,14 @@
       "scoreWeight": "外部文章热度权重",
       "scoreWeightHint": "0 ~ 10。在门户热门文章中乘以外部文章的分数。",
       "default": "默认值：{{value}}",
-      "reset": "恢复默认"
+      "reset": "恢复默认",
+      "saved": "已保存。从下次抓取开始生效。",
+      "resetDone": "已恢复默认值。"
+    },
+    "reviewStatus": {
+      "PENDING": "待审核",
+      "CONFIRMED": "已确认",
+      "SKIPPED": "已跳过"
     }
   }
 }

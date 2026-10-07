@@ -168,7 +168,9 @@
       "deleteKept": "남긴 글 삭제",
       "deleteKeptConfirm": "남긴 글을 모두 삭제합니다. 포털에서 바로 사라지며 되돌릴 수 없습니다.",
       "confirm": "확인했습니다",
-      "released": "등록을 해제했습니다."
+      "released": "등록을 해제했습니다.",
+      "verifyToEdit": "소유 인증을 하면 기본 주제와 글 주제를 바꿀 수 있습니다.",
+      "postTopicFor": "{{title}} 주제"
     }
   },
   "admin": {
@@ -232,15 +234,29 @@
       "select": "선택",
       "confirmBatch": "선택한 글 일괄 확정",
       "batchDone": "{{confirmed}}건 확정, {{skipped}}건은 이미 처리되어 건너뛰었습니다.",
-      "none": "없음"
+      "none": "없음",
+      "statusLabel": "검수 상태",
+      "blog": "블로그",
+      "post": "글",
+      "confidence": "신뢰도",
+      "confirmTo": "확정할 주제",
+      "confirmFor": "{{title}} 확정 주제",
+      "selectFor": "{{title}} 선택",
+      "confirmed": "확정했습니다.",
+      "confirmedTopic": "확정 주제",
+      "reviewedBy": "검수자",
+      "batchLimit": "한 번에 {{max}}건까지 확정할 수 있습니다.",
+      "batchEmpty": "확정할 글을 고르세요.",
+      "blogFilter": "블로그 #{{id}}만 보는 중",
+      "clearFilter": "모든 블로그 보기"
     },
     "stats": {
       "title": "분류 현황",
       "window": "최근 30일({{from}} ~ {{to}})",
       "classifierAccuracy": "자동 분류 정확도",
-      "classifierHint": "검수에서 확정한 주제와 자동 분류 예측이 같은 비율",
+      "classifierHint": "주인이나 검수가 주제를 정한 글 중 자동 분류 예측이 최종 주제와 같은 비율",
       "finalAccuracy": "최종 주제 정확도",
-      "finalHint": "자동·규칙·기본으로 정해진 글 중 주인이나 검수가 바꾸지 않은 비율(근사)",
+      "finalHint": "확정한 검수 중 확정 주제가 검수 대기 동안 보이던 기본 주제와 같은 비율(근사)",
       "sample": "표본 {{count, number}}건",
       "rate": "{{rate}}%",
       "noData": "표본 없음",
@@ -250,7 +266,9 @@
       "goReviews": "검수하러 가기",
       "minConfidence": "지금 신뢰도 기준",
       "classifierVersion": "분류 방식",
-      "generatedAt": "계산 시각"
+      "generatedAt": "계산 시각",
+      "chart": "주제별 외부 글 수(출처별)",
+      "unknownTopic": "알 수 없는 주제"
     },
     "rules": {
       "title": "매핑 규칙",
@@ -262,7 +280,13 @@
       "update": "수정",
       "delete": "삭제",
       "empty": "규칙이 없습니다.",
-      "search": "키워드 검색"
+      "search": "키워드 검색",
+      "priorityHint": "-1000 ~ 1000. 큰 값이 먼저 맞춰집니다.",
+      "created": "규칙을 추가했습니다.",
+      "updated": "규칙을 수정했습니다.",
+      "deleted": "규칙을 삭제했습니다.",
+      "editFor": "{{keyword}} 규칙 수정",
+      "existing": "같은 키워드의 규칙 #{{id}}이 있습니다."
     },
     "settings": {
       "title": "외부 블로그 설정",
@@ -273,7 +297,14 @@
       "scoreWeight": "외부 글 인기 점수 가중치",
       "scoreWeightHint": "0 ~ 10. 포털 인기 글에서 외부 글 점수에 곱합니다.",
       "default": "기본값: {{value}}",
-      "reset": "기본값으로"
+      "reset": "기본값으로",
+      "saved": "저장했습니다. 다음 수집부터 적용됩니다.",
+      "resetDone": "기본값으로 되돌렸습니다."
+    },
+    "reviewStatus": {
+      "PENDING": "검수 대기",
+      "CONFIRMED": "확정",
+      "SKIPPED": "건너뜀"
     }
   }
 }
