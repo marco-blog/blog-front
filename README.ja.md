@@ -71,16 +71,25 @@ npm run e2e                          # = npx playwright test
 
 `playwright.config.ts` が `npm run build && npm start` で front サーバーを起動して（`E2E_PORT`、既定 5173）テストします。環境変数によって実行されるシナリオが変わります。
 
-| 環境変数          | 例                      | ない場合                                                                                                                                                    |
-| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| （なし）          |                         | トップ画面・404・セキュリティヘッダーなどの smoke シナリオのみ実行                                                                                          |
-| `E2E_BACKEND_URL` | `http://localhost:8080` | 登録・記事・カテゴリ・コメント・画像・言語のシナリオ（`tests/e2e/us*`）をスキップ。設定すると front サーバーもこの backend を使います（`BLOG_BACKEND_URL`） |
-| `MAILPIT_URL`     | `http://localhost:8025` | パスワード再設定メールを読むシナリオをスキップ（backend が同じ Mailpit へメールを送る必要があります）                                                       |
+| 環境変数                                | 例                      | ない場合                                                                                                                                                    |
+| --------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| （なし）                                |                         | トップ画面・404・セキュリティヘッダーなどの smoke シナリオのみ実行                                                                                          |
+| `E2E_BACKEND_URL`                       | `http://localhost:8080` | 登録・記事・カテゴリ・コメント・画像・言語のシナリオ（`tests/e2e/us*`）をスキップ。設定すると front サーバーもこの backend を使います（`BLOG_BACKEND_URL`） |
+| `MAILPIT_URL`                           | `http://localhost:8025` | パスワード再設定メールを読むシナリオをスキップ（backend が同じ Mailpit へメールを送る必要があります）                                                       |
+| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | ポータル（003）のシナリオ（`tests/e2e/portal-*`）をスキップ。backend を下記のポータル試験用設定で起動したという印です                                       |
+| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理者アカウント        | 管理コンソールとリリースノートのシナリオをスキップ。backend の `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` と同じメールアドレスで登録したアカウントです        |
 
 backend を含めてすべて実行するには、backend の README のとおりに MySQL（スキーマ適用）・Mailpit・backend（local プロファイル）を起動してから:
 
 ```bash
 E2E_BACKEND_URL=http://localhost:8080 MAILPIT_URL=http://localhost:8025 npm run e2e
+```
+
+ポータル（003）のシナリオは backend を試験用の運用設定で起動する必要があります: `BLOG_PORTAL_CACHE_TTL=0s`（キャッシュなし）、`BLOG_PORTAL_NEW_MEMBER_DELAY=PT0S`（登録直後から表示）、`BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD=1`、最初の管理者 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL=<管理者メールアドレス>`（値は `.env` にだけ置き、コミットしません）。front の試験アドレス（既定 `http://localhost:5173`）は backend の `blog.security.allowed-origins` に含める必要があります。そのうえで:
+
+```bash
+E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
+  E2E_ADMIN_EMAIL=<管理者メールアドレス> E2E_ADMIN_PASSWORD=<パスワード> npm run e2e
 ```
 
 `CI` がなければ、同じポートで起動済みの front サーバーを再利用します。シナリオは実行ごとに新しいアカウントを作るので、同じ DB で何度実行しても構いません。

@@ -71,16 +71,25 @@ npm run e2e                          # = npx playwright test
 
 `playwright.config.ts` starts the front server with `npm run build && npm start` (`E2E_PORT`, default 5173). Which scenarios run depends on environment variables:
 
-| Variable          | Example                 | When missing                                                                                                                                                         |
-| ----------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| (none)            |                         | Only smoke scenarios run (home, 404, security headers)                                                                                                               |
-| `E2E_BACKEND_URL` | `http://localhost:8080` | Sign-up, post, category, comment, image and language scenarios (`tests/e2e/us*`) are skipped. When set, the front server also uses this backend (`BLOG_BACKEND_URL`) |
-| `MAILPIT_URL`     | `http://localhost:8025` | Scenarios that read password-reset mail are skipped (the backend must send mail to the same Mailpit)                                                                 |
+| Variable                                | Example                 | When missing                                                                                                                                                         |
+| --------------------------------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (none)                                  |                         | Only smoke scenarios run (home, 404, security headers)                                                                                                               |
+| `E2E_BACKEND_URL`                       | `http://localhost:8080` | Sign-up, post, category, comment, image and language scenarios (`tests/e2e/us*`) are skipped. When set, the front server also uses this backend (`BLOG_BACKEND_URL`) |
+| `MAILPIT_URL`                           | `http://localhost:8025` | Scenarios that read password-reset mail are skipped (the backend must send mail to the same Mailpit)                                                                 |
+| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | Portal (003) scenarios (`tests/e2e/portal-*`) are skipped. It signals that the backend runs with the portal test settings below                                      |
+| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | an admin account        | Admin console and release note scenarios are skipped. The account signs up with the same email as the backend's `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL`             |
 
 To run everything including the backend, start MySQL (with the schema), Mailpit and the backend (local profile) as described in the backend README, then:
 
 ```bash
 E2E_BACKEND_URL=http://localhost:8080 MAILPIT_URL=http://localhost:8025 npm run e2e
+```
+
+Portal (003) scenarios need the backend started with test settings: `BLOG_PORTAL_CACHE_TTL=0s` (no cache), `BLOG_PORTAL_NEW_MEMBER_DELAY=PT0S` (shown right after sign-up), `BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD=1`, and the first admin `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL=<admin email>` (keep the value in `.env` only and never commit it). The front test origin (default `http://localhost:5173`) must be in the backend's `blog.security.allowed-origins`. Then:
+
+```bash
+E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
+  E2E_ADMIN_EMAIL=<admin email> E2E_ADMIN_PASSWORD=<password> npm run e2e
 ```
 
 Without `CI`, an already running front server on the same port is reused. Each run creates new accounts, so you can run it repeatedly against the same DB.
