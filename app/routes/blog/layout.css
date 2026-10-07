@@ -1,45 +1,292 @@
-/* 공개 블로그 레이아웃(004): 넓은 화면은 본문 오른쪽에 사이드바, 좁은 화면(모바일)은 본문 아래 */
+/* 공개 블로그 레이아웃(004): 넓은 화면은 본문 오른쪽에 사이드바, 좁은 화면(모바일)은 본문 아래. 색·간격은 tokens.css */
+body > .blog-layout {
+  padding-inline: max(var(--gutter), calc((100% - var(--width-blog)) / 2));
+  padding-top: 0;
+}
+
+/* 블로그 이름과 메뉴 */
+.blog-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-6);
+  margin: 0 0 var(--space-8);
+  padding-block: var(--space-10) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.blog-nav-title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heavy);
+  letter-spacing: -0.03em;
+  line-height: var(--leading-tight);
+}
+
+.blog-nav-title a {
+  color: var(--color-text);
+}
+
+.blog-nav-title a:hover {
+  text-decoration: none;
+}
+
+.blog-nav ul,
+.blog-sidebar ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.blog-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+}
+
+.blog-nav ul a {
+  display: inline-block;
+  padding-block: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.blog-nav ul a:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.blog-nav ul a[aria-current="page"],
+.blog-nav ul a.active {
+  color: var(--color-text);
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+
 .blog-layout-body {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: var(--space-12);
   align-items: flex-start;
 }
+
 .blog-layout-main {
   flex: 1 1 36rem;
   min-width: 0;
 }
-.blog-sidebar {
-  flex: 0 1 16rem;
-  min-width: 0;
+
+.blog-layout-main > main {
+  max-width: var(--width-prose);
 }
+
+.blog-sidebar {
+  flex: 0 1 var(--width-sidebar);
+  min-width: 0;
+  font-size: var(--text-sm);
+}
+
 @media (max-width: 48rem) {
   .blog-layout-body {
     flex-direction: column;
+    gap: var(--space-10);
   }
+
   .blog-layout-main,
   .blog-sidebar {
     flex-basis: auto;
     width: 100%;
   }
+
+  .blog-nav {
+    padding-top: var(--space-6);
+  }
+
+  .blog-sidebar {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
 }
-.blog-nav ul,
-.blog-sidebar ul {
-  list-style: none;
-  padding-left: 0;
+
+/* 사이드바 항목 */
+.sidebar-item {
+  margin-bottom: var(--space-8);
 }
-.blog-nav ul {
+
+.sidebar-item h2 {
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-heavy);
+}
+
+.blog-sidebar li {
+  padding-block: var(--space-1);
+}
+
+.blog-sidebar li a {
+  color: var(--color-text-secondary);
+}
+
+.blog-sidebar li a:hover,
+.blog-sidebar li a[aria-current] {
+  color: var(--color-text);
+}
+
+.blog-sidebar li a[aria-current] {
+  font-weight: var(--weight-bold);
+}
+
+.category-tree {
+  margin-bottom: var(--space-8);
+  padding: var(--space-3) 0;
+  border-block: 1px solid var(--color-border);
+}
+
+.category-tree ul ul {
+  padding-left: var(--space-4);
+}
+
+.category-tree > ul > li:first-child > a {
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+}
+
+.sidebar-profile .avatar,
+.sidebar-profile img {
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: var(--space-2);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sidebar-profile-owner {
+  margin-bottom: var(--space-1);
+  font-weight: var(--weight-bold);
+}
+
+.sidebar-profile-bio,
+.sidebar-profile-description {
+  color: var(--color-text-secondary);
+}
+
+.sidebar-comment-author {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.visitor-counts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+}
+
+.visitor-counts dt {
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.visitor-counts dd {
+  margin: 0;
+  font-weight: var(--weight-bold);
+  text-align: right;
+}
+
+.sidebar-search form,
+.blog-sidebar form[role="search"] {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-2);
 }
+
+.blog-sidebar form[role="search"] label {
+  flex-basis: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.blog-sidebar form[role="search"] input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.25rem;
+  font-size: var(--text-sm);
+}
+
+/* 블로그 홈 머리(표지·이름·소개·구독) */
+.blog-home > header {
+  margin-bottom: var(--space-8);
+}
+
+.blog-cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 16rem;
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+.blog-home > header h1 {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-xl);
+}
+
+.blog-home > header > p {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.blog-home > header .avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: var(--space-1);
+}
+
+.blog-home > header .subscribe {
+  margin-top: var(--space-2);
+}
+
+.blog-home > header .subscribe button {
+  border-radius: var(--radius-pill);
+}
+
+/* 블로그 안의 화면 제목 */
+:is(
+    .blog-category,
+    .blog-tag,
+    .blog-tags,
+    .blog-archive,
+    .blog-notice,
+    .blog-search,
+    .blog-guestbook
+  )
+  > h1 {
+  margin-bottom: var(--space-6);
+  font-size: var(--text-xl);
+}
+
+/* 태그 구름 */
 .tag-cloud {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
   list-style: none;
   padding-left: 0;
 }
+
+.tag-cloud a {
+  color: var(--color-text-secondary);
+}
+
+.tag-cloud a:hover {
+  color: var(--color-accent-strong);
+}
+
 .tag-weight-1 {
   font-size: 0.85rem;
 }
@@ -51,9 +298,32 @@
 }
 .tag-weight-4 {
   font-size: 1.35rem;
+  font-weight: var(--weight-bold);
 }
 .tag-weight-5 {
   font-size: 1.6rem;
+  font-weight: var(--weight-heavy);
+}
+
+.tag-count {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.archive-list {
+  padding: 0;
+  list-style: none;
+}
+
+.archive-list li {
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.restricted-blog {
+  padding: var(--space-10) var(--space-4);
+  text-align: center;
+  color: var(--color-text-secondary);
 }
 
 /* 005 글 상세 트랙백 영역: 긴 주소·제목이 좁은 화면에서 가로 스크롤을 만들지 않게 */

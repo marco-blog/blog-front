@@ -1,0 +1,138 @@
+/*
+ * 디자인 토큰. 색·글꼴·간격·모서리·그림자·폭은 모두 여기서 고친다(다른 CSS는 var(--…)만 쓴다).
+ * 흰 바탕, 진한 검정 글자, 넉넉한 여백, 강조색 하나. 어두운 화면은 prefers-color-scheme으로 바꾼다.
+ * 글꼴은 내려받지 않는다(CSP font-src 'self'). 설치된 Pretendard가 있으면 쓰고, 없으면 시스템 한글 글꼴로.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* 글꼴 */
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui,
+    "Apple SD Gothic Neo", "Noto Sans KR", "Noto Sans CJK KR", "Malgun Gothic", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "D2Coding", "Liberation Mono",
+    monospace;
+
+  /* 글자 크기(모바일 기준, 넓은 화면에서 제목만 키운다) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.25rem;
+  --leading-tight: 1.3;
+  --leading-normal: 1.6;
+  --leading-prose: 1.85;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+  --tracking-tight: -0.02em;
+
+  /* 간격(4px 단위) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* 모서리 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* 폭 */
+  --width-page: 75rem; /* 포털·관리 화면 */
+  --width-blog: 68rem; /* 블로그(본문 + 사이드바) */
+  --width-prose: 45rem; /* 글 본문 약 720px */
+  --width-narrow: 26rem; /* 로그인·가입 */
+  --width-sidebar: 16rem;
+  --gutter: 1rem; /* 화면 좌우 여백(넓은 화면에서 늘린다) */
+  --header-height: 3.75rem;
+
+  /* 색: 밝은 화면 */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-subtle: #f6f6f4;
+  --color-muted-bg: #efefec;
+  --color-text: #111111;
+  --color-text-secondary: #555555;
+  --color-text-muted: #808080;
+  --color-border: #e6e6e3;
+  --color-border-strong: #cfcfcb;
+  --color-link: var(--color-text);
+  /* 강조색 하나(따뜻한 주황). 글자에는 대비가 충분한 -strong을 쓴다. */
+  --color-accent: #f2652a;
+  --color-accent-strong: #c2410c;
+  --color-accent-soft: #fff1e9;
+  --color-on-accent: #ffffff;
+  /* 기본 버튼은 검정 */
+  --color-primary: #111111;
+  --color-primary-hover: #333333;
+  --color-on-primary: #ffffff;
+  --color-danger: #c62828;
+  --color-danger-soft: #fdecec;
+  --color-success: #2e7d32;
+  --color-success-soft: #e9f5ea;
+  --color-warning-soft: #fff6d9;
+  --color-focus: #f2652a;
+  --color-code-bg: #f6f6f4;
+  --color-overlay: rgb(0 0 0 / 0.45);
+
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 4px 16px rgb(0 0 0 / 0.08);
+  --shadow-lg: 0 12px 40px rgb(0 0 0 / 0.16);
+
+  --transition: 150ms ease;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --gutter: 2rem;
+    --text-2xl: 2.125rem;
+    --text-3xl: 2.625rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #141414;
+    --color-surface: #1c1c1c;
+    --color-subtle: #1f1f1f;
+    --color-muted-bg: #2a2a2a;
+    --color-text: #ececec;
+    --color-text-secondary: #b4b4b4;
+    --color-text-muted: #8c8c8c;
+    --color-border: #2e2e2e;
+    --color-border-strong: #454545;
+    --color-accent: #ff7a3d;
+    --color-accent-strong: #ff9a66;
+    --color-accent-soft: #3a2116;
+    --color-on-accent: #141414;
+    --color-primary: #ececec;
+    --color-primary-hover: #ffffff;
+    --color-on-primary: #141414;
+    --color-danger: #ff6b6b;
+    --color-danger-soft: #3a1c1c;
+    --color-success: #7bd17f;
+    --color-success-soft: #1b301c;
+    --color-warning-soft: #3a3217;
+    --color-focus: #ff7a3d;
+    --color-code-bg: #1f1f1f;
+    --color-overlay: rgb(0 0 0 / 0.65);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 16px rgb(0 0 0 / 0.45);
+    --shadow-lg: 0 12px 40px rgb(0 0 0 / 0.6);
+  }
+}

@@ -53,7 +53,7 @@ export default function PasswordReset() {
   const submitting = useNavigation().state === "submitting";
 
   return (
-    <main>
+    <main className="auth">
       <h1>{t("auth:passwordReset.title")}</h1>
       <p>{t("auth:passwordReset.intro")}</p>
       {result?.sent && <p role="status">{t("auth:passwordReset.sent")}</p>}

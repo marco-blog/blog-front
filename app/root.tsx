@@ -26,6 +26,10 @@ import { createI18n } from "~/i18n/instance";
 import { resolveLanguage } from "~/i18n/resolveLanguage.server";
 import { resourcesFor } from "~/i18n/resources.server";
 import type { RootLoaderData } from "~/i18n/root-data";
+import baseStyles from "~/styles/base.css?url";
+import contentStyles from "~/styles/content.css?url";
+import layoutStyles from "~/styles/layout.css?url";
+import tokenStyles from "~/styles/tokens.css?url";
 
 import type { Route } from "./+types/root";
 
@@ -42,6 +46,17 @@ export interface RootData extends RootLoaderData {
  * 모든 요청에서 backend가 준 Set-Cookie(로그인·리프레시·로그아웃 등)와 front 쿠키를 브라우저 응답에 싣는다
  * (tasks.md "구현 전 결정 사항" 1번).
  */
+/**
+ * 모든 화면의 공통 CSS(토큰 → 기본 → 공통 틀 → 화면별). `<Links />`가 서버 렌더링 HTML의 <head>에 <link>로 넣는다.
+ * 블로그 레이아웃·관리 화면 CSS는 각 라우트의 links가 이 뒤에 더한다.
+ */
+export const links: Route.LinksFunction = () => [
+  { rel: "stylesheet", href: tokenStyles },
+  { rel: "stylesheet", href: baseStyles },
+  { rel: "stylesheet", href: layoutStyles },
+  { rel: "stylesheet", href: contentStyles },
+];
+
 export const middleware: Route.MiddlewareFunction[] = [forwardBackendCookies];
 
 /**

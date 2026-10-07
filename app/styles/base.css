@@ -1,0 +1,439 @@
+/*
+ * 기본 스타일: 초기화, 글자, 링크, 버튼, 입력 요소, 표, 포커스, 화면 틀(가운데 정렬 폭).
+ * 색·크기는 tokens.css의 변수만 쓴다.
+ */
+
+/* ---------- 초기화 ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-wrap: break-word;
+  scroll-padding-top: calc(var(--header-height) + var(--space-4));
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+img {
+  vertical-align: middle;
+}
+
+/* ---------- 글자 ---------- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 var(--space-3);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heavy);
+}
+
+h2 {
+  font-size: var(--text-lg);
+}
+
+h3 {
+  font-size: var(--text-md);
+}
+
+h4,
+h5,
+h6 {
+  font-size: var(--text-base);
+}
+
+p {
+  margin: 0 0 var(--space-3);
+}
+
+ul,
+ol {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-6);
+}
+
+dl {
+  margin: 0 0 var(--space-3);
+}
+
+dt {
+  font-weight: var(--weight-bold);
+}
+
+dd {
+  margin: 0 0 var(--space-2);
+}
+
+small {
+  font-size: var(--text-sm);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-8) 0;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+pre {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  overflow-x: auto;
+  background: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  line-height: 1.55;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+time {
+  color: inherit;
+}
+
+/* ---------- 링크 ---------- */
+a {
+  color: var(--color-link);
+  text-decoration: none;
+  text-underline-offset: 0.2em;
+  transition: color var(--transition);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a[aria-current="page"],
+a.active {
+  font-weight: var(--weight-bold);
+}
+
+/* ---------- 포커스 ---------- */
+:where(:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- 버튼 ---------- */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+/* 에디터(Milkdown) 안의 버튼·입력은 Crepe가 꾸미므로 뺀다. :where로 특이도를 0으로 두어 화면별 규칙이 늘 이긴다. */
+:where(button, input[type="submit"], input[type="button"], input[type="reset"]):not(
+  :where(.milkdown *)
+),
+input::file-selector-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 2.25rem;
+  padding: var(--space-1) var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+:where(button, input[type="submit"], input[type="button"]):not(:where(.milkdown *)):hover {
+  border-color: var(--color-text);
+  text-decoration: none;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button[aria-pressed="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+}
+
+/* 강조 버튼(검정). 화면별 CSS가 주 동작 버튼에 같은 모양을 붙인다. */
+.button-primary,
+.auth button[type="submit"],
+.settings form > button[type="submit"],
+.comment-form > button[type="submit"],
+.guestbook-form button[type="submit"],
+.write-actions > button:last-child,
+dialog button[type="submit"],
+.dialog-actions > button:last-child {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.button-primary:hover,
+.auth button[type="submit"]:hover,
+.settings form > button[type="submit"]:hover,
+.comment-form > button[type="submit"]:hover,
+.guestbook-form button[type="submit"]:hover,
+.write-actions > button:last-child:hover,
+dialog button[type="submit"]:hover,
+.dialog-actions > button:last-child:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+/* ---------- 입력 요소 ---------- */
+:where(
+  input:not(
+    [type="checkbox"],
+    [type="radio"],
+    [type="hidden"],
+    [type="submit"],
+    [type="button"],
+    [type="reset"],
+    [type="file"],
+    [type="range"],
+    [type="color"]
+  ),
+  select,
+  textarea
+):not(:where(.milkdown *)) {
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  line-height: 1.4;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 6rem;
+  resize: vertical;
+  line-height: var(--leading-normal);
+}
+
+select {
+  padding-right: var(--space-8);
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    right 1rem center,
+    right calc(1rem - 5px) center;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+select[multiple] {
+  padding-right: var(--space-3);
+  background-image: none;
+}
+
+:where(input, select, textarea):not(:where(.milkdown *)):focus-visible {
+  outline: none;
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0 var(--space-1) 0 0;
+  vertical-align: -0.15em;
+  accent-color: var(--color-accent);
+}
+
+input[type="file"] {
+  max-width: 100%;
+  font-size: var(--text-sm);
+}
+
+input::file-selector-button {
+  margin-right: var(--space-3);
+}
+
+label {
+  cursor: pointer;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+legend {
+  padding: 0 var(--space-2);
+  font-weight: var(--weight-bold);
+}
+
+details > summary {
+  cursor: pointer;
+}
+
+/* ---------- 표 ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-4);
+}
+
+th,
+td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+thead th {
+  border-bottom: 1px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+}
+
+caption {
+  padding-bottom: var(--space-2);
+  text-align: left;
+  font-weight: var(--weight-bold);
+}
+
+/* ---------- 대화상자 ---------- */
+dialog {
+  max-width: min(36rem, calc(100vw - 2 * var(--gutter)));
+  max-height: calc(100vh - 2 * var(--space-8));
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+}
+
+dialog::backdrop {
+  background: var(--color-overlay);
+}
+
+/* ---------- 화면 틀 ---------- */
+/* 최상위 블록은 감싸는 요소 없이 좌우 여백으로 가운데 폭을 만든다(바탕색은 화면 끝까지). */
+body > header,
+body > main,
+body > footer,
+body > .release-note-banner,
+body > :is(.blog-layout, .settings, .manage, .admin, .updates) {
+  padding-inline: max(var(--gutter), calc((100% - var(--width-page)) / 2));
+}
+
+body > main,
+body > :is(.blog-layout, .settings, .manage, .admin, .updates) {
+  flex: 1 0 auto;
+  width: 100%;
+  padding-block: var(--space-8) var(--space-16);
+}
+
+/* 화면 읽기 전용 */
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

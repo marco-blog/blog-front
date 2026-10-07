@@ -98,7 +98,7 @@ export default function Login() {
   const submitting = useNavigation().state === "submitting";
 
   return (
-    <main>
+    <main className="auth">
       <h1>{t("auth:login.title")}</h1>
       <Form method="post">
         <FormAlert message={messages.form} />

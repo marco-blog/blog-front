@@ -138,7 +138,7 @@ export default function Signup() {
 
   const values = actionData?.values;
   return (
-    <main>
+    <main className="auth">
       <h1>{t("auth:signup.title")}</h1>
       <Form method="post">
         <FormAlert message={messages.form} />

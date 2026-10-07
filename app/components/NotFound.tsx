@@ -5,7 +5,7 @@ import { Link } from "react-router";
 export function NotFound() {
   const { t } = useTranslation();
   return (
-    <main>
+    <main className="not-found">
       <h1>{t("notFound.title")}</h1>
       <p>{t("notFound.description")}</p>
       <p>
