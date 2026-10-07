@@ -50,7 +50,8 @@
     "moderation": "신고·숨김",
     "setting": "설정",
     "releaseNote": "릴리스 노트",
-    "role": "권한"
+    "role": "권한",
+    "external": "외부 블로그"
   },
   "actions": {
     "TOPIC_CREATE": "주제 추가",
@@ -83,7 +84,19 @@
     "BANNED_WORD_DELETE": "금칙어 삭제",
     "USER_BLOG_LIMIT_CHANGE": "블로그 수 한도 변경",
     "ROLE_GRANT": "관리자 권한 부여",
-    "ROLE_REVOKE": "관리자 권한 회수"
+    "ROLE_REVOKE": "관리자 권한 회수",
+    "EXTERNAL_BLOG_CREATE": "외부 블로그 직접 등록",
+    "EXTERNAL_BLOG_APPROVE": "외부 블로그 승인",
+    "EXTERNAL_BLOG_REJECT": "외부 블로그 거절",
+    "EXTERNAL_BLOG_UPDATE": "외부 블로그 기본 주제 변경",
+    "EXTERNAL_BLOG_PAUSE": "외부 블로그 일시 중지",
+    "EXTERNAL_BLOG_RESUME": "외부 블로그 재개",
+    "EXTERNAL_BLOG_BLOCK": "외부 블로그 차단",
+    "EXTERNAL_POST_REMOVE": "외부 글 내림",
+    "TOPIC_MAPPING_RULE_CREATE": "매핑 규칙 추가",
+    "TOPIC_MAPPING_RULE_UPDATE": "매핑 규칙 수정",
+    "TOPIC_MAPPING_RULE_DELETE": "매핑 규칙 삭제",
+    "CLASSIFICATION_CONFIRM": "분류 검수 확정"
   },
   "targets": {
     "USER": "회원",
@@ -96,6 +109,10 @@
     "COMMENT": "댓글",
     "GUESTBOOK": "방명록 글",
     "TRACKBACK": "트랙백",
-    "BANNED_WORD": "금칙어"
+    "BANNED_WORD": "금칙어",
+    "EXTERNAL_BLOG": "외부 블로그",
+    "EXTERNAL_POST": "외부 글",
+    "TOPIC_MAPPING_RULE": "매핑 규칙",
+    "CLASSIFICATION_REVIEW": "분류 검수"
   }
 }

@@ -10,6 +10,8 @@ import {
 } from "~/moderation/reasons";
 import {
   hiddenContentPath,
+  isReportFormType,
+  isReportableType,
   parseReportKey,
   parseTargetUrl,
   reportKey,
@@ -17,10 +19,63 @@ import {
   targetAnchor,
 } from "~/moderation/reportTarget";
 
+import { action as homeAction } from "~/routes/home";
+import { action as topicAction } from "~/routes/topic";
+
 import { fail, mockBackend, ok } from "../support/backend";
 import { asData, caught, expectRedirect, formRequest } from "../support/route";
 
 const REPORTS = "POST /api/v1/reports";
+
+describe("007 외부 글 신고(T086)", () => {
+  it("신고 레이어는 EXTERNAL_POST를 받지만, 숨김·대상 지정 종류는 그대로", () => {
+    expect(isReportFormType("EXTERNAL_POST")).toBe(true);
+    expect(isReportFormType("EXTERNAL_BLOG")).toBe(false);
+    expect(isReportFormType("POST")).toBe(true);
+    expect(isReportableType("EXTERNAL_POST")).toBe(false);
+    expect(reportKey("EXTERNAL_POST", 7)).toBe("external-7");
+    expect(parseReportKey("external-7")).toBeNull();
+    expect(targetAnchor("EXTERNAL_POST", 7)).toBe("#external-7");
+  });
+
+  it("포털 화면 action: EXTERNAL_POST 신고는 POST /reports, 로그인 필요면 ?report=external-{id}로 돌아온다", async () => {
+    const backend = mockBackend({ [REPORTS]: ok({ id: 1, status: "PENDING" }, { status: 201 }) });
+    const result = asData(
+      await homeAction({
+        request: formRequest(
+          "/?index",
+          { intent: "report", targetType: "EXTERNAL_POST", targetId: "7", reason: "COPYRIGHT" },
+          { cookie: "access_token=a" },
+        ),
+        params: {},
+        context: {},
+      } as never),
+    );
+    expect(result.data).toEqual({ intent: "report", ok: true, key: "external-7" });
+    expect(backend.callsTo(REPORTS)[0].body).toEqual({
+      targetType: "EXTERNAL_POST",
+      targetId: 7,
+      reason: "COPYRIGHT",
+    });
+
+    mockBackend({ [REPORTS]: fail(401, "UNAUTHENTICATED") });
+    const redirect = await caught(
+      topicAction({
+        request: formRequest("/topics/knowledge?sort=popular", {
+          intent: "report",
+          targetType: "EXTERNAL_POST",
+          targetId: "7",
+          reason: "SPAM",
+        }),
+        params: { "*": "knowledge" },
+        context: {},
+      } as never),
+    );
+    expect(expectRedirect(redirect)).toBe(
+      `/login?next=${encodeURIComponent("/topics/knowledge?sort=popular&report=external-7")}`,
+    );
+  });
+});
 
 describe("신고 대상 열쇠·앵커(005 T043)", () => {
   it("열쇠와 앵커, 거꾸로 읽기", () => {

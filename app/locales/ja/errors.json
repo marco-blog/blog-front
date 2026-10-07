@@ -103,5 +103,20 @@
   "BANNED_WORD_NOT_FOUND": "禁止語が見つかりません。",
   "TRACKBACK_NOT_FOUND": "トラックバックが見つかりません。",
   "TRACKBACK_NOT_ALLOWED": "トラックバックは公開記事からのみ送信できます。",
-  "CANNOT_CHANGE_OWN_ROLE": "自分の権限は変更できません。別の最高管理者が変更する必要があります。"
+  "CANNOT_CHANGE_OWN_ROLE": "自分の権限は変更できません。別の最高管理者が変更する必要があります。",
+  "EXTERNAL_FEED_URL_NOT_ALLOWED": "登録できないアドレスです。",
+  "EXTERNAL_FEED_NOT_FOUND": "RSS・Atom のアドレスが見つかりません。フィードのアドレスを直接入力してください。",
+  "EXTERNAL_FEED_UNREADABLE": "フィードを読み込めませんでした。",
+  "EXTERNAL_BLOG_ALREADY_REGISTERED": "すでに登録されているブログです。自分のブログなら所有確認後に引き継げます。",
+  "EXTERNAL_BLOG_LIMIT_EXCEEDED": "外部ブログは 3 件まで登録できます。",
+  "EXTERNAL_BLOG_NOT_FOUND": "外部ブログが見つかりません。",
+  "EXTERNAL_BLOG_STATE_CONFLICT": "現在の状態ではできない操作です。",
+  "EXTERNAL_BLOG_OWNERSHIP_REQUIRED": "所有確認を済ませたオーナーのみ可能です。",
+  "EXTERNAL_VERIFICATION_NOT_FOUND": "認証情報が見つかりません。コードを取得し直してください。",
+  "EXTERNAL_VERIFICATION_EXPIRED": "認証コードの有効期限(24 時間)が切れました。取得し直してください。",
+  "EXTERNAL_VERIFICATION_CODE_NOT_FOUND": "フィードにもブログのトップページにも認証コードが見つかりませんでした。",
+  "EXTERNAL_POST_NOT_FOUND": "外部記事が見つかりません。",
+  "CLASSIFICATION_REVIEW_NOT_FOUND": "レビュー項目が見つかりません。",
+  "CLASSIFICATION_REVIEW_CLOSED": "すでに処理されたレビューです。",
+  "TOPIC_MAPPING_RULE_KEYWORD_TAKEN": "すでにあるキーワードです。"
 }

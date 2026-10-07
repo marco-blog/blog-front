@@ -81,6 +81,8 @@ npm run e2e                          # = npx playwright test
 | `E2E_MODERATION_TEST_SETTINGS`          | `1`                     | 신고·스팸 방어·트랙백(005) 시나리오(`tests/e2e/moderation-*`)를 건너뛴다. backend를 아래 005 시험용 설정으로 띄웠다는 표시다               |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 관리자 계정             | 관리자 콘솔·릴리스 노트 시나리오를 건너뛴다. backend의 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL`과 같은 이메일로 가입한 계정이다            |
 | `E2E_ADMIN_TEST_SETTINGS`               | `1`                     | 관리 콘솔(006) 시나리오(`tests/e2e/admin-*`)를 건너뛴다. backend를 `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`(대시보드 캐시 끔)로 띄웠다는 표시다 |
+| `E2E_EXTERNAL_TEST_SETTINGS`            | `1`                     | 외부 블로그(007) 시나리오(`tests/e2e/external-*`)를 건너뛴다. backend를 아래 007 시험용 설정으로 띄웠다는 표시다                           |
+| `E2E_FEED_STUB_PORT`                    | `4610`                  | E2E 피드 스텁 서버 포트(기본 4610). backend의 `BLOG_OUTBOUND_ALLOWED_PORTS`에 같은 포트를 넣는다                                           |
 
 backend까지 포함해 모두 돌리려면 backend README대로 MySQL(스키마 적용)·Mailpit·backend(local 프로필)를 띄운 뒤:
 
@@ -102,6 +104,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
 신고·스팸 방어·트랙백(005) 시나리오(`tests/e2e/moderation-*`)는 금칙어·운영 설정처럼 사이트 전체에 걸리는 값을 바꾸므로 Playwright 프로젝트 `moderation`으로 `portal` 다음에 한 번에 한 파일씩 돈다. 모든 시나리오가 같은 IP(localhost)에서 가입·댓글·발행·업로드·신고·트랙백을 하므로 backend를 다음 값으로 띄우고 `E2E_MODERATION_TEST_SETTINGS=1`을 준다(가입 IP 한도가 기본값이면 001~004 시나리오도 가입에서 막힌다): `BLOG_CAPTCHA_PROVIDER=test`, `BLOG_CAPTCHA_LOGIN_FAILURES_BEFORE_CAPTCHA=100000`, `BLOG_RATELIMIT_SIGNUP_PER_IP_PER_HOUR=100000`, `BLOG_RATELIMIT_COMMENT_PER_MINUTE=1000`, `BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE=1000`, `BLOG_RATELIMIT_POST_PUBLISH_PER_HOUR=100000`, `BLOG_RATELIMIT_MEDIA_UPLOAD_PER_MINUTE=1000`, `BLOG_TRACKBACK_RECEIVE_LIMIT=100000`, `BLOG_REPORTS_MEMBER_PER_HOUR=100000`, `BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR=100000`. CAPTCHA `test`는 토큰 `e2e-pass`만 통과시키며 front의 시험용 위젯과 E2E 도우미(`scripts/e2e-provision-admin.sh`, `tests/e2e/support/backend.ts`)가 이 토큰을 보낸다. 로그인 CAPTCHA 기준을 크게 두는 것은 001 로그인 잠금 시나리오가 같은 IP의 연속 실패 3회 기준에 걸리지 않게 하려는 것이다. 트랙백 보내기 시나리오는 backend의 `blog.base-url`이 front 주소와 같아야 서비스 안 글로 처리된다(local 프로필 기본 `http://localhost:5173`, 다른 포트면 `BLOG_BASE_URL`).
 
 관리 콘솔(006) 시나리오(`tests/e2e/admin-*`)는 권한 부여·회수, 릴리스 노트 게시처럼 사이트 전체에 걸리는 상태를 바꾸므로 Playwright 프로젝트 `admin`으로 `portal`·`moderation`이 끝난 뒤 한 번에 한 파일씩 돈다. 대시보드 수치가 바로 바뀌어야 하므로 backend를 `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`로 띄우고 `E2E_ADMIN_TEST_SETTINGS=1`을 준다. 관리자 계정은 최고 관리자여야 하며, 시나리오는 그 계정 자신의 권한은 바꾸지 않는다.
+
+외부 블로그(007) 시나리오(`tests/e2e/external-*`)는 포털 "최신 글"에 외부 글을 섞고 운영 설정을 바꾸므로 Playwright 프로젝트 `external`로 맨 마지막에 한 번에 한 파일씩 돈다. 피드는 인터넷이 아니라 `playwright.config.ts`의 `webServer`가 함께 띄우는 피드 스텁(`tests/e2e/support/feed-stub-server.mjs`, `127.0.0.1:${E2E_FEED_STUB_PORT}`, 상태 확인 `/__stub/health`)이 준다. 시나리오가 `/__stub/{이름}`으로 피드 내용·인증 코드·응답 상태를 정한다. backend는 다음 값으로 띄우고 `E2E_EXTERNAL_TEST_SETTINGS=1`을 준다: `BLOG_OUTBOUND_ALLOW_PRIVATE=true`(루프백 스텁 허용, **시험 전용**이며 prod 프로필에서는 기동 실패), `BLOG_OUTBOUND_ALLOWED_PORTS=80,443,8080,8443,4610`, `BLOG_EXTERNAL_POLL_INTERVAL=2s`, `BLOG_EXTERNAL_FETCH_INTERVAL=PT5S`, `BLOG_EXTERNAL_FETCH_JITTER=PT0S`, `BLOG_EXTERNAL_PREVIEW_PER_HOUR=1000`, `BLOG_EXTERNAL_VERIFY_CHECKS_PER_HOUR=1000`. 포털 반영을 바로 보도록 `BLOG_PORTAL_CACHE_TTL=0s`(003 설정)도 필요하다. 신고 연결 시나리오(`external-us4-report`)는 005 설정과 `E2E_MODERATION_TEST_SETTINGS=1`도 쓴다.
 
 `CI`가 없으면 이미 떠 있는 front 서버(같은 포트)를 다시 쓴다. 시나리오는 실행마다 새 계정을 만들므로 같은 DB에서 여러 번 돌려도 된다.
 

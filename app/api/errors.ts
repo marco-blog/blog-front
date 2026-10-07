@@ -18,6 +18,8 @@ export interface ApiErrorInit {
   traceId?: string;
   /** `Retry-After` 헤더(초). 429(요청 제한·비밀번호 시도 제한)에서 남은 시간 안내에 쓴다(004) */
   retryAfter?: number | null;
+  /** 오류 상세 값(`header.params`, 007) */
+  params?: Record<string, unknown> | null;
 }
 
 /** backend 호출 실패(header.isSuccessful=false 등). 화면 문구는 resultCode로 번역한다(errors.{code}). */
@@ -29,6 +31,7 @@ export class ApiError extends Error {
   readonly fieldErrors: ApiFieldError[];
   readonly traceId: string | undefined;
   readonly retryAfter: number | null;
+  readonly params: Record<string, unknown>;
 
   constructor(init: ApiErrorInit) {
     super(
@@ -40,6 +43,7 @@ export class ApiError extends Error {
     this.fieldErrors = init.fieldErrors ?? [];
     this.traceId = init.traceId;
     this.retryAfter = init.retryAfter ?? null;
+    this.params = init.params ?? {};
   }
 }
 

@@ -103,5 +103,20 @@
   "BANNED_WORD_NOT_FOUND": "금칙어를 찾을 수 없습니다.",
   "TRACKBACK_NOT_FOUND": "트랙백을 찾을 수 없습니다.",
   "TRACKBACK_NOT_ALLOWED": "공개 글에서만 트랙백을 보낼 수 있습니다.",
-  "CANNOT_CHANGE_OWN_ROLE": "자기 권한은 바꿀 수 없습니다. 다른 최고 관리자가 바꿔야 합니다."
+  "CANNOT_CHANGE_OWN_ROLE": "자기 권한은 바꿀 수 없습니다. 다른 최고 관리자가 바꿔야 합니다.",
+  "EXTERNAL_FEED_URL_NOT_ALLOWED": "등록할 수 없는 주소입니다.",
+  "EXTERNAL_FEED_NOT_FOUND": "RSS·Atom 주소를 찾지 못했습니다. 피드 주소를 직접 넣어 보세요.",
+  "EXTERNAL_FEED_UNREADABLE": "피드를 읽지 못했습니다.",
+  "EXTERNAL_BLOG_ALREADY_REGISTERED": "이미 등록된 블로그입니다. 내 블로그라면 소유 인증 후 넘겨받을 수 있습니다.",
+  "EXTERNAL_BLOG_LIMIT_EXCEEDED": "외부 블로그는 3개까지 등록할 수 있습니다.",
+  "EXTERNAL_BLOG_NOT_FOUND": "외부 블로그를 찾을 수 없습니다.",
+  "EXTERNAL_BLOG_STATE_CONFLICT": "지금 상태에서는 할 수 없는 작업입니다.",
+  "EXTERNAL_BLOG_OWNERSHIP_REQUIRED": "소유 인증을 마친 주인만 할 수 있습니다.",
+  "EXTERNAL_VERIFICATION_NOT_FOUND": "인증 정보를 찾을 수 없습니다. 코드를 다시 받아 주세요.",
+  "EXTERNAL_VERIFICATION_EXPIRED": "인증 코드가 만료되었습니다(24시간). 코드를 다시 받아 주세요.",
+  "EXTERNAL_VERIFICATION_CODE_NOT_FOUND": "피드와 블로그 첫 화면 어디에서도 인증 코드를 찾지 못했습니다.",
+  "EXTERNAL_POST_NOT_FOUND": "외부 글을 찾을 수 없습니다.",
+  "CLASSIFICATION_REVIEW_NOT_FOUND": "검수 항목을 찾을 수 없습니다.",
+  "CLASSIFICATION_REVIEW_CLOSED": "이미 처리된 검수입니다.",
+  "TOPIC_MAPPING_RULE_KEYWORD_TAKEN": "이미 있는 키워드입니다."
 }

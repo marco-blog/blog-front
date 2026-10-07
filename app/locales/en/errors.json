@@ -103,5 +103,20 @@
   "BANNED_WORD_NOT_FOUND": "The banned word could not be found.",
   "TRACKBACK_NOT_FOUND": "The trackback could not be found.",
   "TRACKBACK_NOT_ALLOWED": "Trackbacks can be sent only from public posts.",
-  "CANNOT_CHANGE_OWN_ROLE": "You can't change your own role. Another super administrator must change it."
+  "CANNOT_CHANGE_OWN_ROLE": "You can't change your own role. Another super administrator must change it.",
+  "EXTERNAL_FEED_URL_NOT_ALLOWED": "This address cannot be registered.",
+  "EXTERNAL_FEED_NOT_FOUND": "No RSS or Atom feed was found. Try entering the feed address directly.",
+  "EXTERNAL_FEED_UNREADABLE": "Could not read the feed.",
+  "EXTERNAL_BLOG_ALREADY_REGISTERED": "This blog is already registered. If it is yours, verify ownership to take it over.",
+  "EXTERNAL_BLOG_LIMIT_EXCEEDED": "You can register up to 3 external blogs.",
+  "EXTERNAL_BLOG_NOT_FOUND": "External blog not found.",
+  "EXTERNAL_BLOG_STATE_CONFLICT": "This action is not possible in the current state.",
+  "EXTERNAL_BLOG_OWNERSHIP_REQUIRED": "Only a verified owner can do this.",
+  "EXTERNAL_VERIFICATION_NOT_FOUND": "Verification not found. Please get a new code.",
+  "EXTERNAL_VERIFICATION_EXPIRED": "The code expired (24 hours). Please get a new one.",
+  "EXTERNAL_VERIFICATION_CODE_NOT_FOUND": "The code was not found in the feed or on the blog's front page.",
+  "EXTERNAL_POST_NOT_FOUND": "External post not found.",
+  "CLASSIFICATION_REVIEW_NOT_FOUND": "Review item not found.",
+  "CLASSIFICATION_REVIEW_CLOSED": "This review has already been handled.",
+  "TOPIC_MAPPING_RULE_KEYWORD_TAKEN": "That keyword already has a rule."
 }

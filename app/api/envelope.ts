@@ -92,6 +92,7 @@ export async function readEnvelope<T>(
       fieldErrors: header.fieldErrors,
       traceId: header.traceId ?? traceId,
       retryAfter: retryAfterSeconds(response.headers.get("retry-after")),
+      params: header.params,
     });
   }
   return {

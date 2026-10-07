@@ -236,7 +236,9 @@
     "untargeted": "対象未定",
     "action": {
       "HIDE_CONTENT": "非表示",
-      "SUSPEND_USER": "投稿者を停止"
+      "SUSPEND_USER": "投稿者を停止",
+      "REMOVE_FROM_PORTAL": "ポータルから削除",
+      "BLOCK_EXTERNAL_BLOG": "外部ブログをブロック"
     },
     "targetTypes": {
       "POST": "記事",
@@ -288,7 +290,11 @@
       "suspend": "投稿者を停止",
       "suspendReason": "停止の理由",
       "dismiss": "却下",
-      "confirmSuspend": "投稿者を停止しますか？すべてのログインが切断されます。"
+      "confirmSuspend": "投稿者を停止しますか？すべてのログインが切断されます。",
+      "removeFromPortal": "ポータルから削除",
+      "blockExternal": "外部ブログをブロック",
+      "confirmRemove": "この外部記事をポータルから削除します。元に戻せません。",
+      "confirmBlock": "この外部ブログをブロックします。すべての記事がポータルから削除され、元に戻せません。"
     },
     "result": {
       "title": "処理結果",

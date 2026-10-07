@@ -103,5 +103,20 @@
   "BANNED_WORD_NOT_FOUND": "找不到该违禁词。",
   "TRACKBACK_NOT_FOUND": "找不到该引用通告。",
   "TRACKBACK_NOT_ALLOWED": "只能从公开文章发送引用通告。",
-  "CANNOT_CHANGE_OWN_ROLE": "不能更改自己的权限，需要由另一位超级管理员更改。"
+  "CANNOT_CHANGE_OWN_ROLE": "不能更改自己的权限，需要由另一位超级管理员更改。",
+  "EXTERNAL_FEED_URL_NOT_ALLOWED": "该地址无法登记。",
+  "EXTERNAL_FEED_NOT_FOUND": "没有找到 RSS 或 Atom 地址。请直接输入订阅源地址。",
+  "EXTERNAL_FEED_UNREADABLE": "无法读取订阅源。",
+  "EXTERNAL_BLOG_ALREADY_REGISTERED": "该博客已被登记。如果是你的博客，验证所有权后即可接管。",
+  "EXTERNAL_BLOG_LIMIT_EXCEEDED": "最多可登记 3 个外部博客。",
+  "EXTERNAL_BLOG_NOT_FOUND": "找不到该外部博客。",
+  "EXTERNAL_BLOG_STATE_CONFLICT": "当前状态下无法执行此操作。",
+  "EXTERNAL_BLOG_OWNERSHIP_REQUIRED": "只有完成所有权验证的博主才能执行此操作。",
+  "EXTERNAL_VERIFICATION_NOT_FOUND": "找不到验证信息，请重新获取验证码。",
+  "EXTERNAL_VERIFICATION_EXPIRED": "验证码已过期(24 小时)，请重新获取。",
+  "EXTERNAL_VERIFICATION_CODE_NOT_FOUND": "在订阅源和博客首页都没有找到验证码。",
+  "EXTERNAL_POST_NOT_FOUND": "找不到该外部文章。",
+  "CLASSIFICATION_REVIEW_NOT_FOUND": "找不到审核项。",
+  "CLASSIFICATION_REVIEW_CLOSED": "该审核已处理。",
+  "TOPIC_MAPPING_RULE_KEYWORD_TAKEN": "该关键词已存在。"
 }

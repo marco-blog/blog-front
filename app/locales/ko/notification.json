@@ -13,6 +13,9 @@
     "BACKUP_READY": "{{blogTitle}} 백업이 준비되었습니다. {{expiresAt}}까지 내려받을 수 있습니다.",
     "REPORT_RESOLVED": "신고하신 콘텐츠의 검토를 마쳤습니다.",
     "REPORT_RESOLVED_ACTIONED": "신고하신 콘텐츠를 검토해 조치했습니다.",
-    "REPORT_RESOLVED_DISMISSED": "신고하신 콘텐츠를 검토했으나 조치하지 않았습니다."
+    "REPORT_RESOLVED_DISMISSED": "신고하신 콘텐츠를 검토했으나 조치하지 않았습니다.",
+    "EXTERNAL_BLOG_APPROVED": "외부 블로그 {{externalBlogTitle}} 등록이 승인되었습니다. 곧 글을 수집합니다.",
+    "EXTERNAL_BLOG_REJECTED": "외부 블로그 {{externalBlogTitle}} 등록이 거절되었습니다. 사유: {{reason}}",
+    "EXTERNAL_FEED_STOPPED": "외부 블로그 {{externalBlogTitle}}의 피드를 7일 넘게 읽지 못해 수집을 멈췄습니다(마지막 결과: {{lastResult}})."
   }
 }

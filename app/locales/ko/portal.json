@@ -28,7 +28,10 @@
     "likes_one": "좋아요 {{count, number}}",
     "likes_other": "좋아요 {{count, number}}",
     "comments_one": "댓글 {{count, number}}",
-    "comments_other": "댓글 {{count, number}}"
+    "comments_other": "댓글 {{count, number}}",
+    "external": "외부",
+    "newTab": "새 탭에서 원래 블로그로 이동",
+    "removalRequest": "삭제 요청"
   },
   "topic": {
     "description": "{{name}} 주제의 글을 모아 봅니다.",
@@ -39,6 +42,14 @@
     "popular": "인기순",
     "posts": "글 목록",
     "empty": "이 주제에는 아직 글이 없습니다.",
-    "popularEmpty": "최근 7일 동안 반응을 얻은 글이 없습니다. 최신순으로 둘러보세요."
+    "popularEmpty": "최근 7일 동안 반응을 얻은 글이 없습니다. 최신순으로 둘러보세요.",
+    "sourceEmpty": "이 주제에는 이 출처의 글이 없습니다."
+  },
+  "source": {
+    "label": "출처",
+    "all": "전체",
+    "internal": "내부 글만",
+    "external": "외부 글만",
+    "empty": "이 출처의 최신 글이 없습니다."
   }
 }

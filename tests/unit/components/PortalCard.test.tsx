@@ -8,7 +8,7 @@ import type { Language } from "~/i18n/config";
 import { DEFAULT_CARD_COLOR } from "~/portal/cardColor";
 
 import { portalCard, topicNode } from "../support/fixtures";
-import { renderRoutes } from "../support/render";
+import { renderRoutes, type RenderRoutesOptions } from "../support/render";
 
 const NOW = "2026-10-06T07:24:19Z";
 const topics = [
@@ -17,12 +17,26 @@ const topics = [
   ]),
 ];
 
-function renderCard(card: PortalCardData, language: Language = "ko") {
+function renderCard(
+  card: PortalCardData,
+  language: Language = "ko",
+  user: RenderRoutesOptions["user"] = null,
+) {
   return renderRoutes(
     [{ index: true, Component: () => <PortalCard card={card} topics={topics} now={NOW} /> }],
-    { language },
+    { language, user },
   );
 }
+
+const externalCard = (id: number) =>
+  portalCard(id, {
+    source: "EXTERNAL",
+    title: `External ${id}`,
+    blog: { handle: null, title: "Dev Log" },
+    author: null,
+    externalBlog: { id: 3, title: "Dev Log", siteHost: "dev.example.com" },
+    visitUrl: `/api/v1/external-posts/${id}/visit`,
+  });
 
 /** 포털 카드(003 T042, FR-085) */
 describe("PortalCard", () => {
@@ -95,5 +109,98 @@ describe("PortalCard", () => {
     expect(placeholder).toHaveStyle({ backgroundColor: DEFAULT_CARD_COLOR });
     expect(placeholder).toHaveTextContent("トピックなし");
     expect(screen.getByRole("article").querySelector(".portal-card-summary")).toBeNull();
+  });
+
+  it("외부 카드(007): visit 링크 새 탭·nofollow, 외부 배지, 블로그 이름과 호스트, 좋아요·댓글 없음", async () => {
+    renderCard(
+      portalCard(77, {
+        source: "EXTERNAL",
+        title: "Rust 소유권 정리",
+        blog: { handle: null, title: "Dev Log" },
+        author: null,
+        externalBlog: { id: 3, title: "Dev Log", siteHost: "dev.example.com" },
+        visitUrl: "/api/v1/external-posts/77/visit",
+        likeCount: 0,
+        commentCount: 0,
+      }),
+    );
+
+    const article = await screen.findByRole("article");
+    const link = within(article).getByRole("link", { name: /Rust 소유권 정리/ });
+    expect(link).toHaveAttribute("href", "/api/v1/external-posts/77/visit");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener nofollow");
+    expect(article).toHaveTextContent("외부");
+    expect(article).toHaveTextContent("Dev Log");
+    expect(article).toHaveTextContent("dev.example.com");
+    expect(article).not.toHaveTextContent("좋아요");
+    expect(article).not.toHaveTextContent("댓글");
+  });
+  it("외부 카드(007): 썸네일이 없으면 주제 색, 요약 속 <script>는 글자로만, visitUrl이 없으면 같은 규칙의 주소", async () => {
+    renderCard(
+      portalCard(78, {
+        source: "EXTERNAL",
+        title: "<b>제목</b>",
+        summary: "<script>alert(1)</script> 요약",
+        topicId: 12,
+        blog: { handle: null, title: "Dev Log" },
+        author: null,
+        externalBlog: { id: 3, title: "Dev Log", siteHost: "dev.example.com" },
+        visitUrl: null,
+      }),
+    );
+
+    const article = await screen.findByRole("article");
+    expect(article).toHaveAttribute("data-source", "EXTERNAL");
+    expect(within(article).getByTestId("portal-card-placeholder")).toHaveStyle({
+      backgroundColor: "#3D7DD8",
+    });
+    expect(article.querySelector("script")).toBeNull();
+    expect(article.querySelector("b")).toBeNull();
+    expect(within(article).getByText("<script>alert(1)</script> 요약")).toBeInTheDocument();
+    expect(within(article).getByRole("link", { name: /<b>제목<\/b>/ })).toHaveAttribute(
+      "href",
+      "/api/v1/external-posts/78/visit",
+    );
+    expect(within(article).queryByRole("link", { name: "Dev Log" })).toBeNull();
+  });
+
+  it("외부 카드 '삭제 요청'(007 T086): 비로그인은 이동 주소를 채운 권리 침해 신고로", async () => {
+    renderCard(externalCard(77));
+    const article = await screen.findByRole("article");
+    expect(within(article).getByRole("link", { name: "삭제 요청" })).toHaveAttribute(
+      "href",
+      "/rights-request?url=%2Fapi%2Fv1%2Fexternal-posts%2F77%2Fvisit",
+    );
+    expect(article.querySelector("details")).toBeNull();
+  });
+
+  it("외부 카드 '삭제 요청': 로그인 회원은 신고 레이어(EXTERNAL_POST), 레이어의 권리 침해 링크도 이동 주소", async () => {
+    renderCard(externalCard(78), "ko", { userId: 1, nickname: "마르코", role: "USER" });
+    const article = await screen.findByRole("article");
+    const details = article.querySelector("details.report");
+    expect(details?.querySelector("summary")).toHaveTextContent("삭제 요청");
+    const form = within(article).getByRole("form", { name: "외부 글 신고" });
+    expect(form.querySelector('input[name="targetType"]')).toHaveValue("EXTERNAL_POST");
+    expect(form.querySelector('input[name="targetId"]')).toHaveValue("78");
+    expect(
+      within(article).getByRole("link", { name: "회원이 아니신가요? 권리 침해 신고" }),
+    ).toHaveAttribute("href", "/rights-request?url=%2Fapi%2Fv1%2Fexternal-posts%2F78%2Fvisit");
+  });
+
+  it("내부 카드에는 '삭제 요청'이 없다", async () => {
+    renderCard(portalCard(6), "ko", { userId: 1, nickname: "마르코", role: "USER" });
+    const article = await screen.findByRole("article");
+    expect(within(article).queryByText("삭제 요청")).toBeNull();
+  });
+
+  it("내부 카드는 기존과 같다(외부 배지·새 탭 없음)", async () => {
+    renderCard(portalCard(5));
+
+    const article = await screen.findByRole("article");
+    expect(article).not.toHaveAttribute("data-source");
+    const link = within(article).getByRole("link", { name: /포털 글 5/ });
+    expect(link).not.toHaveAttribute("target");
+    expect(article.querySelector(".portal-card-badge")).toBeNull();
   });
 });

@@ -28,7 +28,10 @@
     "likes_one": "{{count, number}} like",
     "likes_other": "{{count, number}} likes",
     "comments_one": "{{count, number}} comment",
-    "comments_other": "{{count, number}} comments"
+    "comments_other": "{{count, number}} comments",
+    "external": "External",
+    "newTab": "Opens the original blog in a new tab",
+    "removalRequest": "Request removal"
   },
   "topic": {
     "description": "Posts about {{name}}.",
@@ -39,6 +42,14 @@
     "popular": "Popular",
     "posts": "Posts",
     "empty": "There are no posts on this topic yet.",
-    "popularEmpty": "No posts got reactions in the last 7 days. Try the latest posts."
+    "popularEmpty": "No posts got reactions in the last 7 days. Try the latest posts.",
+    "sourceEmpty": "No posts from this source in this topic."
+  },
+  "source": {
+    "label": "Source",
+    "all": "All",
+    "internal": "Posts here",
+    "external": "External posts",
+    "empty": "No recent posts from this source."
   }
 }

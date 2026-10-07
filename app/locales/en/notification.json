@@ -13,6 +13,9 @@
     "BACKUP_READY": "The backup of {{blogTitle}} is ready. You can download it until {{expiresAt}}.",
     "REPORT_RESOLVED": "We have finished reviewing the content you reported.",
     "REPORT_RESOLVED_ACTIONED": "We reviewed the content you reported and took action.",
-    "REPORT_RESOLVED_DISMISSED": "We reviewed the content you reported but took no action."
+    "REPORT_RESOLVED_DISMISSED": "We reviewed the content you reported but took no action.",
+    "EXTERNAL_BLOG_APPROVED": "Your external blog {{externalBlogTitle}} was approved. Posts will be collected soon.",
+    "EXTERNAL_BLOG_REJECTED": "Your external blog {{externalBlogTitle}} was rejected. Reason: {{reason}}",
+    "EXTERNAL_FEED_STOPPED": "Collection for {{externalBlogTitle}} stopped after the feed failed for more than 7 days (last result: {{lastResult}})."
   }
 }

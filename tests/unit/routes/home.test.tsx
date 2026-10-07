@@ -138,6 +138,38 @@ describe("home loader", () => {
     });
     expect((await callLoader("/?cursor=bad")).cursorBatch).toBeNull();
   });
+
+  it("?source=external(007)이면 /portal/latest?source=로 첫 묶음, 커서와 함께면 둘 다", async () => {
+    const backend = mockBackend({
+      [PORTAL]: ok(home()),
+      [LATEST]: cursorPage([portalCard(9, { source: "EXTERNAL" })], "c2"),
+    });
+
+    const data = await callLoader("/?source=external");
+
+    const call = backend.callsTo(LATEST)[0].url.searchParams;
+    expect(call.get("source")).toBe("external");
+    expect(call.get("cursor")).toBeNull();
+    expect(data.source).toBe("external");
+    expect(data.cursorBatch).toEqual({
+      cursor: null,
+      items: [portalCard(9, { source: "EXTERNAL" })],
+      nextCursor: "c2",
+    });
+
+    const next = mockBackend({ [PORTAL]: ok(home()), [LATEST]: cursorPage([]) });
+    await callLoader("/?source=internal&cursor=c2");
+    expect(Object.fromEntries(next.callsTo(LATEST)[0].url.searchParams)).toEqual({
+      source: "internal",
+      cursor: "c2",
+    });
+  });
+
+  it("모르는 ?source=는 전체(필터 호출 없음)", async () => {
+    const backend = mockBackend({ [PORTAL]: ok(home()) });
+    expect((await callLoader("/?source=bogus")).source).toBe("all");
+    expect(backend.callsTo(LATEST)).toHaveLength(0);
+  });
 });
 
 describe("home meta", () => {
@@ -161,6 +193,15 @@ describe("home meta", () => {
     expect(tags).not.toContainEqual({ name: "robots", content: "noindex" });
   });
 
+  it("출처 필터 주소는 noindex(007)", () => {
+    expect(
+      meta(args({ origin: "https://blog.java21.net", cursor: null, source: "external" })),
+    ).toContainEqual({
+      name: "robots",
+      content: "noindex",
+    });
+  });
+
   it("커서 묶음 주소는 noindex", () => {
     expect(meta(args({ origin: "https://blog.java21.net", cursor: "c1" }))).toContainEqual({
       name: "robots",
@@ -176,6 +217,7 @@ describe("home 화면", () => {
     topics,
     releaseCard: releaseNotes.portalCard,
     cursor: null,
+    source: "all",
     cursorBatch: null,
     now: NOW,
     origin: "http://front.test",
@@ -248,5 +290,63 @@ describe("home 화면", () => {
       "/signup",
     );
     expect(screen.queryByRole("region")).toBeNull();
+  });
+  it("같은 id의 내부·외부 카드가 함께 그려지고(키 source-id), 최신 위에 출처 필터", async () => {
+    const external = portalCard(3, {
+      source: "EXTERNAL",
+      title: "외부 글 3",
+      blog: { handle: null, title: "Dev Log" },
+      author: null,
+      externalBlog: { id: 1, title: "Dev Log", siteHost: "dev.example.com" },
+      visitUrl: "/api/v1/external-posts/3/visit",
+    });
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    renderHome(
+      loaded({ portal: home({ latest: { items: [portalCard(3), external], nextCursor: "c1" } }) }),
+    );
+
+    const latest = await screen.findByRole("region", { name: "최신 글" });
+    expect(within(latest).getByText("포털 글 3")).toBeInTheDocument();
+    expect(within(latest).getByText("외부 글 3")).toBeInTheDocument();
+    expect(errors.mock.calls.flat().join(" ")).not.toContain("same key");
+    errors.mockRestore();
+    const filter = within(latest).getByRole("navigation", { name: "출처" });
+    expect(within(filter).getByRole("link", { name: "전체" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(latest).getByRole("link", { name: "더 보기" })).toHaveAttribute(
+      "href",
+      "/?cursor=c1",
+    );
+  });
+
+  it("출처 필터 결과가 비면 필터와 빈 안내, 더 보기는 그 출처로", async () => {
+    renderHome(
+      loaded({
+        source: "external",
+        cursorBatch: { cursor: null, items: [], nextCursor: null },
+      }),
+    );
+    const latest = await screen.findByRole("region", { name: "최신 글" });
+    expect(latest).toHaveTextContent("이 출처의 최신 글이 없습니다.");
+    expect(within(latest).getByRole("link", { name: "외부 글만" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+  });
+
+  it("출처 필터 묶음의 더 보기 주소에 출처가 붙는다", async () => {
+    renderHome(
+      loaded({
+        source: "internal",
+        cursorBatch: { cursor: null, items: [portalCard(8)], nextCursor: "n1" },
+      }),
+    );
+    const latest = await screen.findByRole("region", { name: "최신 글" });
+    expect(within(latest).getByRole("link", { name: "더 보기" })).toHaveAttribute(
+      "href",
+      "/?source=internal&cursor=n1",
+    );
   });
 });

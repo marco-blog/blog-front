@@ -1,29 +1,37 @@
 import type { ReportTargetType } from "~/api/models";
 
-/** 화면에서 신고할 수 있는 대상(007의 외부 대상은 아직 받지 않는다) */
+/** 서비스 안 콘텐츠 신고 대상(숨김·대상 지정이 되는 종류) */
 export type ReportableType = Extract<
   ReportTargetType,
   "POST" | "COMMENT" | "GUESTBOOK" | "TRACKBACK"
 >;
 
-const PREFIX: Record<ReportableType, string> = {
+/** 신고 레이어로 받는 대상: 서비스 콘텐츠 + 007 포털의 외부 글("삭제 요청"). 외부 블로그는 관리자 신고 화면에만 나온다 */
+export type ReportFormType = ReportableType | "EXTERNAL_POST";
+
+const PREFIX: Record<ReportFormType, string> = {
   POST: "post",
   COMMENT: "comment",
   GUESTBOOK: "guestbook",
   TRACKBACK: "trackback",
+  EXTERNAL_POST: "external",
 };
+export const REPORTABLE_TYPES: ReportableType[] = ["POST", "COMMENT", "GUESTBOOK", "TRACKBACK"];
 const TYPE_BY_PREFIX = Object.fromEntries(
-  Object.entries(PREFIX).map(([type, prefix]) => [prefix, type]),
+  REPORTABLE_TYPES.map((type) => [PREFIX[type], type]),
 ) as Record<string, ReportableType>;
-
-export const REPORTABLE_TYPES = Object.keys(PREFIX) as ReportableType[];
 
 export function isReportableType(value: unknown): value is ReportableType {
   return typeof value === "string" && (REPORTABLE_TYPES as string[]).includes(value);
 }
 
-/** 신고 대상의 화면 열쇠(`comment-12`). JS 없는 화면의 `?report=` 값과 action 결과의 `key`에 쓴다 */
-export function reportKey(type: ReportableType, id: number): string {
+/** 신고 레이어가 보내는 종류인지(`intent=report`) */
+export function isReportFormType(value: unknown): value is ReportFormType {
+  return isReportableType(value) || value === "EXTERNAL_POST";
+}
+
+/** 신고 대상의 화면 열쇠(`comment-12`, `external-7`). JS 없는 화면의 `?report=` 값과 action 결과의 `key`에 쓴다 */
+export function reportKey(type: ReportFormType, id: number): string {
   return `${PREFIX[type]}-${id}`;
 }
 
@@ -38,7 +46,7 @@ export function parseReportKey(
 }
 
 /** 항목 앵커(`#comment-12`). 글은 앵커 없이 글 주소 자체 */
-export function targetAnchor(type: ReportableType, id: number): string {
+export function targetAnchor(type: ReportFormType, id: number): string {
   return type === "POST" ? "" : `#${PREFIX[type]}-${id}`;
 }
 

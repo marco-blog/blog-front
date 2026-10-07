@@ -22,5 +22,5 @@ export const MANAGE_MENU = [
   { key: "trackbacks", path: "/trackbacks", available: true },
   { key: "backup", path: "/backup", available: true },
   { key: "blocks", path: "/blocks", available: true },
-  { key: "externalBlogs", path: "/external-blogs", available: false },
+  { key: "externalBlogs", path: "/external-blogs", available: true },
 ] as const;

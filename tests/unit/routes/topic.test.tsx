@@ -106,6 +106,36 @@ describe("topic loader", () => {
     expect(topicPageHref("/topics/life", "popular", 3)).toBe("/topics/life?sort=popular&page=3");
     expect(topicPageHref("/topics/life", "latest", 2)).toBe("/topics/life?page=2");
     expect(sortHref("/topics/life", "latest")).toBe("/topics/life");
+    expect(topicPageHref("/topics/life", "popular", 2, "external")).toBe(
+      "/topics/life?sort=popular&source=external&page=2",
+    );
+    expect(sortHref("/topics/life", "popular", "internal")).toBe(
+      "/topics/life?sort=popular&source=internal",
+    );
+  });
+
+  it("?source=external(007)을 API에 넘기고, 모르는 값은 넘기지 않는다", async () => {
+    const backend = mockBackend({
+      [TOPICS]: ok(tree),
+      "GET /api/v1/topics/knowledge/posts": ok([], { totalCount: 0 }),
+    });
+
+    const data = await callLoader("/topics/knowledge?source=external", { major: "knowledge" });
+    expect(data.source).toBe("external");
+    expect(
+      backend.callsTo("GET /api/v1/topics/knowledge/posts")[0].url.searchParams.get("source"),
+    ).toBe("external");
+
+    const again = mockBackend({
+      [TOPICS]: ok(tree),
+      "GET /api/v1/topics/knowledge/posts": ok([], { totalCount: 0 }),
+    });
+    expect((await callLoader("/topics/knowledge?source=x", { major: "knowledge" })).source).toBe(
+      "all",
+    );
+    expect(
+      again.callsTo("GET /api/v1/topics/knowledge/posts")[0].url.searchParams.has("source"),
+    ).toBe(false);
   });
 });
 
@@ -147,6 +177,16 @@ describe("topic meta", () => {
     expect(meta(args(data()))).not.toContainEqual({ name: "robots", content: "noindex" });
   });
 
+  it("출처 필터 주소는 noindex, canonical에서 출처 제외(007)", () => {
+    const tags = meta(args(data({ source: "internal", page: 2 })));
+    expect(tags).toContainEqual({ name: "robots", content: "noindex" });
+    expect(tags).toContainEqual({
+      tagName: "link",
+      rel: "canonical",
+      href: "https://blog.java21.net/topics/knowledge?page=2",
+    });
+  });
+
   it("데이터가 없으면(404) 찾을 수 없음", () => {
     expect(meta(args(undefined))[0]).toEqual({ title: "페이지를 찾을 수 없습니다 - 블로그" });
   });
@@ -160,6 +200,7 @@ describe("topic 화면", () => {
       path: "/topics/knowledge",
       names: tree[1].names,
       sort: "latest",
+      source: "all",
       page: 1,
       pageSize: 20,
       posts: [portalCard(1, { topicId: 12 }), portalCard(2)],
@@ -235,5 +276,45 @@ describe("topic 화면", () => {
     expect(
       await screen.findByText("최근 7일 동안 반응을 얻은 글이 없습니다. 최신순으로 둘러보세요."),
     ).toBeInTheDocument();
+  });
+  it("정렬 옆 출처 필터: 정렬은 남기고 페이지는 버림, 페이지 이동은 출처 유지, 같은 id 내부·외부 카드", async () => {
+    const external = portalCard(1, {
+      source: "EXTERNAL",
+      title: "외부 글 1",
+      blog: { handle: null, title: "Dev Log" },
+      author: null,
+      externalBlog: { id: 1, title: "Dev Log", siteHost: "dev.example.com" },
+      visitUrl: "/api/v1/external-posts/1/visit",
+    });
+    renderTopic(
+      loaded({ sort: "popular", source: "external", posts: [portalCard(1), external] }),
+      "/topics/knowledge?sort=popular&source=external",
+    );
+
+    const filter = await screen.findByRole("navigation", { name: "출처" });
+    expect(
+      within(filter)
+        .getAllByRole("link")
+        .map((l) => [l.getAttribute("href"), l.getAttribute("aria-current")]),
+    ).toEqual([
+      ["/topics/knowledge?sort=popular", null],
+      ["/topics/knowledge?sort=popular&source=internal", null],
+      ["/topics/knowledge?sort=popular&source=external", "page"],
+    ]);
+    const sort = screen.getByRole("navigation", { name: "정렬" });
+    expect(within(sort).getByRole("link", { name: "최신순" })).toHaveAttribute(
+      "href",
+      "/topics/knowledge?source=external",
+    );
+    expect(screen.getAllByRole("article")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "2" })).toHaveAttribute(
+      "href",
+      "/topics/knowledge?sort=popular&source=external&page=2",
+    );
+  });
+
+  it("출처 필터 빈 상태", async () => {
+    renderTopic(loaded({ posts: [], totalCount: 0, source: "internal" }));
+    expect(await screen.findByText("이 주제에는 이 출처의 글이 없습니다.")).toBeInTheDocument();
   });
 });

@@ -236,7 +236,9 @@
     "untargeted": "대상 미정",
     "action": {
       "HIDE_CONTENT": "숨김",
-      "SUSPEND_USER": "작성자 정지"
+      "SUSPEND_USER": "작성자 정지",
+      "REMOVE_FROM_PORTAL": "포털에서 내림",
+      "BLOCK_EXTERNAL_BLOG": "외부 블로그 차단"
     },
     "targetTypes": {
       "POST": "글",
@@ -288,7 +290,11 @@
       "suspend": "작성자 정지",
       "suspendReason": "정지 사유",
       "dismiss": "기각",
-      "confirmSuspend": "작성 회원을 정지할까요? 로그인이 모두 끊깁니다."
+      "confirmSuspend": "작성 회원을 정지할까요? 로그인이 모두 끊깁니다.",
+      "removeFromPortal": "포털에서 내림",
+      "blockExternal": "외부 블로그 차단",
+      "confirmRemove": "이 외부 글을 포털에서 내립니다. 되돌릴 수 없습니다.",
+      "confirmBlock": "이 외부 블로그를 차단합니다. 모든 글이 포털에서 내려가며 되돌릴 수 없습니다."
     },
     "result": {
       "title": "처리 결과",

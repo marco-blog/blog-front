@@ -14,6 +14,8 @@ export interface ApiHeader {
   resultMessage: string;
   fieldErrors?: ApiFieldError[];
   traceId?: string;
+  /** 오류 상세 값(007부터, 예: `EXTERNAL_FEED_URL_NOT_ALLOWED`의 `reason`). 없으면 생략 */
+  params?: Record<string, unknown>;
 }
 
 export interface ApiEnvelope<T> {

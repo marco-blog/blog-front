@@ -35,21 +35,21 @@ describe("ADMIN_MENU", () => {
     expect(ADMIN_MENU.some((item) => item.path === "/admin/contents/hidden-posts")).toBe(false);
   });
 
-  it("보이는 항목의 경로는 routes.ts에 있고, 숨긴 항목(외부 블로그)의 경로는 없다", () => {
+  it("보이는 항목의 경로는 routes.ts에 있고, 007이 외부 블로그 관리를 켰다(숨긴 항목 없음)", () => {
     const paths = adminPaths();
     for (const item of ADMIN_MENU) {
       expect(paths.includes(item.path), item.key).toBe(item.available);
     }
-    expect(ADMIN_MENU.filter((item) => !item.available).map((item) => item.key)).toEqual([
-      "externalBlogs",
-    ]);
+    expect(ADMIN_MENU.filter((item) => !item.available).map((item) => item.key)).toEqual([]);
   });
 
   it("묶음은 바뀔 때마다 나뉜다(보이는 항목만)", () => {
     expect(adminMenuSections().map((section) => [section.group, section.items.length])).toEqual([
       ["operations", 1],
       ["portal", 4],
-      ["operations", 4],
+      ["operations", 3],
+      ["portal", 1],
+      ["operations", 1],
       ["service", 5],
     ]);
     expect(adminMenuSections([])).toEqual([]);

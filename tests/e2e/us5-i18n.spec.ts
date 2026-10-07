@@ -6,14 +6,17 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import {
   PASSWORD,
   adminAccount,
+  adminRequest,
   backendUrl,
   callApi,
   newAccount,
   publishPost,
   requireAdmin,
   requireBackend,
+  requireExternalTestSettings,
   signUp,
 } from "./support/backend.js";
+import { stubFeed, stubUrl, uniqueStubName } from "./support/feedStub.js";
 
 /**
  * US5 내 언어로 서비스 이용하기 Independent Test(T231, quickstart #26~28):
@@ -39,7 +42,7 @@ const t = (language: Language, namespace: string, path: string): string =>
 
 /** 화면에 번역 키(예: nav.login, errors:UNKNOWN)가 그대로 나왔는지 */
 const KEY_PATTERN =
-  /\b(?:(?:common|auth|post|editor|errors|settings|manage|comment|category|tag|media|legal):[A-Za-z]|(?:nav|footer|home|notFound|pagination|login|signup|fieldErrors)\.[a-z][A-Za-z]+\b)/;
+  /\b(?:(?:common|auth|post|editor|errors|settings|manage|comment|category|tag|media|legal|external|notification|portal):[A-Za-z]|(?:nav|footer|home|notFound|pagination|login|signup|fieldErrors)\.[a-z][A-Za-z]+\b)/;
 
 async function expectNoKeys(page: Page) {
   const text = await page.locator("body").innerText();
@@ -365,6 +368,123 @@ test.describe("006 관리 화면 언어", () => {
       ).toBeVisible();
       await expectNoKeys(page);
       expect(await page.locator("body").innerText()).not.toMatch(/\b(?:admin|audit):[A-Za-z]/);
+      await context.close();
+    });
+  }
+});
+
+/**
+ * 007 외부 블로그 화면의 언어(quickstart #39, T092): en·ja·zh-CN에서 외부 블로그 상세의 상태·표 제목, 신청 화면의 주소 오류 문구,
+ * 승인 알림 문구가 그 언어로 나오고, 외부 블로그·글 제목은 피드에 쓴 원문 그대로다. 번역 키는 화면에 나오지 않는다.
+ */
+test.describe("US5 007 외부 블로그 언어", () => {
+  requireBackend();
+  requireAdmin();
+  requireExternalTestSettings();
+  test.describe.configure({ mode: "serial" });
+
+  const owner = newAccount("xi");
+  const blogTitle = `한국어 외부 블로그 ${owner.handle.slice(-6)}`;
+  const postTitle = `한국어 원문 제목 ${owner.handle.slice(-6)}`;
+  let detailPath = "";
+
+  test.beforeAll(async ({ browser, playwright }) => {
+    const feed = uniqueStubName("xi");
+    await stubFeed(feed, {
+      title: blogTitle,
+      items: [{ n: 1, title: postTitle, publishedAt: new Date(Date.now() - 60_000).toISOString() }],
+    });
+    const context = await browser.newContext({
+      baseURL: test.info().project.use.baseURL,
+      locale: "ko-KR",
+    });
+    const page = await context.newPage();
+    await signUp(page, owner);
+    const topics = await callApi<{ children: { id: number }[] }[]>(page.request, "GET", "/topics");
+    const created = await callApi<{ id: number }>(page.request, "POST", "/me/external-blogs", {
+      feedUrl: stubUrl(feed),
+      defaultTopicId: topics.body.result[0]!.children[0]!.id,
+    });
+    expect(created.status).toBe(201);
+    const id = created.body.result.id;
+    detailPath = `/${owner.handle}/manage/external-blogs/${id}`;
+    const admin = await adminRequest(playwright);
+    expect((await callApi(admin, "POST", `/admin/external-blogs/${id}/approve`, {})).status).toBe(
+      200,
+    );
+    await expect
+      .poll(
+        async () => {
+          const posts = await callApi<{ title: string }[]>(
+            admin,
+            "GET",
+            `/admin/external-blogs/${id}/posts`,
+          );
+          return posts.body.result.some((post) => post.title === postTitle);
+        },
+        { timeout: 60_000, intervals: [2_000, 3_000] },
+      )
+      .toBe(true);
+    await admin.dispose();
+    await context.close();
+  });
+
+  for (const language of ["en", "ja", "zh-CN"] as const) {
+    test(`${language}: 외부 블로그 상세·오류·알림은 ${language} 문구, 제목은 원문 그대로`, async ({
+      browser,
+    }) => {
+      const { context, page } = await newPage(browser, {
+        baseURL: test.info().project.use.baseURL,
+        locale: "ko-KR",
+      });
+      await context.addCookies([
+        { name: "lang", value: language, url: test.info().project.use.baseURL! },
+      ]);
+      await page.goto("/login");
+      const main = page.locator("main");
+      await main.getByLabel(t(language, "auth", "login.email")).fill(owner.email);
+      await main.getByLabel(t(language, "auth", "login.password"), { exact: true }).fill(PASSWORD);
+      await main.getByRole("button", { name: t(language, "auth", "login.submit") }).click();
+      await expect(page).not.toHaveURL(/\/login/);
+      // 가입 때 저장된 회원 언어(ko)가 쿠키보다 앞서므로 이 회차 언어로 바꾼다
+      expect((await callApi(page.request, "PATCH", "/me", { locale: language })).status).toBe(200);
+      await context.addCookies([
+        { name: "lang", value: language, url: test.info().project.use.baseURL! },
+      ]);
+
+      await page.goto(detailPath);
+      await expect(page.locator("html")).toHaveAttribute("lang", language);
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(blogTitle);
+      await expect(page.locator(".external-status")).toHaveText(
+        t(language, "external", "status.ACTIVE"),
+      );
+      const table = page.getByRole("table", {
+        name: t(language, "external", "manage.detail.posts"),
+      });
+      await expect(table.getByRole("link", { name: postTitle })).toBeVisible();
+      await expectNoKeys(page);
+
+      await page.goto(`/${owner.handle}/manage/external-blogs/new`);
+      await page
+        .getByLabel(t(language, "external", "manage.new.url"))
+        .fill(`${test.info().project.use.baseURL}/${owner.handle}`);
+      await page
+        .getByRole("button", { name: t(language, "external", "manage.new.preview") })
+        .click();
+      await expect(page.getByRole("alert")).toHaveText(t(language, "external", "urlReason.SELF"));
+      expect(await page.locator("body").innerText()).not.toContain("EXTERNAL_FEED_URL_NOT_ALLOWED");
+      await expectNoKeys(page);
+
+      await page.goto("/notifications");
+      await expect(
+        page.getByText(
+          t(language, "notification", "types.EXTERNAL_BLOG_APPROVED").replace(
+            "{{externalBlogTitle}}",
+            blogTitle,
+          ),
+        ),
+      ).toBeVisible();
+      await expectNoKeys(page);
       await context.close();
     });
   }

@@ -1,12 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, useRouteLoaderData } from "react-router";
 
 import type { PortalCard as PortalCardData, TopicNode } from "~/api/models";
 import { Avatar } from "~/components/media/Avatar";
+import { ReportButton } from "~/components/report/ReportButton";
+import { visitHref } from "~/external/visit";
 import { useDateFormat, useRelativeTime } from "~/i18n/format";
+import { rightsRequestHref } from "~/moderation/reportTarget";
 import { thumbnailImage } from "~/media/thumbnail";
 import { cardColor } from "~/portal/cardColor";
 import { findTopicById, topicName } from "~/portal/topics";
+import type { RootData } from "~/root";
 
 export interface PortalCardProps {
   card: PortalCardData;
@@ -34,41 +38,103 @@ export function PortalCard({ card, topics, now }: PortalCardProps) {
   const format = useDateFormat();
   const topic = findTopicById(topics, card.topicId);
   const name = topic ? topicName(topic.topic.names, i18n.language) : t("portal:card.noTopic");
+  const external = card.source === "EXTERNAL";
+  const loggedIn = Boolean(useRouteLoaderData<RootData>("root")?.user);
+  const body = (
+    <>
+      {card.thumbnailUrl ? (
+        <img
+          {...thumbnailImage(card.thumbnailUrl, "card")}
+          alt=""
+          loading="lazy"
+          className="portal-card-image"
+        />
+      ) : (
+        <div
+          className="portal-card-image portal-card-placeholder"
+          style={{ backgroundColor: cardColor(topics, card.topicId) }}
+          data-testid="portal-card-placeholder"
+        >
+          <span>{name}</span>
+        </div>
+      )}
+      <h3>
+        {card.title}
+        {external && (
+          <>
+            {" "}
+            <span className="portal-card-badge">{t("portal:card.external")}</span>
+          </>
+        )}
+      </h3>
+      {card.summary && (
+        <p className="portal-card-summary" style={SUMMARY_CLAMP}>
+          {card.summary}
+        </p>
+      )}
+    </>
+  );
+  const time = (
+    <time dateTime={card.publishedAt} title={format.dateTime(card.publishedAt)}>
+      {relative(card.publishedAt)}
+    </time>
+  );
+  if (external) {
+    // 007: 외부 글은 원래 블로그로(클릭 수를 세는 visit 경로, 새 탭). 외부 블로그 이름·호스트는 일반 텍스트로만.
+    // "삭제 요청"(T086): 로그인 회원은 신고 레이어(EXTERNAL_POST), 비로그인은 이 글의 이동 주소를 채운 권리 침해 신고.
+    // backend는 이동 주소(visit)와 원문 주소 둘 다 이 외부 글로 해석한다.
+    const visit = visitHref(card);
+    return (
+      <article className="portal-card portal-card-external" data-source="EXTERNAL">
+        <a
+          href={visit}
+          target="_blank"
+          rel="noopener nofollow"
+          className="portal-card-link"
+          aria-description={t("portal:card.newTab")}
+          title={t("portal:card.newTab")}
+        >
+          {body}
+        </a>
+        <p className="portal-card-meta">
+          <span className="portal-card-external-blog">
+            {card.externalBlog?.title ?? card.blog.title}
+          </span>{" "}
+          {card.externalBlog?.siteHost && (
+            <span className="portal-card-host">{card.externalBlog.siteHost}</span>
+          )}{" "}
+          {time}
+        </p>
+        <div className="portal-card-removal">
+          {loggedIn ? (
+            <ReportButton
+              type="EXTERNAL_POST"
+              id={card.id}
+              label={t("portal:card.removalRequest")}
+              rightsPath={visit}
+            />
+          ) : (
+            <Link to={rightsRequestHref(visit)} rel="nofollow">
+              {t("portal:card.removalRequest")}
+            </Link>
+          )}
+        </div>
+      </article>
+    );
+  }
   return (
     <article className="portal-card">
       <Link to={`/${card.blog.handle}/${card.id}`} className="portal-card-link">
-        {card.thumbnailUrl ? (
-          <img
-            {...thumbnailImage(card.thumbnailUrl, "card")}
-            alt=""
-            loading="lazy"
-            className="portal-card-image"
-          />
-        ) : (
-          <div
-            className="portal-card-image portal-card-placeholder"
-            style={{ backgroundColor: cardColor(topics, card.topicId) }}
-            data-testid="portal-card-placeholder"
-          >
-            <span>{name}</span>
-          </div>
-        )}
-        <h3>{card.title}</h3>
-        {card.summary && (
-          <p className="portal-card-summary" style={SUMMARY_CLAMP}>
-            {card.summary}
-          </p>
-        )}
+        {body}
       </Link>
       <p className="portal-card-meta">
         <Link to={`/${card.blog.handle}`}>{card.blog.title}</Link>{" "}
-        <span className="portal-card-author">
-          <Avatar url={card.author.profileImageUrl} /> {card.author.nickname}
-        </span>{" "}
-        <time dateTime={card.publishedAt} title={format.dateTime(card.publishedAt)}>
-          {relative(card.publishedAt)}
-        </time>{" "}
-        <span>{t("portal:card.likes", { count: card.likeCount })}</span>{" "}
+        {card.author && (
+          <span className="portal-card-author">
+            <Avatar url={card.author.profileImageUrl} /> {card.author.nickname}
+          </span>
+        )}{" "}
+        {time} <span>{t("portal:card.likes", { count: card.likeCount })}</span>{" "}
         <span>{t("portal:card.comments", { count: card.commentCount })}</span>
       </p>
     </article>
@@ -85,7 +151,7 @@ export function PortalCardList({ cards, label, topics, now }: PortalCardListProp
   return (
     <ul className="portal-cards" aria-label={label}>
       {cards.map((card) => (
-        <li key={card.id}>
+        <li key={`${card.source}-${card.id}`}>
           <PortalCard card={card} topics={topics} now={now} />
         </li>
       ))}

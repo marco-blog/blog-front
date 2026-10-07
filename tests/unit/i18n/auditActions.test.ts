@@ -44,6 +44,18 @@ const BACKEND_ACTIONS = [
   "USER_BLOG_LIMIT_CHANGE",
   "ROLE_GRANT",
   "ROLE_REVOKE",
+  "EXTERNAL_BLOG_CREATE",
+  "EXTERNAL_BLOG_APPROVE",
+  "EXTERNAL_BLOG_REJECT",
+  "EXTERNAL_BLOG_UPDATE",
+  "EXTERNAL_BLOG_PAUSE",
+  "EXTERNAL_BLOG_RESUME",
+  "EXTERNAL_BLOG_BLOCK",
+  "EXTERNAL_POST_REMOVE",
+  "TOPIC_MAPPING_RULE_CREATE",
+  "TOPIC_MAPPING_RULE_UPDATE",
+  "TOPIC_MAPPING_RULE_DELETE",
+  "CLASSIFICATION_CONFIRM",
 ];
 
 /** 작업 종류 이름(006 T047) */
@@ -81,9 +93,7 @@ describe("auditActions", () => {
     expect(actionQuery("TOPIC_HIDE")).toBe("TOPIC_HIDE");
     expect(actionQuery("UNKNOWN_CODE")).toBeUndefined();
     expect(actionQuery(null)).toBeUndefined();
-    expect(ungroupedActions(["TOPIC_HIDE", "EXTERNAL_BLOG_BLOCK"])).toEqual([
-      "EXTERNAL_BLOG_BLOCK",
-    ]);
+    expect(ungroupedActions(["TOPIC_HIDE", "FUTURE_ACTION"])).toEqual(["FUTURE_ACTION"]);
   });
 
   it("작업 기록 조건 해석·쿼리·주소", () => {

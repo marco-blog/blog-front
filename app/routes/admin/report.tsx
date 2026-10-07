@@ -31,9 +31,38 @@ type Intent = (typeof INTENTS)[number];
 const OPERATIONS = {
   HIDE: { decision: "ACTION", action: "HIDE_CONTENT" },
   SUSPEND: { decision: "ACTION", action: "SUSPEND_USER" },
+  REMOVE: { decision: "ACTION", action: "REMOVE_FROM_PORTAL" },
+  BLOCK: { decision: "ACTION", action: "BLOCK_EXTERNAL_BLOG" },
   DISMISS: { decision: "DISMISS", action: null },
 } as const;
 type Operation = keyof typeof OPERATIONS;
+
+/**
+ * 대상 종류별 조치 버튼(기각 제외). 서비스 콘텐츠는 숨김·작성자 정지, 007 외부 글은 "포털에서 내림"·관리 회원 정지,
+ * 외부 블로그는 "외부 블로그 차단"·관리 회원 정지(되돌릴 수 없어 확인 문구). 대상이 없으면(권리 침해 신고) 서비스 콘텐츠와 같다.
+ */
+export function operationsFor(type: string | null | undefined): Operation[] {
+  switch (type) {
+    case "EXTERNAL_POST":
+      return ["REMOVE", "SUSPEND"];
+    case "EXTERNAL_BLOG":
+      return ["BLOCK", "SUSPEND"];
+    default:
+      return ["HIDE", "SUSPEND"];
+  }
+}
+
+const OPERATION_LABEL: Record<Exclude<Operation, "DISMISS">, string> = {
+  HIDE: "admin:report.resolve.hide",
+  SUSPEND: "admin:report.resolve.suspend",
+  REMOVE: "admin:report.resolve.removeFromPortal",
+  BLOCK: "admin:report.resolve.blockExternal",
+};
+const OPERATION_CONFIRM: Partial<Record<Operation, string>> = {
+  SUSPEND: "admin:report.resolve.confirmSuspend",
+  REMOVE: "admin:report.resolve.confirmRemove",
+  BLOCK: "admin:report.resolve.confirmBlock",
+};
 
 type ReportActionResult = AdminActionData<{ resolvedCount?: number }>;
 
@@ -57,7 +86,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
 /**
  * - `intent=target`: 서비스 안 주소(또는 종류 + 번호)로 대상 지정 → PATCH /admin/reports/{id}/target
- * - `intent=resolve`: `op`=HIDE(숨김)·SUSPEND(작성자 정지, 사유 필수)·DISMISS(기각), 메모 → POST /admin/reports/{id}/resolve
+ * - `intent=resolve`: `op`=HIDE(숨김)·SUSPEND(작성자 정지, 사유 필수)·REMOVE(007 포털에서 내림)·BLOCK(007 외부 블로그 차단)·
+ *   DISMISS(기각), 메모 → POST /admin/reports/{id}/resolve
  * - `intent=unhide`: 대상 숨김 해제 → DELETE /admin/contents/{type}/{id}/hidden
  */
 export async function action({ request, params }: Route.ActionArgs) {
@@ -149,12 +179,11 @@ export default function AdminReport() {
   const submitting = useNavigation().state === "submitting";
   const target = report.target;
   const pending = report.status === "PENDING";
+  const operations = operationsFor(target?.type);
   const confirmSuspend = (event: FormEvent<HTMLFormElement>) => {
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-    if (
-      submitter?.value === "SUSPEND" &&
-      !window.confirm(t("admin:report.resolve.confirmSuspend"))
-    ) {
+    const confirmKey = submitter ? OPERATION_CONFIRM[submitter.value as Operation] : undefined;
+    if (confirmKey && !window.confirm(t(confirmKey))) {
       event.preventDefault();
     }
   };
@@ -242,12 +271,13 @@ export default function AdminReport() {
               <input name="suspendReason" maxLength={SUSPEND_REASON_MAX} />
             </label>
             <p>
-              <button type="submit" name="op" value="HIDE" disabled={submitting}>
-                {t("admin:report.resolve.hide")}
-              </button>{" "}
-              <button type="submit" name="op" value="SUSPEND" disabled={submitting}>
-                {t("admin:report.resolve.suspend")}
-              </button>{" "}
+              {operations.map((op) => (
+                <span key={op}>
+                  <button type="submit" name="op" value={op} disabled={submitting}>
+                    {t(OPERATION_LABEL[op as Exclude<Operation, "DISMISS">])}
+                  </button>{" "}
+                </span>
+              ))}
               <button type="submit" name="op" value="DISMISS" disabled={submitting}>
                 {t("admin:report.resolve.dismiss")}
               </button>

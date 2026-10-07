@@ -81,6 +81,8 @@ npm run e2e                          # = npx playwright test
 | `E2E_MODERATION_TEST_SETTINGS`          | `1`                     | 通報・スパム対策・トラックバック(005)のシナリオ(`tests/e2e/moderation-*`)をスキップする。backend を下記の 005 試験用設定で起動したという印                         |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理者アカウント        | 管理コンソールとリリースノートのシナリオをスキップ。backend の `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` と同じメールアドレスで登録したアカウントです               |
 | `E2E_ADMIN_TEST_SETTINGS`               | `1`                     | 管理コンソール(006)のシナリオ(`tests/e2e/admin-*`)をスキップする。backend を `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`(ダッシュボードのキャッシュなし)で起動したという印 |
+| `E2E_EXTERNAL_TEST_SETTINGS`            | `1`                     | 外部ブログ(007)のシナリオ(`tests/e2e/external-*`)をスキップする。backend を下の 007 テスト用設定で起動したことを示す                                               |
+| `E2E_FEED_STUB_PORT`                    | `4610`                  | E2E フィードスタブサーバーのポート(既定 4610)。backend の `BLOG_OUTBOUND_ALLOWED_PORTS` に同じポートを入れる                                                       |
 
 backend を含めてすべて実行するには、backend の README のとおりに MySQL（スキーマ適用）・Mailpit・backend（local プロファイル）を起動してから:
 
@@ -102,6 +104,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
 通報・スパム対策・トラックバック(005)のシナリオ(`tests/e2e/moderation-*`)は禁止語や運用設定のようにサイト全体の値を変えるため、Playwright プロジェクト `moderation` で `portal` の後に 1 ファイルずつ実行する。すべてのシナリオが同じ IP(localhost)から登録・コメント・公開・アップロード・通報・トラックバックを行うので、backend を次の値で起動し `E2E_MODERATION_TEST_SETTINGS=1` を指定する(登録の IP 制限が既定値のままだと 001〜004 のシナリオも登録で止まる): `BLOG_CAPTCHA_PROVIDER=test`, `BLOG_CAPTCHA_LOGIN_FAILURES_BEFORE_CAPTCHA=100000`, `BLOG_RATELIMIT_SIGNUP_PER_IP_PER_HOUR=100000`, `BLOG_RATELIMIT_COMMENT_PER_MINUTE=1000`, `BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE=1000`, `BLOG_RATELIMIT_POST_PUBLISH_PER_HOUR=100000`, `BLOG_RATELIMIT_MEDIA_UPLOAD_PER_MINUTE=1000`, `BLOG_TRACKBACK_RECEIVE_LIMIT=100000`, `BLOG_REPORTS_MEMBER_PER_HOUR=100000`, `BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR=100000`。CAPTCHA の `test` はトークン `e2e-pass` だけを通し、front の試験用ウィジェットと E2E ヘルパー(`scripts/e2e-provision-admin.sh`、`tests/e2e/support/backend.ts`)がこのトークンを送る。ログイン CAPTCHA の基準を大きくするのは、001 のログインロックのシナリオが同じ IP の連続 3 回失敗の基準にかからないようにするためである。トラックバック送信のシナリオでは backend の `blog.base-url` が front のアドレスと同じでなければサービス内の記事として扱われない(local プロファイルの既定は `http://localhost:5173`、別のポートなら `BLOG_BASE_URL`)。
 
 管理コンソール(006)のシナリオ(`tests/e2e/admin-*`)は権限の付与・取り消しやリリースノートの公開のようにサイト全体の状態を変えるため、Playwright プロジェクト `admin` で `portal`・`moderation` の後に 1 ファイルずつ実行する。ダッシュボードの数値がすぐ変わる必要があるので、backend を `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s` で起動し `E2E_ADMIN_TEST_SETTINGS=1` を指定する。管理者アカウントは最高管理者でなければならず、シナリオはそのアカウント自身の権限は変えない。
+
+外部ブログ(007)のシナリオ(`tests/e2e/external-*`)はポータルの「最新記事」に外部記事を混ぜ、運営設定を変えるため、Playwright プロジェクト `external` で最後に 1 ファイルずつ実行する。フィードはインターネットではなく、`playwright.config.ts` の `webServer` が一緒に起動するフィードスタブ(`tests/e2e/support/feed-stub-server.mjs`、`127.0.0.1:${E2E_FEED_STUB_PORT}`、ヘルスチェック `/__stub/health`)が返す。シナリオは `/__stub/{名前}` でフィードの内容・認証コード・応答ステータスを決める。backend は次の値で起動し、`E2E_EXTERNAL_TEST_SETTINGS=1` を渡す: `BLOG_OUTBOUND_ALLOW_PRIVATE=true`(ループバックのスタブを許可。**テスト専用**で、prod プロファイルでは起動に失敗する)、`BLOG_OUTBOUND_ALLOWED_PORTS=80,443,8080,8443,4610`、`BLOG_EXTERNAL_POLL_INTERVAL=2s`、`BLOG_EXTERNAL_FETCH_INTERVAL=PT5S`、`BLOG_EXTERNAL_FETCH_JITTER=PT0S`、`BLOG_EXTERNAL_PREVIEW_PER_HOUR=1000`、`BLOG_EXTERNAL_VERIFY_CHECKS_PER_HOUR=1000`。ポータルにすぐ反映されるよう `BLOG_PORTAL_CACHE_TTL=0s`(003 の設定)も必要。通報連携のシナリオ(`external-us4-report`)は 005 の設定と `E2E_MODERATION_TEST_SETTINGS=1` も使う。
 
 `CI` がなければ、同じポートで起動済みの front サーバーを再利用します。シナリオは実行ごとに新しいアカウントを作るので、同じ DB で何度実行しても構いません。
 
