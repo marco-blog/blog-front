@@ -25,6 +25,7 @@ import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { requireOwnedBlog, throwManageError } from "~/manage/access.server";
 import { postHref } from "~/manage/links";
+import { POST_STATUS_FILTERS, POST_VISIBILITY_FILTERS, oneOf } from "~/manage/postFilters";
 import { privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/posts";
@@ -34,9 +35,9 @@ export const MANAGE_PAGE_SIZE = 20;
 const MAX_PAGE = 100_000;
 const QUERY_MAX = 200;
 
-/** `HIDDEN`은 관리자가 숨긴 글(005 FR-041) */
-const STATUSES: readonly PostStatus[] = ["DRAFT", "PUBLISHED", "SCHEDULED", "DELETED", "HIDDEN"];
-const VISIBILITIES: readonly Visibility[] = ["PUBLIC", "PRIVATE", "PROTECTED"];
+/** 상태·공개 범위 조건 값은 `~/manage/postFilters` 한 곳(006 T018). `HIDDEN`은 관리자가 숨긴 글(005 FR-041) */
+const STATUSES = POST_STATUS_FILTERS;
+const VISIBILITIES = POST_VISIBILITY_FILTERS;
 /** 일괄 작업 버튼 값 → backend 요청 */
 const BULK_OPS = {
   PUBLIC: { action: "CHANGE_VISIBILITY", visibility: "PUBLIC" },
@@ -58,10 +59,6 @@ export interface PostFilters {
   q: string;
   /** 1부터 */
   page: number;
-}
-
-function oneOf<T extends string>(values: readonly T[], value: string | null): T | null {
-  return value !== null && (values as readonly string[]).includes(value) ? (value as T) : null;
 }
 
 export function parseFilters(search: URLSearchParams): PostFilters {

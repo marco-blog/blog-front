@@ -93,14 +93,15 @@
   "CONTENT_NOT_FOUND": "内容が見つからないか、すでに削除されています。",
   "POST_HIDDEN": "管理者が非表示にした記事は公開したり公開設定を変更したりできません。",
   "BLOG_RESTRICTED": "利用が制限されたブログです。",
-  "USER_NOT_ACTIVE": "退会した会員は停止できません。",
+  "USER_NOT_ACTIVE": "停止中または退会した会員にはこの操作はできません。",
   "CANNOT_SUSPEND_SELF": "自分自身を停止することはできません。",
-  "LAST_SUPER_ADMIN": "最後の最高管理者は停止できません。",
+  "LAST_SUPER_ADMIN": "最後の最高管理者にはこの操作はできません。先に別の最高管理者を指定してください。",
   "CAPTCHA_FAILED": "スパム防止の確認に失敗しました。もう一度お試しください。",
   "CAPTCHA_REQUIRED": "ログインに何度も失敗しました。スパム防止の確認をしてから、もう一度ログインしてください。",
   "DUPLICATE_CONTENT_SPAM": "同じ内容を短時間に何度も書き込むことはできません。",
   "BANNED_WORD_EXISTS": "すでに登録されている禁止語です。",
   "BANNED_WORD_NOT_FOUND": "禁止語が見つかりません。",
   "TRACKBACK_NOT_FOUND": "トラックバックが見つかりません。",
-  "TRACKBACK_NOT_ALLOWED": "トラックバックは公開記事からのみ送信できます。"
+  "TRACKBACK_NOT_ALLOWED": "トラックバックは公開記事からのみ送信できます。",
+  "CANNOT_CHANGE_OWN_ROLE": "自分の権限は変更できません。別の最高管理者が変更する必要があります。"
 }

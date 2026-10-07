@@ -21,7 +21,8 @@
     "notifications": "Notifications",
     "unreadNotifications": "{{count}} unread notifications",
     "search": "Search",
-    "searchLabel": "Search terms"
+    "searchLabel": "Search terms",
+    "admin": "System admin"
   },
   "footer": {
     "label": "Site information",

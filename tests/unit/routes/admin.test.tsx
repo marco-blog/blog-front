@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { ADMIN_ROLES, isAdminDenied, requireAdmin, throwAdminError } from "~/admin/access.server";
 import { ADMIN_HOME, ADMIN_MENU } from "~/admin/links";
 import { ApiError } from "~/api/errors";
-import { loader as indexLoader } from "~/routes/admin/index";
+import { loader as dashboardLoader } from "~/routes/admin/dashboard";
 import Layout, { loader as layoutLoader, meta as layoutMeta } from "~/routes/admin/layout";
 import { meta as curationsMeta } from "~/routes/admin/curations";
 import { meta as exclusionsMeta } from "~/routes/admin/exclusions";
@@ -53,6 +53,7 @@ describe("/admin 접근", () => {
       mockBackend({ [ME]: ok(member(role)) });
       await expect(call(layoutLoader, "/admin/topics")).resolves.toEqual({
         nickname: "운영자",
+        role,
         pendingReports: 0,
       });
     }
@@ -71,13 +72,28 @@ describe("/admin 접근", () => {
     expect(statusOf(await caught(call(topicsLoader as never, "/admin/topics")))).toBe(500);
   });
 
-  it("/admin은 /admin/topics로, 관리자가 아니면 404", async () => {
-    mockBackend({ [ME]: ok(member()) });
-    expect(expectRedirect(await call(indexLoader as never, "/admin"))).toBe("/admin/topics");
-    expect(ADMIN_HOME).toBe("/admin/topics");
+  it("/admin은 리다이렉트가 아니라 대시보드(GET /admin/dashboard), 관리자가 아니면 404(006 T025)", async () => {
+    const dashboard = {
+      today: { signups: 0, publishedPosts: 0, comments: 0 },
+      totals: { members: 0, blogs: 0, publicPosts: 0 },
+      pendingReports: null,
+      trend: [],
+      timeZone: "Asia/Seoul",
+      generatedAt: "2026-10-07T00:00:00Z",
+    };
+    const backend = mockBackend({
+      [ME]: ok(member()),
+      "GET /api/v1/admin/dashboard": ok(dashboard),
+    });
+    await expect(call(dashboardLoader as never, "/admin")).resolves.toMatchObject({ dashboard });
+    expect(backend.callsTo("GET /api/v1/admin/dashboard")).toHaveLength(1);
+    expect(ADMIN_HOME).toBe("/admin");
 
     mockBackend({ [ME]: ok(member("USER")) });
-    expect(statusOf(await caught(call(indexLoader as never, "/admin")))).toBe(404);
+    expect(statusOf(await caught(call(dashboardLoader as never, "/admin")))).toBe(404);
+
+    mockBackend({ [ME]: ok(member()), "GET /api/v1/admin/dashboard": fail(404, "NOT_FOUND") });
+    expect(statusOf(await caught(call(dashboardLoader as never, "/admin")))).toBe(404);
   });
 
   it("관리자 아님 판정: 403과 404 NOT_FOUND만(다른 404 코드는 아님)", () => {
@@ -99,9 +115,9 @@ describe("/admin 접근", () => {
 });
 
 describe("/admin 화면", () => {
-  it("좌측 메뉴는 003의 4개와 005의 회원 관리·신고 관리(처리 대기 배지)·숨긴 글", async () => {
+  it("좌측 메뉴는 묶음 제목과 available 항목만, 머리글에 관리자 권한 이름(006 T025)", async () => {
     mockBackend({
-      [ME]: ok(member()),
+      [ME]: ok(member("SUPER_ADMIN")),
       "GET /api/v1/admin/topics": ok([adminTopic(1, "dev")]),
       "GET /api/v1/admin/reports/summary": ok({ pendingCount: 3 }),
     });
@@ -118,20 +134,44 @@ describe("/admin 화면", () => {
     );
 
     const menu = await screen.findByRole("navigation", { name: "관리자 메뉴" });
+    expect(
+      within(menu)
+        .getAllByRole("heading")
+        .map((heading) => heading.textContent),
+    ).toEqual(["운영", "포털", "운영", "서비스"]);
     const links = within(menu).getAllByRole("link");
     expect(links.map((link) => link.textContent)).toEqual([
+      "대시보드",
       "주제",
       "포털 추천",
       "포털 제외",
       "포털 설정",
       "회원 관리",
-      "신고 관리 처리 대기 3건",
+      "콘텐츠 관리",
       "숨긴 글",
+      "신고 관리 처리 대기 3건",
+      "예약어",
+      "서비스 설정",
+      "관리자 권한",
+      "작업 기록",
+      "릴리스 노트",
     ]);
     expect(links.map((link) => link.getAttribute("href"))).toEqual(
-      ADMIN_MENU.map((item) => item.path),
+      ADMIN_MENU.filter((item) => item.available).map((item) => item.path),
     );
+    // 대시보드(`/admin`)는 하위 화면에서 현재 메뉴가 아니다(end)
+    expect(within(menu).getByRole("link", { name: "대시보드" })).not.toHaveAttribute(
+      "aria-current",
+    );
+    expect(within(menu).getByRole("link", { name: "주제" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(menu).queryByRole("link", { name: "외부 블로그 관리" })).toBeNull();
+    expect(within(menu).queryByRole("link", { name: "스팸 방어 설정" })).toBeNull();
+    expect(menu.closest("details")).toHaveAttribute("open");
     expect(screen.getByText("운영자")).toBeInTheDocument();
+    expect(screen.getByText("최고 관리자")).toBeInTheDocument();
     expect(await screen.findByRole("heading", { name: "주제 관리" })).toBeInTheDocument();
   });
 
@@ -148,7 +188,7 @@ describe("/admin 화면", () => {
     ]);
   });
 
-  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글)이 /:handle 계열보다 앞에", () => {
+  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글, 006 콘솔)이 /:handle 계열보다 앞에", () => {
     const paths = routes.map((route) => route.path);
     const admin = routes.find((route) => route.path === "admin");
     expect(paths.indexOf("admin")).toBeLessThan(firstBlogRoute(paths));
@@ -163,6 +203,20 @@ describe("/admin 화면", () => {
       "users",
       "users/:id",
       "contents/hidden-posts",
+      "contents",
+      "contents/posts",
+      "contents/comments",
+      "contents/guestbook",
+      "reserved-handles",
+      "settings",
+      "admins",
+      "audit-log",
+      "audit-log/:id",
+      "release-notes",
+      "release-notes/new",
+      "release-notes/:id",
+      "release-notes/:id/revisions",
+      "release-notes/:id/revisions/:revisionNo",
     ]);
   });
 });

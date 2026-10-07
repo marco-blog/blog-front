@@ -865,3 +865,166 @@ export interface TrackbackPing {
   attemptedAt: string | null;
   createdAt: string;
 }
+
+// ---- 006 관리 콘솔(006 contracts/api.md) ----
+
+/** GET /admin/dashboard. 날짜 경계는 요청한 관리자의 시간대(`timeZone`) */
+export interface AdminDashboard {
+  today: { signups: number; publishedPosts: number; comments: number };
+  totals: { members: number; blogs: number; publicPosts: number };
+  /** 처리 대기 신고 수. 신고 기능이 연결되기 전에는 null(카드 숨김) */
+  pendingReports: number | null;
+  /** 오늘 포함 7일, 오래된 날 먼저 */
+  trend: { date: string; signups: number; publishedPosts: number }[];
+  timeZone: string;
+  /** 수치를 계산한 시각(UTC). 최대 캐시 TTL 전 */
+  generatedAt: string;
+}
+
+/** 콘텐츠 관리 표의 작성자 */
+export interface AdminRef {
+  userId: number;
+  nickname: string;
+  status: UserStatus;
+}
+
+/** GET /admin/contents/posts 한 줄(본문·요약·대표 이미지 없음) */
+export interface AdminPostRow {
+  id: number;
+  title: string;
+  blog: { handle: string; title: string; status: "ACTIVE" | "DELETED" };
+  author: AdminRef;
+  status: PostStatus;
+  visibility: Visibility;
+  publishedAt: string | null;
+  createdAt: string;
+  deletedAt: string | null;
+  commentCount: number;
+}
+
+/** GET /admin/contents/comments 한 줄. 비밀 댓글은 content null, 비회원은 author null */
+export interface AdminCommentRow {
+  id: number;
+  postId: number;
+  postTitle: string;
+  blogHandle: string;
+  parentId: number | null;
+  author: AdminRef | null;
+  guestName: string | null;
+  secret: boolean;
+  content: string | null;
+  status: "ACTIVE" | "DELETED" | "HIDDEN";
+  createdAt: string;
+}
+
+/** GET /admin/contents/guestbook-entries 한 줄 */
+export type AdminGuestbookRow = Omit<AdminCommentRow, "postId" | "postTitle">;
+
+/** GET /admin/service-settings(읽기 전용, 비밀 값 없음) */
+export interface ServiceSettings {
+  termsVersion: string;
+  blogs: { defaultMaxPerMember: number };
+  media: {
+    maxFileSize: number;
+    maxPixels: number;
+    tempQuota: number;
+    /** ISO-8601 기간 */
+    tempTtl: string;
+    allowedTypes: string[];
+  };
+  admin: { auditRetention: string; dashboardCacheTtl: string };
+}
+
+/** GET /admin/audit-logs 한 줄 */
+export interface AuditLogEntry {
+  id: number;
+  admin: { userId: number; nickname: string };
+  action: string;
+  targetType: string;
+  targetId: number | null;
+  targetKey: string | null;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  reason: string | null;
+  createdAt: string;
+  /** 상세(GET /admin/audit-logs/{id})만. 최고 관리자에게만 값이 있다 */
+  requestIp?: string | null;
+}
+
+/** GET /admin/audit-logs/actions */
+export interface AuditActionList {
+  actions: string[];
+  targetTypes: string[];
+}
+
+/** GET /admin/admins 한 줄, PUT /admin/users/{id}/role 응답 */
+export interface AdminMember {
+  userId: number;
+  nickname: string;
+  role: UserRole;
+  status: UserStatus;
+  createdAt: string;
+}
+
+/** 릴리스 노트 상태(003) */
+export type ReleaseNoteStatus = "DRAFT" | "PUBLISHED";
+
+/** 릴리스 노트 언어판 하나(제목 + Markdown 원문) */
+export interface ReleaseNoteContentWrite {
+  title: string;
+  contentMarkdown: string;
+}
+
+/** 릴리스 노트 쓰기 요청(POST /admin/release-notes, PUT은 `baseRevisionNo`를 더함) */
+export interface ReleaseNoteWrite {
+  version: string;
+  releaseDate: string;
+  contents: Record<string, ReleaseNoteContentWrite>;
+  baseRevisionNo?: number;
+}
+
+/** GET /admin/release-notes 한 줄 */
+export interface AdminReleaseNoteSummary {
+  id: number;
+  version: string;
+  status: ReleaseNoteStatus;
+  releaseDate: string;
+  langs: string[];
+  revisionNo: number;
+  firstPublishedAt: string | null;
+  publishedAt: string | null;
+  updatedAt: string;
+}
+
+/** GET /admin/release-notes/{id} */
+export interface AdminReleaseNote {
+  id: number;
+  version: string;
+  releaseDate: string;
+  contents: Record<string, ReleaseNoteContentWrite>;
+  status: ReleaseNoteStatus;
+  revisionNo: number;
+  firstPublishedAt: string | null;
+  publishedAt: string | null;
+  createdBy: UserRef;
+  updatedBy: UserRef;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GET /admin/release-notes/{id}/revisions[/{no}]. 목록에서는 version·releaseDate·contents가 null */
+export interface AdminRevision {
+  revisionNo: number;
+  editedBy: UserRef;
+  editedAt: string;
+  status: ReleaseNoteStatus;
+  version: string | null;
+  releaseDate: string | null;
+  contents: Record<string, ReleaseNoteContentWrite> | null;
+}
+
+/** POST /admin/release-notes/preview */
+export interface ReleaseNotePreview {
+  contentHtml: string;
+  toc: ReleaseNoteTocEntry[];
+}

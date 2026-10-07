@@ -39,4 +39,13 @@ describe("dangerouslySetInnerHTML 예외 목록", () => {
       expect(await ruleIds("app/routes/updates/history.tsx")).toEqual([RULE]);
     },
   );
+
+  it(
+    "006 릴리스 노트 미리보기 컴포넌트도 허용, 같은 폴더의 다른 파일은 오류(T058)",
+    { timeout: 30_000 },
+    async () => {
+      expect(await ruleIds("app/components/admin/MarkdownPreview.tsx")).toEqual([]);
+      expect(await ruleIds("app/components/admin/ReleaseNoteEditor.tsx")).toEqual([RULE]);
+    },
+  );
 });

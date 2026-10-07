@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router";
 
+import { isAdmin } from "~/admin/roles";
+
 /** 상단에 보여줄 로그인 회원 정보(root loader가 /me에서 골라 넘긴다) */
 export interface HeaderUser {
   userId: number;
@@ -49,6 +51,7 @@ export function HeaderSearch() {
 
 /**
  * 공통 상단. 검색창, 비로그인은 로그인·회원가입, 로그인은 구독 피드·알림(안 읽은 수 배지)·글쓰기·내 블로그 관리·설정·로그아웃.
+ * 세션 권한이 관리자(ADMIN·SUPER_ADMIN)면 "내 블로그 관리" 다음에 "시스템 관리"(`/admin`, 006 FR-096).
  * 로그아웃은 JS 없이도 동작하도록 `/logout` action으로 폼 전송한다(US1에서 구현).
  */
 export function Header({ user }: HeaderProps) {
@@ -88,6 +91,11 @@ export function Header({ user }: HeaderProps) {
             <li>
               <Link to="/manage">{t("nav.manage")}</Link>
             </li>
+            {isAdmin(user.role) && (
+              <li>
+                <Link to="/admin">{t("nav.admin")}</Link>
+              </li>
+            )}
             <li>
               <Link to="/settings">{t("nav.settings")}</Link>
             </li>
