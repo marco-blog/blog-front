@@ -8,7 +8,9 @@
     "comments": "评论",
     "settings": "博客设置",
     "feed": "订阅源设置",
-    "guestbook": "留言板"
+    "guestbook": "留言板",
+    "design": "装饰",
+    "stats": "统计"
   },
   "switcher": {
     "label": "切换博客"
@@ -33,16 +35,20 @@
     "guestbookCount_other": "{{count, number}} 条",
     "recentGuestbook": "最近留言",
     "noGuestbook": "还没有留言。",
-    "allGuestbook": "查看全部留言"
+    "allGuestbook": "查看全部留言",
+    "visitorsToday": "今日访客",
+    "visitorsYesterday": "昨日访客"
   },
   "status": {
     "DRAFT": "草稿",
     "PUBLISHED": "已发布",
-    "DELETED": "回收站"
+    "DELETED": "回收站",
+    "SCHEDULED": "定时"
   },
   "visibility": {
     "PUBLIC": "公开",
-    "PRIVATE": "私密"
+    "PRIVATE": "私密",
+    "PROTECTED": "受保护"
   },
   "posts": {
     "title": "文章管理",
@@ -77,7 +83,9 @@
       "done": "已更改 {{updated}} 篇文章。",
       "move": "移动到分类",
       "moveTarget": "目标分类",
-      "moveSubmit": "移动"
+      "moveSubmit": "移动",
+      "notice": "设为公告",
+      "unnotice": "取消公告"
     },
     "edit": "编辑",
     "continue": "继续写作",
@@ -88,7 +96,8 @@
     "purgeAt": "将于 {{date}} 永久删除",
     "restore": "恢复",
     "restored": "文章已恢复。",
-    "category": "分类"
+    "category": "分类",
+    "noticeBadge": "公告"
   },
   "settings": {
     "title": "博客设置",
@@ -137,5 +146,32 @@
     "disabled": "留言板已关闭，访客看不到。",
     "settingsLink": "在博客设置中开启",
     "viewPublic": "查看博客留言板"
+  },
+  "design": {
+    "title": "装饰",
+    "sidebar": "侧边栏",
+    "sidebarHint": "勾选的项目会按此顺序从上到下显示在博客侧边栏。上移、下移会立即保存。",
+    "up": "上移",
+    "down": "下移",
+    "moveUp": "上移{{item}}",
+    "moveDown": "下移{{item}}",
+    "save": "保存侧边栏",
+    "saved": "侧边栏已保存。",
+    "notices": "公告列表",
+    "noticesHint": "可在文章发布设置中选择“设为公告”，或在文章管理中批量设置。",
+    "noNotices": "没有设为公告的文章。",
+    "unnotice": "取消公告",
+    "unnoticeFor": "取消公告：{{title}}",
+    "unnoticed": "已取消公告。"
+  },
+  "stats": {
+    "title": "统计",
+    "dailyCaption_one": "最近 {{count}} 天的访客",
+    "dailyCaption_other": "最近 {{count}} 天的访客",
+    "date": "日期",
+    "visitors": "访客",
+    "timeZoneNote": "日期按服务基准时区（韩国时间）计算，而不是你的时区。同一访客每天只计一次。",
+    "topPosts": "浏览最多的文章",
+    "noPosts": "还没有文章。"
   }
 }

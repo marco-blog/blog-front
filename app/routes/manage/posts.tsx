@@ -41,6 +41,9 @@ const BULK_OPS = {
   PUBLIC: { action: "CHANGE_VISIBILITY", visibility: "PUBLIC" },
   PRIVATE: { action: "CHANGE_VISIBILITY", visibility: "PRIVATE" },
   DELETE: { action: "DELETE" },
+  /** 공지로·공지 해제(004 FR-059) */
+  NOTICE: { action: "NOTICE" },
+  UNNOTICE: { action: "UNNOTICE" },
   /** 카테고리 옮기기. 대상은 폼의 `moveCategoryId`(비우면 미분류) */
   MOVE: { action: "MOVE_CATEGORY" },
 } as const satisfies Record<string, Omit<BulkPostRequest, "postIds">>;
@@ -336,6 +339,12 @@ function PostMeta({ post }: { post: PostSummary }) {
       </span>{" "}
       · <span>{t(`manage:status.${post.status}`)}</span> ·{" "}
       <span>{t(`manage:visibility.${post.visibility}`)}</span>
+      {post.notice && (
+        <>
+          {" "}
+          · <span className="badge badge-notice">{t("manage:posts.noticeBadge")}</span>
+        </>
+      )}
       {post.hasDraft && post.status === "PUBLISHED" && (
         <>
           {" "}
@@ -397,6 +406,12 @@ function BulkList({
         </button>{" "}
         <button type="submit" name="op" value="DELETE" disabled={submitting}>
           {t("manage:posts.bulk.delete")}
+        </button>{" "}
+        <button type="submit" name="op" value="NOTICE" disabled={submitting}>
+          {t("manage:posts.bulk.notice")}
+        </button>{" "}
+        <button type="submit" name="op" value="UNNOTICE" disabled={submitting}>
+          {t("manage:posts.bulk.unnotice")}
         </button>{" "}
         <span className="bulk-move">
           {t("manage:posts.bulk.move")}:{" "}

@@ -18,7 +18,7 @@ export function meta({ matches }: Route.MetaArgs) {
 
 /**
  * 블로그 관리 대시보드(`/:handle/manage`, SSR, 006 FR-100의 001 범위): 임시저장 글 수, 최근 7일 새 댓글 수, 최근 글·댓글 5건.
- * 004가 최근 7일 새 방명록 수와 최근 방명록 5건을 더했다.
+ * 004가 오늘·어제 방문자 수, 최근 7일 새 방명록 수와 최근 방명록 5건을 더했다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
@@ -37,6 +37,22 @@ export default function ManageDashboardPage() {
     <main className="manage-dashboard">
       <h1>{t("manage:dashboard.title")}</h1>
       <dl className="manage-stats">
+        {dashboard.visitors && (
+          <>
+            <div>
+              <dt>{t("manage:dashboard.visitorsToday")}</dt>
+              <dd>
+                <Link to={`/${handle}/manage/stats`}>
+                  {format.number(dashboard.visitors.today)}
+                </Link>
+              </dd>
+            </div>
+            <div>
+              <dt>{t("manage:dashboard.visitorsYesterday")}</dt>
+              <dd>{format.number(dashboard.visitors.yesterday)}</dd>
+            </div>
+          </>
+        )}
         <div>
           <dt>{t("manage:dashboard.drafts")}</dt>
           <dd>

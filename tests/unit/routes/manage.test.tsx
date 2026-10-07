@@ -303,6 +303,19 @@ describe("글 관리 action", () => {
     expect(backend.callsTo(BULK)[0].body).toEqual({ postIds: [9], action: "DELETE" });
   });
 
+  it("공지로·공지 해제: NOTICE·UNNOTICE(004)", async () => {
+    const backend = mockBackend({ [ME]: ok(me()), [BULK]: ok({ updated: 2 }) });
+
+    const result = asData(await call({ intent: "bulk", op: "NOTICE", postIds: ["1", "2"] }));
+    await call({ intent: "bulk", op: "UNNOTICE", postIds: "3" });
+
+    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 2 });
+    expect(backend.callsTo(BULK).map((c) => c.body)).toEqual([
+      { postIds: [1, 2], action: "NOTICE" },
+      { postIds: [3], action: "UNNOTICE" },
+    ]);
+  });
+
   it("카테고리 옮기기: MOVE_CATEGORY, 대상이 비면 미분류(null)", async () => {
     const backend = mockBackend({ [ME]: ok(me()), [BULK]: ok({ updated: 2 }) });
 
@@ -583,7 +596,17 @@ describe("블로그 관리 화면", () => {
       within(menu)
         .getAllByRole("link")
         .map((link) => link.textContent),
-    ).toEqual(["대시보드", "글 관리", "카테고리", "댓글", "방명록", "블로그 설정", "피드 설정"]);
+    ).toEqual([
+      "대시보드",
+      "글 관리",
+      "카테고리",
+      "댓글",
+      "방명록",
+      "꾸미기",
+      "통계",
+      "블로그 설정",
+      "피드 설정",
+    ]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
       "/marco/manage/categories",
@@ -598,6 +621,8 @@ describe("블로그 관리 화면", () => {
       "categories",
       "comments",
       "guestbook",
+      "design",
+      "stats",
       "settings",
       "feed",
     ]);
@@ -682,6 +707,25 @@ describe("블로그 관리 화면", () => {
       "/marco/manage/comments",
     );
     expect(screen.getByText("아직 글이 없습니다.")).toBeInTheDocument();
+  });
+
+  it("글 관리: 공지 글 표시와 일괄 공지로·공지 해제 버튼(004)", async () => {
+    const backend = renderManage("/marco/manage/posts", {
+      [POSTS]: ok([postSummary(1, { title: "공지 글", notice: true }), postSummary(2)], {
+        totalCount: 2,
+      }),
+      [BULK]: ok({ updated: 1 }),
+    });
+
+    const list = await screen.findByRole("list", { name: "글 목록" });
+    const items = within(list).getAllByRole("listitem");
+    expect(within(items[0]).getByText("공지", { selector: ".badge" })).toBeInTheDocument();
+    expect(within(items[1]).queryByText("공지", { selector: ".badge" })).toBeNull();
+    fireEvent.click(screen.getByRole("checkbox", { name: "글 2 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "공지로" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("글 1편을 바꿨습니다.");
+    expect(backend.callsTo(BULK)[0].body).toEqual({ postIds: [2], action: "NOTICE" });
+    expect(screen.getByRole("button", { name: "공지 해제" })).toBeInTheDocument();
   });
 
   it("글 관리: 상태·공개 범위·작성 중 사본, 수정·이어 쓰기 링크, 필터 폼은 쿼리 문자열로", async () => {

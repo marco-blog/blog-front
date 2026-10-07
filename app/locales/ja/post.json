@@ -33,7 +33,8 @@
     "publishPublic": "公開する",
     "savePrivate": "非公開で保存",
     "republish": "更新して公開",
-    "publishing": "公開しています。"
+    "publishing": "公開しています。",
+    "notice": "お知らせに登録"
   },
   "topic": {
     "label": "トピック",

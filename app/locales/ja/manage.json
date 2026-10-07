@@ -8,7 +8,9 @@
     "comments": "コメント",
     "settings": "ブログ設定",
     "feed": "フィード設定",
-    "guestbook": "ゲストブック"
+    "guestbook": "ゲストブック",
+    "design": "デザイン",
+    "stats": "統計"
   },
   "switcher": {
     "label": "ブログ切り替え"
@@ -33,16 +35,20 @@
     "guestbookCount_other": "{{count, number}}件",
     "recentGuestbook": "最近のゲストブック",
     "noGuestbook": "まだゲストブックの書き込みはありません。",
-    "allGuestbook": "ゲストブックをすべて見る"
+    "allGuestbook": "ゲストブックをすべて見る",
+    "visitorsToday": "今日の訪問者",
+    "visitorsYesterday": "昨日の訪問者"
   },
   "status": {
     "DRAFT": "下書き",
     "PUBLISHED": "公開済み",
-    "DELETED": "ゴミ箱"
+    "DELETED": "ゴミ箱",
+    "SCHEDULED": "予約"
   },
   "visibility": {
     "PUBLIC": "公開",
-    "PRIVATE": "非公開"
+    "PRIVATE": "非公開",
+    "PROTECTED": "保護"
   },
   "posts": {
     "title": "記事管理",
@@ -77,7 +83,9 @@
       "done": "{{updated}}件の記事を変更しました。",
       "move": "カテゴリを移動",
       "moveTarget": "移動先カテゴリ",
-      "moveSubmit": "移動"
+      "moveSubmit": "移動",
+      "notice": "お知らせに",
+      "unnotice": "お知らせ解除"
     },
     "edit": "編集",
     "continue": "続きを書く",
@@ -88,7 +96,8 @@
     "purgeAt": "{{date}}に完全削除",
     "restore": "復元",
     "restored": "記事を復元しました。",
-    "category": "カテゴリ"
+    "category": "カテゴリ",
+    "noticeBadge": "お知らせ"
   },
   "settings": {
     "title": "ブログ設定",
@@ -137,5 +146,32 @@
     "disabled": "ゲストブックがオフのため、訪問者には表示されません。",
     "settingsLink": "ブログ設定でオンにする",
     "viewPublic": "ブログのゲストブックを見る"
+  },
+  "design": {
+    "title": "デザイン",
+    "sidebar": "サイドバー",
+    "sidebarHint": "チェックした項目が上からこの順番でブログのサイドバーに表示されます。上へ・下へはすぐに保存されます。",
+    "up": "上へ",
+    "down": "下へ",
+    "moveUp": "{{item}}を上へ",
+    "moveDown": "{{item}}を下へ",
+    "save": "サイドバーを保存",
+    "saved": "サイドバーを保存しました。",
+    "notices": "お知らせ一覧",
+    "noticesHint": "お知らせは記事の公開設定の「お知らせに登録」か、記事管理の一括操作で設定します。",
+    "noNotices": "お知らせに登録した記事はありません。",
+    "unnotice": "お知らせ解除",
+    "unnoticeFor": "{{title}}のお知らせを解除",
+    "unnoticed": "お知らせを解除しました。"
+  },
+  "stats": {
+    "title": "統計",
+    "dailyCaption_one": "直近{{count}}日の訪問者",
+    "dailyCaption_other": "直近{{count}}日の訪問者",
+    "date": "日付",
+    "visitors": "訪問者",
+    "timeZoneNote": "日付は会員のタイムゾーンではなく、サービス基準のタイムゾーン(韓国時間)の日付です。同じ訪問者は1日1回だけ数えます。",
+    "topPosts": "閲覧数の多い記事",
+    "noPosts": "まだ記事がありません。"
   }
 }

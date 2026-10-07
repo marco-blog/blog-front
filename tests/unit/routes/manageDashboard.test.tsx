@@ -85,3 +85,21 @@ describe("대시보드 방명록(004)", () => {
     expect(screen.queryByRole("region", { name: "최근 방명록" })).toBeNull();
   });
 });
+
+describe("대시보드 방문자(004)", () => {
+  it("오늘·어제 방문자, 오늘은 통계 링크", async () => {
+    renderDashboard({ ...base, visitors: { today: 12, yesterday: 30, total: 1520 } });
+
+    expect(await screen.findByRole("link", { name: "12" })).toHaveAttribute(
+      "href",
+      "/marco/manage/stats",
+    );
+    expect(screen.getByText("어제 방문자").nextSibling).toHaveTextContent("30");
+  });
+
+  it("방문자 필드가 없으면 숨긴다", async () => {
+    renderDashboard(base);
+    await screen.findByRole("heading", { level: 1 });
+    expect(screen.queryByText("오늘 방문자")).toBeNull();
+  });
+});

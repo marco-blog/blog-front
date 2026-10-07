@@ -33,7 +33,8 @@
     "publishPublic": "공개 발행",
     "savePrivate": "비공개 저장",
     "republish": "수정 발행",
-    "publishing": "발행하는 중입니다."
+    "publishing": "발행하는 중입니다.",
+    "notice": "공지로 등록"
   },
   "topic": {
     "label": "주제",

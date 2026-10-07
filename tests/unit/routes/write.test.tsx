@@ -175,6 +175,7 @@ describe("write loader", () => {
         visibility: "PUBLIC",
         commentEnabled: true,
         thumbnailUrl: postDetail.thumbnailUrl,
+        notice: false,
       },
       draft: {
         title: "고친 제목",
@@ -337,6 +338,7 @@ describe("write 화면", () => {
           visibility: "PRIVATE",
           commentEnabled: false,
           thumbnailUrl: null,
+          notice: false,
         },
         draft: savedDraft("제목", "본문"),
         latestDraft: null,
@@ -387,6 +389,7 @@ describe("write 화면", () => {
       tags: [],
       topicId: null,
       thumbnailMediaKey: null,
+      notice: false,
     });
   });
 
@@ -519,6 +522,7 @@ describe("write 화면", () => {
       tags: ["spring boot"],
       topicId: 11,
       thumbnailMediaKey: null,
+      notice: false,
     });
   });
 
@@ -535,6 +539,7 @@ describe("write 화면", () => {
           visibility: "PUBLIC",
           commentEnabled: true,
           thumbnailUrl: null,
+          notice: false,
         },
         draft: { ...savedDraft("제목", "본문"), categoryId: 20, tags: ["daily", "life"] },
         latestDraft: null,
@@ -683,6 +688,7 @@ describe("write 화면", () => {
                     visibility: "PUBLIC",
                     commentEnabled: true,
                     thumbnailUrl: null,
+                    notice: false,
                   },
                   draft: savedDraft("쓰던 글", "쓰던 본문"),
                   latestDraft: null,
