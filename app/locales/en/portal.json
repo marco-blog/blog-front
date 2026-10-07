@@ -42,12 +42,14 @@
     "popular": "Popular",
     "posts": "Posts",
     "empty": "There are no posts on this topic yet.",
-    "popularEmpty": "No posts got reactions in the last 7 days. Try the latest posts."
+    "popularEmpty": "No posts got reactions in the last 7 days. Try the latest posts.",
+    "sourceEmpty": "No posts from this source in this topic."
   },
   "source": {
     "label": "Source",
     "all": "All",
     "internal": "Posts here",
-    "external": "External posts"
+    "external": "External posts",
+    "empty": "No recent posts from this source."
   }
 }

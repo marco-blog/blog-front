@@ -3,6 +3,7 @@ import { Link } from "react-router";
 
 import type { PortalCard as PortalCardData, TopicNode } from "~/api/models";
 import { Avatar } from "~/components/media/Avatar";
+import { visitHref } from "~/external/visit";
 import { useDateFormat, useRelativeTime } from "~/i18n/format";
 import { thumbnailImage } from "~/media/thumbnail";
 import { cardColor } from "~/portal/cardColor";
@@ -79,7 +80,7 @@ export function PortalCard({ card, topics, now }: PortalCardProps) {
     return (
       <article className="portal-card portal-card-external" data-source="EXTERNAL">
         <a
-          href={card.visitUrl ?? "#"}
+          href={visitHref(card)}
           target="_blank"
           rel="noopener nofollow"
           className="portal-card-link"

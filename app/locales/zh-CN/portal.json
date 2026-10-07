@@ -42,12 +42,14 @@
     "popular": "热门",
     "posts": "文章列表",
     "empty": "该主题下还没有文章。",
-    "popularEmpty": "最近 7 天没有获得反应的文章。请按最新查看。"
+    "popularEmpty": "最近 7 天没有获得反应的文章。请按最新查看。",
+    "sourceEmpty": "该主题下暂无此来源的文章。"
   },
   "source": {
     "label": "来源",
     "all": "全部",
     "internal": "仅站内文章",
-    "external": "仅外部文章"
+    "external": "仅外部文章",
+    "empty": "该来源暂无最新文章。"
   }
 }

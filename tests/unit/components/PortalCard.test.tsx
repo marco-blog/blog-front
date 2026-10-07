@@ -122,4 +122,42 @@ describe("PortalCard", () => {
     expect(article).not.toHaveTextContent("좋아요");
     expect(article).not.toHaveTextContent("댓글");
   });
+  it("외부 카드(007): 썸네일이 없으면 주제 색, 요약 속 <script>는 글자로만, visitUrl이 없으면 같은 규칙의 주소", async () => {
+    renderCard(
+      portalCard(78, {
+        source: "EXTERNAL",
+        title: "<b>제목</b>",
+        summary: "<script>alert(1)</script> 요약",
+        topicId: 12,
+        blog: { handle: null, title: "Dev Log" },
+        author: null,
+        externalBlog: { id: 3, title: "Dev Log", siteHost: "dev.example.com" },
+        visitUrl: null,
+      }),
+    );
+
+    const article = await screen.findByRole("article");
+    expect(article).toHaveAttribute("data-source", "EXTERNAL");
+    expect(within(article).getByTestId("portal-card-placeholder")).toHaveStyle({
+      backgroundColor: "#3D7DD8",
+    });
+    expect(article.querySelector("script")).toBeNull();
+    expect(article.querySelector("b")).toBeNull();
+    expect(within(article).getByText("<script>alert(1)</script> 요약")).toBeInTheDocument();
+    expect(within(article).getByRole("link", { name: /<b>제목<\/b>/ })).toHaveAttribute(
+      "href",
+      "/api/v1/external-posts/78/visit",
+    );
+    expect(within(article).queryByRole("link", { name: "Dev Log" })).toBeNull();
+  });
+
+  it("내부 카드는 기존과 같다(외부 배지·새 탭 없음)", async () => {
+    renderCard(portalCard(5));
+
+    const article = await screen.findByRole("article");
+    expect(article).not.toHaveAttribute("data-source");
+    const link = within(article).getByRole("link", { name: /포털 글 5/ });
+    expect(link).not.toHaveAttribute("target");
+    expect(article.querySelector(".portal-card-badge")).toBeNull();
+  });
 });

@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import type { Socket } from "node:net";
 
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
 /**
@@ -19,6 +20,12 @@ const READ_PATHS = [
   /^\/robots\.txt$/,
 ];
 const TRACKBACK_PATH = /^\/[^/]+\/\d+\/trackback$/;
+/**
+ * 외부 글 원문 이동(007 contracts/routes.md): backend가 클릭을 센 뒤 302. 없는 글의 404를 브라우저(`Accept: text/html`)가
+ * 받으면 JSON 대신 front의 404 화면을 보낸다(새 탭에 JSON이 보이지 않게). 이 경로 한 곳만 다르게 다룬다.
+ * `app/external/visit.ts`의 `VISIT_PATH_PATTERN`과 같은 규칙이다.
+ */
+const VISIT_PATH = /^\/api\/v1\/external-posts\/[^/]+\/visit$/;
 
 export function isBackendPath(method: string, pathname: string): boolean {
   if (ANY_METHOD_PATHS.some((pattern) => pattern.test(pathname))) {
@@ -62,20 +69,60 @@ export function writeProxyError(req: IncomingMessage, res: ServerResponse): void
   res.end("Bad Gateway");
 }
 
+/** 이 요청이 HTML 화면을 바라는가(브라우저가 링크를 열 때) */
+export function wantsHtml(req: IncomingMessage): boolean {
+  const accept = req.headers.accept ?? "";
+  return accept.includes("text/html");
+}
+
+export function isVisitPath(method: string, pathname: string): boolean {
+  const upper = method.toUpperCase();
+  return (upper === "GET" || upper === "HEAD") && VISIT_PATH.test(pathname);
+}
+
+function onError(_error: Error, req: IncomingMessage, res: ServerResponse | Socket) {
+  if ("writeHead" in res) {
+    writeProxyError(req, res);
+  } else {
+    res.destroy();
+  }
+}
+
 export function backendProxy(target: string) {
-  return createProxyMiddleware<Request, Response>({
+  const proxy = createProxyMiddleware<Request, Response>({
     target,
     changeOrigin: true,
     xfwd: true,
     pathFilter: (path, req) => isBackendPath(req.method ?? "GET", pathnameOf(path)),
+    on: { error: onError },
+  });
+  // 외부 글 이동: 응답을 직접 쓴다. 404이고 HTML 요청이면 본문을 버리고 다음 처리기(React Router의 404 화면)로 넘긴다.
+  const nextOf = new WeakMap<IncomingMessage, NextFunction>();
+  const visitProxy = createProxyMiddleware<Request, Response>({
+    target,
+    changeOrigin: true,
+    xfwd: true,
+    selfHandleResponse: true,
     on: {
-      error: (_error, req, res) => {
-        if ("writeHead" in res) {
-          writeProxyError(req, res);
-        } else {
-          res.destroy();
+      error: onError,
+      proxyRes: (proxyRes, req, res) => {
+        const status = proxyRes.statusCode ?? 502;
+        const next = nextOf.get(req);
+        if (status === 404 && wantsHtml(req) && next) {
+          proxyRes.resume();
+          next();
+          return;
         }
+        res.writeHead(status, proxyRes.headers);
+        proxyRes.pipe(res);
       },
     },
   });
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (isVisitPath(req.method, pathnameOf(req.url))) {
+      nextOf.set(req, next);
+      return visitProxy(req, res, next);
+    }
+    return proxy(req, res, next);
+  };
 }
