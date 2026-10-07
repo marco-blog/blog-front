@@ -21,7 +21,8 @@
     "notifications": "お知らせ",
     "unreadNotifications": "未読のお知らせ {{count}}件",
     "search": "検索",
-    "searchLabel": "検索キーワード"
+    "searchLabel": "検索キーワード",
+    "admin": "システム管理"
   },
   "footer": {
     "label": "サイト情報",

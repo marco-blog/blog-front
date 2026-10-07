@@ -4,6 +4,7 @@ import express from "express";
 import { createLoadContext } from "../app/server/requestContext";
 import { cspNonceOf } from "../app/server/securityHeaders";
 import { forwardedHeaders } from "./middleware/forwarded";
+import { robotsHeader } from "./middleware/robotsHeader";
 
 /** React Router 요청 처리기. 개발 시 Vite가, 운영 시 빌드 산출물(build/server)이 이 모듈을 불러온다. */
 export const app = express();
@@ -11,6 +12,8 @@ app.disable("x-powered-by");
 
 // SSR이 backend를 부를 때 방문자 주소(X-Forwarded-For)·scheme을 함께 보낸다.
 app.use(forwardedHeaders());
+// 관리 화면(`/admin/**`, `/manage`, `/:handle/manage/**`)은 응답 종류와 무관하게 검색 엔진 제외(006 FR-098).
+app.use(robotsHeader());
 app.use(
   createRequestHandler({
     build: () => import("virtual:react-router/server-build"),

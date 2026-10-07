@@ -71,14 +71,15 @@ npm run e2e                          # = npx playwright test
 
 `playwright.config.ts` が `npm run build && npm start` で front サーバーを起動して（`E2E_PORT`、既定 5173）テストします。環境変数によって実行されるシナリオが変わります。
 
-| 環境変数                                | 例                      | ない場合                                                                                                                                                    |
-| --------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| （なし）                                |                         | トップ画面・404・セキュリティヘッダーなどの smoke シナリオのみ実行                                                                                          |
-| `E2E_BACKEND_URL`                       | `http://localhost:8080` | 登録・記事・カテゴリ・コメント・画像・言語のシナリオ（`tests/e2e/us*`）をスキップ。設定すると front サーバーもこの backend を使います（`BLOG_BACKEND_URL`） |
-| `MAILPIT_URL`                           | `http://localhost:8025` | パスワード再設定メールを読むシナリオをスキップ（backend が同じ Mailpit へメールを送る必要があります）                                                       |
-| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | ポータル（003）のシナリオ（`tests/e2e/portal-*`）をスキップ。backend を下記のポータル試験用設定で起動したという印です                                       |
-| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 非会員のコメント・ゲストブック（004）のシナリオをスキップ。backend を下記の非会員試験用設定で起動したという印です                                           |
-| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理者アカウント        | 管理コンソールとリリースノートのシナリオをスキップ。backend の `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` と同じメールアドレスで登録したアカウントです        |
+| 環境変数                                | 例                      | ない場合                                                                                                                                                           |
+| --------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| （なし）                                |                         | トップ画面・404・セキュリティヘッダーなどの smoke シナリオのみ実行                                                                                                 |
+| `E2E_BACKEND_URL`                       | `http://localhost:8080` | 登録・記事・カテゴリ・コメント・画像・言語のシナリオ（`tests/e2e/us*`）をスキップ。設定すると front サーバーもこの backend を使います（`BLOG_BACKEND_URL`）        |
+| `MAILPIT_URL`                           | `http://localhost:8025` | パスワード再設定メールを読むシナリオをスキップ（backend が同じ Mailpit へメールを送る必要があります）                                                              |
+| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | ポータル（003）のシナリオ（`tests/e2e/portal-*`）をスキップ。backend を下記のポータル試験用設定で起動したという印です                                              |
+| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 非会員のコメント・ゲストブック（004）のシナリオをスキップ。backend を下記の非会員試験用設定で起動したという印です                                                  |
+| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 管理者アカウント        | 管理コンソールとリリースノートのシナリオをスキップ。backend の `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL` と同じメールアドレスで登録したアカウントです               |
+| `E2E_ADMIN_TEST_SETTINGS`               | `1`                     | 管理コンソール(006)のシナリオ(`tests/e2e/admin-*`)をスキップする。backend を `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`(ダッシュボードのキャッシュなし)で起動したという印 |
 
 backend を含めてすべて実行するには、backend の README のとおりに MySQL（スキーマ適用）・Mailpit・backend（local プロファイル）を起動してから:
 
@@ -96,6 +97,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
 004 のブログ機能シナリオ（`tests/e2e/blog-*`）は backend の local プロファイルの既定値で動きます。非会員の書き込みシナリオは同じ IP（localhost）から何度も書くため、非会員の書き込み制限を緩めて起動し `E2E_GUEST_TEST_SETTINGS=1` を指定します: `BLOG_GUEST_COMMENT_PER_MINUTE=1000`、`BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`。バックアップのシナリオでは backend が `BLOG_EXPORT_DIR`（local の既定は `./data/exports`）に zip を書きます。予約公開とバックアップのシナリオはバッチ処理の周期（30 秒）を待つため 1〜2 分かかります。
 
 ポータルのシナリオはメインの「最新記事」・おすすめ・ポータル設定のようなサイトに一つしかない画面を見るため、Playwright プロジェクト `portal` として残り（`e2e`）が終わった後に一度に1ファイルずつ実行します。CI（`ci.yml` の e2e-backend、`e2e.yml`）は上記の試験用設定で backend を起動し、`scripts/e2e-provision-admin.sh` で使い捨て DB に管理者アカウントを作ります（登録 API → `role` を SUPER_ADMIN に）。
+
+管理コンソール(006)のシナリオ(`tests/e2e/admin-*`)は権限の付与・取り消しやリリースノートの公開のようにサイト全体の状態を変えるため、Playwright プロジェクト `admin` で `portal`・`moderation` の後に 1 ファイルずつ実行する。ダッシュボードの数値がすぐ変わる必要があるので、backend を `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s` で起動し `E2E_ADMIN_TEST_SETTINGS=1` を指定する。管理者アカウントは最高管理者でなければならず、シナリオはそのアカウント自身の権限は変えない。
 
 `CI` がなければ、同じポートで起動済みの front サーバーを再利用します。シナリオは実行ごとに新しいアカウントを作るので、同じ DB で何度実行しても構いません。
 

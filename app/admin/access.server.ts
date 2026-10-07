@@ -3,8 +3,9 @@ import { data } from "react-router";
 import { apiErrorResponse, isApiError } from "~/api/errors";
 import { requireUser, type SessionUser } from "~/auth/session.server";
 
-/** 시스템 관리자 역할(006 data-model `users.role`) */
-export const ADMIN_ROLES: readonly string[] = ["ADMIN", "SUPER_ADMIN"];
+import { ADMIN_ROLES, isAdmin } from "./roles";
+
+export { ADMIN_ROLES };
 
 /** 콘솔은 관리자가 아니면 존재를 드러내지 않고 HTTP 404로 응답한다(003 contracts/routes.md). */
 export const adminNotFound = () => data(null, { status: 404 });
@@ -15,7 +16,7 @@ export const adminNotFound = () => data(null, { status: 404 });
  */
 export async function requireAdmin(request: Request): Promise<SessionUser> {
   const user = await requireUser(request);
-  if (!ADMIN_ROLES.includes(user.role)) {
+  if (!isAdmin(user.role)) {
     throw adminNotFound();
   }
   return user;

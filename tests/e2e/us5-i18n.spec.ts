@@ -5,10 +5,12 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 
 import {
   PASSWORD,
+  adminAccount,
   backendUrl,
   callApi,
   newAccount,
   publishPost,
+  requireAdmin,
   requireBackend,
   signUp,
 } from "./support/backend.js";
@@ -302,6 +304,68 @@ test.describe("US5 메일 언어", () => {
       expect(requested.status).toBe(202);
 
       expect(await latestSubject(member.email)).toBe("Reset your password");
+    });
+  }
+});
+
+/**
+ * 006 관리 화면 언어(T069, quickstart #40): 화면 언어 en·ja·zh-CN에서 콘솔 메뉴·대시보드 카드·작업 기록의 작업 이름·
+ * 릴리스 노트 편집기 문구가 그 언어. 관리자 회원 설정 언어는 바꾸지 않도록 하단 언어 선택 대신 쿠키 `lang`으로 고른다
+ * (회원 설정 언어가 없으면 쿠키가 쓰인다). 읽기만 하므로 다른 관리자 시나리오와 함께 돌아도 된다.
+ */
+test.describe("006 관리 화면 언어", () => {
+  requireBackend();
+  requireAdmin();
+
+  for (const language of ["en", "ja", "zh-CN"] as const) {
+    test(`${language}: 콘솔 메뉴·대시보드·작업 이름·릴리스 노트 편집기`, async ({ browser }) => {
+      const { context, page } = await newPage(browser, { locale: "ko-KR" });
+      const origin = new URL(test.info().project.use.baseURL ?? "").origin;
+      await context.addCookies([{ name: "lang", value: language, url: origin }]);
+      const { email, password } = adminAccount();
+      const login = await callApi(page.request, "POST", "/auth/login", { email, password });
+      expect(login.status).toBe(200);
+      const me = await callApi<{ locale: string | null }>(page.request, "GET", "/me");
+      test.skip(
+        me.body.result.locale !== null,
+        "관리자 회원 설정 언어가 있으면 쿠키가 쓰이지 않는다.",
+      );
+
+      await page.goto("/admin");
+      await expect(page.locator("html")).toHaveAttribute("lang", language);
+      const menu = page.getByRole("navigation", { name: t(language, "admin", "nav.label") });
+      await expect(
+        menu.getByRole("link", { name: t(language, "admin", "nav.auditLog"), exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { level: 1, name: t(language, "admin", "dashboard.title") }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("region", { name: t(language, "admin", "dashboard.today") }),
+      ).toContainText(t(language, "admin", "dashboard.cards.signups"));
+
+      await page.goto("/admin/audit-log");
+      await expect(
+        page.getByRole("heading", { level: 1, name: t(language, "audit", "title") }),
+      ).toBeVisible();
+      const action = page.getByLabel(t(language, "audit", "filters.action"));
+      await expect(
+        action.locator("option", { hasText: t(language, "audit", "actions.ROLE_GRANT") }),
+      ).toHaveCount(1);
+
+      await page.goto("/admin/release-notes/new");
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: t(language, "admin", "releaseNotes.editor.newTitle"),
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: t(language, "admin", "releaseNotes.editor.saveDraft") }),
+      ).toBeVisible();
+      await expectNoKeys(page);
+      expect(await page.locator("body").innerText()).not.toMatch(/\b(?:admin|audit):[A-Za-z]/);
+      await context.close();
     });
   }
 });

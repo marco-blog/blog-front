@@ -1,0 +1,92 @@
+/*
+ * 관리 화면 공통(006 T019·T068): 블로그 관리(`/:handle/manage/**`)와 시스템 관리자 콘솔(`/admin/**`).
+ * 폭 360px에서도 가로 스크롤 없이 쓰도록 메뉴·버튼 막대는 줄바꿈하고, 넓은 표는 자기 상자 안에서만 가로로 움직인다.
+ */
+.manage,
+.admin {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.console-menu > summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+.console-menu ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  list-style: none;
+  padding-left: 0;
+}
+.console-menu h2 {
+  font-size: 0.85rem;
+  margin: 0.5rem 0 0.25rem;
+}
+.blog-switcher ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  list-style: none;
+  padding-left: 0;
+}
+/* 넓은 화면에서는 메뉴가 늘 펼쳐져 있으므로 접기 제목을 감춘다(JS 없음). */
+@media (min-width: 48rem) {
+  .console-menu > summary {
+    display: none;
+  }
+}
+.bulk-form fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 0;
+}
+.bulk-move {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+.manage select,
+.manage input,
+.manage textarea,
+.admin select,
+.admin input,
+.admin textarea {
+  max-width: 100%;
+}
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  padding-left: 0;
+}
+.dashboard-card {
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+.dashboard-card strong {
+  display: block;
+  font-size: 1.5rem;
+}
+.json-diff .same {
+  opacity: 0.6;
+}
+.language-tabs ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding-left: 0;
+}
+.release-note-editor textarea {
+  width: 100%;
+  min-height: 12rem;
+}

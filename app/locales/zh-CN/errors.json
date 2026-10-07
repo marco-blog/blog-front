@@ -93,14 +93,15 @@
   "CONTENT_NOT_FOUND": "找不到内容或内容已删除。",
   "POST_HIDDEN": "管理员隐藏的文章不能发布，也不能更改发布设置。",
   "BLOG_RESTRICTED": "此博客已被限制。",
-  "USER_NOT_ACTIVE": "不能停用已注销的会员。",
+  "USER_NOT_ACTIVE": "不能对已停用或已注销的会员执行此操作。",
   "CANNOT_SUSPEND_SELF": "不能停用自己。",
-  "LAST_SUPER_ADMIN": "不能停用最后一位超级管理员。",
+  "LAST_SUPER_ADMIN": "不能对最后一位超级管理员执行此操作。请先指定另一位超级管理员。",
   "CAPTCHA_FAILED": "防垃圾验证失败，请重试。",
   "CAPTCHA_REQUIRED": "登录失败次数过多。请完成防垃圾验证后重新登录。",
   "DUPLICATE_CONTENT_SPAM": "不能在短时间内多次发布相同内容。",
   "BANNED_WORD_EXISTS": "该违禁词已存在。",
   "BANNED_WORD_NOT_FOUND": "找不到该违禁词。",
   "TRACKBACK_NOT_FOUND": "找不到该引用通告。",
-  "TRACKBACK_NOT_ALLOWED": "只能从公开文章发送引用通告。"
+  "TRACKBACK_NOT_ALLOWED": "只能从公开文章发送引用通告。",
+  "CANNOT_CHANGE_OWN_ROLE": "不能更改自己的权限，需要由另一位超级管理员更改。"
 }

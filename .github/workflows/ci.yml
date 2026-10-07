@@ -151,6 +151,8 @@ jobs:
           BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR: "100000"
           # 004 블로그 백업 zip 디렉터리(blog-us4-backup E2E). 실행마다 비는 러너 임시 디렉터리
           BLOG_EXPORT_DIR: ${{ runner.temp }}/blog-exports
+          # 006 대시보드 수치를 바로 확인(E2E_ADMIN_TEST_SETTINGS=1과 짝): 대시보드 캐시 끔
+          BLOG_ADMIN_DASHBOARD_CACHE_TTL: 0s
         run: |
           BLOG_CRYPTO_KEY_V1="$(openssl rand -base64 32)"
           BLOG_CRYPTO_HASH_KEY="$(openssl rand -base64 32)"
@@ -192,6 +194,8 @@ jobs:
           E2E_GUEST_TEST_SETTINGS: "1"
           # 005 신고·스팸 방어·트랙백 시나리오(moderation 프로젝트): 위 backend 한도·CAPTCHA test로 띄웠다는 표시
           E2E_MODERATION_TEST_SETTINGS: "1"
+          # 006 관리 콘솔 시나리오(admin 프로젝트): 위 BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s로 띄웠다는 표시
+          E2E_ADMIN_TEST_SETTINGS: "1"
 
       - name: Upload logs
         if: failure()

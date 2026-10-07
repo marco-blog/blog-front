@@ -12,7 +12,10 @@
     "design": "装饰",
     "stats": "统计",
     "backup": "备份",
-    "blocks": "屏蔽列表"
+    "blocks": "屏蔽列表",
+    "menu": "菜单",
+    "trackbacks": "收到的引用通告",
+    "externalBlogs": "外部博客"
   },
   "switcher": {
     "label": "切换博客"

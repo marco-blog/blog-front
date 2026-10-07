@@ -11,6 +11,8 @@ const SANITIZED_HTML_FILES = [
   // 003 릴리스 노트 본문(backend가 살균, 제목 id 허용). 003 contracts/routes.md
   "app/routes/updates/version.tsx",
   "app/routes/updates/revision.tsx",
+  // 006 릴리스 노트 편집기 미리보기(backend `POST /admin/release-notes/preview`가 같은 규칙으로 살균). 006 contracts/routes.md
+  "app/components/admin/MarkdownPreview.tsx",
 ];
 
 export default tseslint.config(
