@@ -7,7 +7,7 @@ import { newAccount, publishPost, requireBackend, signUp } from "./support/backe
 /**
  * 004 US4 백업 Independent Test(quickstart #31~33, T106): 글·이미지가 있는 블로그에서 백업을 요청하면 배치 작업이 zip을 만들고
  * (90초 안), 알림이 오고, 내려받은 파일은 zip(앞 2바이트 `PK`)이다. 같은 날 다시 요청하면 하루 한 번 안내.
- * backend가 있어야 돈다(E2E_BACKEND_URL). backend는 BLOG_EXPORT_DIR(local 프로필 기본 ./data/exports)에 파일을 쓴다.
+ * backend가 있어야 돈다(E2E_BACKEND_URL). backend는 BLOG_DATA_DIR/exports(local 프로필 기본 ./data/exports)에 파일을 쓴다.
  */
 
 /** 120x80 PNG(us4-images와 같은 그림) */

@@ -97,7 +97,7 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<관리자 이메일> E2E_ADMIN_PASSWORD=<비밀번호> npm run e2e
 ```
 
-004 블로그 기능 시나리오(`tests/e2e/blog-*`)는 backend local 프로필 기본값으로 돈다. 비회원 글 시나리오는 같은 IP(localhost)에서 여러 번 쓰므로 작성 속도 제한을 넉넉히 띄우고 `E2E_GUEST_TEST_SETTINGS=1`을 준다(004의 `BLOG_GUEST_*_PER_MINUTE`는 005의 `BLOG_RATELIMIT_*`로 바뀌었다. 아래 005 설정). 백업 시나리오는 backend가 `BLOG_EXPORT_DIR`(local 기본 `./data/exports`)에 zip을 쓴다. 예약 발행·백업 시나리오는 배치 작업 주기(30초)를 기다리므로 1~2분 걸린다.
+004 블로그 기능 시나리오(`tests/e2e/blog-*`)는 backend local 프로필 기본값으로 돈다. 비회원 글 시나리오는 같은 IP(localhost)에서 여러 번 쓰므로 작성 속도 제한을 넉넉히 띄우고 `E2E_GUEST_TEST_SETTINGS=1`을 준다(004의 `BLOG_GUEST_*_PER_MINUTE`는 005의 `BLOG_RATELIMIT_*`로 바뀌었다. 아래 005 설정). 백업 시나리오는 backend가 `BLOG_DATA_DIR`/exports(local 기본 `./data/exports`)에 zip을 쓴다. 예약 발행·백업 시나리오는 배치 작업 주기(30초)를 기다리므로 1~2분 걸린다.
 
 포털 시나리오는 메인 "최신 글"·추천·포털 설정처럼 사이트에 하나뿐인 화면을 보므로, Playwright 프로젝트 `portal`로 나머지(`e2e`)가 끝난 뒤 한 번에 한 파일씩 돈다. CI(`ci.yml` e2e-backend, `e2e.yml`)는 위 시험용 설정으로 backend를 띄우고 `scripts/e2e-provision-admin.sh`로 일회용 DB에 관리자 계정을 만든다(가입 API → `role` SUPER_ADMIN).
 

@@ -97,7 +97,7 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<管理者メールアドレス> E2E_ADMIN_PASSWORD=<パスワード> npm run e2e
 ```
 
-004 のブログ機能シナリオ（`tests/e2e/blog-*`）は backend の local プロファイルの既定値で動きます。非会員の書き込みシナリオは同じ IP（localhost）から何度も書くため、書き込み速度の制限を緩めて起動し `E2E_GUEST_TEST_SETTINGS=1` を指定します（004 の `BLOG_GUEST_*_PER_MINUTE` は 005 の `BLOG_RATELIMIT_*` に変わりました。下記の 005 設定）。バックアップのシナリオでは backend が `BLOG_EXPORT_DIR`（local の既定は `./data/exports`）に zip を書きます。予約公開とバックアップのシナリオはバッチ処理の周期（30 秒）を待つため 1〜2 分かかります。
+004 のブログ機能シナリオ（`tests/e2e/blog-*`）は backend の local プロファイルの既定値で動きます。非会員の書き込みシナリオは同じ IP（localhost）から何度も書くため、書き込み速度の制限を緩めて起動し `E2E_GUEST_TEST_SETTINGS=1` を指定します（004 の `BLOG_GUEST_*_PER_MINUTE` は 005 の `BLOG_RATELIMIT_*` に変わりました。下記の 005 設定）。バックアップのシナリオでは backend が `BLOG_DATA_DIR`/exports（local の既定は `./data/exports`）に zip を書きます。予約公開とバックアップのシナリオはバッチ処理の周期（30 秒）を待つため 1〜2 分かかります。
 
 ポータルのシナリオはメインの「最新記事」・おすすめ・ポータル設定のようなサイトに一つしかない画面を見るため、Playwright プロジェクト `portal` として残り（`e2e`）が終わった後に一度に1ファイルずつ実行します。CI（`ci.yml` の e2e-backend、`e2e.yml`）は上記の試験用設定で backend を起動し、`scripts/e2e-provision-admin.sh` で使い捨て DB に管理者アカウントを作ります（登録 API → `role` を SUPER_ADMIN に）。
 
