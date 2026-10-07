@@ -12,6 +12,8 @@ export interface GuestbookListProps {
   /** 블로그 관리: 회원 작성자에게 "차단" 버튼(004 US5) */
   showBlock?: boolean;
   result?: GuestbookActionData;
+  /** 로그인 회원에게 남의 글 "신고" 버튼(005) */
+  reportable?: boolean;
 }
 
 /** 방명록 최상위 글(최신순)과 각 글의 답글 */
@@ -21,6 +23,7 @@ export function GuestbookList({
   isOwner,
   showBlock = false,
   result,
+  reportable = false,
 }: GuestbookListProps) {
   const { t } = useTranslation();
   if (entries.length === 0) {
@@ -36,6 +39,7 @@ export function GuestbookList({
           isOwner={isOwner}
           showBlock={showBlock}
           result={result}
+          reportable={reportable}
         />
       ))}
     </ul>

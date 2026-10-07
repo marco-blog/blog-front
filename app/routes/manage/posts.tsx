@@ -34,7 +34,8 @@ export const MANAGE_PAGE_SIZE = 20;
 const MAX_PAGE = 100_000;
 const QUERY_MAX = 200;
 
-const STATUSES: readonly PostStatus[] = ["DRAFT", "PUBLISHED", "SCHEDULED", "DELETED"];
+/** `HIDDEN`은 관리자가 숨긴 글(005 FR-041) */
+const STATUSES: readonly PostStatus[] = ["DRAFT", "PUBLISHED", "SCHEDULED", "DELETED", "HIDDEN"];
 const VISIBILITIES: readonly Visibility[] = ["PUBLIC", "PRIVATE", "PROTECTED"];
 /** 일괄 작업 버튼 값 → backend 요청 */
 const BULK_OPS = {
@@ -139,7 +140,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 type PostsActionData =
-  | { intent: "bulk"; ok: true; updated: number }
+  | { intent: "bulk"; ok: true; updated: number; skipped: number }
   | { intent: "restore"; ok: true }
   | { intent: "unschedule"; ok: true }
   | { intent: "bulk"; ok: false; noSelection: true }
@@ -179,7 +180,12 @@ export async function action({ request, params }: Route.ActionArgs) {
       const result = await api.post<BulkPostResult>(`/blogs/${handle}/manage/posts/bulk`, {
         body,
       });
-      return data<PostsActionData>({ intent, ok: true, updated: result.updated });
+      return data<PostsActionData>({
+        intent,
+        ok: true,
+        updated: result.updated,
+        skipped: result.skipped ?? 0,
+      });
     } catch (error) {
       const { data: formError, status } = toFormError(error);
       return data<PostsActionData>({ ...formError, intent, ok: false }, { status });
@@ -274,6 +280,7 @@ function FilterForm({
             <option value="DRAFT">{t("manage:status.DRAFT")}</option>
             <option value="PUBLISHED">{t("manage:status.PUBLISHED")}</option>
             <option value="SCHEDULED">{t("manage:status.SCHEDULED")}</option>
+            <option value="HIDDEN">{t("manage:status.HIDDEN")}</option>
           </select>
         </label>
       )}{" "}
@@ -321,7 +328,12 @@ function ActionResult({ result }: { result: PostsActionData | undefined }) {
     return (
       <p role="status">
         {result.intent === "bulk"
-          ? t("manage:posts.bulk.done", { updated: result.updated })
+          ? [
+              t("manage:posts.bulk.done", { updated: result.updated }),
+              ...(result.skipped > 0
+                ? [t("manage:posts.bulk.skipped", { count: result.skipped })]
+                : []),
+            ].join(" ")
           : result.intent === "unschedule"
             ? t("manage:posts.unscheduled")
             : t("manage:posts.restored")}
@@ -390,6 +402,11 @@ function BulkList({
     return <p>{t("manage:posts.empty")}</p>;
   }
   const allSelected = selected.size === posts.length;
+  /** 고른 글이 모두 관리자가 숨긴 글이면 공개 범위·공지 버튼을 끈다(005, 휴지통 이동은 된다) */
+  const hiddenIds = new Set(
+    posts.filter((post) => post.status === "HIDDEN").map((post) => post.id),
+  );
+  const onlyHidden = selected.size > 0 && [...selected].every((id) => hiddenIds.has(id));
   const toggle = (id: number) =>
     setSelected((current) => {
       const next = new Set(current);
@@ -407,19 +424,19 @@ function BulkList({
         <input type="hidden" name="intent" value="bulk" />
         <fieldset>
           <legend>{t("manage:posts.bulk.label")}</legend>
-          <button type="submit" name="op" value="PUBLIC" disabled={submitting}>
+          <button type="submit" name="op" value="PUBLIC" disabled={submitting || onlyHidden}>
             {t("manage:posts.bulk.makePublic")}
           </button>{" "}
-          <button type="submit" name="op" value="PRIVATE" disabled={submitting}>
+          <button type="submit" name="op" value="PRIVATE" disabled={submitting || onlyHidden}>
             {t("manage:posts.bulk.makePrivate")}
           </button>{" "}
           <button type="submit" name="op" value="DELETE" disabled={submitting}>
             {t("manage:posts.bulk.delete")}
           </button>{" "}
-          <button type="submit" name="op" value="NOTICE" disabled={submitting}>
+          <button type="submit" name="op" value="NOTICE" disabled={submitting || onlyHidden}>
             {t("manage:posts.bulk.notice")}
           </button>{" "}
-          <button type="submit" name="op" value="UNNOTICE" disabled={submitting}>
+          <button type="submit" name="op" value="UNNOTICE" disabled={submitting || onlyHidden}>
             {t("manage:posts.bulk.unnotice")}
           </button>{" "}
           <span className="bulk-move">
@@ -465,9 +482,15 @@ function BulkList({
                   onChange={() => toggle(post.id)}
                 />{" "}
                 <Link to={postHref(handle, post)}>{title}</Link>{" "}
-                <Link to={`/${handle}/write/${post.id}`}>
-                  {t(resume ? "manage:posts.continue" : "manage:posts.edit")}
-                </Link>
+                {post.status === "HIDDEN" ? (
+                  <span className="badge badge-hidden" title={t("manage:posts.hiddenHint")}>
+                    {t("moderation:hidden.badge")}
+                  </span>
+                ) : (
+                  <Link to={`/${handle}/write/${post.id}`}>
+                    {t(resume ? "manage:posts.continue" : "manage:posts.edit")}
+                  </Link>
+                )}
                 {post.status === "SCHEDULED" && (
                   <>
                     {" "}
@@ -483,6 +506,9 @@ function BulkList({
                   </>
                 )}
                 <PostMeta post={post} />
+                {post.status === "HIDDEN" && (
+                  <p className="form-hint">{t("manage:posts.hiddenHint")}</p>
+                )}
               </li>
             );
           })}

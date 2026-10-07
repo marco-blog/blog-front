@@ -8,6 +8,7 @@ import type { Comment } from "~/api/models";
 import { isGuestAuthor, isOwnEntry, writerMode } from "~/blog/guestAuthor";
 import { FormAlert } from "~/components/form/FormField";
 import { Avatar } from "~/components/media/Avatar";
+import { ReportButton } from "~/components/report/ReportButton";
 import { useDateFormat } from "~/i18n/format";
 import type { RootData } from "~/root";
 
@@ -28,6 +29,8 @@ export interface CommentSectionProps {
   /** 비로그인 방문자에게 보여줄 로그인 주소(`/login?next=…`) */
   loginHref: string;
   result?: CommentActionData;
+  /** 로그인 회원에게 남의 댓글 "신고" 버튼(005, 글 상세 화면) */
+  reportable?: boolean;
 }
 
 /** 전체 댓글 수(답글 포함). 새 댓글 폼은 이 값이 바뀌면(작성 성공) 비워진다. */
@@ -49,6 +52,7 @@ export function CommentSection({
   guestWriteEnabled = false,
   loginHref,
   result,
+  reportable = false,
 }: CommentSectionProps) {
   const { t } = useTranslation();
   const viewer = useRouteLoaderData<RootData>("root")?.user ?? null;
@@ -75,6 +79,7 @@ export function CommentSection({
               canReply={canWrite && !comment.deleted}
               guestWriter={mode === "guest"}
               result={result}
+              reportable={reportable}
             />
           ))}
         </ul>
@@ -112,6 +117,7 @@ interface CommentItemProps {
   guestWriter?: boolean;
   isReply?: boolean;
   result?: CommentActionData;
+  reportable?: boolean;
 }
 
 function CommentItem({
@@ -122,14 +128,20 @@ function CommentItem({
   guestWriter = false,
   isReply = false,
   result,
+  reportable = false,
 }: CommentItemProps) {
   const { t } = useTranslation();
   const format = useDateFormat();
   const guest = isGuestAuthor(comment.author);
-  const isAuthor = !comment.deleted && isOwnEntry(comment.author, viewerId);
+  /** 관리자가 숨긴 댓글(005): 작성 회원에게만 내용과 안내, 다른 사람에게는 답글이 있을 때만 자리. 고치기·지우기·답글은 없다 */
+  const hidden = comment.hidden === true;
+  const live = !comment.deleted && !hidden;
+  const isAuthor = live && isOwnEntry(comment.author, viewerId);
   /** 비회원 댓글을 비로그인 방문자가 비밀번호로 고치거나 지운다 */
-  const guestControls = !comment.deleted && guest && viewerId === null;
-  const canDelete = !comment.deleted && (isAuthor || isPostOwner);
+  const guestControls = live && guest && viewerId === null;
+  const canDelete = live && (isAuthor || isPostOwner);
+  const canReport =
+    reportable && live && viewerId !== null && !isOwnEntry(comment.author, viewerId);
   const deleteError = commentErrorFor(result, `delete-${comment.id}`);
   const name = comment.author?.nickname ?? t("comment:unknownAuthor");
   /** 결과(오류·내용 받기)가 이 댓글의 폼이면 펼쳐 둔다(JS 없이 새로 그린 화면에서도 보이게) */
@@ -140,6 +152,8 @@ function CommentItem({
     <li className={isReply ? "comment comment-reply" : "comment"} id={`comment-${comment.id}`}>
       {comment.deleted ? (
         <p className="comment-deleted">{t("comment:deleted")}</p>
+      ) : hidden && comment.content === null ? (
+        <p className="comment-hidden">{t("moderation:hidden.placeholder")}</p>
       ) : (
         <article aria-label={name}>
           <p className="comment-meta">
@@ -166,6 +180,11 @@ function CommentItem({
               </>
             )}
           </p>
+          {hidden && (
+            <p className="moderation-hidden" role="note">
+              {t("moderation:hidden.mine")}
+            </p>
+          )}
           {comment.content === null ? (
             <p className="comment-secret">{t("comment:secret.hidden")}</p>
           ) : (
@@ -177,7 +196,7 @@ function CommentItem({
             message={deleteError && !guestControls ? errorMessage(t, deleteError) : null}
           />
           <div className="comment-actions">
-            {canReply && !isReply && (
+            {canReply && !isReply && !hidden && (
               <details open={openFor(`reply-${comment.id}`)}>
                 <summary>{t("comment:reply")}</summary>
                 <CommentForm
@@ -205,6 +224,7 @@ function CommentItem({
                 <DeleteCommentButton commentId={comment.id} withPassword result={result} />
               </details>
             )}
+            {canReport && <ReportButton type="COMMENT" id={comment.id} />}
           </div>
         </article>
       )}
@@ -223,6 +243,7 @@ function CommentItem({
               canReply={false}
               isReply
               result={result}
+              reportable={reportable}
             />
           ))}
         </ul>

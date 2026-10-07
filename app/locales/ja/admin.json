@@ -5,7 +5,12 @@
     "topics": "トピック",
     "curations": "ポータルのおすすめ",
     "exclusions": "ポータル除外",
-    "settings": "ポータル設定"
+    "settings": "ポータル設定",
+    "users": "会員管理",
+    "reports": "通報管理",
+    "hiddenPosts": "非表示の記事",
+    "pending_one": "未処理 {{count}}件",
+    "pending_other": "未処理 {{count}}件"
   },
   "timeZone": "時刻は{{timeZone}}基準です。",
   "fields": {
@@ -35,7 +40,14 @@
       "comment": "コメントの重み",
       "halfLifeHours": "半減期(時間)",
       "reportPenalty": "通報による減点(0〜1)"
-    }
+    },
+    "suspendReason": "停止の理由",
+    "note": "メモ",
+    "targetUrl": "アドレス",
+    "targetType": "種類",
+    "targetId": "番号",
+    "maxBlogs": "上限",
+    "decision": "処理"
   },
   "lookup": {
     "submit": "記事を確認",
@@ -161,5 +173,182 @@
         }
       }
     }
+  },
+  "reports": {
+    "title": "通報管理",
+    "list": "通報一覧",
+    "empty": "通報はありません。",
+    "statusTabs": "処理状態",
+    "status": {
+      "PENDING": "未処理",
+      "ACTIONED": "措置済み",
+      "DISMISSED": "却下"
+    },
+    "targetType": "対象の種類",
+    "allTypes": "すべて",
+    "filter": "絞り込む",
+    "channel": {
+      "MEMBER": "会員の通報",
+      "RIGHTS_REQUEST": "権利侵害",
+      "MIXED": "会員の通報・権利侵害"
+    },
+    "count_one": "通報 {{count}}件",
+    "count_other": "通報 {{count}}件",
+    "firstReportedAt": "最初の受付 {{time}}",
+    "untargeted": "対象未定",
+    "action": {
+      "HIDE_CONTENT": "非表示",
+      "SUSPEND_USER": "投稿者を停止"
+    },
+    "targetTypes": {
+      "POST": "記事",
+      "COMMENT": "コメント",
+      "GUESTBOOK": "ゲストブック",
+      "TRACKBACK": "トラックバック",
+      "EXTERNAL_POST": "外部の記事",
+      "EXTERNAL_BLOG": "外部のブログ"
+    }
+  },
+  "report": {
+    "title": "通報の詳細",
+    "target": "通報の対象",
+    "openOriginal": "元の画面を開く",
+    "noTarget": "対象はまだ決まっていません。",
+    "state": {
+      "ACTIVE": "公開中",
+      "HIDDEN": "非表示",
+      "DELETED": "削除済み",
+      "MISSING": "なし"
+    },
+    "author": "投稿者",
+    "guestAuthor": "非会員 {{nickname}}",
+    "blog": "ブログ",
+    "reports": "同じ対象への通報",
+    "reporter": "通報者",
+    "rightsReporter": "権利侵害の申告(非会員)",
+    "rights": {
+      "title": "権利侵害の情報",
+      "targetUrl": "申告されたアドレス",
+      "rightsBasis": "権利の根拠",
+      "contactEmail": "連絡先メールアドレス",
+      "purged": "破棄済み"
+    },
+    "targetUserReportCount_one": "投稿者が受けた通報 {{count}}件",
+    "targetUserReportCount_other": "投稿者が受けた通報 {{count}}件",
+    "assign": {
+      "legend": "対象の指定",
+      "hint": "サービス内のアドレス(記事のアドレス、#comment-番号、#guestbook-番号、#trackback-番号)か、種類と番号で指定します。",
+      "url": "アドレス",
+      "type": "種類",
+      "id": "番号",
+      "submit": "対象を指定"
+    },
+    "resolve": {
+      "legend": "処理",
+      "note": "メモ",
+      "hide": "非表示",
+      "suspend": "投稿者を停止",
+      "suspendReason": "停止の理由",
+      "dismiss": "却下",
+      "confirmSuspend": "投稿者を停止しますか？すべてのログインが切断されます。"
+    },
+    "result": {
+      "title": "処理結果",
+      "handledBy": "{{nickname}} · {{time}}",
+      "note": "メモ"
+    },
+    "unhide": "非表示を解除",
+    "done": {
+      "target": "対象を指定しました。",
+      "resolve_one": "通報{{count}}件を処理しました。",
+      "resolve_other": "通報{{count}}件を処理しました。",
+      "unhide": "非表示を解除しました。"
+    }
+  },
+  "users": {
+    "title": "会員管理",
+    "search": {
+      "legend": "会員を探す",
+      "by": "検索方法",
+      "byNickname": "ニックネーム(前方一致)",
+      "byEmail": "メールアドレス(完全一致)",
+      "byHandle": "ブログのアドレス(完全一致)",
+      "q": "検索語",
+      "submit": "検索",
+      "hint": "2文字以上入力してください。"
+    },
+    "list": "会員一覧",
+    "empty": "条件に合う会員はいません。",
+    "columns": {
+      "nickname": "ニックネーム",
+      "status": "状態",
+      "role": "権限",
+      "createdAt": "登録日",
+      "blogCount": "ブログ数"
+    },
+    "status": {
+      "ACTIVE": "通常",
+      "SUSPENDED": "停止",
+      "WITHDRAWN": "退会"
+    },
+    "role": {
+      "USER": "会員",
+      "ADMIN": "管理者",
+      "SUPER_ADMIN": "最高管理者"
+    }
+  },
+  "user": {
+    "title": "会員の詳細",
+    "createdAt": "登録日",
+    "status": "状態",
+    "role": "権限",
+    "postCount": "記事数",
+    "receivedReportCount": "受けた通報",
+    "lastLoginAt": "最近のログイン",
+    "never": "なし",
+    "blogs": "ブログ",
+    "noBlogs": "ブログはありません。",
+    "blogLimit": {
+      "legend": "ブログ数の上限",
+      "current": "ブログ {{current}}個 / 上限 {{limit}}個",
+      "custom": "会員ごとの上限",
+      "default": "標準の上限",
+      "limit": "上限",
+      "reset": "標準に戻す",
+      "submit": "保存"
+    },
+    "suspend": {
+      "legend": "停止",
+      "reason": "停止の理由",
+      "submit": "停止",
+      "confirm": "この会員を停止しますか？すべてのログインが切断されます。"
+    },
+    "unsuspend": {
+      "legend": "停止の解除",
+      "reason": "メモ",
+      "submit": "停止を解除"
+    },
+    "done": {
+      "suspend": "会員を停止しました。",
+      "unsuspend": "停止を解除しました。",
+      "blogLimit": "ブログ数の上限を保存しました。"
+    }
+  },
+  "hiddenPosts": {
+    "title": "非表示の記事",
+    "list": "非表示の記事一覧",
+    "empty": "非表示の記事はありません。",
+    "unhide": "非表示を解除",
+    "done": "非表示を解除しました。"
+  },
+  "reportReasons": {
+    "SPAM": "スパム・広告",
+    "ABUSE": "暴言・嫌がらせ",
+    "ADULT": "わいせつな内容",
+    "ILLEGAL": "違法な情報",
+    "PRIVACY": "個人情報の公開",
+    "COPYRIGHT": "著作権侵害",
+    "DEFAMATION": "名誉毀損",
+    "OTHER": "その他"
   }
 }

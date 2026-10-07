@@ -20,6 +20,9 @@ import { categoryHref } from "~/components/blog/CategoryTree";
 import type { CommentActionData } from "~/components/comment/actions";
 import { runCommentAction } from "~/components/comment/actions.server";
 import { CommentSection } from "~/components/comment/CommentSection";
+import { REPORT_INTENT, type ReportActionData } from "~/components/report/actions";
+import { runReportAction } from "~/components/report/actions.server";
+import { ReportButton } from "~/components/report/ReportButton";
 import { Avatar } from "~/components/media/Avatar";
 import { LikeButton } from "~/components/post/LikeButton";
 import { LockedPost, type UnlockActionData } from "~/components/post/LockedPost";
@@ -124,6 +127,9 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === "unlock") {
     return runUnlockAction(request, postId, returnTo);
   }
+  if (intent === REPORT_INTENT) {
+    return runReportAction(request, { returnTo });
+  }
   return runCommentAction(request, { postId, returnTo });
 }
 
@@ -209,7 +215,9 @@ export default function PostDetailPage() {
   const format = useDateFormat();
   const { post, isOwner, comments, related, origin, topic, guestWriteEnabled } =
     useLoaderData<typeof loader>();
-  const actionData = useActionData<CommentActionData | LikeActionData | UnlockActionData>();
+  const actionData = useActionData<
+    CommentActionData | LikeActionData | UnlockActionData | ReportActionData
+  >();
   const rootData = useRouteLoaderData<RootData>("root");
   const viewer = rootData?.user ?? null;
   const likeResult =
@@ -217,9 +225,14 @@ export default function PostDetailPage() {
   const unlockResult =
     actionData?.intent === "unlock" ? (actionData as UnlockActionData) : undefined;
   const result =
-    actionData && !isLikeIntent(actionData.intent) && actionData.intent !== "unlock"
+    actionData &&
+    !isLikeIntent(actionData.intent) &&
+    actionData.intent !== "unlock" &&
+    actionData.intent !== REPORT_INTENT
       ? (actionData as CommentActionData)
       : undefined;
+  /** 로그인 회원이 남의 공개된 글을 볼 때 "신고"(005) */
+  const reportable = viewer !== null && !isOwner;
   const handle = post.blogHandle;
 
   if (post.locked) {
@@ -234,6 +247,11 @@ export default function PostDetailPage() {
     <main>
       <article className="post">
         <header>
+          {post.hidden && (
+            <p className="moderation-hidden" role="note">
+              {t("moderation:hidden.post")}
+            </p>
+          )}
           <h1>{post.title}</h1>
           {isOwner && (
             <p className="post-status">
@@ -315,6 +333,7 @@ export default function PostDetailPage() {
                 kakaoJsKey={rootData?.kakaoJsKey ?? null}
               />
             )}
+            {reportable && <ReportButton type="POST" id={post.id} />}
           </footer>
         )}
       </article>
@@ -341,6 +360,7 @@ export default function PostDetailPage() {
         guestWriteEnabled={guestWriteEnabled}
         loginHref={loginPath(`/${handle}/${post.id}`)}
         result={result}
+        reportable={reportable}
       />
     </main>
   );

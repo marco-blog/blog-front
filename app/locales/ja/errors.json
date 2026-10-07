@@ -34,7 +34,8 @@
     "INVALID_FORMAT": "形式が正しくありません。",
     "INVALID": "正しくない値です。",
     "PASSWORD_WEAK": "パスワードは8〜64文字で、英字と数字を両方含める必要があります。",
-    "PASSWORD_CONFIRM_MISMATCH": "新しいパスワードが一致しません。"
+    "PASSWORD_CONFIRM_MISMATCH": "新しいパスワードが一致しません。",
+    "BANNED_WORD": "使用できない語句が含まれています。"
   },
   "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。",
   "REFRESH_INVALID": "ログインの有効期限が切れました。もう一度ログインしてください。",
@@ -80,5 +81,26 @@
   "EXPORT_NOT_FOUND": "バックアップファイルが見つかりません。",
   "CANNOT_BLOCK_SELF": "自分自身はブロックできません。",
   "USER_NOT_FOUND": "会員が見つかりません。",
-  "BLOCK_NOT_FOUND": "ブロックしている会員ではありません。"
+  "BLOCK_NOT_FOUND": "ブロックしている会員ではありません。",
+  "REPORT_TARGET_NOT_FOUND": "通報する内容が見つかりません。",
+  "CANNOT_REPORT_OWN_CONTENT": "自分の内容は通報できません。必要な場合は削除してください。",
+  "REPORT_ALREADY_EXISTS": "すでに通報した内容です。",
+  "REPORT_NOT_FOUND": "通報が見つかりません。",
+  "REPORT_ALREADY_RESOLVED": "すでに処理された通報です。",
+  "REPORT_ALREADY_TARGETED": "すでに対象が決まっている通報です。",
+  "REPORT_TARGET_REQUIRED": "先に通報の対象を指定してください。",
+  "REPORT_ACTION_NOT_ALLOWED": "この対象にはできない措置です。",
+  "CONTENT_NOT_FOUND": "内容が見つからないか、すでに削除されています。",
+  "POST_HIDDEN": "管理者が非表示にした記事は公開したり公開設定を変更したりできません。",
+  "BLOG_RESTRICTED": "利用が制限されたブログです。",
+  "USER_NOT_ACTIVE": "退会した会員は停止できません。",
+  "CANNOT_SUSPEND_SELF": "自分自身を停止することはできません。",
+  "LAST_SUPER_ADMIN": "最後の最高管理者は停止できません。",
+  "CAPTCHA_FAILED": "スパム防止の確認に失敗しました。もう一度お試しください。",
+  "CAPTCHA_REQUIRED": "ログインに何度も失敗しました。スパム防止の確認をしてから、もう一度ログインしてください。",
+  "DUPLICATE_CONTENT_SPAM": "同じ内容を短時間に何度も書き込むことはできません。",
+  "BANNED_WORD_EXISTS": "すでに登録されている禁止語です。",
+  "BANNED_WORD_NOT_FOUND": "禁止語が見つかりません。",
+  "TRACKBACK_NOT_FOUND": "トラックバックが見つかりません。",
+  "TRACKBACK_NOT_ALLOWED": "トラックバックは公開記事からのみ送信できます。"
 }

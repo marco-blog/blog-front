@@ -11,6 +11,7 @@ import {
   KAKAO_API_ORIGIN,
   KAKAO_SCRIPT_ORIGIN,
   securityHeaders,
+  TURNSTILE_ORIGIN,
 } from "~/server/securityHeaders";
 import { KAKAO_SDK_ORIGIN, KAKAO_SDK_URL } from "~/share/kakao.client";
 
@@ -107,6 +108,44 @@ describe("contentSecurityPolicy: 카카오톡 공유(002 T077, research D9)", ()
     const policy = directives((await fetch(url)).headers.get("content-security-policy") ?? "");
     expect(policy.get("script-src")).toContain("https://t1.kakaocdn.net");
     expect(policy.get("connect-src")).toEqual(["'self'", "https://kapi.kakao.com"]);
+  });
+});
+
+describe("contentSecurityPolicy: CAPTCHA Turnstile(005 T014)", () => {
+  it("provider가 turnstile이면 script-src·frame-src·connect-src에 Cloudflare 출처를 더한다", () => {
+    const policy = directives(contentSecurityPolicy("abc123", { turnstile: true }));
+
+    expect(TURNSTILE_ORIGIN).toBe("https://challenges.cloudflare.com");
+    expect(policy.get("script-src")).toEqual(["'self'", "'nonce-abc123'", TURNSTILE_ORIGIN]);
+    expect(policy.get("frame-src")).toEqual([
+      "https://www.youtube-nocookie.com",
+      "https://player.vimeo.com",
+      TURNSTILE_ORIGIN,
+    ]);
+    expect(policy.get("connect-src")).toEqual(["'self'", TURNSTILE_ORIGIN]);
+  });
+
+  it("카카오와 함께 켜면 두 출처를 모두 더하고, 끄면 001과 같다", () => {
+    const policy = directives(contentSecurityPolicy("n", { kakao: true, turnstile: true }));
+    expect(policy.get("script-src")).toEqual([
+      "'self'",
+      "'nonce-n'",
+      KAKAO_SCRIPT_ORIGIN,
+      TURNSTILE_ORIGIN,
+    ]);
+    expect(policy.get("connect-src")).toEqual(["'self'", KAKAO_API_ORIGIN, TURNSTILE_ORIGIN]);
+    expect(contentSecurityPolicy("n", { turnstile: false })).toBe(contentSecurityPolicy("n"));
+  });
+
+  it("미들웨어도 turnstile 옵션에 따라 헤더를 만든다", async () => {
+    const app = express();
+    app.use(securityHeaders({ production: false, turnstile: true }));
+    app.get("/", (_req, res) => res.type("html").send("<!doctype html>"));
+    server = createServer(app);
+    await new Promise<void>((resolve) => server!.listen(0, "127.0.0.1", resolve));
+    const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    const policy = directives((await fetch(url)).headers.get("content-security-policy") ?? "");
+    expect(policy.get("frame-src")).toContain(TURNSTILE_ORIGIN);
   });
 });
 

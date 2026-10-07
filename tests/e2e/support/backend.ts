@@ -5,6 +5,7 @@ import {
   type Browser,
   type BrowserContext,
   type Page,
+  type PlaywrightWorkerArgs,
 } from "@playwright/test";
 
 /**
@@ -31,13 +32,26 @@ export function requirePortalTestSettings() {
 }
 
 /**
- * 004 비회원 글 시나리오는 backend의 비회원 쓰기 속도 제한을 넉넉히 띄웠을 때만 돈다(같은 IP에서 여러 시나리오가 쓰므로):
- * BLOG_GUEST_COMMENT_PER_MINUTE=1000, BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000. 그렇게 띄웠다는 표시로 E2E_GUEST_TEST_SETTINGS=1을 준다.
+ * 004 비회원 글 시나리오는 backend의 댓글·방명록 속도 제한을 넉넉히 띄웠을 때만 돈다(같은 IP에서 여러 시나리오가 쓰므로):
+ * 005부터 BLOG_RATELIMIT_COMMENT_PER_MINUTE=1000, BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE=1000(004의 BLOG_GUEST_* 대신).
+ * 그렇게 띄웠다는 표시로 E2E_GUEST_TEST_SETTINGS=1을 준다.
  */
 export function requireGuestTestSettings() {
   test.skip(
     process.env.E2E_GUEST_TEST_SETTINGS !== "1",
     "E2E_GUEST_TEST_SETTINGS=1(비회원 글 시험용 backend 설정)이 아니면 비회원 시나리오는 건너뛴다.",
+  );
+}
+
+/**
+ * 005 신고·스팸 방어·트랙백 시나리오(moderation 프로젝트)는 backend를 시험용 설정으로 띄웠을 때만 돈다: CAPTCHA test
+ * (BLOG_CAPTCHA_PROVIDER=test), 가입·작성·신고·트랙백 받기 한도를 넉넉히(.github/workflows/ci.yml "Start backend").
+ * 그렇게 띄웠다는 표시로 E2E_MODERATION_TEST_SETTINGS=1을 준다.
+ */
+export function requireModerationTestSettings() {
+  test.skip(
+    process.env.E2E_MODERATION_TEST_SETTINGS !== "1",
+    "E2E_MODERATION_TEST_SETTINGS=1(005 시험용 backend 설정)이 아니면 신고·스팸·트랙백 시나리오는 건너뛴다.",
   );
 }
 
@@ -226,4 +240,81 @@ export async function waitForPublic(request: APIRequestContext, path: string, ti
 export async function newGuestContext(browser: Browser): Promise<BrowserContext> {
   const baseURL = test.info().project.use.baseURL;
   return browser.newContext({ baseURL, locale: "ko-KR" });
+}
+
+/**
+ * 관리자 계정으로 로그인한 API 요청 컨텍스트(005·006 관리자 API 준비·정리용). 쓰고 나면 `dispose()`.
+ * front 서버의 /api 프록시를 거치며, 로그인 쿠키는 이 컨텍스트에만 남는다.
+ */
+export async function adminRequest(
+  playwright: PlaywrightWorkerArgs["playwright"],
+): Promise<APIRequestContext> {
+  const baseURL = test.info().project.use.baseURL ?? "";
+  const request = await playwright.request.newContext({ baseURL });
+  const { email, password } = adminAccount();
+  const login = await callApi(request, "POST", "/auth/login", { email, password });
+  expect(login.status, "관리자 로그인").toBe(200);
+  return request;
+}
+
+export type ReportTargetType = "POST" | "COMMENT" | "GUESTBOOK" | "TRACKBACK";
+
+/** 회원 신고(POST /reports, 신고하는 회원으로 로그인한 request). 응답 상태와 resultCode */
+export async function report(
+  request: APIRequestContext,
+  targetType: ReportTargetType,
+  targetId: number,
+  reason = "SPAM",
+  detail?: string,
+) {
+  const response = await callApi<{ id: number; status: string }>(request, "POST", "/reports", {
+    targetType,
+    targetId,
+    reason,
+    ...(detail === undefined ? {} : { detail }),
+  });
+  return {
+    status: response.status,
+    resultCode: response.body?.header.resultCode,
+    id: response.body?.result?.id,
+  };
+}
+
+/**
+ * 트랙백 핑(TrackBack 1.2, `POST /{handle}/{postId}/trackback`, front 프록시 경유)을 보낸다. 응답은 늘 200 XML이고
+ * `<error>` 값(0 성공, 1 실패)과 `<message>`를 돌려준다.
+ * `form`이 객체면 UTF-8 form-urlencoded로, Buffer면 그 바이트를 그대로(예: EUC-KR로 미리 인코딩한 본문) `charset`과 함께 보낸다.
+ */
+export async function sendTrackbackPing(
+  request: APIRequestContext,
+  handle: string,
+  postId: number,
+  form: Record<string, string> | Buffer,
+  charset?: string,
+) {
+  const body = Buffer.isBuffer(form)
+    ? form
+    : Buffer.from(new URLSearchParams(form).toString(), "utf-8");
+  const response = await request.post(`/${handle}/${postId}/trackback`, {
+    headers: {
+      "Content-Type": `application/x-www-form-urlencoded${charset ? `; charset=${charset}` : ""}`,
+    },
+    data: body,
+  });
+  const xml = await response.text();
+  return {
+    status: response.status(),
+    error: Number(/<error>(\d+)<\/error>/.exec(xml)?.[1] ?? Number.NaN),
+    message: /<message>([^<]*)<\/message>/.exec(xml)?.[1] ?? null,
+    xml,
+  };
+}
+
+/**
+ * 실행마다 다른 문구(10자 이상). 같은 문구 댓글·방명록을 짧은 시간에 반복하면 005 반복 스팸 기준(기본 10분 3회)에 걸리므로
+ * 시나리오가 쓰는 본문에 붙인다(research M12·M18).
+ */
+export function uniqueText(seed = "본문") {
+  const suffix = `${Date.now().toString(36)}${Math.floor(Math.random() * 46656).toString(36)}`;
+  return `${seed} ${suffix}`;
 }

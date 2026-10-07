@@ -5,7 +5,12 @@
     "topics": "Topics",
     "curations": "Portal picks",
     "exclusions": "Portal exclusions",
-    "settings": "Portal settings"
+    "settings": "Portal settings",
+    "users": "Members",
+    "reports": "Reports",
+    "hiddenPosts": "Hidden posts",
+    "pending_one": "{{count}} pending",
+    "pending_other": "{{count}} pending"
   },
   "timeZone": "Times are in {{timeZone}}.",
   "fields": {
@@ -35,7 +40,14 @@
       "comment": "Comment weight",
       "halfLifeHours": "Half-life (hours)",
       "reportPenalty": "Report penalty (0–1)"
-    }
+    },
+    "suspendReason": "Reason for suspension",
+    "note": "Note",
+    "targetUrl": "Address",
+    "targetType": "Type",
+    "targetId": "Number",
+    "maxBlogs": "Limit",
+    "decision": "Decision"
   },
   "lookup": {
     "submit": "Check post",
@@ -161,5 +173,182 @@
         }
       }
     }
+  },
+  "reports": {
+    "title": "Reports",
+    "list": "Report list",
+    "empty": "There are no reports.",
+    "statusTabs": "Status",
+    "status": {
+      "PENDING": "Pending",
+      "ACTIONED": "Actioned",
+      "DISMISSED": "Dismissed"
+    },
+    "targetType": "Target type",
+    "allTypes": "All",
+    "filter": "Filter",
+    "channel": {
+      "MEMBER": "Member report",
+      "RIGHTS_REQUEST": "Rights violation",
+      "MIXED": "Member report and rights violation"
+    },
+    "count_one": "{{count}} report",
+    "count_other": "{{count}} reports",
+    "firstReportedAt": "First reported {{time}}",
+    "untargeted": "No target yet",
+    "action": {
+      "HIDE_CONTENT": "Hidden",
+      "SUSPEND_USER": "Author suspended"
+    },
+    "targetTypes": {
+      "POST": "Post",
+      "COMMENT": "Comment",
+      "GUESTBOOK": "Guestbook entry",
+      "TRACKBACK": "Trackback",
+      "EXTERNAL_POST": "External post",
+      "EXTERNAL_BLOG": "External blog"
+    }
+  },
+  "report": {
+    "title": "Report details",
+    "target": "Reported content",
+    "openOriginal": "Open original page",
+    "noTarget": "The target has not been set yet.",
+    "state": {
+      "ACTIVE": "Visible",
+      "HIDDEN": "Hidden",
+      "DELETED": "Deleted",
+      "MISSING": "Missing"
+    },
+    "author": "Author",
+    "guestAuthor": "Guest {{nickname}}",
+    "blog": "Blog",
+    "reports": "Reports on this content",
+    "reporter": "Reporter",
+    "rightsReporter": "Rights request (guest)",
+    "rights": {
+      "title": "Rights violation",
+      "targetUrl": "Reported address",
+      "rightsBasis": "Basis of rights",
+      "contactEmail": "Contact email",
+      "purged": "Deleted"
+    },
+    "targetUserReportCount_one": "The author has received {{count}} report",
+    "targetUserReportCount_other": "The author has received {{count}} reports",
+    "assign": {
+      "legend": "Set target",
+      "hint": "Use an address on this service (post address, #comment-id, #guestbook-id, #trackback-id) or a type and number.",
+      "url": "Address",
+      "type": "Type",
+      "id": "Number",
+      "submit": "Set target"
+    },
+    "resolve": {
+      "legend": "Resolve",
+      "note": "Note",
+      "hide": "Hide",
+      "suspend": "Suspend author",
+      "suspendReason": "Reason for suspension",
+      "dismiss": "Dismiss",
+      "confirmSuspend": "Suspend the author? All of their sessions will end."
+    },
+    "result": {
+      "title": "Result",
+      "handledBy": "{{nickname}} · {{time}}",
+      "note": "Note"
+    },
+    "unhide": "Unhide",
+    "done": {
+      "target": "The target has been set.",
+      "resolve_one": "Resolved {{count}} report.",
+      "resolve_other": "Resolved {{count}} reports.",
+      "unhide": "The content is visible again."
+    }
+  },
+  "users": {
+    "title": "Members",
+    "search": {
+      "legend": "Find members",
+      "by": "Search by",
+      "byNickname": "Nickname (starts with)",
+      "byEmail": "Email (exact)",
+      "byHandle": "Blog address (exact)",
+      "q": "Search text",
+      "submit": "Search",
+      "hint": "Enter at least 2 characters."
+    },
+    "list": "Member list",
+    "empty": "No members match.",
+    "columns": {
+      "nickname": "Nickname",
+      "status": "Status",
+      "role": "Role",
+      "createdAt": "Joined",
+      "blogCount": "Blogs"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "WITHDRAWN": "Withdrawn"
+    },
+    "role": {
+      "USER": "Member",
+      "ADMIN": "Administrator",
+      "SUPER_ADMIN": "Super administrator"
+    }
+  },
+  "user": {
+    "title": "Member details",
+    "createdAt": "Joined",
+    "status": "Status",
+    "role": "Role",
+    "postCount": "Posts",
+    "receivedReportCount": "Reports received",
+    "lastLoginAt": "Last sign-in",
+    "never": "None",
+    "blogs": "Blogs",
+    "noBlogs": "No blogs.",
+    "blogLimit": {
+      "legend": "Blog limit",
+      "current": "{{current}} blogs / limit {{limit}}",
+      "custom": "Member limit",
+      "default": "Default limit",
+      "limit": "Limit",
+      "reset": "Use default",
+      "submit": "Save"
+    },
+    "suspend": {
+      "legend": "Suspend",
+      "reason": "Reason for suspension",
+      "submit": "Suspend",
+      "confirm": "Suspend this member? All of their sessions will end."
+    },
+    "unsuspend": {
+      "legend": "Lift suspension",
+      "reason": "Note",
+      "submit": "Lift suspension"
+    },
+    "done": {
+      "suspend": "The member has been suspended.",
+      "unsuspend": "The suspension has been lifted.",
+      "blogLimit": "The blog limit has been saved."
+    }
+  },
+  "hiddenPosts": {
+    "title": "Hidden posts",
+    "list": "Hidden post list",
+    "empty": "There are no hidden posts.",
+    "unhide": "Unhide",
+    "done": "The post is visible again."
+  },
+  "reportReasons": {
+    "SPAM": "Spam or advertising",
+    "ABUSE": "Abuse or harassment",
+    "ADULT": "Sexual content",
+    "ILLEGAL": "Illegal content",
+    "PRIVACY": "Personal information exposed",
+    "COPYRIGHT": "Copyright infringement",
+    "DEFAMATION": "Defamation",
+    "OTHER": "Other"
   }
 }

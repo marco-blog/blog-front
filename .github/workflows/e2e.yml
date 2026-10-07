@@ -108,9 +108,19 @@ jobs:
           BLOG_PORTAL_CACHE_TTL: 0s
           BLOG_PORTAL_NEW_MEMBER_DELAY: PT0S
           BLOG_PORTAL_TOPIC_AUTO_HIDE_THRESHOLD: "1"
-          # 004 비회원 글 시험용 설정(E2E_GUEST_TEST_SETTINGS=1과 짝): 같은 IP(localhost)에서 여러 시나리오가 쓰므로 속도 제한을 넉넉히
-          BLOG_GUEST_COMMENT_PER_MINUTE: "1000"
-          BLOG_GUEST_GUESTBOOK_PER_MINUTE: "1000"
+          # 005 스팸 방어 시험용 설정(E2E_GUEST_TEST_SETTINGS=1·E2E_MODERATION_TEST_SETTINGS=1과 짝). 모든 시나리오가 같은
+          # IP(localhost)에서 가입·댓글·방명록·발행·업로드·신고를 하므로 한도를 넉넉히 둔다. 특히 가입 IP 한도(기본 1시간 5회)가
+          # 없으면 001~004 E2E가 가입 단계에서 막힌다(005 research M18). CAPTCHA는 test(토큰 e2e-pass, front 기본값과 같음).
+          # 004의 BLOG_GUEST_COMMENT_PER_MINUTE·BLOG_GUEST_GUESTBOOK_PER_MINUTE는 005의 blog.ratelimit.*로 옮겨 없어졌다.
+          BLOG_CAPTCHA_PROVIDER: test
+          BLOG_RATELIMIT_SIGNUP_PER_IP_PER_HOUR: "100000"
+          BLOG_RATELIMIT_COMMENT_PER_MINUTE: "1000"
+          BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE: "1000"
+          BLOG_RATELIMIT_POST_PUBLISH_PER_HOUR: "100000"
+          BLOG_RATELIMIT_MEDIA_UPLOAD_PER_MINUTE: "1000"
+          BLOG_TRACKBACK_RECEIVE_LIMIT: "100000"
+          BLOG_REPORTS_MEMBER_PER_HOUR: "100000"
+          BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR: "100000"
           # 004 블로그 백업 zip 디렉터리(blog-us4-backup E2E). 실행마다 비는 러너 임시 디렉터리
           BLOG_EXPORT_DIR: ${{ runner.temp }}/blog-exports
           BLOG_MAIL_HOST: localhost
@@ -164,6 +174,8 @@ jobs:
           MAILPIT_URL: http://localhost:8025
           E2E_PORTAL_TEST_SETTINGS: "1"
           E2E_GUEST_TEST_SETTINGS: "1"
+          # 005 신고·스팸 방어·트랙백 시나리오(moderation 프로젝트): 위 backend 한도·CAPTCHA test로 띄웠다는 표시
+          E2E_MODERATION_TEST_SETTINGS: "1"
 
       - name: Upload logs
         if: failure()

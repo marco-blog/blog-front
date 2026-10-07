@@ -11,6 +11,7 @@ import { SecretToggle } from "~/components/comment/SecretToggle";
 import { FormAlert } from "~/components/form/FormField";
 import { BlockButton } from "~/components/manage/BlockButton";
 import { Avatar } from "~/components/media/Avatar";
+import { ReportButton } from "~/components/report/ReportButton";
 import { useDateFormat } from "~/i18n/format";
 import { blockableUserId } from "~/manage/blocks";
 
@@ -26,6 +27,8 @@ export interface GuestbookEntryItemProps {
   /** 블로그 관리: 회원 작성자에게 "차단" 버튼(004 US5) */
   showBlock?: boolean;
   result?: GuestbookActionData;
+  /** 로그인 회원에게 남의 글 "신고" 버튼(005, 공개 방명록 화면) */
+  reportable?: boolean;
 }
 
 /**
@@ -41,12 +44,21 @@ export function GuestbookEntryItem({
   isReply = false,
   showBlock = false,
   result,
+  reportable = false,
 }: GuestbookEntryItemProps) {
   const { t } = useTranslation();
   const format = useDateFormat();
   const guest = isGuestAuthor(entry.author);
-  const own = isOwnEntry(entry.author, viewerId);
-  const guestControls = guest && viewerId === null;
+  /** 관리자가 숨긴 글(005): 작성 회원에게만 내용과 안내, 다른 사람에게는 답글이 있을 때만 자리. 고치기·지우기·답글은 없다 */
+  const hidden = entry.hidden === true;
+  const own = !hidden && isOwnEntry(entry.author, viewerId);
+  const guestControls = !hidden && guest && viewerId === null;
+  const canReport =
+    reportable &&
+    !hidden &&
+    !entry.deleted &&
+    viewerId !== null &&
+    !isOwnEntry(entry.author, viewerId);
   const deleteError = errorFor(result, `delete-${entry.id}`);
   const name = entry.author?.nickname ?? t("guestbook:entry.unknownAuthor");
   const blockable = showBlock && isOwner ? blockableUserId(entry.author, viewerId) : null;
@@ -61,6 +73,8 @@ export function GuestbookEntryItem({
     >
       {entry.deleted ? (
         <p className="guestbook-deleted">{t("guestbook:entry.deleted")}</p>
+      ) : hidden && entry.content === null ? (
+        <p className="guestbook-hidden">{t("moderation:hidden.placeholder")}</p>
       ) : (
         <article aria-label={name}>
           <p className="guestbook-meta">
@@ -87,6 +101,11 @@ export function GuestbookEntryItem({
               </>
             )}
           </p>
+          {hidden && (
+            <p className="moderation-hidden" role="note">
+              {t("moderation:hidden.mine")}
+            </p>
+          )}
           {entry.content === null ? (
             <p className="guestbook-secret">{t("guestbook:entry.secretHidden")}</p>
           ) : (
@@ -98,7 +117,7 @@ export function GuestbookEntryItem({
             message={deleteError && !guestControls ? errorMessage(t, deleteError) : null}
           />
           <div className="guestbook-actions">
-            {isOwner && !isReply && (
+            {isOwner && !isReply && !hidden && (
               <details open={openFor(`reply-${entry.id}`)}>
                 <summary>{t("guestbook:entry.reply")}</summary>
                 <ReplyForm entryId={entry.id} result={result} />
@@ -110,7 +129,7 @@ export function GuestbookEntryItem({
                 <EditForm entry={entry} guest={guestControls} isReply={isReply} result={result} />
               </details>
             )}
-            {(own || isOwner) && <DeleteEntryButton entryId={entry.id} />}
+            {(own || (isOwner && !hidden)) && <DeleteEntryButton entryId={entry.id} />}
             {blockable !== null && <BlockButton userId={blockable} nickname={name} />}
             {guestControls && !isOwner && (
               <details open={openFor(`delete-${entry.id}`)}>
@@ -118,6 +137,7 @@ export function GuestbookEntryItem({
                 <DeleteEntryButton entryId={entry.id} withPassword result={result} />
               </details>
             )}
+            {canReport && <ReportButton type="GUESTBOOK" id={entry.id} />}
           </div>
         </article>
       )}
@@ -136,6 +156,7 @@ export function GuestbookEntryItem({
               isReply
               showBlock={showBlock}
               result={result}
+              reportable={reportable}
             />
           ))}
         </ul>

@@ -31,23 +31,40 @@ export function newNonce(): string {
 export const KAKAO_SCRIPT_ORIGIN = "https://t1.kakaocdn.net";
 export const KAKAO_API_ORIGIN = "https://kapi.kakao.com";
 
+/**
+ * Cloudflare Turnstile(005 FR-141, research)이 쓰는 출처. CAPTCHA provider가 `turnstile`일 때만 CSP의
+ * `script-src`·`frame-src`·`connect-src`에 더한다. app/components/captcha/captcha.server.ts의 스크립트 주소와 같은 출처다.
+ */
+export const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com";
+
 export interface ContentSecurityPolicyOptions {
   /** 카카오톡 공유를 켰는지(`BLOG_KAKAO_JS_KEY`가 있음) */
   kakao?: boolean;
+  /** CAPTCHA provider가 Turnstile인지(`BLOG_CAPTCHA_PROVIDER=turnstile`, 005) */
+  turnstile?: boolean;
 }
 
 export function contentSecurityPolicy(
   nonce: string,
-  { kakao = false }: ContentSecurityPolicyOptions = {},
+  { kakao = false, turnstile = false }: ContentSecurityPolicyOptions = {},
 ): string {
+  const scriptOrigins = [
+    ...(kakao ? [KAKAO_SCRIPT_ORIGIN] : []),
+    ...(turnstile ? [TURNSTILE_ORIGIN] : []),
+  ];
+  const connectOrigins = [
+    ...(kakao ? [KAKAO_API_ORIGIN] : []),
+    ...(turnstile ? [TURNSTILE_ORIGIN] : []),
+  ];
+  const frameOrigins = [...ALLOWED_FRAME_SOURCES, ...(turnstile ? [TURNSTILE_ORIGIN] : [])];
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}'${kakao ? ` ${KAKAO_SCRIPT_ORIGIN}` : ""}`,
-    ...(kakao ? [`connect-src 'self' ${KAKAO_API_ORIGIN}`] : []),
+    ["script-src 'self'", `'nonce-${nonce}'`, ...scriptOrigins].join(" "),
+    ...(connectOrigins.length > 0 ? [["connect-src 'self'", ...connectOrigins].join(" ")] : []),
     "style-src 'self' 'unsafe-inline'",
     // 외부 이미지는 backend가 받아 /media로 제공한다(R27).
     "img-src 'self' data:",
-    `frame-src ${ALLOWED_FRAME_SOURCES.join(" ")}`,
+    `frame-src ${frameOrigins.join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -61,11 +78,15 @@ export interface SecurityHeadersOptions extends ContentSecurityPolicyOptions {
 }
 
 /** 요청마다 nonce를 만들어 CSP와 res.locals에 싣고, nosniff·Referrer-Policy·(운영) HSTS를 붙인다. */
-export function securityHeaders({ production, kakao = false }: SecurityHeadersOptions) {
+export function securityHeaders({
+  production,
+  kakao = false,
+  turnstile = false,
+}: SecurityHeadersOptions) {
   return (_req: Request, res: Response, next: NextFunction) => {
     const nonce = newNonce();
     res.locals[CSP_NONCE_LOCAL] = nonce;
-    res.setHeader("Content-Security-Policy", contentSecurityPolicy(nonce, { kakao }));
+    res.setHeader("Content-Security-Policy", contentSecurityPolicy(nonce, { kakao, turnstile }));
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     if (production) {

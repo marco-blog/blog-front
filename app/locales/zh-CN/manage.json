@@ -45,7 +45,8 @@
     "DRAFT": "草稿",
     "PUBLISHED": "已发布",
     "DELETED": "回收站",
-    "SCHEDULED": "定时"
+    "SCHEDULED": "定时",
+    "HIDDEN": "已隐藏"
   },
   "visibility": {
     "PUBLIC": "公开",
@@ -87,7 +88,9 @@
       "moveTarget": "目标分类",
       "moveSubmit": "移动",
       "notice": "设为公告",
-      "unnotice": "取消公告"
+      "unnotice": "取消公告",
+      "skipped_one": "已跳过 {{count}} 篇被管理员隐藏的文章。",
+      "skipped_other": "已跳过 {{count}} 篇被管理员隐藏的文章。"
     },
     "edit": "编辑",
     "continue": "继续写作",
@@ -102,7 +105,8 @@
     "noticeBadge": "公告",
     "scheduledAt": "{{date}} 定时发布",
     "unschedule": "取消定时",
-    "unscheduled": "已取消定时发布。文章已恢复为草稿。"
+    "unscheduled": "已取消定时发布。文章已恢复为草稿。",
+    "hiddenHint": "管理员已隐藏此文章，不能更改发布设置和公开范围。"
   },
   "settings": {
     "title": "博客设置",

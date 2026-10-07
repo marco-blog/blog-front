@@ -888,3 +888,122 @@ describe("post detail 보호 글(004 T086)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("9분 뒤에 다시 시도해 주세요.");
   });
 });
+
+describe("post detail 신고·숨김(005 T047)", () => {
+  type ActionArgs = Parameters<typeof action>[0];
+  const comment = (id: number, userId: number | null, overrides = {}) => ({
+    id,
+    content: `댓글 ${id}`,
+    author: userId === null ? null : { userId, nickname: `회원${userId}`, profileImageUrl: null },
+    deleted: false,
+    createdAt: "2026-10-06T05:00:00Z",
+    updatedAt: "2026-10-06T05:00:00Z",
+    replies: [],
+    ...overrides,
+  });
+
+  function renderPost(
+    user: { userId: number; nickname: string; role: string } | null,
+    overrides: Partial<LoaderData> = {},
+  ) {
+    const data: LoaderData = {
+      post: postWithoutMarkdown(),
+      isOwner: false,
+      origin: "http://front.test",
+      comments: [],
+      related: [],
+      blogTitle: "마르코의 블로그",
+      topic: null,
+      guestWriteEnabled: false,
+      ...overrides,
+    };
+    renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
+      initialEntries: ["/marco/123"],
+      user,
+    });
+  }
+
+  it("로그인 회원에게 글·남의 댓글 신고 버튼(내 댓글·숨긴 댓글 제외), 비로그인·주인에게는 없다", async () => {
+    renderPost(
+      { userId: 2, nickname: "독자", role: "USER" },
+      {
+        comments: [
+          comment(1, 3),
+          comment(2, 2),
+          comment(3, 2, { hidden: true }),
+          comment(4, null, { hidden: true, content: null, replies: [comment(5, 3)] }),
+        ] as LoaderData["comments"],
+      },
+    );
+
+    expect(await screen.findByRole("form", { name: "글 신고" })).toBeInTheDocument();
+    const reports = screen.getAllByRole("form", { name: "댓글 신고" });
+    expect(reports).toHaveLength(2);
+    expect(reports[0].closest("li")).toHaveAttribute("id", "comment-1");
+    expect(reports[1].closest("li")).toHaveAttribute("id", "comment-5");
+    // 숨긴 내 댓글: 내용과 안내, 고치기·지우기 없음. 남의 숨긴 댓글은 자리만.
+    const mine = document.getElementById("comment-3")!;
+    expect(mine).toHaveTextContent("댓글 3");
+    expect(mine).toHaveTextContent("관리자가 숨긴 글입니다. 나에게만 보입니다.");
+    expect(within(mine).queryByText("수정")).toBeNull();
+    expect(within(mine).queryByRole("button", { name: "삭제" })).toBeNull();
+    expect(document.getElementById("comment-4")).toHaveTextContent(
+      "운영 정책에 따라 숨겨진 글입니다.",
+    );
+  });
+
+  it("비로그인·주인에게는 신고 버튼이 없다", async () => {
+    renderPost(null, { comments: [comment(1, 3)] as LoaderData["comments"] });
+    expect(await screen.findByText("댓글 1")).toBeInTheDocument();
+    expect(screen.queryByText("신고", { selector: "summary" })).toBeNull();
+  });
+
+  it("주인의 숨긴 글: 상단 안내(meta noindex)", async () => {
+    renderPost(
+      { userId: 1, nickname: "마르코", role: "USER" },
+      { isOwner: true, post: { ...postWithoutMarkdown(), status: "HIDDEN", hidden: true } },
+    );
+    expect(
+      await screen.findByText(
+        "관리자가 숨긴 글입니다. 다른 사람에게 보이지 않으며 다시 발행할 수 없습니다.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("신고", { selector: "summary" })).toBeNull();
+    const tags = meta({
+      loaderData: {
+        post: { ...postWithoutMarkdown(), status: "HIDDEN", hidden: true },
+        origin: "http://front.test",
+        blogTitle: "b",
+      },
+      matches: [{ id: "root", loaderData: rootData("ko") }],
+    } as unknown as MetaArgs) as Record<string, string>[];
+    expect(tags).toContainEqual({ name: "robots", content: "noindex" });
+  });
+
+  it("action intent=report는 POST /reports, 비로그인이면 신고 폼이 열린 이 글로 돌아오는 로그인", async () => {
+    const backend = mockBackend({ "POST /api/v1/reports": ok({ id: 1, status: "PENDING" }) });
+    const call = () =>
+      action(
+        routeArgs<ActionArgs>(
+          formRequest(
+            "/marco/123",
+            { intent: "report", targetType: "POST", targetId: "123", reason: "SPAM" },
+            { cookie: "access_token=a" },
+          ),
+          { handle: "marco", postId: "123" },
+        ),
+      );
+
+    expect(asData(await call()).data).toEqual({ intent: "report", ok: true, key: "post-123" });
+    expect(backend.callsTo("POST /api/v1/reports")[0].body).toEqual({
+      targetType: "POST",
+      targetId: 123,
+      reason: "SPAM",
+    });
+
+    mockBackend({ "POST /api/v1/reports": fail(401, "UNAUTHENTICATED") });
+    expect(decodeURIComponent(expectRedirect(await caught(call())))).toContain(
+      "next=/marco/123?report=post-123",
+    );
+  });
+});

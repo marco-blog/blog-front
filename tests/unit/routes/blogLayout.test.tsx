@@ -6,11 +6,17 @@ import { createApiClient } from "~/api/client.server";
 import type { SidebarView } from "~/api/models";
 
 import routes from "~/routes";
-import BlogLayout, { loader, shouldRevalidate } from "~/routes/blog/layout";
+import BlogLayout, {
+  ErrorBoundary,
+  isRestrictedError,
+  loader,
+  meta,
+  shouldRevalidate,
+} from "~/routes/blog/layout";
 
 import { fail, mockBackend, ok } from "../support/backend";
 import { blog } from "../support/fixtures";
-import { renderRoutes } from "../support/render";
+import { renderRoutes, rootData } from "../support/render";
 import { caught, getRequest, routeArgs, statusOf } from "../support/route";
 
 type LoaderArgs = Parameters<typeof loader>[0];
@@ -91,7 +97,7 @@ describe("공개 블로그 레이아웃 loader", () => {
     expect(backend.callsTo(VISITS)[0].headers.get("origin")).toBe("http://front.test");
   });
 
-  it("세 요청을 함께 보낸다(앞 요청을 기다리지 않음)", async () => {
+  it("블로그·사이드바를 함께 읽고, 방문 기록은 블로그를 읽은 뒤에 보낸다(005: 이용 제한 블로그는 기록하지 않음)", async () => {
     let release: () => void = () => {};
     const gate = new Promise<void>((resolve) => (release = resolve));
     const backend = mockBackend({
@@ -104,9 +110,11 @@ describe("공개 블로그 레이아웃 loader", () => {
     });
 
     const pending = callLoader();
-    await vi.waitFor(() => expect(backend.calls).toHaveLength(3));
+    await vi.waitFor(() => expect(backend.calls).toHaveLength(2));
+    expect(backend.callsTo(VISITS)).toHaveLength(0);
     release();
     await pending;
+    expect(backend.callsTo(VISITS)).toHaveLength(1);
   });
 
   it("방문 기록·사이드바가 실패해도 화면은 그린다(사이드바 null)", async () => {
@@ -309,5 +317,100 @@ describe("공개 블로그 레이아웃 사이드바", () => {
         .map((heading) => heading.textContent),
     ).toEqual(["프로필", "검색", "피드"]);
     expect(within(aside).getByRole("navigation", { name: "카테고리" })).toBeInTheDocument();
+  });
+});
+
+describe("이용이 제한된 블로그(005 T047, FR-042)", () => {
+  it("BLOG_RESTRICTED면 { restricted: true } 404를 던지고 방문을 기록하지 않는다, BLOG_NOT_FOUND는 그대로 404", async () => {
+    const backend = mockBackend({
+      [BLOG]: fail(404, "BLOG_RESTRICTED"),
+      [SIDEBAR]: ok(sidebarView),
+      [VISITS]: ok(null),
+    });
+
+    const error = await caught(callLoader());
+    expect(statusOf(error)).toBe(404);
+    expect((error as { data: unknown }).data).toEqual({
+      restricted: true,
+      resultCode: "BLOG_RESTRICTED",
+    });
+    expect(backend.callsTo(VISITS)).toHaveLength(0);
+
+    mockBackend({ [BLOG]: fail(404, "BLOG_NOT_FOUND") });
+    const notFound = await caught(callLoader());
+    expect((notFound as { data: { resultCode: string } }).data.resultCode).toBe("BLOG_NOT_FOUND");
+  });
+
+  function renderFailing(error: Response | (() => never), path = "/marco") {
+    renderRoutes(
+      [
+        {
+          id: "blog-layout",
+          loader: () => {
+            throw error;
+          },
+          Component: BlogLayout,
+          ErrorBoundary,
+          children: [{ path: ":handle", Component: () => <main>블로그 홈 본문</main> }],
+        },
+      ],
+      { initialEntries: [path] },
+    );
+  }
+
+  it("화면: 안내만(블로그 메뉴·사이드바 없음), 없는 블로그는 찾을 수 없음, 그 밖은 오류 화면", async () => {
+    renderFailing(
+      Response.json({ restricted: true, resultCode: "BLOG_RESTRICTED" }, { status: 404 }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "이용이 제한된 블로그" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "이용이 제한된 블로그입니다. 운영 정책에 따라 이 블로그는 지금 볼 수 없습니다.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "블로그 메뉴" })).toBeNull();
+    expect(screen.queryByText("블로그 홈 본문")).toBeNull();
+  });
+
+  it("없는 블로그·서버 오류는 root와 같은 화면", async () => {
+    renderFailing(Response.json({ resultCode: "BLOG_NOT_FOUND" }, { status: 404 }));
+    expect(
+      await screen.findByRole("heading", { name: "페이지를 찾을 수 없습니다" }),
+    ).toBeInTheDocument();
+  });
+
+  it("서버 오류 화면", async () => {
+    renderFailing(Response.json({ resultCode: "INTERNAL_ERROR" }, { status: 500 }));
+    expect(
+      await screen.findByText("서버에 문제가 생겼습니다. 잠시 후 다시 시도해 주세요."),
+    ).toBeInTheDocument();
+  });
+
+  it("예상하지 못한 오류 화면", async () => {
+    renderFailing(() => {
+      throw new Error("boom");
+    });
+    expect(await screen.findByRole("main")).toBeInTheDocument();
+  });
+
+  it("meta: 제한이면 제목 '이용이 제한된 블로그'·noindex, 그 밖의 오류는 찾을 수 없음, 정상은 자식 meta", () => {
+    const matches = [{ id: "root", loaderData: rootData("ko") }];
+    const restricted = { status: 404, statusText: "", internal: false, data: { restricted: true } };
+    const call = (error: unknown) => meta({ matches, error } as never) as Record<string, string>[];
+
+    const notFound = { ...restricted, data: { resultCode: "POST_NOT_FOUND" } };
+
+    expect(isRestrictedError(restricted)).toBe(true);
+    expect(isRestrictedError({ ...restricted, data: { resultCode: "BLOG_RESTRICTED" } })).toBe(
+      true,
+    );
+    expect(isRestrictedError(notFound)).toBe(false);
+    expect(call(restricted)).toContainEqual({ title: "이용이 제한된 블로그 - 블로그" });
+    expect(call(restricted)).toContainEqual({ name: "robots", content: "noindex" });
+    expect(call(notFound)[0]).toEqual({ title: "페이지를 찾을 수 없습니다 - 블로그" });
+    expect(call(new Error("x"))).toContainEqual({ name: "robots", content: "noindex" });
+    expect(call(undefined)).toEqual([]);
   });
 });

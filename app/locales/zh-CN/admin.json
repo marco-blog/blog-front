@@ -5,7 +5,12 @@
     "topics": "主题",
     "curations": "门户推荐",
     "exclusions": "门户排除",
-    "settings": "门户设置"
+    "settings": "门户设置",
+    "users": "会员管理",
+    "reports": "举报管理",
+    "hiddenPosts": "已隐藏的文章",
+    "pending_one": "待处理 {{count}} 条",
+    "pending_other": "待处理 {{count}} 条"
   },
   "timeZone": "时间以 {{timeZone}} 为准。",
   "fields": {
@@ -35,7 +40,14 @@
       "comment": "评论权重",
       "halfLifeHours": "半衰期(小时)",
       "reportPenalty": "举报扣分(0~1)"
-    }
+    },
+    "suspendReason": "停用理由",
+    "note": "备注",
+    "targetUrl": "地址",
+    "targetType": "类型",
+    "targetId": "编号",
+    "maxBlogs": "上限",
+    "decision": "处理"
   },
   "lookup": {
     "submit": "查看文章",
@@ -161,5 +173,182 @@
         }
       }
     }
+  },
+  "reports": {
+    "title": "举报管理",
+    "list": "举报列表",
+    "empty": "没有举报。",
+    "statusTabs": "处理状态",
+    "status": {
+      "PENDING": "待处理",
+      "ACTIONED": "已处置",
+      "DISMISSED": "已驳回"
+    },
+    "targetType": "对象类型",
+    "allTypes": "全部",
+    "filter": "筛选",
+    "channel": {
+      "MEMBER": "会员举报",
+      "RIGHTS_REQUEST": "侵权举报",
+      "MIXED": "会员举报和侵权举报"
+    },
+    "count_one": "举报 {{count}} 条",
+    "count_other": "举报 {{count}} 条",
+    "firstReportedAt": "首次受理 {{time}}",
+    "untargeted": "未指定对象",
+    "action": {
+      "HIDE_CONTENT": "已隐藏",
+      "SUSPEND_USER": "已停用作者"
+    },
+    "targetTypes": {
+      "POST": "文章",
+      "COMMENT": "评论",
+      "GUESTBOOK": "留言",
+      "TRACKBACK": "引用通告",
+      "EXTERNAL_POST": "外部文章",
+      "EXTERNAL_BLOG": "外部博客"
+    }
+  },
+  "report": {
+    "title": "举报详情",
+    "target": "举报对象",
+    "openOriginal": "打开原页面",
+    "noTarget": "尚未指定对象。",
+    "state": {
+      "ACTIVE": "显示中",
+      "HIDDEN": "已隐藏",
+      "DELETED": "已删除",
+      "MISSING": "不存在"
+    },
+    "author": "作者",
+    "guestAuthor": "非会员 {{nickname}}",
+    "blog": "博客",
+    "reports": "对同一对象的举报",
+    "reporter": "举报人",
+    "rightsReporter": "侵权举报（非会员）",
+    "rights": {
+      "title": "侵权信息",
+      "targetUrl": "举报的地址",
+      "rightsBasis": "权利依据",
+      "contactEmail": "联系邮箱",
+      "purged": "已删除"
+    },
+    "targetUserReportCount_one": "作者收到的举报 {{count}} 条",
+    "targetUserReportCount_other": "作者收到的举报 {{count}} 条",
+    "assign": {
+      "legend": "指定对象",
+      "hint": "使用本服务内的地址（文章地址、#comment-编号、#guestbook-编号、#trackback-编号）或类型和编号指定。",
+      "url": "地址",
+      "type": "类型",
+      "id": "编号",
+      "submit": "指定对象"
+    },
+    "resolve": {
+      "legend": "处理",
+      "note": "备注",
+      "hide": "隐藏",
+      "suspend": "停用作者",
+      "suspendReason": "停用理由",
+      "dismiss": "驳回",
+      "confirmSuspend": "要停用作者吗？其所有登录都会被注销。"
+    },
+    "result": {
+      "title": "处理结果",
+      "handledBy": "{{nickname}} · {{time}}",
+      "note": "备注"
+    },
+    "unhide": "取消隐藏",
+    "done": {
+      "target": "已指定对象。",
+      "resolve_one": "已处理 {{count}} 条举报。",
+      "resolve_other": "已处理 {{count}} 条举报。",
+      "unhide": "已取消隐藏。"
+    }
+  },
+  "users": {
+    "title": "会员管理",
+    "search": {
+      "legend": "查找会员",
+      "by": "查找方式",
+      "byNickname": "昵称（开头匹配）",
+      "byEmail": "电子邮件（完全匹配）",
+      "byHandle": "博客地址（完全匹配）",
+      "q": "搜索词",
+      "submit": "查找",
+      "hint": "请输入至少 2 个字符。"
+    },
+    "list": "会员列表",
+    "empty": "没有符合条件的会员。",
+    "columns": {
+      "nickname": "昵称",
+      "status": "状态",
+      "role": "权限",
+      "createdAt": "注册日期",
+      "blogCount": "博客数"
+    },
+    "status": {
+      "ACTIVE": "正常",
+      "SUSPENDED": "已停用",
+      "WITHDRAWN": "已注销"
+    },
+    "role": {
+      "USER": "会员",
+      "ADMIN": "管理员",
+      "SUPER_ADMIN": "超级管理员"
+    }
+  },
+  "user": {
+    "title": "会员详情",
+    "createdAt": "注册日期",
+    "status": "状态",
+    "role": "权限",
+    "postCount": "文章数",
+    "receivedReportCount": "收到的举报",
+    "lastLoginAt": "最近登录",
+    "never": "无",
+    "blogs": "博客",
+    "noBlogs": "没有博客。",
+    "blogLimit": {
+      "legend": "博客数量上限",
+      "current": "博客 {{current}} 个 / 上限 {{limit}} 个",
+      "custom": "会员专属上限",
+      "default": "默认上限",
+      "limit": "上限",
+      "reset": "恢复默认",
+      "submit": "保存"
+    },
+    "suspend": {
+      "legend": "停用",
+      "reason": "停用理由",
+      "submit": "停用",
+      "confirm": "要停用此会员吗？其所有登录都会被注销。"
+    },
+    "unsuspend": {
+      "legend": "解除停用",
+      "reason": "备注",
+      "submit": "解除停用"
+    },
+    "done": {
+      "suspend": "已停用该会员。",
+      "unsuspend": "已解除停用。",
+      "blogLimit": "已保存博客数量上限。"
+    }
+  },
+  "hiddenPosts": {
+    "title": "已隐藏的文章",
+    "list": "已隐藏的文章列表",
+    "empty": "没有已隐藏的文章。",
+    "unhide": "取消隐藏",
+    "done": "已取消隐藏。"
+  },
+  "reportReasons": {
+    "SPAM": "垃圾信息或广告",
+    "ABUSE": "辱骂或骚扰",
+    "ADULT": "色情内容",
+    "ILLEGAL": "违法信息",
+    "PRIVACY": "泄露个人信息",
+    "COPYRIGHT": "侵犯著作权",
+    "DEFAMATION": "诽谤",
+    "OTHER": "其他"
   }
 }

@@ -187,8 +187,12 @@ describe("글 관리 조건", () => {
       ),
     ).toEqual({ status: "DELETED", visibility: "PRIVATE", category: 12, q: "스프링", page: 3 });
     expect(
-      parseFilters(new URLSearchParams("status=HIDDEN&visibility=x&category=-1&page=0")),
+      parseFilters(new URLSearchParams("status=GONE&visibility=x&category=-1&page=0")),
     ).toEqual({ status: null, visibility: null, category: null, q: "", page: 1 });
+  });
+
+  it("숨김(005) 상태로 거른다", () => {
+    expect(parseFilters(new URLSearchParams("status=HIDDEN")).status).toBe("HIDDEN");
   });
 
   it("조건 → 쿼리 문자열(첫 페이지는 page 없음)", () => {
@@ -287,7 +291,7 @@ describe("글 관리 action", () => {
       await call({ intent: "bulk", op: "PRIVATE", postIds: ["1", "2", "3", "2", "x"] }),
     );
 
-    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 3 });
+    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 3, skipped: 0 });
     expect(backend.callsTo(BULK)[0].body).toEqual({
       postIds: [1, 2, 3],
       action: "CHANGE_VISIBILITY",
@@ -309,7 +313,7 @@ describe("글 관리 action", () => {
     const result = asData(await call({ intent: "bulk", op: "NOTICE", postIds: ["1", "2"] }));
     await call({ intent: "bulk", op: "UNNOTICE", postIds: "3" });
 
-    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 2 });
+    expect(result.data).toEqual({ intent: "bulk", ok: true, updated: 2, skipped: 0 });
     expect(backend.callsTo(BULK).map((c) => c.body)).toEqual([
       { postIds: [1, 2], action: "NOTICE" },
       { postIds: [3], action: "UNNOTICE" },
@@ -730,6 +734,41 @@ describe("블로그 관리 화면", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("글 1편을 바꿨습니다.");
     expect(backend.callsTo(BULK)[0].body).toEqual({ postIds: [2], action: "NOTICE" });
     expect(screen.getByRole("button", { name: "공지 해제" })).toBeInTheDocument();
+  });
+
+  it("글 관리: 숨긴 글(005)은 '숨김' 표시와 안내, 수정 링크 없음, 숨긴 글만 고르면 공개 범위·공지 버튼 비활성, 건너뛴 수 안내", async () => {
+    const backend = renderManage("/marco/manage/posts?status=HIDDEN", {
+      [POSTS]: ok(
+        [
+          postSummary(1, { title: "숨긴 글", status: "HIDDEN" }),
+          postSummary(2, { title: "보통 글" }),
+        ],
+        { totalCount: 2 },
+      ),
+      [BULK]: ok({ updated: 1, skipped: 1 }),
+    });
+
+    const list = await screen.findByRole("list", { name: "글 목록" });
+    const [hidden, normal] = within(list).getAllByRole("listitem");
+    expect(within(hidden).getByText("숨김", { selector: ".badge" })).toBeInTheDocument();
+    expect(hidden).toHaveTextContent(
+      "관리자가 숨긴 글입니다. 발행 설정과 공개 범위를 바꿀 수 없습니다.",
+    );
+    expect(within(hidden).queryByRole("link", { name: "수정" })).toBeNull();
+    expect(within(normal).getByRole("link", { name: "수정" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "상태" })).toHaveValue("HIDDEN");
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "숨긴 글 선택" }));
+    expect(screen.getByRole("button", { name: "공개로 바꾸기" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "공지로" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "휴지통으로 옮기기" })).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "보통 글 선택" }));
+    fireEvent.click(screen.getByRole("button", { name: "비공개로 바꾸기" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "글 1편을 바꿨습니다. 관리자가 숨긴 글 1편은 건너뛰었습니다.",
+    );
+    expect(backend.callsTo(BULK)[0].body).toMatchObject({ postIds: [1, 2] });
   });
 
   it("글 관리: 상태·공개 범위·작성 중 사본, 수정·이어 쓰기 링크, 필터 폼은 쿼리 문자열로", async () => {

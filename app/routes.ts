@@ -30,6 +30,8 @@ export default [
   route("feed", "routes/feed.tsx"),
   route("notifications", "routes/notifications.tsx"),
   route("search", "routes/search.tsx"),
+  // 005 권리 침해 신고(비회원도). 예약어(rights-request)라 `/:handle`과 겹치지 않는다.
+  route("rights-request", "routes/rights-request.tsx"),
   // 003 주제 페이지(대분류·소분류 공용 모듈). `/:handle` 계열보다 앞에 둔다.
   route("topics/:major", "routes/topic.tsx", { id: "topic-major" }),
   route("topics/:major/:minor", "routes/topic.tsx", { id: "topic-minor" }),
@@ -48,6 +50,12 @@ export default [
     route("portal/curations", "routes/admin/curations.tsx"),
     route("portal/exclusions", "routes/admin/exclusions.tsx"),
     route("portal/settings", "routes/admin/settings.tsx"),
+    // 005 신고·회원·숨긴 글
+    route("reports", "routes/admin/reports.tsx"),
+    route("reports/:id", "routes/admin/report.tsx"),
+    route("users", "routes/admin/users.tsx"),
+    route("users/:id", "routes/admin/user.tsx"),
+    route("contents/hidden-posts", "routes/admin/hidden-posts.tsx"),
   ]),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).

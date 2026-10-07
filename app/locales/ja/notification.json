@@ -10,6 +10,9 @@
     "NEW_COMMENT": "{{actor}}さんが「{{postTitle}}」にコメントしました。",
     "NEW_SUBSCRIBER": "{{actor}}さんが{{blogTitle}}を購読しました。",
     "UNKNOWN": "新しいお知らせがあります。",
-    "BACKUP_READY": "{{blogTitle}} のバックアップの準備ができました。{{expiresAt}} までダウンロードできます。"
+    "BACKUP_READY": "{{blogTitle}} のバックアップの準備ができました。{{expiresAt}} までダウンロードできます。",
+    "REPORT_RESOLVED": "通報いただいた内容の確認が終わりました。",
+    "REPORT_RESOLVED_ACTIONED": "通報いただいた内容を確認し、措置を行いました。",
+    "REPORT_RESOLVED_DISMISSED": "通報いただいた内容を確認しましたが、措置は行いませんでした。"
   }
 }

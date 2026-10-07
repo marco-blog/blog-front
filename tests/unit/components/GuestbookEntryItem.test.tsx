@@ -30,7 +30,13 @@ function renderList(
     viewerId = null,
     isOwner = false,
     result,
-  }: { viewerId?: number | null; isOwner?: boolean; result?: GuestbookActionData } = {},
+    reportable = false,
+  }: {
+    viewerId?: number | null;
+    isOwner?: boolean;
+    result?: GuestbookActionData;
+    reportable?: boolean;
+  } = {},
 ) {
   const actions: FormData[] = [];
   renderRoutes(
@@ -42,7 +48,13 @@ function renderList(
           return null;
         },
         Component: () => (
-          <GuestbookList entries={entries} viewerId={viewerId} isOwner={isOwner} result={result} />
+          <GuestbookList
+            entries={entries}
+            viewerId={viewerId}
+            isOwner={isOwner}
+            result={result}
+            reportable={reportable}
+          />
         ),
       },
     ],
@@ -238,5 +250,56 @@ describe("방명록 글", () => {
   it("수정된 글은 '수정됨'", async () => {
     renderList([entry(1, { updatedAt: "2026-10-07T00:00:00Z" })]);
     expect(await screen.findByText("(수정됨)")).toBeInTheDocument();
+  });
+});
+
+describe("방명록 신고·숨김(005 T047)", () => {
+  it("공개 방명록에서 로그인 회원에게 남의 글 신고(앵커 #guestbook-{id}), 내 글·비로그인·관리 화면에는 없다", async () => {
+    renderList(
+      [
+        entry(1),
+        entry(2, { author: { ...guestAuthor } }),
+        entry(3, { author: { userId: 7, nickname: "나", profileImageUrl: null } }),
+      ],
+      {
+        viewerId: 7,
+        reportable: true,
+      },
+    );
+
+    const forms = await screen.findAllByRole("form", { name: "방명록 글 신고" });
+    expect(forms.map((form) => form.closest("li")?.id)).toEqual(["guestbook-1", "guestbook-2"]);
+    expect(
+      within(forms[0].closest("details")!).getByRole("link", {
+        name: "회원이 아니신가요? 권리 침해 신고",
+      }),
+    ).toHaveAttribute("href", "/rights-request?url=%2Fgb%23guestbook-1");
+  });
+
+  it("reportable이 아니면(블로그 관리) 신고 버튼이 없다", async () => {
+    renderList([entry(1)], { viewerId: 7 });
+    expect(await screen.findByText("방명록 1")).toBeInTheDocument();
+    expect(screen.queryByText("신고", { selector: "summary" })).toBeNull();
+  });
+
+  it("숨긴 내 글은 내용과 안내(고치기·지우기·답글 없음), 남의 숨긴 글은 답글이 있을 때 자리만", async () => {
+    renderList(
+      [
+        entry(1, { hidden: true, author: { userId: 7, nickname: "나", profileImageUrl: null } }),
+        entry(2, { hidden: true, content: null, author: null, replies: [entry(3)] }),
+      ],
+      { viewerId: 7, isOwner: true, reportable: true },
+    );
+
+    const mine = await screen.findByText("방명록 1", { selector: "p" });
+    const item = mine.closest("li")!;
+    expect(item).toHaveTextContent("관리자가 숨긴 글입니다. 나에게만 보입니다.");
+    expect(within(item).queryByText("수정")).toBeNull();
+    expect(within(item).queryByRole("button", { name: "삭제" })).toBeNull();
+    expect(within(item).queryByText("답글 달기")).toBeNull();
+    expect(within(item).queryByText("신고", { selector: "summary" })).toBeNull();
+    expect(document.getElementById("guestbook-2")).toHaveTextContent(
+      "운영 정책에 따라 숨겨진 글입니다.",
+    );
   });
 });
