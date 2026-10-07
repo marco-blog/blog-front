@@ -75,6 +75,7 @@
     "USER_UNSUSPEND": "회원 정지 해제",
     "REPORT_ACTION": "신고 조치",
     "REPORT_DISMISS": "신고 기각",
+    "REPORT_TARGET_ASSIGN": "신고 대상 지정",
     "CONTENT_HIDE": "콘텐츠 숨김",
     "CONTENT_UNHIDE": "콘텐츠 숨김 해제",
     "BANNED_WORD_CREATE": "금칙어 추가",

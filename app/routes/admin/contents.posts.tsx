@@ -32,7 +32,7 @@ export default function AdminContentPosts() {
   const { t } = useTranslation();
   const format = useDateFormat();
   const status = useContentStatus("posts");
-  const { kind, filters, rows, totalCount, scopeRequired, fieldErrors, canHide } =
+  const { kind, filters, rows, totalCount, scopeRequired, fieldErrors } =
     useLoaderData<typeof loader>();
   const result = useActionData<typeof action>();
   return (
@@ -62,7 +62,7 @@ export default function AdminContentPosts() {
                   <th>{t("admin:contents.columns.visibility")}</th>
                   <th>{t("admin:contents.columns.publishedAt")}</th>
                   <th>{t("admin:contents.columns.commentCount")}</th>
-                  {canHide && <th>{t("admin:contents.columns.actions")}</th>}
+                  <th>{t("admin:contents.columns.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,11 +88,9 @@ export default function AdminContentPosts() {
                         : t("admin:contents.notPublished")}
                     </td>
                     <td>{format.number(post.commentCount)}</td>
-                    {canHide && (
-                      <td>
-                        <ContentHideButton id={post.id} status={post.status} label={post.title} />
-                      </td>
-                    )}
+                    <td>
+                      <ContentHideButton id={post.id} status={post.status} label={post.title} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

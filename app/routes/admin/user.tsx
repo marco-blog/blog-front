@@ -4,10 +4,14 @@ import { Form, Link, data, useActionData, useLoaderData, useNavigation } from "r
 
 import { requireAdmin, throwAdminError } from "~/admin/access.server";
 import { adminActionError, adminInvalid, type AdminActionData } from "~/admin/actions.server";
+import { contentPath } from "~/admin/contentSearch";
+import { roleChangeAction } from "~/admin/roleChange.server";
+import { isSuperAdmin } from "~/admin/roles";
 import { createApiClient } from "~/api/client.server";
 import type { AdminUserDetail } from "~/api/models";
 import { parsePostId } from "~/blog/ids";
 import { AdminFormErrors } from "~/components/admin/AdminFormErrors";
+import { RoleForm } from "~/components/admin/RoleForm";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { privatePageMeta } from "~/seo/meta";
@@ -16,7 +20,7 @@ import type { Route } from "./+types/user";
 
 /** backend `SuspensionService.REASON_MAX`와 같다 */
 export const SUSPEND_REASON_MAX = 500;
-const INTENTS = ["suspend", "unsuspend", "blogLimit"] as const;
+const INTENTS = ["suspend", "unsuspend", "blogLimit", "role"] as const;
 type Intent = (typeof INTENTS)[number];
 
 export function meta({ matches }: Route.MetaArgs) {
@@ -24,9 +28,21 @@ export function meta({ matches }: Route.MetaArgs) {
   return privatePageMeta(t("admin:user.title"), t("appName"));
 }
 
-/** 회원 상세(`/admin/users/:id`, 005 T061, 006 FR-104): 가입일·상태·권한·글 수·받은 신고·최근 로그인·블로그·한도 */
+/** 이 회원의 글·댓글(006 콘텐츠 관리, T039)과 이 회원 대상 작업 기록(006 작업 기록, T055) 주소 */
+export function memberLinks(id: number) {
+  return {
+    posts: `${contentPath("posts")}?authorId=${id}`,
+    comments: `${contentPath("comments")}?authorId=${id}`,
+    auditLog: `/admin/audit-log?targetType=USER&targetId=${id}`,
+  };
+}
+
+/**
+ * 회원 상세(`/admin/users/:id`, 005 T061, 006 FR-104·105): 가입일·상태·권한·글 수·받은 신고·최근 로그인·블로그·한도,
+ * "이 회원의 글·댓글", "관리자 권한"(최고 관리자만 바꾸기, 006 T055)
+ */
 export async function loader({ request, params }: Route.LoaderArgs) {
-  await requireAdmin(request);
+  const viewer = await requireAdmin(request);
   const id = parsePostId(params.id);
   if (id === null) {
     throw data(null, { status: 404 });
@@ -34,13 +50,14 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const user = await createApiClient(request)
     .get<AdminUserDetail>(`/admin/users/${id}`)
     .catch(throwAdminError);
-  return { user };
+  return { user, canChangeRole: isSuperAdmin(viewer.role) };
 }
 
 /**
  * - `intent=suspend`: 사유 필수(500자) → POST /admin/users/{id}/suspend
  * - `intent=unsuspend`: 메모 선택 → POST /admin/users/{id}/unsuspend
  * - `intent=blogLimit`: 한도(0 이상 정수), `reset`이면 기본값(null) → PATCH /admin/users/{id}/blog-limit (003)
+ * - `intent=role`: 권한 + 확인 체크 → PUT /admin/users/{id}/role (006 T055, 최고 관리자만 — 아니면 backend 403)
  */
 export async function action({ request, params }: Route.ActionArgs) {
   await requireAdmin(request);
@@ -54,6 +71,9 @@ export async function action({ request, params }: Route.ActionArgs) {
     return adminInvalid(intentText);
   }
   const intent = intentText as Intent;
+  if (intent === "role") {
+    return roleChangeAction(request, intent, form, String(id));
+  }
   const reason = String(form.get("reason") ?? "").trim();
   if (reason.length > SUSPEND_REASON_MAX) {
     return adminInvalid(intent, [
@@ -88,7 +108,8 @@ export async function action({ request, params }: Route.ActionArgs) {
 export default function AdminUser() {
   const { t } = useTranslation();
   const format = useDateFormat();
-  const { user } = useLoaderData<typeof loader>();
+  const { user, canChangeRole } = useLoaderData<typeof loader>();
+  const links = memberLinks(user.id);
   const result = useActionData<typeof action>();
   const submitting = useNavigation().state === "submitting";
   const confirmSuspend = (event: FormEvent<HTMLFormElement>) => {
@@ -171,6 +192,35 @@ export default function AdminUser() {
             )}
           </fieldset>
         </Form>
+      </section>
+
+      <section aria-labelledby="admin-user-contents">
+        <h2 id="admin-user-contents">{t("admin:user.contentLinks.title")}</h2>
+        <ul>
+          <li>
+            <Link to={links.posts}>{t("admin:user.contentLinks.posts")}</Link>
+          </li>
+          <li>
+            <Link to={links.comments}>{t("admin:user.contentLinks.comments")}</Link>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="admin-user-role">
+        <h2 id="admin-user-role">{t("admin:user.roleArea.title")}</h2>
+        <p>{t("admin:user.roleArea.current", { role: t(`admin:users.role.${user.role}`) })}</p>
+        {canChangeRole ? (
+          <RoleForm
+            key={`role-${user.role}`}
+            member={{ userId: user.id, nickname: user.nickname, role: user.role }}
+            legend={t("admin:user.roleArea.legend")}
+          />
+        ) : (
+          <p className="form-hint">{t("admin:user.roleArea.readOnly")}</p>
+        )}
+        <p>
+          <Link to={links.auditLog}>{t("admin:user.roleArea.auditLog")}</Link>
+        </p>
       </section>
 
       {user.status === "ACTIVE" && (

@@ -16,6 +16,7 @@ const DETAIL = "GET /api/v1/admin/users/7";
 const SUSPEND = "POST /api/v1/admin/users/7/suspend";
 const UNSUSPEND = "POST /api/v1/admin/users/7/unsuspend";
 const LIMIT = "PATCH /api/v1/admin/users/7/blog-limit";
+const ROLE = "PUT /api/v1/admin/users/7/role";
 
 const post = (fields: Record<string, string>, id = "7") =>
   action(routeArgs<ActionArgs>(formRequest(`/admin/users/${id}`, fields, loggedIn), { id }));
@@ -29,7 +30,10 @@ describe("admin user loader·action", () => {
     const call = (id: string) =>
       loader(routeArgs<LoaderArgs>(getRequest(`/admin/users/${id}`, loggedIn), { id }));
 
-    await expect(call("7")).resolves.toEqual({ user: userDetail() });
+    await expect(call("7")).resolves.toEqual({ user: userDetail(), canChangeRole: false });
+    mockBackend({ [ME]: ok(member("SUPER_ADMIN")), [DETAIL]: ok(userDetail()) });
+    await expect(call("7")).resolves.toMatchObject({ canChangeRole: true });
+    mockBackend({ [ME]: ok(member()), [DETAIL]: ok(userDetail()) });
     expect(statusOf(await caught(call("abc")))).toBe(404);
     mockBackend({ [ME]: ok(member()), "GET /api/v1/admin/users/8": fail(404, "USER_NOT_FOUND") });
     expect(statusOf(await caught(call("8")))).toBe(404);
@@ -75,6 +79,35 @@ describe("admin user loader·action", () => {
     });
   });
 
+  it("관리자 권한(006 T055): 확인 체크 필수, 주소의 회원 번호로 PUT role, 자기 권한·마지막 최고 관리자는 폼 오류", async () => {
+    const admin = { userId: 7, nickname: "마르코", role: "ADMIN", status: "ACTIVE" };
+    const backend = mockBackend({ [ME]: ok(member("SUPER_ADMIN")), [ROLE]: ok(admin) });
+
+    expect(asData(await post({ intent: "role", role: "ADMIN" })).data).toMatchObject({
+      ok: false,
+      fieldErrors: [{ field: "confirm", code: "REQUIRED" }],
+    });
+    expect(asData(await post({ intent: "role", role: "ROOT", confirm: "yes" })).data).toMatchObject(
+      { fieldErrors: [{ field: "role", code: "INVALID" }] },
+    );
+    expect(backend.callsTo(ROLE)).toHaveLength(0);
+    expect(
+      asData(await post({ intent: "role", role: "ADMIN", confirm: "yes", userId: "99" })).data,
+    ).toEqual({ intent: "role", ok: true, member: admin });
+    expect(backend.callsTo(ROLE).map((call) => call.body)).toEqual([{ role: "ADMIN" }]);
+
+    for (const [status, code] of [
+      [422, "CANNOT_CHANGE_OWN_ROLE"],
+      [409, "LAST_SUPER_ADMIN"],
+      [409, "USER_NOT_ACTIVE"],
+    ] as const) {
+      mockBackend({ [ME]: ok(member("SUPER_ADMIN")), [ROLE]: fail(status, code) });
+      expect(
+        asData(await post({ intent: "role", role: "USER", confirm: "yes" })).data,
+      ).toMatchObject({ ok: false, resultCode: code });
+    }
+  });
+
   it("CANNOT_SUSPEND_SELF·LAST_SUPER_ADMIN·USER_NOT_ACTIVE·FORBIDDEN은 폼 오류(관리자 아님 403은 404)", async () => {
     for (const [status, code] of [
       [422, "CANNOT_SUSPEND_SELF"],
@@ -97,8 +130,9 @@ describe("admin user 화면", () => {
   function renderUser(
     detail = userDetail(),
     routes: Record<string, BackendHandler | Response> = {},
+    role = "ADMIN",
   ) {
-    const backend = mockBackend({ [ME]: ok(member()), [DETAIL]: ok(detail), ...routes });
+    const backend = mockBackend({ [ME]: ok(member(role)), [DETAIL]: ok(detail), ...routes });
     renderRoutes(
       [{ path: "admin/users/:id", loader: stub(loader), action: stub(action), Component: User }],
       { initialEntries: ["/admin/users/7"] },
@@ -157,5 +191,66 @@ describe("admin user 화면", () => {
     fireEvent.click(within(form).getByRole("button", { name: "정지 해제" }));
     expect(await screen.findByRole("status")).toHaveTextContent("정지를 해제했습니다.");
     expect(backend.callsTo(UNSUSPEND)).toHaveLength(1);
+  });
+
+  it("이 회원의 글·댓글 링크(006 콘텐츠 관리), 일반 관리자는 권한 읽기 전용과 작업 기록 링크 (T039·T055)", async () => {
+    renderUser();
+
+    const contents = await screen.findByRole("region", { name: "이 회원의 글·댓글" });
+    expect(within(contents).getByRole("link", { name: "이 회원의 글" })).toHaveAttribute(
+      "href",
+      "/admin/contents/posts?authorId=7",
+    );
+    expect(within(contents).getByRole("link", { name: "이 회원의 댓글" })).toHaveAttribute(
+      "href",
+      "/admin/contents/comments?authorId=7",
+    );
+    const role = screen.getByRole("region", { name: "관리자 권한" });
+    expect(role).toHaveTextContent("지금 권한: 회원");
+    expect(role).toHaveTextContent("권한은 최고 관리자만 바꿀 수 있습니다.");
+    expect(within(role).queryByRole("group", { name: "권한 바꾸기" })).toBeNull();
+    expect(within(role).getByRole("link", { name: "이 회원 대상 작업 기록" })).toHaveAttribute(
+      "href",
+      "/admin/audit-log?targetType=USER&targetId=7",
+    );
+  });
+
+  it("최고 관리자는 권한 바꾸기 폼, 확인하고 보내면 바뀐 권한, 오류 문구 (T055)", async () => {
+    let current = userDetail();
+    const backend = renderUser(
+      current,
+      {
+        [DETAIL]: () => ok(current),
+        [ROLE]: (request) => {
+          if ((request.body as { role: string }).role === "SUPER_ADMIN") {
+            return fail(409, "LAST_SUPER_ADMIN");
+          }
+          current = userDetail({ role: "ADMIN" });
+          return ok({ userId: 7, nickname: "마르코", role: "ADMIN", status: "ACTIVE" });
+        },
+      },
+      "SUPER_ADMIN",
+    );
+
+    const form = await screen.findByRole("group", { name: "권한 바꾸기" });
+    expect(within(form).getByRole("combobox", { name: "새 권한" })).toHaveValue("USER");
+    fireEvent.change(within(form).getByRole("combobox", { name: "새 권한" }), {
+      target: { value: "ADMIN" },
+    });
+    fireEvent.click(within(form).getByRole("checkbox"));
+    fireEvent.click(within(form).getByRole("button", { name: "바꾸기" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("권한을 바꿨습니다.");
+    expect(backend.callsTo(ROLE).map((call) => call.body)).toEqual([{ role: "ADMIN" }]);
+    expect(screen.getByRole("region", { name: "관리자 권한" })).toHaveTextContent(
+      "지금 권한: 관리자",
+    );
+
+    const again = screen.getByRole("group", { name: "권한 바꾸기" });
+    fireEvent.change(within(again).getByRole("combobox", { name: "새 권한" }), {
+      target: { value: "SUPER_ADMIN" },
+    });
+    fireEvent.click(within(again).getByRole("checkbox"));
+    fireEvent.click(within(again).getByRole("button", { name: "바꾸기" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 });

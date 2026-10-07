@@ -45,14 +45,6 @@ export const ADMIN_MENU: readonly AdminMenuItem[] = [
     spec: "006",
     available: true,
   },
-  // 005 숨긴 글 화면. 006 T039(005 머지 후)가 `/admin/contents/posts?status=HIDDEN`으로 흡수한다.
-  {
-    key: "hiddenPosts",
-    path: "/admin/contents/hidden-posts",
-    group: "operations",
-    spec: "005",
-    available: true,
-  },
   { key: "reports", path: "/admin/reports", group: "operations", spec: "005", available: true },
   {
     key: "externalBlogs",
@@ -92,9 +84,6 @@ export const ADMIN_REPORTS_MENU_KEY = "reports";
 
 /** 콘솔 첫 화면(대시보드, 006 FR-103) */
 export const ADMIN_HOME = "/admin";
-
-/** 다른 스펙에 기대는 콘솔 기능 스위치. `contentHide`는 005 숨김 API를 콘텐츠 관리 표에 연결한다(006 T039가 켬). */
-export const ADMIN_FEATURES = { contentHide: false };
 
 /** 메뉴에 보이는 항목을 묶음이 바뀔 때마다 나눈다(순서는 그대로). */
 export function adminMenuSections(

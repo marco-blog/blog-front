@@ -8,7 +8,6 @@
     "settings": "门户设置",
     "users": "会员管理",
     "reports": "举报管理",
-    "hiddenPosts": "已隐藏的文章",
     "pending_one": "待处理 {{count}} 条",
     "pending_other": "待处理 {{count}} 条",
     "menu": "菜单",
@@ -370,15 +369,21 @@
     "done": {
       "suspend": "已停用该会员。",
       "unsuspend": "已解除停用。",
-      "blogLimit": "已保存博客数量上限。"
+      "blogLimit": "已保存博客数量上限。",
+      "role": "已更改权限。"
+    },
+    "roleArea": {
+      "title": "管理员权限",
+      "current": "当前权限：{{role}}",
+      "readOnly": "只有超级管理员可以更改权限。",
+      "legend": "更改权限",
+      "auditLog": "以该会员为对象的操作记录"
+    },
+    "contentLinks": {
+      "title": "该会员的文章和评论",
+      "posts": "该会员的文章",
+      "comments": "该会员的评论"
     }
-  },
-  "hiddenPosts": {
-    "title": "已隐藏的文章",
-    "list": "已隐藏的文章列表",
-    "empty": "没有已隐藏的文章。",
-    "unhide": "取消隐藏",
-    "done": "已取消隐藏。"
   },
   "reportReasons": {
     "SPAM": "垃圾信息或广告",
@@ -473,7 +478,8 @@
     "done": {
       "hide": "已隐藏。",
       "unhide": "已取消隐藏。"
-    }
+    },
+    "hideReason": "隐藏原因"
   },
   "reservedHandles": {
     "title": "保留名称",

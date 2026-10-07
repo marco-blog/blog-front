@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ADMIN_FEATURES, ADMIN_HOME, ADMIN_MENU, adminMenuSections } from "~/admin/links";
+import { ADMIN_HOME, ADMIN_MENU, adminMenuSections } from "~/admin/links";
 import { isAdmin, isSuperAdmin } from "~/admin/roles";
 import routes from "~/routes";
 
@@ -21,7 +21,6 @@ describe("ADMIN_MENU", () => {
       ["settings", "portal"],
       ["users", "operations"],
       ["contents", "operations"],
-      ["hiddenPosts", "operations"],
       ["reports", "operations"],
       ["externalBlogs", "portal"],
       ["spam", "operations"],
@@ -32,7 +31,8 @@ describe("ADMIN_MENU", () => {
       ["releaseNotes", "service"],
     ]);
     expect(ADMIN_HOME).toBe("/admin");
-    expect(ADMIN_FEATURES.contentHide).toBe(false);
+    // 005 숨긴 글 메뉴는 006 T039가 콘텐츠 관리(`?status=HIDDEN`)로 흡수했다
+    expect(ADMIN_MENU.some((item) => item.path === "/admin/contents/hidden-posts")).toBe(false);
   });
 
   it("보이는 항목의 경로는 routes.ts에 있고, 숨긴 항목(외부 블로그)의 경로는 없다", () => {
@@ -49,7 +49,7 @@ describe("ADMIN_MENU", () => {
     expect(adminMenuSections().map((section) => [section.group, section.items.length])).toEqual([
       ["operations", 1],
       ["portal", 4],
-      ["operations", 5],
+      ["operations", 4],
       ["service", 5],
     ]);
     expect(adminMenuSections([])).toEqual([]);
