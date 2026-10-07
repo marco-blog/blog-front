@@ -54,6 +54,7 @@ describe("PublishSettingsDialog", () => {
       topicId: null,
       thumbnailMediaKey: null,
       notice: false,
+      scheduledAt: null,
     });
   });
 });

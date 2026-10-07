@@ -23,5 +23,16 @@
   "edited": "edited",
   "replies": "Replies",
   "author": "Author",
-  "unknownAuthor": "Unknown author"
+  "unknownAuthor": "Unknown author",
+  "secret": {
+    "label": "Private comment",
+    "badge": "Private",
+    "hidden": "This is a private comment."
+  },
+  "guest": "Guest",
+  "unlock": {
+    "form": "Load private comment",
+    "hint": "To edit your private comment, first load it with the password you used when writing it.",
+    "submit": "Load comment"
+  }
 }

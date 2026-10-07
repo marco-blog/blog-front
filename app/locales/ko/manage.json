@@ -97,7 +97,10 @@
     "restore": "복구",
     "restored": "글을 복구했습니다.",
     "category": "카테고리",
-    "noticeBadge": "공지"
+    "noticeBadge": "공지",
+    "scheduledAt": "{{date}} 발행 예약",
+    "unschedule": "예약 취소",
+    "unscheduled": "예약을 취소했습니다. 글은 임시저장 상태로 돌아갔습니다."
   },
   "settings": {
     "title": "블로그 설정",

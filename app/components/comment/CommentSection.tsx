@@ -3,14 +3,17 @@ import { useTranslation } from "react-i18next";
 import { Form, Link, useRouteLoaderData } from "react-router";
 
 import { errorMessage } from "~/api/errorMessage";
+import { useFormMessages } from "~/api/formErrors";
 import type { Comment } from "~/api/models";
+import { isGuestAuthor, isOwnEntry, writerMode } from "~/blog/guestAuthor";
 import { FormAlert } from "~/components/form/FormField";
 import { Avatar } from "~/components/media/Avatar";
 import { useDateFormat } from "~/i18n/format";
 import type { RootData } from "~/root";
 
-import type { CommentActionData } from "./actions";
+import { commentErrorFor, type CommentActionData } from "./actions";
 import { CommentForm } from "./CommentForm";
+import { GuestPasswordPrompt } from "./GuestPasswordPrompt";
 
 export interface CommentSectionProps {
   /** null이면 댓글을 불러오지 못했다 */
@@ -20,6 +23,8 @@ export interface CommentSectionProps {
   commentEnabled: boolean;
   /** 보는 사람이 글 주인인지(남의 댓글도 지울 수 있다, FR-028) */
   isPostOwner: boolean;
+  /** 블로그가 비회원 댓글을 허용하는지(004 FR-066). 허용하면 비로그인도 이름·비밀번호로 쓴다 */
+  guestWriteEnabled?: boolean;
   /** 비로그인 방문자에게 보여줄 로그인 주소(`/login?next=…`) */
   loginHref: string;
   result?: CommentActionData;
@@ -32,21 +37,24 @@ function countAll(comments: Comment[]): number {
 
 /**
  * 글 아래 댓글(US3, FR-027~029). 작성자·작성 시각과 함께 작성순으로 보여주고, 답글은 한 단계 들여쓴다(답글에는 답글 버튼 없음).
- * 비로그인은 로그인 안내, 댓글이 막힌 글은 안내만 보여준다. 수정은 작성자만, 삭제는 작성자와 글 주인만 할 수 있다.
- * 내용은 일반 텍스트라 React가 이스케이프해 그린다(HTML로 해석하지 않는다).
+ * 비로그인은 로그인 안내(블로그가 비회원 댓글을 허용하면 이름·비밀번호 칸), 댓글이 막힌 글은 안내만 보여준다.
+ * 수정은 작성자만, 삭제는 작성자와 글 주인만 할 수 있다. 비회원 댓글은 비로그인 방문자가 작성 때의 비밀번호로 고치거나 지운다.
+ * 볼 수 없는 비밀 댓글은 "비밀 댓글입니다"(004 FR-065). 내용은 일반 텍스트라 React가 이스케이프해 그린다.
  */
 export function CommentSection({
   comments,
   commentCount,
   commentEnabled,
   isPostOwner,
+  guestWriteEnabled = false,
   loginHref,
   result,
 }: CommentSectionProps) {
   const { t } = useTranslation();
   const viewer = useRouteLoaderData<RootData>("root")?.user ?? null;
   const viewerId = viewer?.userId ?? null;
-  const canWrite = viewerId !== null && commentEnabled;
+  const mode = writerMode(viewer, guestWriteEnabled);
+  const canWrite = mode !== "login" && commentEnabled;
 
   return (
     <section className="comments" aria-labelledby="comments-title">
@@ -65,6 +73,7 @@ export function CommentSection({
               viewerId={viewerId}
               isPostOwner={isPostOwner}
               canReply={canWrite && !comment.deleted}
+              guestWriter={mode === "guest"}
               result={result}
             />
           ))}
@@ -73,7 +82,7 @@ export function CommentSection({
 
       {!commentEnabled ? (
         <p role="note">{t("comment:disabled")}</p>
-      ) : viewerId === null ? (
+      ) : mode === "login" ? (
         <p>
           <Link to={loginHref}>{t("comment:loginToWrite")}</Link>
         </p>
@@ -84,6 +93,8 @@ export function CommentSection({
           target="new"
           label={t("comment:form.content")}
           submitLabel={t("comment:form.submit")}
+          showSecret
+          guest={mode === "guest"}
           result={result}
         />
       )}
@@ -97,6 +108,8 @@ interface CommentItemProps {
   isPostOwner: boolean;
   /** 답글 달기(최상위 댓글에만) */
   canReply: boolean;
+  /** 답글을 비회원으로 쓰는지(이름·비밀번호 칸) */
+  guestWriter?: boolean;
   isReply?: boolean;
   result?: CommentActionData;
 }
@@ -106,25 +119,45 @@ function CommentItem({
   viewerId,
   isPostOwner,
   canReply,
+  guestWriter = false,
   isReply = false,
   result,
 }: CommentItemProps) {
   const { t } = useTranslation();
   const format = useDateFormat();
-  const isAuthor = !comment.deleted && viewerId !== null && comment.author?.userId === viewerId;
+  const guest = isGuestAuthor(comment.author);
+  const isAuthor = !comment.deleted && isOwnEntry(comment.author, viewerId);
+  /** 비회원 댓글을 비로그인 방문자가 비밀번호로 고치거나 지운다 */
+  const guestControls = !comment.deleted && guest && viewerId === null;
   const canDelete = !comment.deleted && (isAuthor || isPostOwner);
-  const deleteError =
-    result && !result.ok && result.target === `delete-${comment.id}` ? result : null;
+  const deleteError = commentErrorFor(result, `delete-${comment.id}`);
+  const name = comment.author?.nickname ?? t("comment:unknownAuthor");
+  /** 결과(오류·내용 받기)가 이 댓글의 폼이면 펼쳐 둔다(JS 없이 새로 그린 화면에서도 보이게) */
+  const openFor = (...targets: string[]) =>
+    (result !== undefined && targets.includes(result.target)) || undefined;
 
   return (
     <li className={isReply ? "comment comment-reply" : "comment"} id={`comment-${comment.id}`}>
       {comment.deleted ? (
         <p className="comment-deleted">{t("comment:deleted")}</p>
       ) : (
-        <article aria-label={comment.author?.nickname ?? t("comment:unknownAuthor")}>
+        <article aria-label={name}>
           <p className="comment-meta">
-            <Avatar url={comment.author?.profileImageUrl} />{" "}
-            <strong>{comment.author?.nickname ?? t("comment:unknownAuthor")}</strong>{" "}
+            <Avatar url={comment.author?.profileImageUrl} /> <strong>{name}</strong>
+            {guest && (
+              <>
+                {" "}
+                <span className="badge badge-guest">{t("comment:guest")}</span>
+              </>
+            )}
+            {comment.secret && (
+              <>
+                {" "}
+                <span className="badge badge-secret">
+                  <span aria-hidden="true">🔒</span> {t("comment:secret.badge")}
+                </span>
+              </>
+            )}{" "}
             <time dateTime={comment.createdAt}>{format.dateTime(comment.createdAt)}</time>
             {comment.updatedAt !== comment.createdAt && (
               <>
@@ -133,13 +166,19 @@ function CommentItem({
               </>
             )}
           </p>
-          <p className="comment-content" style={{ whiteSpace: "pre-wrap" }}>
-            {comment.content}
-          </p>
-          <FormAlert message={deleteError ? errorMessage(t, deleteError) : null} />
+          {comment.content === null ? (
+            <p className="comment-secret">{t("comment:secret.hidden")}</p>
+          ) : (
+            <p className="comment-content" style={{ whiteSpace: "pre-wrap" }}>
+              {comment.content}
+            </p>
+          )}
+          <FormAlert
+            message={deleteError && !guestControls ? errorMessage(t, deleteError) : null}
+          />
           <div className="comment-actions">
             {canReply && !isReply && (
-              <details>
+              <details open={openFor(`reply-${comment.id}`)}>
                 <summary>{t("comment:reply")}</summary>
                 <CommentForm
                   intent="create"
@@ -147,25 +186,25 @@ function CommentItem({
                   parentId={comment.id}
                   label={t("comment:form.replyContent")}
                   submitLabel={t("comment:form.replySubmit")}
+                  showSecret
+                  guest={guestWriter}
                   result={result}
                 />
               </details>
             )}
-            {isAuthor && (
-              <details>
+            {(isAuthor || guestControls) && (
+              <details open={openFor(`edit-${comment.id}`, `unlock-${comment.id}`)}>
                 <summary>{t("comment:edit")}</summary>
-                <CommentForm
-                  intent="edit"
-                  target={`edit-${comment.id}`}
-                  commentId={comment.id}
-                  defaultValue={comment.content ?? ""}
-                  label={t("comment:form.editContent")}
-                  submitLabel={t("comment:form.editSubmit")}
-                  result={result}
-                />
+                <EditComment comment={comment} guest={guestControls} result={result} />
               </details>
             )}
             {canDelete && <DeleteCommentButton commentId={comment.id} />}
+            {guestControls && !isPostOwner && (
+              <details open={openFor(`delete-${comment.id}`)}>
+                <summary>{t("comment:delete")}</summary>
+                <DeleteCommentButton commentId={comment.id} withPassword result={result} />
+              </details>
+            )}
           </div>
         </article>
       )}
@@ -192,17 +231,75 @@ function CommentItem({
   );
 }
 
-/** 삭제 버튼. 브라우저에서는 한 번 더 묻는다(JS가 없으면 바로 보낸다). */
+/**
+ * 고치기. 비회원 댓글은 비밀번호를 함께 보낸다. 내용을 볼 수 없는 비회원 비밀 댓글은 비밀번호로 먼저 내용을 받는다
+ * (`intent=unlockComment`, 결과의 내용을 채운다).
+ */
+function EditComment({
+  comment,
+  guest,
+  result,
+}: {
+  comment: Comment;
+  guest: boolean;
+  result?: CommentActionData;
+}) {
+  const { t } = useTranslation();
+  const unlockTarget = `unlock-${comment.id}`;
+  const unlocked =
+    result?.ok && result.intent === "unlockComment" && result.target === unlockTarget
+      ? result.comment
+      : null;
+  const unlockMessages = useFormMessages(commentErrorFor(result, unlockTarget));
+  const content = unlocked?.content ?? comment.content;
+  if (content === null) {
+    return (
+      <Form method="post" className="comment-unlock-form" aria-label={t("comment:unlock.form")}>
+        <input type="hidden" name="intent" value="unlockComment" />
+        <input type="hidden" name="target" value={unlockTarget} />
+        <input type="hidden" name="commentId" value={comment.id} />
+        <p>{t("comment:unlock.hint")}</p>
+        <FormAlert message={unlockMessages.form} />
+        <GuestPasswordPrompt error={unlockMessages.fields.guestPassword} />
+        <button type="submit">{t("comment:unlock.submit")}</button>
+      </Form>
+    );
+  }
+  return (
+    <CommentForm
+      key={unlocked ? "unlocked" : "plain"}
+      intent="edit"
+      target={`edit-${comment.id}`}
+      commentId={comment.id}
+      defaultValue={content}
+      label={t("comment:form.editContent")}
+      submitLabel={t("comment:form.editSubmit")}
+      showSecret
+      defaultSecret={comment.secret === true}
+      askGuestPassword={guest}
+      result={result}
+    />
+  );
+}
+
+/** 삭제 버튼. 브라우저에서는 한 번 더 묻는다(JS가 없으면 바로 보낸다). 비회원 댓글은 비밀번호를 함께 보낸다. */
 export function DeleteCommentButton({
   commentId,
   label,
   confirmMessage,
+  withPassword = false,
+  result,
 }: {
   commentId: number;
   label?: string;
   confirmMessage?: string;
+  withPassword?: boolean;
+  result?: CommentActionData;
 }) {
   const { t } = useTranslation();
+  const messages = useFormMessages(
+    withPassword ? commentErrorFor(result, `delete-${commentId}`) : null,
+  );
   const confirmText = confirmMessage ?? t("comment:deleteConfirm");
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (!window.confirm(confirmText)) {
@@ -214,6 +311,12 @@ export function DeleteCommentButton({
       <input type="hidden" name="intent" value="delete" />
       <input type="hidden" name="target" value={`delete-${commentId}`} />
       <input type="hidden" name="commentId" value={commentId} />
+      {withPassword && (
+        <>
+          <FormAlert message={messages.form} />
+          <GuestPasswordPrompt error={messages.fields.guestPassword} />
+        </>
+      )}
       <button type="submit">{label ?? t("comment:delete")}</button>
     </Form>
   );

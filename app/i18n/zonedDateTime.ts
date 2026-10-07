@@ -1,6 +1,13 @@
+import { useRouteLoaderData } from "react-router";
+
+import { DEFAULT_TIME_ZONE } from "./format";
+import type { RootLoaderData } from "./root-data";
+
 /**
- * 콘솔의 `datetime-local` 입력(관리자 시간대의 벽시계 시각)과 UTC ISO 시각을 오간다(003 T102 "기간은 화면 시간대 → UTC").
- * 시간대는 세션 회원의 `timeZone`이고, 모르는 시간대면 UTC로 본다.
+ * `datetime-local` 입력(회원 시간대의 벽시계 시각)과 UTC ISO 시각을 오간다. 003 관리자 콘솔의 기간(T102)과
+ * 004 예약 발행 시각(FR-064, contracts/routes.md "회원 시간대로 입력하고 UTC로 보냄")이 함께 쓴다.
+ * 시간대는 세션 회원의 `timeZone`이고, 모르는 시간대면 UTC로 본다. 서머타임 경계에서 두 번 있는 벽시계 시각(가을)은
+ * 앞의 것으로, 없는 시각(봄)은 바뀌기 전 오프셋으로 계산한 실제 시각으로 본다.
  */
 const LOCAL_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
 
@@ -61,4 +68,10 @@ export function utcIsoToLocal(iso: string | null | undefined, timeZone: string):
   const [y, mo, d, h, mi] = parts(epoch, safeZone(timeZone));
   const pad = (value: number) => String(value).padStart(2, "0");
   return `${y}-${pad(mo)}-${pad(d)}T${pad(h)}:${pad(mi)}`;
+}
+
+/** 화면이 쓸 회원 시간대(비회원·모름은 Asia/Seoul, research.md R22) */
+export function useTimeZone(): string {
+  const root = useRouteLoaderData("root") as (RootLoaderData & { timeZone?: string }) | undefined;
+  return root?.timeZone ?? DEFAULT_TIME_ZONE;
 }

@@ -97,7 +97,10 @@
     "restore": "Restore",
     "restored": "The post was restored.",
     "category": "Category",
-    "noticeBadge": "Notice"
+    "noticeBadge": "Notice",
+    "scheduledAt": "Scheduled for {{date}}",
+    "unschedule": "Cancel schedule",
+    "unscheduled": "The schedule was cancelled. The post is a draft again."
   },
   "settings": {
     "title": "Blog settings",

@@ -97,7 +97,10 @@
     "restore": "復元",
     "restored": "記事を復元しました。",
     "category": "カテゴリ",
-    "noticeBadge": "お知らせ"
+    "noticeBadge": "お知らせ",
+    "scheduledAt": "{{date}} に公開予約",
+    "unschedule": "予約を取り消す",
+    "unscheduled": "予約を取り消しました。記事は下書きに戻りました。"
   },
   "settings": {
     "title": "ブログ設定",

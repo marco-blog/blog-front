@@ -3,12 +3,20 @@ import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { responseCookies } from "~/api/backendCookies.server";
-import Write, { AUTOSAVE_INTERVAL_MS, loader, meta } from "~/routes/write";
+import Write, { AUTOSAVE_INTERVAL_MS, action, loader, meta } from "~/routes/write";
 
 import { fail, mockBackend, ok, type BackendHandler } from "../support/backend";
 import { blog, postDetail, topicNode } from "../support/fixtures";
 import { renderRoutes, rootData } from "../support/render";
-import { caught, expectRedirect, getRequest, routeArgs, statusOf } from "../support/route";
+import {
+  asData,
+  caught,
+  expectRedirect,
+  formRequest,
+  getRequest,
+  routeArgs,
+  statusOf,
+} from "../support/route";
 
 // 에디터(Milkdown Crepe)는 브라우저 전용이라 이 테스트에서는 같은 인터페이스의 입력란으로 바꾼다.
 // `editor.unreported`는 에디터에 들어갔지만 아직 onChange로 알리지 않은 내용(Milkdown은 알림을 늦춰 보낸다)이다.
@@ -176,6 +184,7 @@ describe("write loader", () => {
         commentEnabled: true,
         thumbnailUrl: postDetail.thumbnailUrl,
         notice: false,
+        scheduledAt: null,
       },
       draft: {
         title: "고친 제목",
@@ -339,6 +348,7 @@ describe("write 화면", () => {
           commentEnabled: false,
           thumbnailUrl: null,
           notice: false,
+          scheduledAt: null,
         },
         draft: savedDraft("제목", "본문"),
         latestDraft: null,
@@ -390,6 +400,40 @@ describe("write 화면", () => {
       topicId: null,
       thumbnailMediaKey: null,
       notice: false,
+      scheduledAt: null,
+    });
+  });
+
+  it("보호·예약 발행: 비밀번호와 UTC 예약 시각을 보내고 예약 글 목록으로 이동한다(004)", async () => {
+    const backend = savingBackend({
+      "POST /api/v1/posts/77/publish": ok({ ...postDetail, id: 77, status: "SCHEDULED" }),
+    });
+    renderRoutes(
+      [
+        { path: ":handle/write/:postId?", loader: () => newPost, Component: Write },
+        { path: ":handle/manage/posts", Component: () => <p>scheduled list</p> },
+      ],
+      { initialEntries: ["/marco/write"] },
+    );
+    await type("예약 글", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByLabelText("보호(비밀번호를 아는 사람만)"));
+    fireEvent.change(within(dialog).getByLabelText("보호 글 비밀번호"), {
+      target: { value: "open-sesame" },
+    });
+    fireEvent.click(within(dialog).getByLabelText("예약 발행"));
+    fireEvent.change(within(dialog).getByLabelText("발행할 날짜와 시각"), {
+      target: { value: "2026-10-08T09:00" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "예약 발행" }));
+
+    expect(await screen.findByText("scheduled list")).toBeInTheDocument();
+    expect(backend.calls[1].body).toMatchObject({
+      visibility: "PROTECTED",
+      password: "open-sesame",
+      scheduledAt: "2026-10-08T00:00:00Z",
     });
   });
 
@@ -523,6 +567,7 @@ describe("write 화면", () => {
       topicId: 11,
       thumbnailMediaKey: null,
       notice: false,
+      scheduledAt: null,
     });
   });
 
@@ -540,6 +585,7 @@ describe("write 화면", () => {
           commentEnabled: true,
           thumbnailUrl: null,
           notice: false,
+          scheduledAt: null,
         },
         draft: { ...savedDraft("제목", "본문"), categoryId: 20, tags: ["daily", "life"] },
         latestDraft: null,
@@ -689,6 +735,7 @@ describe("write 화면", () => {
                     commentEnabled: true,
                     thumbnailUrl: null,
                     notice: false,
+                    scheduledAt: null,
                   },
                   draft: savedDraft("쓰던 글", "쓰던 본문"),
                   latestDraft: null,
@@ -732,5 +779,87 @@ describe("write 화면", () => {
     fireEvent.click(within(prompt).getByRole("button", { name: "새 글 쓰기" }));
 
     expect(screen.queryByRole("alertdialog")).toBeNull();
+  });
+});
+
+describe("write 예약 취소(004 T085)", () => {
+  type ActionArgs = Parameters<typeof action>[0];
+  const UNSCHEDULE = "POST /api/v1/posts/55/unschedule";
+  const callAction = (fields: Record<string, string>, handle = "marco", postId = "55") =>
+    action(
+      routeArgs<ActionArgs>(formRequest(`/${handle}/write/${postId}`, fields, loggedIn), {
+        handle,
+        postId,
+      }),
+    );
+
+  it("intent=unschedule은 POST /posts/{id}/unschedule 뒤 같은 작성 화면으로", async () => {
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [UNSCHEDULE]: ok({ id: 55, status: "DRAFT", scheduledAt: null }),
+    });
+    expect(expectRedirect(await caught(callAction({ intent: "unschedule" })))).toBe(
+      "/marco/write/55",
+    );
+    expect(backend.callsTo(UNSCHEDULE)).toHaveLength(1);
+  });
+
+  it("예약 글이 아니면(409) 오류를 돌려주고, 내 블로그가 아니거나 모르는 작업이면 거부", async () => {
+    mockBackend({ [ME]: ok(me), [UNSCHEDULE]: fail(409, "POST_NOT_SCHEDULED") });
+    const conflict = asData<{ resultCode: string }>(await callAction({ intent: "unschedule" }));
+    expect(conflict.data.resultCode).toBe("POST_NOT_SCHEDULED");
+    expect(conflict.init?.status).toBe(409);
+
+    mockBackend({ [ME]: ok(me), [UNSCHEDULE]: fail(403, "FORBIDDEN") });
+    expect(statusOf(await caught(callAction({ intent: "unschedule" })))).toBe(404);
+    expect(statusOf(await caught(callAction({ intent: "unschedule" }, "someone")))).toBe(404);
+    const unknown = asData<{ resultCode: string }>(await callAction({ intent: "publish" }));
+    expect(unknown.init?.status).toBe(400);
+  });
+
+  it("예약 글을 열면 예약 시각 안내와 예약 취소, 발행 설정에 예약 시각이 채워져 있다", async () => {
+    mockBackend();
+    renderRoutes(
+      [
+        {
+          path: ":handle/write/:postId?",
+          loader: () => ({
+            handle: "marco",
+            post: {
+              id: 55,
+              status: "SCHEDULED",
+              visibility: "PROTECTED",
+              commentEnabled: true,
+              thumbnailUrl: null,
+              notice: false,
+              scheduledAt: "2026-10-08T00:00:00Z",
+            },
+            draft: {
+              title: "예약 글",
+              contentMarkdown: "본문",
+              categoryId: null,
+              tags: [],
+              topicId: null,
+              savedAt: "2026-10-07T00:00:00Z",
+            },
+            latestDraft: null,
+            categories: [],
+            topics: [],
+            defaultTopicId: null,
+          }),
+          Component: Write,
+        },
+      ],
+      { initialEntries: ["/marco/write/55"] },
+    );
+
+    const note = await screen.findByRole("note");
+    expect(note).toHaveTextContent("에 발행하도록 예약된 글입니다.");
+    expect(within(note).getByRole("button", { name: "예약 취소" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    expect(screen.getByLabelText("예약 발행")).toBeChecked();
+    expect(screen.getByLabelText("발행할 날짜와 시각")).toHaveValue("2026-10-08T09:00");
+    expect(screen.getByText("바꾸지 않으려면 비워 두세요.")).toBeInTheDocument();
   });
 });

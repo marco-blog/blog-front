@@ -19,7 +19,9 @@
     "next": "다음 글",
     "draft": "임시저장",
     "private": "비공개",
-    "topic": "주제"
+    "topic": "주제",
+    "scheduled": "예약 발행 {{time}}",
+    "protected": "보호 글"
   },
   "publish": {
     "title": "발행 설정",
@@ -34,12 +36,30 @@
     "savePrivate": "비공개 저장",
     "republish": "수정 발행",
     "publishing": "발행하는 중입니다.",
-    "notice": "공지로 등록"
+    "notice": "공지로 등록",
+    "protected": "보호(비밀번호를 아는 사람만)",
+    "password": "보호 글 비밀번호",
+    "passwordKeep": "바꾸지 않으려면 비워 두세요.",
+    "passwordHint": "{{min}}~{{max}}자. 이 비밀번호를 아는 사람만 본문을 볼 수 있습니다.",
+    "scheduleToggle": "예약 발행",
+    "scheduledAt": "발행할 날짜와 시각",
+    "scheduleHint": "{{timeZone}} 시간 기준입니다.",
+    "schedule": "예약 발행"
   },
   "topic": {
     "label": "주제",
     "none": "선택 안 함",
     "hiddenCurrent": "현재 주제(숨김)",
     "hint": "주제를 고르면 포털 주제 페이지에 이 글이 소개될 수 있습니다."
+  },
+  "scheduled": {
+    "notice": "{{time}}에 발행하도록 예약된 글입니다.",
+    "cancel": "예약 취소"
+  },
+  "locked": {
+    "form": "보호 글 열기",
+    "message": "보호된 글입니다. 비밀번호를 입력하면 본문을 볼 수 있습니다.",
+    "password": "비밀번호",
+    "submit": "열기"
   }
 }

@@ -5,7 +5,7 @@ import { Form, Link, data, useActionData, useLoaderData, useNavigation } from "r
 import { requireAdmin, throwAdminError } from "~/admin/access.server";
 import { adminActionError, adminInvalid, type AdminActionData } from "~/admin/actions.server";
 import { parsePostRef } from "~/admin/postRef";
-import { localToUtcIso, utcIsoToLocal } from "~/admin/zonedTime";
+import { localToUtcIso, utcIsoToLocal } from "~/i18n/zonedDateTime";
 import { createApiClient } from "~/api/client.server";
 import type { AdminPortalPost, Curation, CurationStatus } from "~/api/models";
 import type { ApiFieldError } from "~/api/types";

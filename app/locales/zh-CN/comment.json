@@ -23,5 +23,16 @@
   "edited": "已修改",
   "replies": "回复",
   "author": "作者",
-  "unknownAuthor": "未知作者"
+  "unknownAuthor": "未知作者",
+  "secret": {
+    "label": "私密评论",
+    "badge": "私密评论",
+    "hidden": "这是一条私密评论。"
+  },
+  "guest": "访客",
+  "unlock": {
+    "form": "加载私密评论内容",
+    "hint": "要修改私密评论,请先用发表时输入的密码加载内容。",
+    "submit": "加载内容"
+  }
 }

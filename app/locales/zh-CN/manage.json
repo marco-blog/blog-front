@@ -97,7 +97,10 @@
     "restore": "恢复",
     "restored": "文章已恢复。",
     "category": "分类",
-    "noticeBadge": "公告"
+    "noticeBadge": "公告",
+    "scheduledAt": "{{date}} 定时发布",
+    "unschedule": "取消定时",
+    "unscheduled": "已取消定时发布。文章已恢复为草稿。"
   },
   "settings": {
     "title": "博客设置",

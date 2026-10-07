@@ -6,7 +6,10 @@ import { useFormMessages } from "~/api/formErrors";
 import { COMMENT_MAX_LENGTH } from "~/api/models";
 import { FormAlert } from "~/components/form/FormField";
 
-import type { CommentActionData, CommentIntent } from "./actions";
+import { commentErrorFor, type CommentActionData, type CommentIntent } from "./actions";
+import { GuestFields } from "./GuestFields";
+import { GuestPasswordPrompt } from "./GuestPasswordPrompt";
+import { SecretToggle } from "./SecretToggle";
 
 export interface CommentFormProps {
   /** create(댓글·답글) 또는 edit */
@@ -18,12 +21,19 @@ export interface CommentFormProps {
   parentId?: number;
   commentId?: number;
   defaultValue?: string;
+  /** "비밀 댓글" 체크를 보여줄지(004 FR-065) */
+  showSecret?: boolean;
+  defaultSecret?: boolean;
+  /** 비회원 쓰기: 이름·비밀번호 칸(004 FR-066) */
+  guest?: boolean;
+  /** 비회원 댓글 고치기: 작성 때의 비밀번호 칸 */
+  askGuestPassword?: boolean;
   result?: CommentActionData;
 }
 
 /**
  * 댓글·답글 쓰기와 수정 폼. 글 상세 라우트의 `action`으로 보내므로 JS 없이도 동작한다.
- * 내용은 일반 텍스트(1~1000자)이며 화면에는 이스케이프해 보여준다.
+ * 내용은 일반 텍스트(1~1000자)이며 화면에는 이스케이프해 보여준다. 004: 비밀 댓글 체크, 비회원 이름·비밀번호 칸.
  */
 export function CommentForm({
   intent,
@@ -33,6 +43,10 @@ export function CommentForm({
   parentId,
   commentId,
   defaultValue,
+  showSecret = false,
+  defaultSecret = false,
+  guest = false,
+  askGuestPassword = false,
   result,
 }: CommentFormProps) {
   const { t } = useTranslation();
@@ -40,8 +54,7 @@ export function CommentForm({
   const navigation = useNavigation();
   const submitting =
     navigation.state === "submitting" && navigation.formData?.get("target") === target;
-  const error = result && !result.ok && result.target === target ? result : null;
-  const messages = useFormMessages(error);
+  const messages = useFormMessages(commentErrorFor(result, target));
 
   return (
     <Form method="post" className="comment-form" aria-label={label}>
@@ -64,6 +77,17 @@ export function CommentForm({
       <p id={`${id}-hint`} className="field-hint">
         {messages.fields.content ?? t("comment:form.maxLength", { max: COMMENT_MAX_LENGTH })}
       </p>
+      {showSecret && (
+        <SecretToggle
+          label={t("comment:secret.label")}
+          defaultChecked={defaultSecret}
+          disabled={submitting}
+        />
+      )}
+      {guest && <GuestFields errors={messages.fields} disabled={submitting} />}
+      {askGuestPassword && (
+        <GuestPasswordPrompt error={messages.fields.guestPassword} disabled={submitting} />
+      )}
       <button type="submit" disabled={submitting}>
         {submitLabel}
       </button>

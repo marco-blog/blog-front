@@ -236,6 +236,11 @@ export interface Comment {
 export interface CommentWrite {
   content: string;
   parentId?: number | null;
+  /** 비밀 댓글(004 FR-065). 글 주인·작성자만 내용을 본다 */
+  secret?: boolean;
+  /** 비회원 쓰기(004 FR-066): 블로그가 허용하고 비로그인일 때 */
+  guestName?: string;
+  guestPassword?: string;
 }
 
 /** 댓글 내용 최대 길이(backend `Comment.CONTENT_MAX`) */
