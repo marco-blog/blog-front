@@ -57,6 +57,7 @@ describe("방명록 loader", () => {
     const backend = mockBackend({
       [BLOG]: ok({ ...blog, guestWriteEnabled: true }),
       [LIST]: ok(entries, { totalCount: 22 }),
+      "GET /api/v1/captcha/config": ok({ provider: "test", siteKey: null }),
     });
 
     const result = await callLoader("/marco/guestbook?page=2");
@@ -68,6 +69,8 @@ describe("방명록 loader", () => {
         description: blog.description,
         guestWriteEnabled: true,
       },
+      // 005 비회원 쓰기를 허용한 블로그는 CAPTCHA 정보도 함께
+      captcha: { provider: "test", siteKey: null, testToken: "e2e-pass", nonce: null },
       entries,
       totalCount: 22,
       page: 2,
@@ -75,6 +78,15 @@ describe("방명록 loader", () => {
       origin: "http://front.test",
     });
     expect(backend.callsTo(LIST)[0].url.searchParams.get("page")).toBe("1");
+  });
+
+  it("비회원 쓰기를 허용하지 않으면 CAPTCHA 설정을 읽지 않는다", async () => {
+    const backend = mockBackend({ [BLOG]: ok(blog), [LIST]: ok([], { totalCount: 0 }) });
+
+    const result = await callLoader("/marco/guestbook");
+
+    expect(result.captcha).toBeNull();
+    expect(backend.callsTo("GET /api/v1/captcha/config")).toHaveLength(0);
   });
 
   it("꺼진 방명록(404 GUESTBOOK_DISABLED)·없는 블로그는 404", async () => {
@@ -117,7 +129,7 @@ describe("방명록 action", () => {
     expect(backend.callsTo(WRITE)[0].body).toEqual({ content: "놀러 왔어요", secret: true });
   });
 
-  it("create: 비회원은 이름·비밀번호를 함께 보낸다", async () => {
+  it("create: 비회원은 이름·비밀번호·CAPTCHA 토큰을 함께 보낸다", async () => {
     const backend = mockBackend({ [WRITE]: ok(entry(3), { status: 201 }) });
 
     await caught(
@@ -126,6 +138,7 @@ describe("방명록 action", () => {
         content: "안녕하세요",
         guestName: " 지나가던 사람 ",
         guestPassword: "1234",
+        captchaToken: "e2e-pass",
       }),
     );
 
@@ -134,7 +147,30 @@ describe("방명록 action", () => {
       secret: false,
       guestName: "지나가던 사람",
       guestPassword: "1234",
+      captchaToken: "e2e-pass",
     });
+  });
+
+  it.each([
+    [400, "CAPTCHA_FAILED", [], null],
+    [422, "DUPLICATE_CONTENT_SPAM", [], null],
+    [429, "TOO_MANY_REQUESTS", [], null],
+    [400, "VALIDATION_FAILED", [{ field: "content", code: "BANNED_WORD" }], "content"],
+  ])("create: %s %s는 폼 오류로 돌려준다(005)", async (status, code, fieldErrors, field) => {
+    mockBackend({ [WRITE]: fail(status, code, fieldErrors) });
+
+    const result = asData<{ resultCode: string; fieldErrors: { field: string }[] }>(
+      await callAction({
+        intent: "create",
+        content: "광고 광고",
+        guestName: "손님",
+        guestPassword: "1234",
+      }),
+    );
+
+    expect(result.init?.status).toBe(status);
+    expect(result.data.resultCode).toBe(code);
+    if (field) expect(result.data.fieldErrors[0].field).toBe(field);
   });
 
   it("create: 빈 내용·비회원 이름·짧은 비밀번호는 backend를 부르지 않고 필드 오류", async () => {
@@ -366,6 +402,7 @@ describe("방명록 meta", () => {
     }) as unknown as MetaArgs;
   const data = (page: number): LoaderData => ({
     blog: { handle: "marco", title: blog.title, description: null, guestWriteEnabled: false },
+    captcha: null,
     entries: [],
     totalCount: 0,
     page,
@@ -397,6 +434,7 @@ describe("방명록 화면", () => {
   ) {
     const loaderData: LoaderData = {
       blog: { handle: "marco", title: blog.title, description: null, guestWriteEnabled: false },
+      captcha: null,
       entries: [],
       totalCount: 0,
       page: 1,
@@ -427,6 +465,30 @@ describe("방명록 화면", () => {
     expect(within(form).getByLabelText("비밀번호")).toHaveAttribute("type", "password");
     expect(within(form).getByLabelText("비밀글 (블로그 주인과 나만 보기)")).not.toBeChecked();
     expect(screen.getByText("아직 방명록에 남긴 글이 없습니다.")).toBeInTheDocument();
+  });
+
+  it("비회원 쓰기 폼에 CAPTCHA(시험 모드면 숨은 captchaToken), 회원 폼에는 없다(005)", async () => {
+    renderGuestbook({
+      blog: { handle: "marco", title: blog.title, description: null, guestWriteEnabled: true },
+      captcha: { provider: "test", siteKey: null, testToken: "e2e-pass", nonce: null },
+    });
+
+    const form = await screen.findByRole("form", { name: "방명록 쓰기" });
+    const captcha = within(form).getByRole("group", { name: "자동 등록 방지" });
+    expect(captcha.querySelector('input[name="captchaToken"]')).toHaveValue("e2e-pass");
+  });
+
+  it("로그인 회원의 폼에는 CAPTCHA가 없다", async () => {
+    renderGuestbook(
+      {
+        blog: { handle: "marco", title: blog.title, description: null, guestWriteEnabled: true },
+        captcha: { provider: "test", siteKey: null, testToken: "e2e-pass", nonce: null },
+      },
+      { userId: 9, nickname: "손님", role: "USER", blogs: ["guest9"] },
+    );
+
+    const form = await screen.findByRole("form", { name: "방명록 쓰기" });
+    expect(within(form).queryByRole("group", { name: "자동 등록 방지" })).toBeNull();
   });
 
   it("비로그인 + 비회원 허용 안 함이면 로그인 안내 링크", async () => {

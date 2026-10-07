@@ -78,6 +78,7 @@ npm run e2e                          # = npx playwright test
 | `MAILPIT_URL`                           | `http://localhost:8025` | 비밀번호 재설정 메일을 읽는 시나리오를 건너뛴다(backend가 같은 Mailpit으로 메일을 보내야 한다)                                             |
 | `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | 포털(003) 시나리오(`tests/e2e/portal-*`)를 건너뛴다. backend를 아래 포털 시험용 설정으로 띄웠다는 표시다                                   |
 | `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 비회원 댓글·방명록(004) 시나리오를 건너뛴다. backend를 아래 비회원 시험용 설정으로 띄웠다는 표시다                                         |
+| `E2E_MODERATION_TEST_SETTINGS`          | `1`                     | 신고·스팸 방어·트랙백(005) 시나리오(`tests/e2e/moderation-*`)를 건너뛴다. backend를 아래 005 시험용 설정으로 띄웠다는 표시다               |
 | `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 관리자 계정             | 관리자 콘솔·릴리스 노트 시나리오를 건너뛴다. backend의 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL`과 같은 이메일로 가입한 계정이다            |
 | `E2E_ADMIN_TEST_SETTINGS`               | `1`                     | 관리 콘솔(006) 시나리오(`tests/e2e/admin-*`)를 건너뛴다. backend를 `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`(대시보드 캐시 끔)로 띄웠다는 표시다 |
 
@@ -94,9 +95,11 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<관리자 이메일> E2E_ADMIN_PASSWORD=<비밀번호> npm run e2e
 ```
 
-004 블로그 기능 시나리오(`tests/e2e/blog-*`)는 backend local 프로필 기본값으로 돈다. 비회원 글 시나리오는 같은 IP(localhost)에서 여러 번 쓰므로 비회원 쓰기 속도 제한을 넉넉히 띄우고 `E2E_GUEST_TEST_SETTINGS=1`을 준다: `BLOG_GUEST_COMMENT_PER_MINUTE=1000`, `BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`. 백업 시나리오는 backend가 `BLOG_EXPORT_DIR`(local 기본 `./data/exports`)에 zip을 쓴다. 예약 발행·백업 시나리오는 배치 작업 주기(30초)를 기다리므로 1~2분 걸린다.
+004 블로그 기능 시나리오(`tests/e2e/blog-*`)는 backend local 프로필 기본값으로 돈다. 비회원 글 시나리오는 같은 IP(localhost)에서 여러 번 쓰므로 작성 속도 제한을 넉넉히 띄우고 `E2E_GUEST_TEST_SETTINGS=1`을 준다(004의 `BLOG_GUEST_*_PER_MINUTE`는 005의 `BLOG_RATELIMIT_*`로 바뀌었다. 아래 005 설정). 백업 시나리오는 backend가 `BLOG_EXPORT_DIR`(local 기본 `./data/exports`)에 zip을 쓴다. 예약 발행·백업 시나리오는 배치 작업 주기(30초)를 기다리므로 1~2분 걸린다.
 
 포털 시나리오는 메인 "최신 글"·추천·포털 설정처럼 사이트에 하나뿐인 화면을 보므로, Playwright 프로젝트 `portal`로 나머지(`e2e`)가 끝난 뒤 한 번에 한 파일씩 돈다. CI(`ci.yml` e2e-backend, `e2e.yml`)는 위 시험용 설정으로 backend를 띄우고 `scripts/e2e-provision-admin.sh`로 일회용 DB에 관리자 계정을 만든다(가입 API → `role` SUPER_ADMIN).
+
+신고·스팸 방어·트랙백(005) 시나리오(`tests/e2e/moderation-*`)는 금칙어·운영 설정처럼 사이트 전체에 걸리는 값을 바꾸므로 Playwright 프로젝트 `moderation`으로 `portal` 다음에 한 번에 한 파일씩 돈다. 모든 시나리오가 같은 IP(localhost)에서 가입·댓글·발행·업로드·신고·트랙백을 하므로 backend를 다음 값으로 띄우고 `E2E_MODERATION_TEST_SETTINGS=1`을 준다(가입 IP 한도가 기본값이면 001~004 시나리오도 가입에서 막힌다): `BLOG_CAPTCHA_PROVIDER=test`, `BLOG_CAPTCHA_LOGIN_FAILURES_BEFORE_CAPTCHA=100000`, `BLOG_RATELIMIT_SIGNUP_PER_IP_PER_HOUR=100000`, `BLOG_RATELIMIT_COMMENT_PER_MINUTE=1000`, `BLOG_RATELIMIT_GUESTBOOK_PER_MINUTE=1000`, `BLOG_RATELIMIT_POST_PUBLISH_PER_HOUR=100000`, `BLOG_RATELIMIT_MEDIA_UPLOAD_PER_MINUTE=1000`, `BLOG_TRACKBACK_RECEIVE_LIMIT=100000`, `BLOG_REPORTS_MEMBER_PER_HOUR=100000`, `BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR=100000`. CAPTCHA `test`는 토큰 `e2e-pass`만 통과시키며 front의 시험용 위젯과 E2E 도우미(`scripts/e2e-provision-admin.sh`, `tests/e2e/support/backend.ts`)가 이 토큰을 보낸다. 로그인 CAPTCHA 기준을 크게 두는 것은 001 로그인 잠금 시나리오가 같은 IP의 연속 실패 3회 기준에 걸리지 않게 하려는 것이다. 트랙백 보내기 시나리오는 backend의 `blog.base-url`이 front 주소와 같아야 서비스 안 글로 처리된다(local 프로필 기본 `http://localhost:5173`, 다른 포트면 `BLOG_BASE_URL`).
 
 관리 콘솔(006) 시나리오(`tests/e2e/admin-*`)는 권한 부여·회수, 릴리스 노트 게시처럼 사이트 전체에 걸리는 상태를 바꾸므로 Playwright 프로젝트 `admin`으로 `portal`·`moderation`이 끝난 뒤 한 번에 한 파일씩 돈다. 대시보드 수치가 바로 바뀌어야 하므로 backend를 `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`로 띄우고 `E2E_ADMIN_TEST_SETTINGS=1`을 준다. 관리자 계정은 최고 관리자여야 하며, 시나리오는 그 계정 자신의 권한은 바꾸지 않는다.
 

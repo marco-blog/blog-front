@@ -10,7 +10,7 @@ const run = (fields: Record<string, string>) =>
   runCommentAction(formRequest("/marco/123", fields), { postId: 123, returnTo: "/marco/123" });
 
 describe("runCommentAction(004)", () => {
-  it("비회원 쓰기는 이름·비밀번호와 비밀 여부를 함께 보낸다", async () => {
+  it("비회원 쓰기는 이름·비밀번호·CAPTCHA 토큰과 비밀 여부를 함께 보낸다", async () => {
     const backend = mockBackend({ "POST /api/v1/posts/123/comments": ok({ id: 1 }) });
     const result = asData(
       await run({
@@ -20,6 +20,7 @@ describe("runCommentAction(004)", () => {
         secret: "on",
         guestName: " 나그네 ",
         guestPassword: "1234",
+        captchaToken: "e2e-pass",
       }),
     );
     expect(result.data).toEqual({ intent: "create", target: "new", ok: true });
@@ -29,7 +30,28 @@ describe("runCommentAction(004)", () => {
       secret: true,
       guestName: "나그네",
       guestPassword: "1234",
+      captchaToken: "e2e-pass",
     });
+  });
+
+  it("회원 쓰기는 captchaToken을 보내지 않는다", async () => {
+    const backend = mockBackend({ "POST /api/v1/posts/123/comments": ok({ id: 1 }) });
+    await run({ intent: "create", target: "new", content: "안녕", captchaToken: "x" });
+    expect(backend.calls[0].body).not.toHaveProperty("captchaToken");
+  });
+
+  it.each([
+    [400, "CAPTCHA_FAILED", []],
+    [422, "DUPLICATE_CONTENT_SPAM", []],
+    [429, "TOO_MANY_REQUESTS", []],
+    [400, "VALIDATION_FAILED", [{ field: "content", code: "BANNED_WORD" }]],
+  ])("%s %s는 폼 오류(005 스팸 방어)", async (status, code, fieldErrors) => {
+    mockBackend({ "POST /api/v1/posts/123/comments": fail(status, code, fieldErrors) });
+    const result = asData<{ resultCode: string; fieldErrors: unknown[]; ok: boolean }>(
+      await run({ intent: "create", target: "new", content: "광고 광고" }),
+    );
+    expect(result.init?.status).toBe(status);
+    expect(result.data).toMatchObject({ ok: false, resultCode: code, fieldErrors });
   });
 
   it("비회원 이름·비밀번호 미리 검사(backend를 부르지 않음)", async () => {

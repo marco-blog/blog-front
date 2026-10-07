@@ -9,6 +9,8 @@ import { writerMode } from "~/blog/guestAuthor";
 import { isValidHandle } from "~/blog/ids";
 import { parsePage, POST_PAGE_SIZE, withPage } from "~/blog/listing";
 import { Pagination } from "~/components/Pagination";
+import { captchaView } from "~/components/captcha/captcha.server";
+import { CaptchaContext } from "~/components/captcha/CaptchaContext";
 import type { GuestbookActionData } from "~/components/guestbook/actions";
 import { runGuestbookAction } from "~/components/guestbook/actions.server";
 import { GuestbookForm } from "~/components/guestbook/GuestbookForm";
@@ -32,9 +34,10 @@ export function guestbookHref(handle: string, page = 1): string {
 
 /**
  * 방명록(`/:handle/guestbook?page=`, SSR, 004 FR-056~058·066). 최상위 글 최신순 20개와 각 글의 주인 답글.
- * 방명록을 끈 블로그는 주인 외에 404(`GUESTBOOK_DISABLED`).
+ * 방명록을 끈 블로그는 주인 외에 404(`GUESTBOOK_DISABLED`). 비회원 쓰기를 허용한 블로그면 CAPTCHA 정보도 읽는다(005 FR-141,
+ * 비회원 쓰기 폼에만 그린다).
  */
-export async function loader({ request, params }: Route.LoaderArgs) {
+export async function loader({ request, params, context }: Route.LoaderArgs) {
   const { handle } = params;
   if (!isValidHandle(handle)) {
     throw data(null, { status: 404 });
@@ -45,13 +48,15 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     api.get<Blog>(`/blogs/${handle}`),
     api.send<GuestbookEntry[]>(`/blogs/${handle}/guestbook`, { query: { page: page - 1 } }),
   ]).catch(throwApiErrorResponse);
+  const guestWriteEnabled = blog.guestWriteEnabled ?? false;
   return {
     blog: {
       handle: blog.handle,
       title: blog.title,
       description: blog.description,
-      guestWriteEnabled: blog.guestWriteEnabled ?? false,
+      guestWriteEnabled,
     },
+    captcha: guestWriteEnabled ? await captchaView(request, context) : null,
     entries: entries.result,
     totalCount: entries.totalCount ?? entries.result.length,
     page,
@@ -96,7 +101,7 @@ export function meta({ loaderData, matches }: Route.MetaArgs) {
 
 export default function BlogGuestbook() {
   const { t } = useTranslation();
-  const { blog, entries, totalCount, page, pageSize } = useLoaderData<typeof loader>();
+  const { blog, captcha, entries, totalCount, page, pageSize } = useLoaderData<typeof loader>();
   const actionData = useActionData<GuestbookActionData>();
   // 신고 결과는 신고 버튼이 직접 읽는다(ReportButton).
   const result = isReportResult(actionData) ? undefined : actionData;
@@ -107,12 +112,14 @@ export default function BlogGuestbook() {
   return (
     <main className="blog-guestbook">
       <h1>{t("guestbook:title")}</h1>
-      <GuestbookForm
-        key={`${totalCount}-${entries[0]?.id ?? 0}`}
-        mode={mode}
-        loginHref={loginPath(guestbookHref(blog.handle, page))}
-        result={result}
-      />
+      <CaptchaContext value={captcha ?? null}>
+        <GuestbookForm
+          key={`${totalCount}-${entries[0]?.id ?? 0}`}
+          mode={mode}
+          loginHref={loginPath(guestbookHref(blog.handle, page))}
+          result={result}
+        />
+      </CaptchaContext>
       <GuestbookList
         entries={entries}
         viewerId={viewer?.userId ?? null}

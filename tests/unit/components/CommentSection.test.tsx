@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Comment } from "~/api/models";
 import type { CommentActionData } from "~/components/comment/actions";
+import type { CaptchaView } from "~/components/captcha/captcha.server";
+import { CaptchaContext } from "~/components/captcha/CaptchaContext";
 import { CommentSection, type CommentSectionProps } from "~/components/comment/CommentSection";
 
 import { renderRoutes } from "../support/render";
@@ -59,6 +61,8 @@ const defaults: CommentSectionProps = {
 
 interface RenderOptions {
   user?: typeof OWNER | null;
+  /** 005 화면이 CaptchaContext로 주는 CAPTCHA 정보 */
+  captcha?: CaptchaView | null;
   action?: (form: FormData) => CommentActionData | Promise<CommentActionData>;
 }
 
@@ -73,7 +77,11 @@ function renderSection(props: Partial<CommentSectionProps> = {}, options: Render
   );
   function Page() {
     const result = useActionData<CommentActionData>();
-    return <CommentSection {...defaults} {...props} result={result} />;
+    return (
+      <CaptchaContext value={options.captcha ?? null}>
+        <CommentSection {...defaults} {...props} result={result} />
+      </CaptchaContext>
+    );
   }
   renderRoutes([{ path: "marco/123", Component: Page, action }], {
     initialEntries: ["/marco/123"],
@@ -394,6 +402,72 @@ describe("CommentSection 비밀·비회원 댓글(004 T087)", () => {
     const sent = Object.fromEntries(await action.mock.calls[0][0].request.formData());
     expect(sent).toMatchObject({ guestName: "나그네", guestPassword: "1234", content: "안녕" });
     expect(screen.queryByRole("link", { name: "댓글을 쓰려면 로그인하세요" })).toBeNull();
+  });
+
+  it("비회원 쓰기 폼에 CAPTCHA(005): 토큰을 함께 보내고, 오류 문구를 폼에", async () => {
+    const sent: Record<string, FormDataEntryValue>[] = [];
+    const action = renderSection(
+      { guestWriteEnabled: true },
+      {
+        captcha: { provider: "test", siteKey: null, testToken: "e2e-pass", nonce: null },
+        action: (form) => (
+          sent.push(Object.fromEntries(form)),
+          {
+            intent: "create",
+            target: "new",
+            ok: false,
+            resultCode: "DUPLICATE_CONTENT_SPAM",
+            field: null,
+            fieldErrors: [],
+          }
+        ),
+      },
+    );
+    const form = await screen.findByRole("form", { name: "댓글 내용" });
+    expect(within(form).getByRole("group", { name: "자동 등록 방지" })).toBeInTheDocument();
+    fireEvent.change(within(form).getByLabelText("댓글 내용"), { target: { value: "광고" } });
+    fireEvent.change(within(form).getByLabelText("이름"), { target: { value: "나그네" } });
+    fireEvent.change(within(form).getByLabelText("비밀번호"), { target: { value: "1234" } });
+    fireEvent.click(within(form).getByRole("button", { name: "댓글 등록" }));
+
+    await vi.waitFor(() => expect(sent).toHaveLength(1));
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(sent[0]).toMatchObject({ captchaToken: "e2e-pass" });
+    expect(
+      await screen.findByText("같은 내용을 짧은 시간에 여러 번 쓸 수 없습니다."),
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    ["TOO_MANY_REQUESTS", [], "요청이 너무 많습니다"],
+    [
+      "VALIDATION_FAILED",
+      [{ field: "content", code: "BANNED_WORD" }],
+      "사용할 수 없는 단어가 있습니다.",
+    ],
+  ])("회원 쓰기 오류 %s 문구(005)", async (resultCode, fieldErrors, message) => {
+    renderSection(
+      {},
+      {
+        user: VISITOR,
+        captcha: { provider: "test", siteKey: null, testToken: "e2e-pass", nonce: null },
+        action: () => ({
+          intent: "create",
+          target: "new",
+          ok: false,
+          resultCode,
+          field: null,
+          fieldErrors,
+        }),
+      },
+    );
+    const form = await screen.findByRole("form", { name: "댓글 내용" });
+    // 회원 폼에는 CAPTCHA가 없다
+    expect(within(form).queryByRole("group", { name: "자동 등록 방지" })).toBeNull();
+    fireEvent.change(within(form).getByLabelText("댓글 내용"), { target: { value: "광고" } });
+    fireEvent.click(within(form).getByRole("button", { name: "댓글 등록" }));
+
+    expect(await screen.findByText(new RegExp(message))).toBeInTheDocument();
   });
 
   it("비회원 댓글은 비로그인 방문자가 비밀번호로 고치고 지운다", async () => {

@@ -30,6 +30,7 @@ import type {
   PostStatus,
   SavedDraft,
   TopicNode,
+  TrackbackPing,
   Visibility,
 } from "~/api/models";
 import { rememberLastBlog } from "~/auth/lastBlog.server";
@@ -108,11 +109,13 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (postId === null) {
     throw notFound();
   }
-  const [post, draft, categories, topics] = await Promise.all([
+  const [post, draft, categories, topics, pings] = await Promise.all([
     backend.get<PostDetail>(`/posts/${postId}`),
     backend.get<DraftContent>(`/posts/${postId}/draft`),
     backend.get<CategoryNode[]>(`/blogs/${handle}/categories`),
     topicsRequest,
+    // 005 보낸 트랙백 결과. 읽지 못하면 안내만 보인다.
+    backend.get<TrackbackPing[]>(`/posts/${postId}/trackback-pings`).catch(() => null),
   ]).catch(toNotFound);
   if (post.blogHandle !== handle) {
     throw notFound();
@@ -140,6 +143,7 @@ export async function loader({ request, params }: Route.LoaderArgs) {
     categories,
     topics,
     defaultTopicId: null,
+    pings,
   };
 }
 
@@ -201,6 +205,8 @@ interface WriteData {
   topics: TopicNode[];
   /** 새 글에 미리 고를 블로그 기본 주제 */
   defaultTopicId: number | null;
+  /** 이미 있는 글이 보낸 트랙백(005). 새 글이면 없음, 읽지 못했으면 null */
+  pings?: TrackbackPing[] | null;
 }
 
 export default function WritePage() {
@@ -228,6 +234,7 @@ function Writer({
   categories,
   topics,
   defaultTopicId,
+  pings,
 }: WriteData) {
   const { t } = useTranslation();
   const format = useDateFormat();
@@ -350,7 +357,12 @@ function Writer({
       try {
         return (await uploadMedia(file, "POST")).url;
       } catch (error) {
-        setUploadError(errorMessage(t, isApiError(error) ? error : null));
+        // 005 업로드 속도 한도(1분 30개)는 "잠시 후 다시 올려 주세요"
+        setUploadError(
+          isApiError(error) && error.resultCode === "TOO_MANY_REQUESTS"
+            ? t("media:upload.tooMany")
+            : errorMessage(t, isApiError(error) ? error : null),
+        );
         throw error;
       }
     },
@@ -387,6 +399,7 @@ function Writer({
           notice: settings.notice,
           ...(settings.password === undefined ? {} : { password: settings.password }),
           scheduledAt: settings.scheduledAt,
+          ...(settings.trackbackUrls ? { trackbackUrls: settings.trackbackUrls } : {}),
         },
       });
       // 예약한 글은 아직 공개 주소가 없으므로 예약 글 목록으로 간다.
@@ -408,6 +421,9 @@ function Writer({
     if (field === "topicId") {
       return t("post:topic.label");
     }
+    if (field.startsWith("trackbackUrls")) {
+      return t("trackback:send.label");
+    }
     return field.startsWith("tags") ? t("tag:input.label") : null;
   }
 
@@ -416,7 +432,11 @@ function Writer({
       return error.fieldErrors
         .map((fieldError) => {
           const label = fieldLabel(fieldError.field);
-          const message = fieldErrorMessage(t, fieldError);
+          // 005: 트랙백 주소 개수 초과는 글자 수가 아니라 개수로 알린다
+          const message =
+            fieldError.field === "trackbackUrls" && fieldError.code === "TOO_LONG"
+              ? t("trackback:send.tooMany", { max: fieldError.params?.max ?? "" })
+              : fieldErrorMessage(t, fieldError);
           return label ? `${label}: ${message}` : message;
         })
         .join(" ");
@@ -531,6 +551,7 @@ function Writer({
           }}
           pending={publishing}
           error={publishError}
+          pings={post ? pings : undefined}
           onClose={closePublish}
           onPublish={(settings) => void publish(settings)}
         />

@@ -150,6 +150,7 @@ describe("/admin 화면", () => {
       "콘텐츠 관리",
       "숨긴 글",
       "신고 관리 처리 대기 3건",
+      "스팸 방어 설정",
       "예약어",
       "서비스 설정",
       "관리자 권한",
@@ -168,7 +169,6 @@ describe("/admin 화면", () => {
       "page",
     );
     expect(within(menu).queryByRole("link", { name: "외부 블로그 관리" })).toBeNull();
-    expect(within(menu).queryByRole("link", { name: "스팸 방어 설정" })).toBeNull();
     expect(menu.closest("details")).toHaveAttribute("open");
     expect(screen.getByText("운영자")).toBeInTheDocument();
     expect(screen.getByText("최고 관리자")).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe("/admin 화면", () => {
     ]);
   });
 
-  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글, 006 콘솔)이 /:handle 계열보다 앞에", () => {
+  it("라우트: /admin 아래 화면(003 4개, 005 신고·회원·숨긴 글·스팸, 006 콘솔)이 /:handle 계열보다 앞에", () => {
     const paths = routes.map((route) => route.path);
     const admin = routes.find((route) => route.path === "admin");
     expect(paths.indexOf("admin")).toBeLessThan(firstBlogRoute(paths));
@@ -203,6 +203,7 @@ describe("/admin 화면", () => {
       "users",
       "users/:id",
       "contents/hidden-posts",
+      "spam",
       "contents",
       "contents/posts",
       "contents/comments",

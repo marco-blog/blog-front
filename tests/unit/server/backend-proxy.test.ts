@@ -279,3 +279,75 @@ describe("backendProxy 백업 파일 내려받기(004 US4)", () => {
     expect(rest).toBe("rest");
   });
 });
+
+describe("backendProxy — 트랙백 받기(005 T096)", () => {
+  const received: { url?: string; headers: IncomingHttpHeaders; body: Buffer }[] = [];
+  const XML = '<?xml version="1.0" encoding="utf-8"?>\n<response>\n<error>0</error>\n</response>\n';
+  let backend: Server;
+  let front: Server;
+  let frontUrl: string;
+
+  beforeAll(async () => {
+    backend = createServer((req, res) => {
+      const chunks: Buffer[] = [];
+      req.on("data", (chunk: Buffer) => chunks.push(chunk));
+      req.on("end", () => {
+        received.push({ url: req.url, headers: req.headers, body: Buffer.concat(chunks) });
+        res.writeHead(200, { "content-type": "text/xml; charset=utf-8" });
+        res.end(XML);
+      });
+    });
+    const backendUrl = await listen(backend);
+    const app = express();
+    app.use(requestId());
+    app.use(backendProxy(backendUrl));
+    app.use((_req, res) => {
+      res.status(200).send("front");
+    });
+    front = createServer(app);
+    frontUrl = await listen(front);
+  });
+
+  afterAll(async () => {
+    await Promise.all([close(front), close(backend)]);
+  });
+
+  it("EUC-KR 본문 바이트와 Content-Type charset을 바꾸지 않고 넘기고, 응답 XML을 그대로 돌려준다", async () => {
+    received.length = 0;
+    // "title=제목&url=..." 을 EUC-KR 바이트로(제 = C1 A6, 목 = B8 F1)
+    const body = Buffer.concat([
+      Buffer.from("title="),
+      Buffer.from([0xc1, 0xa6, 0xb8, 0xf1]),
+      Buffer.from("&url=http%3A%2F%2Fold.example%2F1&blog_name="),
+      Buffer.from([0xb5, 0xb5]),
+    ]);
+    const response = await fetch(`${frontUrl}/marco/123/trackback`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded; charset=EUC-KR",
+        "x-forwarded-for": "203.0.113.7",
+      },
+      body,
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("text/xml; charset=utf-8");
+    expect(await response.text()).toBe(XML);
+    expect(received).toHaveLength(1);
+    const [request] = received;
+    expect(request.url).toBe("/marco/123/trackback");
+    expect(request.headers["content-type"]).toBe(
+      "application/x-www-form-urlencoded; charset=EUC-KR",
+    );
+    expect(request.body.equals(body)).toBe(true);
+    // 보낸 블로그의 IP를 backend가 알 수 있게(IP 한도·기록) X-Forwarded-For를 넘긴다
+    expect(request.headers["x-forwarded-for"]).toContain("203.0.113.7");
+  });
+
+  it("GET 트랙백 주소는 넘기지 않는다(front 404 화면)", async () => {
+    received.length = 0;
+    const response = await fetch(`${frontUrl}/marco/123/trackback`);
+    expect(await response.text()).toBe("front");
+    expect(received).toHaveLength(0);
+  });
+});

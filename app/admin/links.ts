@@ -61,7 +61,7 @@ export const ADMIN_MENU: readonly AdminMenuItem[] = [
     spec: "007",
     available: false,
   },
-  { key: "spam", path: "/admin/spam", group: "operations", spec: "005", available: false },
+  { key: "spam", path: "/admin/spam", group: "operations", spec: "005", available: true },
   {
     key: "reservedHandles",
     path: "/admin/reserved-handles",

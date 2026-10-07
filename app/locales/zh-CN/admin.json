@@ -80,7 +80,13 @@
     "visibility": "公开范围",
     "page": "页码",
     "size": "每页数量",
-    "lang": "语言"
+    "lang": "语言",
+    "duplicate": {
+      "windowMinutes": "时间窗口（分钟）",
+      "maxCount": "允许次数"
+    },
+    "word": "违禁词",
+    "scope": "适用范围"
   },
   "lookup": {
     "submit": "查看文章",
@@ -610,6 +616,74 @@
       "fill": "用此内容填充编辑器",
       "back": "返回修订列表",
       "editedBy": "{{nickname}} · {{time}}"
+    }
+  },
+  "spam": {
+    "title": "反垃圾设置",
+    "hint": "更改会立即生效。管理员不受发布频率限制和重复规则约束。",
+    "rateLimits": "发布频率限制",
+    "duplicate": "重复评论规则",
+    "limit": "上限",
+    "keys": {
+      "ratelimit-post-publish-per-hour": {
+        "title": "发布文章（每小时）",
+        "hint": "每位会员每小时首次发布或预约的文章数（所有博客合计，1~10000）。"
+      },
+      "ratelimit-comment-per-minute": {
+        "title": "评论（每分钟）",
+        "hint": "每位会员或每个访客 IP 每分钟可发表的评论数（1~10000）。"
+      },
+      "ratelimit-guestbook-per-minute": {
+        "title": "留言板（每分钟）",
+        "hint": "每位会员或每个访客 IP 每分钟可发表的留言数（1~10000）。"
+      },
+      "ratelimit-media-upload-per-minute": {
+        "title": "图片上传（每分钟）",
+        "hint": "每位会员每分钟可上传的图片数（1~10000）。"
+      },
+      "ratelimit-signup-per-ip-per-hour": {
+        "title": "注册（每 IP 每小时）",
+        "hint": "同一 IP 每小时可注册的次数（1~100000）。"
+      },
+      "spam-duplicate-comment": {
+        "title": "重复内容",
+        "hint": "同一人在时间窗口（1~1440 分钟）内发表相同内容超过允许次数（2~100）时拒绝。少于 10 个字符的内容不计入。"
+      }
+    },
+    "words": {
+      "title": "违禁词",
+      "hint": "名称类适用于昵称、博客地址、博客标题和访客名称；正文类适用于文章、评论和留言。名称类只能设为拒绝。",
+      "search": "搜索违禁词",
+      "searchSubmit": "搜索",
+      "add": "添加违禁词",
+      "addSubmit": "添加",
+      "word": "违禁词",
+      "scope": "适用范围",
+      "action": "处理方式",
+      "setting": "适用范围与处理方式",
+      "createdBy": "添加者",
+      "update": "修改",
+      "delete": "删除",
+      "deleteLabel": "删除违禁词：{{word}}",
+      "deleteConfirm": "要删除违禁词“{{word}}”吗？",
+      "count_one": "违禁词 {{count}} 个",
+      "count_other": "违禁词 {{count}} 个",
+      "empty": "还没有违禁词。",
+      "noMatch": "没有匹配的违禁词。",
+      "scopes": {
+        "NAME": "名称类",
+        "CONTENT": "正文类",
+        "ALL": "全部"
+      },
+      "actions": {
+        "REJECT": "拒绝",
+        "MASK": "遮盖"
+      },
+      "done": {
+        "addWord": "已添加违禁词。",
+        "updateWord": "已修改违禁词。",
+        "deleteWord": "已删除违禁词。"
+      }
     }
   }
 }

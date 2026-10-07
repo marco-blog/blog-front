@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import type { TrackbackPing } from "~/api/models";
 import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -20,6 +21,15 @@ import {
 
 // 에디터(Milkdown Crepe)는 브라우저 전용이라 이 테스트에서는 같은 인터페이스의 입력란으로 바꾼다.
 // `editor.unreported`는 에디터에 들어갔지만 아직 onChange로 알리지 않은 내용(Milkdown은 알림을 늦춰 보낸다)이다.
+const ping: TrackbackPing = {
+  id: 1,
+  targetUrl: "https://other.example/tb/1",
+  status: "SUCCESS",
+  errorCode: null,
+  errorMessage: null,
+  attemptedAt: "2026-10-06T05:00:00Z",
+  createdAt: "2026-10-06T05:00:00Z",
+};
 const editor = vi.hoisted(() => ({ unreported: null as string | null }));
 vi.mock("~/components/Editor/Editor", async () => {
   const { useImperativeHandle } = await import("react");
@@ -171,6 +181,7 @@ describe("write loader", () => {
         savedAt: "2026-10-06T05:00:00Z",
       }),
       [TOPICS]: ok(topics),
+      "GET /api/v1/posts/123/trackback-pings": ok([ping]),
     });
 
     const result = await callLoader("/marco/write/123", { handle: "marco", postId: "123" });
@@ -198,6 +209,7 @@ describe("write loader", () => {
       categories: tree,
       topics,
       defaultTopicId: null,
+      pings: [ping],
     });
   });
 
@@ -355,6 +367,7 @@ describe("write 화면", () => {
         categories: tree,
         topics,
         defaultTopicId: null,
+        pings: [],
       },
       "/marco/write/123",
     );
@@ -506,6 +519,97 @@ describe("write 화면", () => {
     );
   });
 
+  it("트랙백 보내기(005): 입력한 주소를 trackbackUrls로 함께 보낸다", async () => {
+    const backend = savingBackend({
+      "POST /api/v1/posts/77/publish": ok({ ...postDetail, id: 77 }),
+    });
+    renderWrite();
+    await type("새 글", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    fireEvent.change(screen.getByLabelText("트랙백 보내기"), {
+      target: { value: "https://other.example/1/trackback" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(await screen.findByText("post page")).toBeInTheDocument();
+    expect(backend.callsTo("POST /api/v1/posts/77/publish")[0].body).toMatchObject({
+      trackbackUrls: ["https://other.example/1/trackback"],
+    });
+  });
+
+  it.each([
+    [
+      fail(400, "VALIDATION_FAILED", [
+        { field: "trackbackUrls[0]", code: "INVALID" },
+        { field: "trackbackUrls", code: "TOO_LONG", params: { max: 10 } },
+      ]),
+      "트랙백 보내기: 올바르지 않은 값입니다. 트랙백 보내기: 트랙백은 한 번에 10개까지 보낼 수 있습니다.",
+    ],
+    [fail(422, "TRACKBACK_NOT_ALLOWED"), "공개 글에서만 트랙백을 보낼 수 있습니다."],
+  ])("트랙백 주소 오류 문구(005) %#", async (response, message) => {
+    savingBackend({ "POST /api/v1/posts/77/publish": response });
+    renderWrite();
+    await type("새 글", "본문");
+
+    fireEvent.click(screen.getByRole("button", { name: "완료" }));
+    fireEvent.change(screen.getByLabelText("트랙백 보내기"), {
+      target: { value: "nope" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(await within(screen.getByRole("dialog")).findByRole("alert")).toHaveTextContent(message);
+  });
+
+  it("이미 있는 글의 발행 설정에 보낸 트랙백 결과(성공·실패 이유·보내는 중)", async () => {
+    mockBackend();
+    renderWrite(
+      {
+        handle: "marco",
+        post: {
+          id: 123,
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          commentEnabled: true,
+          thumbnailUrl: null,
+          notice: false,
+          scheduledAt: null,
+        },
+        draft: savedDraft("제목", "본문"),
+        latestDraft: null,
+        categories: tree,
+        topics,
+        defaultTopicId: null,
+        pings: [
+          ping,
+          {
+            ...ping,
+            id: 2,
+            targetUrl: "https://down.example/tb",
+            status: "FAILED",
+            errorCode: "REMOTE_ERROR",
+            errorMessage: "Duplicate trackback",
+          },
+          {
+            ...ping,
+            id: 3,
+            targetUrl: "https://slow.example/tb",
+            status: "PENDING",
+            attemptedAt: null,
+          },
+        ],
+      },
+      "/marco/write/123",
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "완료" }));
+    const results = within(screen.getByRole("dialog")).getByRole("list", { name: "보낸 트랙백" });
+    const items = within(results).getAllByRole("listitem");
+    expect(items[0]).toHaveTextContent("https://other.example/tb/1 성공");
+    expect(items[1]).toHaveTextContent("실패 상대 블로그가 받지 않았습니다. (Duplicate trackback)");
+    expect(items[2]).toHaveTextContent("보내는 중");
+  });
+
   it('"임시저장" 버튼: 처음에는 이 블로그에 새 임시저장 글을 만들고, 다음부터는 그 글에 저장한다', async () => {
     const backend = savingBackend();
     renderWrite();
@@ -592,6 +696,7 @@ describe("write 화면", () => {
         categories: tree,
         topics,
         defaultTopicId: null,
+        pings: [],
       },
       "/marco/write/123",
     );
@@ -742,6 +847,7 @@ describe("write 화면", () => {
                   categories: tree,
                   topics,
                   defaultTopicId: null,
+                  pings: [],
                 }
               : {
                   ...newPost,

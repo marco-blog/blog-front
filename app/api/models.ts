@@ -257,6 +257,8 @@ export interface CommentWrite {
   /** 비회원 쓰기(004 FR-066): 블로그가 허용하고 비로그인일 때 */
   guestName?: string;
   guestPassword?: string;
+  /** 비회원 쓰기의 CAPTCHA 토큰(005 FR-141). 회원은 보내지 않는다 */
+  captchaToken?: string;
 }
 
 /** 댓글 내용 최대 길이(backend `Comment.CONTENT_MAX`) */
@@ -637,6 +639,8 @@ export interface GuestbookWrite {
   parentId?: number | null;
   guestName?: string;
   guestPassword?: string;
+  /** 비회원 쓰기의 CAPTCHA 토큰(005 FR-141). 회원은 보내지 않는다 */
+  captchaToken?: string;
 }
 
 /** 방명록·비회원 글 길이 제한(backend와 같다) */

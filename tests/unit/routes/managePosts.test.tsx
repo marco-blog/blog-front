@@ -127,3 +127,57 @@ describe("글 관리: 예약·보호(004)", () => {
     expect(result.init?.status).toBe(409);
   });
 });
+
+describe("글 관리: 트랙백 결과(005 T094)", () => {
+  const PINGS = "GET /api/v1/posts/5/trackback-pings";
+
+  it("발행된 글마다 트랙백 결과 펼침, 처음 펼칠 때 한 번만 읽는다", async () => {
+    const backend = renderPosts("/marco/manage/posts", {
+      [POSTS]: ok([
+        postSummary(5, { title: "발행 글", status: "PUBLISHED" }),
+        postSummary(6, { title: "임시 글", status: "DRAFT" }),
+      ]),
+      [PINGS]: ok([
+        {
+          id: 1,
+          targetUrl: "https://other.example/tb",
+          status: "FAILED",
+          errorCode: "TIMEOUT",
+          errorMessage: null,
+          attemptedAt: "2026-10-06T05:00:00Z",
+          createdAt: "2026-10-06T05:00:00Z",
+        },
+      ]),
+    });
+
+    const toggles = await screen.findAllByText("트랙백 결과");
+    expect(toggles).toHaveLength(1);
+    const details = toggles[0].closest("details")!;
+    expect(details).toHaveTextContent("결과를 보려면 자바스크립트를 켜거나");
+
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    expect(await within(details).findByText("https://other.example/tb")).toBeInTheDocument();
+    expect(details).toHaveTextContent("실패 응답이 없어 시간이 지났습니다.");
+
+    details.open = false;
+    fireEvent(details, new Event("toggle"));
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    expect(backend.callsTo(PINGS)).toHaveLength(1);
+  });
+
+  it("결과를 읽지 못하면 안내, 비었으면 빈 안내", async () => {
+    renderPosts("/marco/manage/posts", {
+      [POSTS]: ok([postSummary(5, { title: "발행 글", status: "PUBLISHED" })]),
+      [PINGS]: fail(500, "INTERNAL_ERROR"),
+    });
+
+    const details = (await screen.findByText("트랙백 결과")).closest("details")!;
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    expect(
+      await within(details).findByText("보낸 트랙백 결과를 불러오지 못했습니다."),
+    ).toBeInTheDocument();
+  });
+});

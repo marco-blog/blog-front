@@ -80,7 +80,13 @@
     "visibility": "Visibility",
     "page": "Page",
     "size": "Page size",
-    "lang": "Language"
+    "lang": "Language",
+    "duplicate": {
+      "windowMinutes": "Window (minutes)",
+      "maxCount": "Allowed count"
+    },
+    "word": "Banned word",
+    "scope": "Scope"
   },
   "lookup": {
     "submit": "Check post",
@@ -610,6 +616,74 @@
       "fill": "Fill the editor with this content",
       "back": "Back to revisions",
       "editedBy": "{{nickname}} · {{time}}"
+    }
+  },
+  "spam": {
+    "title": "Spam protection",
+    "hint": "Changes apply immediately. Administrators are not subject to rate limits or the repetition rule.",
+    "rateLimits": "Rate limits",
+    "duplicate": "Repeated comments",
+    "limit": "Limit",
+    "keys": {
+      "ratelimit-post-publish-per-hour": {
+        "title": "Publishing (per hour)",
+        "hint": "Posts a member can publish or schedule for the first time per hour, across all their blogs (1–10000)."
+      },
+      "ratelimit-comment-per-minute": {
+        "title": "Comments (per minute)",
+        "hint": "Comments per minute for one member or one guest IP (1–10000)."
+      },
+      "ratelimit-guestbook-per-minute": {
+        "title": "Guestbook (per minute)",
+        "hint": "Guestbook entries per minute for one member or one guest IP (1–10000)."
+      },
+      "ratelimit-media-upload-per-minute": {
+        "title": "Image uploads (per minute)",
+        "hint": "Images one member can upload per minute (1–10000)."
+      },
+      "ratelimit-signup-per-ip-per-hour": {
+        "title": "Sign-ups (per IP per hour)",
+        "hint": "Sign-ups allowed from the same IP per hour (1–100000)."
+      },
+      "spam-duplicate-comment": {
+        "title": "Repeated content",
+        "hint": "Rejects the same content from the same person beyond the allowed count (2–100) within the window (1–1440 minutes). Texts under 10 characters are not counted."
+      }
+    },
+    "words": {
+      "title": "Banned words",
+      "hint": "Name words apply to nicknames, blog addresses, blog titles and guest names; content words apply to posts, comments and guestbook entries. Name words can only be rejected.",
+      "search": "Search banned words",
+      "searchSubmit": "Search",
+      "add": "Add banned word",
+      "addSubmit": "Add",
+      "word": "Banned word",
+      "scope": "Scope",
+      "action": "Action",
+      "setting": "Scope and action",
+      "createdBy": "Added by",
+      "update": "Update",
+      "delete": "Delete",
+      "deleteLabel": "Delete banned word: {{word}}",
+      "deleteConfirm": "Delete the banned word \"{{word}}\"?",
+      "count_one": "{{count}} banned word",
+      "count_other": "{{count}} banned words",
+      "empty": "No banned words yet.",
+      "noMatch": "No matching banned words.",
+      "scopes": {
+        "NAME": "Names",
+        "CONTENT": "Content",
+        "ALL": "All"
+      },
+      "actions": {
+        "REJECT": "Reject",
+        "MASK": "Mask"
+      },
+      "done": {
+        "addWord": "Banned word added.",
+        "updateWord": "Banned word updated.",
+        "deleteWord": "Banned word deleted."
+      }
     }
   }
 }

@@ -7,6 +7,7 @@ import { COMMENT_MAX_LENGTH, type Comment, type CommentWrite } from "~/api/model
 import type { ApiFieldError } from "~/api/types";
 import { loginPath } from "~/auth/paths";
 import { guestFieldErrors, guestPasswordErrors } from "~/blog/guestAuthor";
+import { CAPTCHA_FIELD } from "~/components/captcha/Captcha";
 import { parsePostId } from "~/blog/ids";
 
 import type { CommentActionData, CommentIntent } from "./actions";
@@ -79,7 +80,9 @@ export async function runCommentAction(request: Request, options: CommentActionO
           content,
           parentId,
           secret,
-          ...(isGuest ? { guestName, guestPassword } : {}),
+          ...(isGuest
+            ? { guestName, guestPassword, captchaToken: String(form.get(CAPTCHA_FIELD) ?? "") }
+            : {}),
         } satisfies CommentWrite,
       });
     } else if (commentId === null) {

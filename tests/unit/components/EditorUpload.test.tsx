@@ -157,6 +157,8 @@ describe("에디터 이미지 업로드(T208)", () => {
       "MEDIA_TEMP_QUOTA_EXCEEDED",
       "저장하지 않은 이미지가 너무 많습니다. 글을 저장한 뒤 다시 올려 주세요.",
     ],
+    // 005 업로드 속도 한도(1분 30개)
+    [429, "TOO_MANY_REQUESTS", "이미지를 너무 많이 올렸습니다. 잠시 후 다시 올려 주세요."],
   ])("%i %s: 이유를 알리고 본문에 넣지 않는다", async (status, code, message) => {
     mockBackend({ [UPLOAD]: fail(status, code) });
     renderWrite();
