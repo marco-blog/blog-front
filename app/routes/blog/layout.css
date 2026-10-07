@@ -55,3 +55,13 @@
 .tag-weight-5 {
   font-size: 1.6rem;
 }
+
+/* 005 글 상세 트랙백 영역: 긴 주소·제목이 좁은 화면에서 가로 스크롤을 만들지 않게 */
+.trackbacks {
+  overflow-wrap: anywhere;
+}
+.trackback-url input {
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+}

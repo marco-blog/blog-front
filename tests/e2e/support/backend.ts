@@ -129,20 +129,34 @@ export async function signUp(page: Page, account: Account) {
   await expect(page).toHaveURL(new RegExp(`/${account.handle}$`));
 }
 
+/** E2E backend(BLOG_CAPTCHA_PROVIDER=test)가 통과시키는 CAPTCHA 토큰(005). front의 BLOG_CAPTCHA_TEST_TOKEN과 같다. */
+export const CAPTCHA_TOKEN = process.env.E2E_CAPTCHA_TOKEN || "e2e-pass";
+
 export async function logIn(page: Page, account: Account) {
-  await page.goto("/login");
-  await page.getByLabel("이메일").fill(account.email);
-  await page.getByLabel("비밀번호").fill(PASSWORD);
-  await page.getByRole("button", { name: "로그인" }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await logInWith(page, account.email, PASSWORD);
 }
 
-/** 이메일·비밀번호로 로그인(관리자 계정 등) */
+/**
+ * 이메일·비밀번호로 로그인(관리자 계정 등). 같은 IP·이메일로 연속 실패한 뒤라 backend가 CAPTCHA를 요구하면(005 FR-141)
+ * 화면이 CAPTCHA(시험 모드)를 보이므로 비밀번호를 다시 넣고 한 번 더 누른다.
+ */
 export async function logInWith(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.getByLabel("이메일").fill(email);
   await page.getByLabel("비밀번호").fill(password);
   await page.getByRole("button", { name: "로그인" }).click();
+  const captcha = page.getByRole("group", { name: "자동 등록 방지" });
+  const onLogin = () => new URL(page.url()).pathname === "/login";
+  // 로그인 화면을 떠나거나 CAPTCHA가 보일 때까지 기다린다
+  await expect(async () => {
+    expect(!onLogin() || (await captcha.isVisible())).toBe(true);
+  })
+    .toPass({ timeout: 10_000 })
+    .catch(() => undefined);
+  if (onLogin() && (await captcha.isVisible())) {
+    await page.getByLabel("비밀번호").fill(password);
+    await page.getByRole("button", { name: "로그인" }).click();
+  }
   await expect(page).not.toHaveURL(/\/login/);
 }
 
@@ -252,7 +266,12 @@ export async function adminRequest(
   const baseURL = test.info().project.use.baseURL ?? "";
   const request = await playwright.request.newContext({ baseURL });
   const { email, password } = adminAccount();
-  const login = await callApi(request, "POST", "/auth/login", { email, password });
+  // 연속 실패 뒤라도 통과하도록 시험용 CAPTCHA 토큰을 함께 보낸다(005, 맞는 토큰이면 평소 흐름).
+  const login = await callApi(request, "POST", "/auth/login", {
+    email,
+    password,
+    captchaToken: CAPTCHA_TOKEN,
+  });
   expect(login.status, "관리자 로그인").toBe(200);
   return request;
 }
