@@ -607,14 +607,14 @@ describe("블로그 관리 화면", () => {
       "글 관리",
       "카테고리",
       "댓글",
-      "받은 트랙백",
       "방명록",
+      "블로그 설정",
       "꾸미기",
+      "피드 설정",
       "통계",
+      "받은 트랙백",
       "백업",
       "차단 목록",
-      "블로그 설정",
-      "피드 설정",
     ]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
@@ -624,20 +624,30 @@ describe("블로그 관리 화면", () => {
       "href",
       "/marco/manage/posts",
     );
-    expect(MANAGE_MENU.map((item) => item.key)).toEqual([
+    // 006 FR-099 표 순서(005가 받은 트랙백을 켰다. 외부 블로그는 007이 켤 때까지 숨김)
+    expect(MANAGE_MENU.filter((item) => item.available).map((item) => item.key)).toEqual([
       "dashboard",
       "posts",
       "categories",
       "comments",
-      "trackbacks",
       "guestbook",
+      "settings",
       "design",
+      "feed",
       "stats",
+      "trackbacks",
       "backup",
       "blocks",
-      "settings",
-      "feed",
     ]);
+    expect(within(menu).getByRole("link", { name: "글 관리" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(within(menu).getByRole("link", { name: "대시보드" })).not.toHaveAttribute(
+      "aria-current",
+    );
+    // 좁은 화면에서 접히는 메뉴(JS 없이 <details>, 006 T019)
+    expect(menu.closest("details")).toHaveAttribute("open");
     expect(within(menu).getByRole("link", { name: "피드 설정" })).toHaveAttribute(
       "href",
       "/marco/manage/feed",
@@ -649,6 +659,20 @@ describe("블로그 관리 화면", () => {
     );
     expect(within(switcher).getByText("marco 블로그")).toHaveAttribute("aria-current", "true");
     expect(screen.getByRole("link", { name: "블로그 보기" })).toHaveAttribute("href", "/marco");
+  });
+
+  it("블로그 전환은 같은 하위 경로로 가고 쿼리는 버린다, 관리자 회원에게도 시스템 관리는 섞이지 않는다(006 T016)", async () => {
+    renderManage("/marco/manage/posts?status=DRAFT&page=2", {
+      [ME]: ok({ ...me(), role: "SUPER_ADMIN" }),
+      [POSTS]: ok([], { totalCount: 0 }),
+    });
+
+    const switcher = await screen.findByRole("navigation", { name: "블로그 전환" });
+    expect(within(switcher).getByRole("link", { name: "marco-dev 블로그" })).toHaveAttribute(
+      "href",
+      "/marco-dev/manage/posts",
+    );
+    expect(screen.queryByRole("link", { name: "시스템 관리" })).toBeNull();
   });
 
   it("블로그가 하나면 전환 메뉴가 없다", async () => {

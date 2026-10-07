@@ -11,7 +11,21 @@
     "hiddenPosts": "숨긴 글",
     "pending_one": "처리 대기 {{count}}건",
     "pending_other": "처리 대기 {{count}}건",
-    "spam": "스팸 방어 설정"
+    "menu": "메뉴",
+    "dashboard": "대시보드",
+    "contents": "콘텐츠 관리",
+    "externalBlogs": "외부 블로그 관리",
+    "spam": "스팸 방어 설정",
+    "reservedHandles": "예약어",
+    "serviceSettings": "서비스 설정",
+    "admins": "관리자 권한",
+    "auditLog": "작업 기록",
+    "releaseNotes": "릴리스 노트",
+    "groups": {
+      "operations": "운영",
+      "portal": "포털",
+      "service": "서비스"
+    }
   },
   "timeZone": "시각은 {{timeZone}} 기준입니다.",
   "fields": {
@@ -49,13 +63,30 @@
     "targetId": "번호",
     "maxBlogs": "한도",
     "decision": "처리",
+    "role": "권한",
+    "userId": "회원 번호",
+    "confirm": "확인",
+    "version": "버전",
+    "releaseDate": "릴리스 날짜",
+    "baseRevisionNo": "수정본 번호",
+    "from": "시작일",
+    "to": "종료일",
+    "adminId": "관리자",
+    "action": "작업 종류",
+    "q": "검색어",
+    "handle": "블로그 주소",
+    "authorId": "작성자 회원 번호",
+    "status": "상태",
+    "visibility": "공개 범위",
+    "page": "페이지",
+    "size": "페이지 크기",
+    "lang": "언어",
     "duplicate": {
       "windowMinutes": "기준 시간(분)",
       "maxCount": "허용 횟수"
     },
     "word": "금칙어",
-    "scope": "적용 범위",
-    "action": "처리 방식"
+    "scope": "적용 범위"
   },
   "lookup": {
     "submit": "글 확인",
@@ -358,6 +389,234 @@
     "COPYRIGHT": "저작권 침해",
     "DEFAMATION": "명예훼손",
     "OTHER": "기타"
+  },
+  "format": {
+    "days_one": "{{count}}일",
+    "days_other": "{{count}}일",
+    "hours_one": "{{count}}시간",
+    "hours_other": "{{count}}시간",
+    "minutes_one": "{{count}}분",
+    "minutes_other": "{{count}}분",
+    "seconds_one": "{{count}}초",
+    "seconds_other": "{{count}}초"
+  },
+  "dashboard": {
+    "title": "대시보드",
+    "today": "오늘",
+    "totals": "전체",
+    "cards": {
+      "signups": "가입",
+      "publishedPosts": "발행 글",
+      "comments": "댓글",
+      "members": "회원",
+      "blogs": "블로그",
+      "publicPosts": "공개 글",
+      "pendingReports": "처리 대기 신고"
+    },
+    "trend": "최근 7일",
+    "trendCaption_one": "최근 {{count}}일 가입·발행",
+    "trendCaption_other": "최근 {{count}}일 가입·발행",
+    "date": "날짜",
+    "signups": "가입",
+    "publishedPosts": "발행",
+    "generatedAt": "{{time}} 기준",
+    "timeZone": "날짜는 {{timeZone}} 기준입니다."
+  },
+  "contents": {
+    "title": "콘텐츠 관리",
+    "tabs": {
+      "label": "콘텐츠 종류",
+      "posts": "글",
+      "comments": "댓글",
+      "guestbook": "방명록"
+    },
+    "search": {
+      "legend": "찾기",
+      "qPosts": "제목",
+      "q": "내용",
+      "handle": "블로그 주소",
+      "authorId": "작성자 회원 번호",
+      "postId": "글 번호",
+      "status": "상태",
+      "visibility": "공개 범위",
+      "all": "전체",
+      "submit": "찾기",
+      "scopeHint": "내용 검색은 블로그·글·작성자 중 하나를 함께 정해야 합니다."
+    },
+    "scopeRequired": "블로그·글·작성자 중 하나를 먼저 정하세요.",
+    "list": "콘텐츠 목록",
+    "empty": "조건에 맞는 콘텐츠가 없습니다.",
+    "columns": {
+      "title": "제목",
+      "blog": "블로그",
+      "author": "작성자",
+      "status": "상태",
+      "visibility": "공개 범위",
+      "publishedAt": "발행",
+      "commentCount": "댓글",
+      "content": "내용",
+      "post": "글",
+      "createdAt": "작성",
+      "actions": "관리"
+    },
+    "secret": "비밀 댓글",
+    "guest": "비회원 {{name}}",
+    "deletedBlog": "삭제된 블로그",
+    "notPublished": "발행 전",
+    "status": {
+      "ACTIVE": "게시 중",
+      "DELETED": "삭제됨",
+      "HIDDEN": "숨김"
+    },
+    "hide": "숨김",
+    "unhide": "숨김 해제",
+    "done": {
+      "hide": "숨겼습니다.",
+      "unhide": "숨김을 해제했습니다."
+    }
+  },
+  "reservedHandles": {
+    "title": "예약어",
+    "hint": "블로그 주소로 쓸 수 없는 이름입니다. 코드 상수로 관리합니다(블로그 주소 규칙 001 FR-002).",
+    "list": "예약어 목록",
+    "count_one": "모두 {{count}}개",
+    "count_other": "모두 {{count}}개"
+  },
+  "serviceSettings": {
+    "title": "서비스 설정",
+    "hint": "읽기 전용입니다. 바꾸려면 서버 프로퍼티를 고친 뒤 다시 시작합니다.",
+    "list": "서비스 설정 값",
+    "columns": {
+      "item": "항목",
+      "value": "값",
+      "property": "프로퍼티"
+    },
+    "items": {
+      "termsVersion": "약관 버전",
+      "defaultMaxPerMember": "회원당 기본 블로그 수",
+      "maxFileSize": "첨부 파일 최대 크기",
+      "maxPixels": "이미지 최대 픽셀 수",
+      "tempQuota": "임시 첨부 한도(회원당)",
+      "tempTtl": "임시 첨부 보관 기간",
+      "allowedTypes": "허용 파일 형식",
+      "auditRetention": "작업 기록 보관 기간",
+      "dashboardCacheTtl": "대시보드 갱신 주기"
+    },
+    "cacheOff": "끔(요청마다 계산)"
+  },
+  "admins": {
+    "title": "관리자 권한",
+    "hint": "권한은 최고 관리자만 바꿀 수 있습니다. 자기 권한은 다른 최고 관리자가 바꿔야 하고, 최고 관리자는 두 명 이상을 권장합니다.",
+    "readOnly": "권한 변경은 최고 관리자만 할 수 있습니다.",
+    "list": "관리자 목록",
+    "empty": "관리자가 없습니다.",
+    "columns": {
+      "nickname": "닉네임",
+      "role": "권한",
+      "status": "상태",
+      "createdAt": "가입일",
+      "change": "권한 바꾸기"
+    },
+    "grant": {
+      "legend": "회원 번호로 관리자 지정",
+      "hint": "회원 번호는 회원 관리 화면의 주소(/admin/users/번호)에서 확인합니다.",
+      "submit": "지정"
+    },
+    "roleForm": {
+      "label": "{{nickname}} 권한 바꾸기",
+      "role": "새 권한",
+      "confirm": "권한을 바꾸는 것을 확인했습니다",
+      "submit": "바꾸기",
+      "self": "자기 권한"
+    },
+    "done": "{{nickname}} 님의 권한을 {{role}}(으)로 바꿨습니다."
+  },
+  "releaseNotes": {
+    "title": "릴리스 노트",
+    "list": "릴리스 노트 목록",
+    "new": "새 노트",
+    "empty": "릴리스 노트가 없습니다.",
+    "tabs": {
+      "label": "상태",
+      "all": "전체",
+      "DRAFT": "초안",
+      "PUBLISHED": "게시"
+    },
+    "status": {
+      "DRAFT": "초안",
+      "PUBLISHED": "게시 중"
+    },
+    "columns": {
+      "version": "버전",
+      "status": "상태",
+      "releaseDate": "릴리스 날짜",
+      "langs": "언어판",
+      "revisionNo": "수정본",
+      "publishedAt": "게시 시각"
+    },
+    "notPublished": "게시 전",
+    "editor": {
+      "newTitle": "새 릴리스 노트",
+      "editTitle": "릴리스 노트 {{version}}",
+      "version": "버전",
+      "versionHint": "예: 1.4.0. 처음 게시한 뒤에는 바꿀 수 없습니다.",
+      "versionLocked": "처음 게시한 뒤라 버전을 바꿀 수 없습니다.",
+      "releaseDate": "릴리스 날짜",
+      "languages": "언어판",
+      "required": "필수",
+      "include": "이 언어판 넣기",
+      "noteTitle": "제목",
+      "body": "본문(Markdown)",
+      "preview": "미리보기",
+      "previewOf": "미리보기: {{language}}",
+      "toc": "목차",
+      "saveDraft": "초안 저장",
+      "save": "저장",
+      "actions": "게시 관리",
+      "publish": "게시",
+      "unpublish": "게시 중단",
+      "delete": "삭제",
+      "confirmPublish": "게시를 확인했습니다",
+      "confirmUnpublish": "게시 중단을 확인했습니다",
+      "confirmDelete": "이 초안을 지우는 것을 확인했습니다",
+      "deleteHint": "한 번도 게시하지 않은 초안만 지울 수 있습니다.",
+      "info": "노트 정보",
+      "statusLabel": "상태",
+      "revision": "수정본 {{no}}",
+      "createdBy": "만든 관리자: {{nickname}} · {{time}}",
+      "updatedBy": "고친 관리자: {{nickname}} · {{time}}",
+      "firstPublishedAt": "처음 게시: {{time}}",
+      "viewPublic": "독자에게 보기",
+      "revisions": "수정본",
+      "auditLog": "이 노트의 작업 기록",
+      "conflict": "다른 관리자가 먼저 저장했습니다. 입력한 내용은 그대로 두었습니다.",
+      "openLatest": "최신 내용 열기",
+      "fromRevision": "수정본 {{no}}의 내용으로 채웠습니다. 저장하면 새 수정본이 됩니다.",
+      "done": {
+        "save": "저장했습니다.",
+        "publish": "게시했습니다.",
+        "unpublish": "게시를 중단했습니다."
+      }
+    },
+    "revisions": {
+      "title": "수정본: {{version}}",
+      "list": "수정본 목록",
+      "empty": "수정본이 없습니다.",
+      "columns": {
+        "no": "번호",
+        "editedBy": "수정한 관리자",
+        "editedAt": "시각",
+        "status": "당시 상태"
+      },
+      "back": "편집 화면으로"
+    },
+    "revision": {
+      "title": "수정본 {{no}}: {{version}}",
+      "readOnly": "지난 내용이라 읽기만 할 수 있습니다.",
+      "fill": "이 내용으로 편집기 채우기",
+      "back": "수정본 목록으로",
+      "editedBy": "{{nickname}} · {{time}}"
+    }
   },
   "spam": {
     "title": "스팸 방어 설정",

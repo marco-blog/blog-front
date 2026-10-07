@@ -43,9 +43,9 @@ export default [
     route(":version/history", "routes/updates/history.tsx"),
     route(":version/history/:revisionNo", "routes/updates/revision.tsx"),
   ]),
-  // 003 시스템 관리자 콘솔(관리자만, 아니면 404). 006이 나머지 메뉴를 더한다.
+  // 003 시스템 관리자 콘솔(관리자만, 아니면 404). 006 대시보드가 첫 화면이고 나머지 메뉴를 더한다.
   route("admin", "routes/admin/layout.tsx", [
-    index("routes/admin/index.ts"),
+    index("routes/admin/dashboard.tsx"),
     route("topics", "routes/admin/topics.tsx"),
     route("portal/curations", "routes/admin/curations.tsx"),
     route("portal/exclusions", "routes/admin/exclusions.tsx"),
@@ -57,6 +57,25 @@ export default [
     route("users/:id", "routes/admin/user.tsx"),
     route("contents/hidden-posts", "routes/admin/hidden-posts.tsx"),
     route("spam", "routes/admin/spam.tsx"),
+    // 006 콘텐츠 관리·예약어·서비스 설정·관리자 권한·작업 기록·릴리스 노트
+    route("contents", "routes/admin/contents.tsx"),
+    route("contents/posts", "routes/admin/contents.posts.tsx"),
+    route("contents/comments", "routes/admin/contents.comments.tsx"),
+    route("contents/guestbook", "routes/admin/contents.guestbook.tsx"),
+    route("reserved-handles", "routes/admin/reserved-handles.tsx"),
+    route("settings", "routes/admin/service-settings.tsx"),
+    route("admins", "routes/admin/admins.tsx"),
+    route("audit-log", "routes/admin/audit-log.tsx"),
+    route("audit-log/:id", "routes/admin/audit-log-entry.tsx"),
+    route("release-notes", "routes/admin/release-notes.tsx"),
+    route("release-notes/new", "routes/admin/release-note-edit.tsx", {
+      id: "admin-release-note-new",
+    }),
+    route("release-notes/:id", "routes/admin/release-note-edit.tsx", {
+      id: "admin-release-note-edit",
+    }),
+    route("release-notes/:id/revisions", "routes/admin/release-note-revisions.tsx"),
+    route("release-notes/:id/revisions/:revisionNo", "routes/admin/release-note-revision.tsx"),
   ]),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).

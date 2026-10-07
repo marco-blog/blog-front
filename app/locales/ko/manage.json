@@ -13,7 +13,10 @@
     "design": "꾸미기",
     "stats": "통계",
     "backup": "백업",
-    "blocks": "차단 목록"
+    "blocks": "차단 목록",
+    "menu": "메뉴",
+    "trackbacks": "받은 트랙백",
+    "externalBlogs": "외부 블로그"
   },
   "switcher": {
     "label": "블로그 전환"

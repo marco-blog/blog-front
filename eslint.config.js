@@ -14,6 +14,8 @@ const SANITIZED_HTML_FILES = [
   // 005 TrackBack 자동 발견 RDF(HTML 주석). 사용자 입력이 아니라 모든 값을 rdfEscape로 이스케이프해 만든 문자열이다.
   // React는 주석을 그릴 수 없다. 005 contracts/routes.md 글 상세
   "app/components/trackback/TrackbackRdf.tsx",
+  // 006 릴리스 노트 편집기 미리보기(backend `POST /admin/release-notes/preview`가 같은 규칙으로 살균). 006 contracts/routes.md
+  "app/components/admin/MarkdownPreview.tsx",
 ];
 
 export default tseslint.config(

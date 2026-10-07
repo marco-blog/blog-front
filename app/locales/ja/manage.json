@@ -13,7 +13,10 @@
     "design": "デザイン",
     "stats": "統計",
     "backup": "バックアップ",
-    "blocks": "ブロックリスト"
+    "blocks": "ブロックリスト",
+    "menu": "メニュー",
+    "trackbacks": "受信トラックバック",
+    "externalBlogs": "外部ブログ"
   },
   "switcher": {
     "label": "ブログ切り替え"

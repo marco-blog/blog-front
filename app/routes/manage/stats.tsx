@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
 import type { VisitStats } from "~/api/models";
-import { VisitorChart } from "~/components/manage/VisitorChart";
+import { DailyBarChart } from "~/components/charts/DailyBarChart";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { requireOwnedBlog, throwManageError } from "~/manage/access.server";
@@ -50,7 +50,15 @@ export default function ManageStats() {
         </div>
       </dl>
       <p className="form-hint">{t("manage:stats.timeZoneNote")}</p>
-      <VisitorChart daily={stats.daily} />
+      <DailyBarChart
+        className="visitor-chart"
+        caption={t("manage:stats.dailyCaption", { count: stats.daily.length })}
+        dateLabel={t("manage:stats.date")}
+        series={[
+          { key: "visitors", label: t("manage:stats.visitors"), barClassName: "visitor-bar" },
+        ]}
+        rows={stats.daily}
+      />
 
       <section aria-labelledby="stats-top-posts">
         <h2 id="stats-top-posts">{t("manage:stats.topPosts")}</h2>

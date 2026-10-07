@@ -11,7 +11,21 @@
     "hiddenPosts": "非表示の記事",
     "pending_one": "未処理 {{count}}件",
     "pending_other": "未処理 {{count}}件",
-    "spam": "スパム対策設定"
+    "menu": "メニュー",
+    "dashboard": "ダッシュボード",
+    "contents": "コンテンツ管理",
+    "externalBlogs": "外部ブログ管理",
+    "spam": "スパム対策設定",
+    "reservedHandles": "予約語",
+    "serviceSettings": "サービス設定",
+    "admins": "管理者権限",
+    "auditLog": "作業記録",
+    "releaseNotes": "リリースノート",
+    "groups": {
+      "operations": "運営",
+      "portal": "ポータル",
+      "service": "サービス"
+    }
   },
   "timeZone": "時刻は{{timeZone}}基準です。",
   "fields": {
@@ -49,13 +63,30 @@
     "targetId": "番号",
     "maxBlogs": "上限",
     "decision": "処理",
+    "role": "権限",
+    "userId": "会員番号",
+    "confirm": "確認",
+    "version": "バージョン",
+    "releaseDate": "リリース日",
+    "baseRevisionNo": "改訂番号",
+    "from": "開始日",
+    "to": "終了日",
+    "adminId": "管理者",
+    "action": "作業の種類",
+    "q": "検索語",
+    "handle": "ブログアドレス",
+    "authorId": "作成者の会員番号",
+    "status": "状態",
+    "visibility": "公開範囲",
+    "page": "ページ",
+    "size": "ページサイズ",
+    "lang": "言語",
     "duplicate": {
       "windowMinutes": "基準時間（分）",
       "maxCount": "許容回数"
     },
     "word": "禁止語",
-    "scope": "適用範囲",
-    "action": "処理方法"
+    "scope": "適用範囲"
   },
   "lookup": {
     "submit": "記事を確認",
@@ -358,6 +389,234 @@
     "COPYRIGHT": "著作権侵害",
     "DEFAMATION": "名誉毀損",
     "OTHER": "その他"
+  },
+  "format": {
+    "days_one": "{{count}}日",
+    "days_other": "{{count}}日",
+    "hours_one": "{{count}}時間",
+    "hours_other": "{{count}}時間",
+    "minutes_one": "{{count}}分",
+    "minutes_other": "{{count}}分",
+    "seconds_one": "{{count}}秒",
+    "seconds_other": "{{count}}秒"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "today": "今日",
+    "totals": "全体",
+    "cards": {
+      "signups": "新規登録",
+      "publishedPosts": "公開した記事",
+      "comments": "コメント",
+      "members": "会員",
+      "blogs": "ブログ",
+      "publicPosts": "公開記事",
+      "pendingReports": "未処理の通報"
+    },
+    "trend": "直近7日",
+    "trendCaption_one": "直近{{count}}日の新規登録・公開",
+    "trendCaption_other": "直近{{count}}日の新規登録・公開",
+    "date": "日付",
+    "signups": "新規登録",
+    "publishedPosts": "公開",
+    "generatedAt": "{{time}}時点",
+    "timeZone": "日付は{{timeZone}}基準です。"
+  },
+  "contents": {
+    "title": "コンテンツ管理",
+    "tabs": {
+      "label": "コンテンツの種類",
+      "posts": "記事",
+      "comments": "コメント",
+      "guestbook": "ゲストブック"
+    },
+    "search": {
+      "legend": "検索",
+      "qPosts": "タイトル",
+      "q": "内容",
+      "handle": "ブログアドレス",
+      "authorId": "作成者の会員番号",
+      "postId": "記事番号",
+      "status": "状態",
+      "visibility": "公開範囲",
+      "all": "すべて",
+      "submit": "検索",
+      "scopeHint": "内容で検索するには、ブログ・記事・作成者のいずれかも指定してください。"
+    },
+    "scopeRequired": "先にブログ・記事・作成者のいずれかを指定してください。",
+    "list": "コンテンツ一覧",
+    "empty": "条件に合うコンテンツがありません。",
+    "columns": {
+      "title": "タイトル",
+      "blog": "ブログ",
+      "author": "作成者",
+      "status": "状態",
+      "visibility": "公開範囲",
+      "publishedAt": "公開",
+      "commentCount": "コメント",
+      "content": "内容",
+      "post": "記事",
+      "createdAt": "作成",
+      "actions": "管理"
+    },
+    "secret": "非公開コメント",
+    "guest": "ゲスト {{name}}",
+    "deletedBlog": "削除されたブログ",
+    "notPublished": "未公開",
+    "status": {
+      "ACTIVE": "掲載中",
+      "DELETED": "削除済み",
+      "HIDDEN": "非表示"
+    },
+    "hide": "非表示",
+    "unhide": "非表示を解除",
+    "done": {
+      "hide": "非表示にしました。",
+      "unhide": "非表示を解除しました。"
+    }
+  },
+  "reservedHandles": {
+    "title": "予約語",
+    "hint": "ブログアドレスに使えない名前です。コードの定数で管理しています(ブログアドレスのルール 001 FR-002)。",
+    "list": "予約語一覧",
+    "count_one": "全{{count}}件",
+    "count_other": "全{{count}}件"
+  },
+  "serviceSettings": {
+    "title": "サービス設定",
+    "hint": "読み取り専用です。変更するにはサーバーのプロパティを直して再起動します。",
+    "list": "サービス設定の値",
+    "columns": {
+      "item": "項目",
+      "value": "値",
+      "property": "プロパティ"
+    },
+    "items": {
+      "termsVersion": "規約のバージョン",
+      "defaultMaxPerMember": "会員ごとの標準ブログ数",
+      "maxFileSize": "添付ファイルの最大サイズ",
+      "maxPixels": "画像の最大ピクセル数",
+      "tempQuota": "一時添付の上限(会員ごと)",
+      "tempTtl": "一時添付の保管期間",
+      "allowedTypes": "許可するファイル形式",
+      "auditRetention": "作業記録の保管期間",
+      "dashboardCacheTtl": "ダッシュボードの更新間隔"
+    },
+    "cacheOff": "オフ(リクエストごとに計算)"
+  },
+  "admins": {
+    "title": "管理者権限",
+    "hint": "権限は最高管理者だけが変更できます。自分の権限は別の最高管理者が変更する必要があり、最高管理者は2人以上をおすすめします。",
+    "readOnly": "権限の変更は最高管理者だけができます。",
+    "list": "管理者一覧",
+    "empty": "管理者がいません。",
+    "columns": {
+      "nickname": "ニックネーム",
+      "role": "権限",
+      "status": "状態",
+      "createdAt": "登録日",
+      "change": "権限の変更"
+    },
+    "grant": {
+      "legend": "会員番号で管理者に指定",
+      "hint": "会員番号は会員管理画面のアドレス(/admin/users/番号)で確認できます。",
+      "submit": "指定"
+    },
+    "roleForm": {
+      "label": "{{nickname}}の権限を変更",
+      "role": "新しい権限",
+      "confirm": "権限の変更を確認しました",
+      "submit": "変更",
+      "self": "自分の権限"
+    },
+    "done": "{{nickname}}さんの権限を{{role}}に変更しました。"
+  },
+  "releaseNotes": {
+    "title": "リリースノート",
+    "list": "リリースノート一覧",
+    "new": "新しいノート",
+    "empty": "リリースノートがありません。",
+    "tabs": {
+      "label": "状態",
+      "all": "すべて",
+      "DRAFT": "下書き",
+      "PUBLISHED": "公開"
+    },
+    "status": {
+      "DRAFT": "下書き",
+      "PUBLISHED": "公開中"
+    },
+    "columns": {
+      "version": "バージョン",
+      "status": "状態",
+      "releaseDate": "リリース日",
+      "langs": "言語版",
+      "revisionNo": "改訂",
+      "publishedAt": "公開日時"
+    },
+    "notPublished": "未公開",
+    "editor": {
+      "newTitle": "新しいリリースノート",
+      "editTitle": "リリースノート {{version}}",
+      "version": "バージョン",
+      "versionHint": "例: 1.4.0。最初に公開した後は変更できません。",
+      "versionLocked": "最初に公開した後なのでバージョンは変更できません。",
+      "releaseDate": "リリース日",
+      "languages": "言語版",
+      "required": "必須",
+      "include": "この言語版を含める",
+      "noteTitle": "タイトル",
+      "body": "本文(Markdown)",
+      "preview": "プレビュー",
+      "previewOf": "プレビュー: {{language}}",
+      "toc": "目次",
+      "saveDraft": "下書き保存",
+      "save": "保存",
+      "actions": "公開の管理",
+      "publish": "公開",
+      "unpublish": "公開停止",
+      "delete": "削除",
+      "confirmPublish": "公開を確認しました",
+      "confirmUnpublish": "公開停止を確認しました",
+      "confirmDelete": "この下書きの削除を確認しました",
+      "deleteHint": "一度も公開していない下書きだけ削除できます。",
+      "info": "ノートの情報",
+      "statusLabel": "状態",
+      "revision": "改訂 {{no}}",
+      "createdBy": "作成した管理者: {{nickname}} · {{time}}",
+      "updatedBy": "編集した管理者: {{nickname}} · {{time}}",
+      "firstPublishedAt": "最初の公開: {{time}}",
+      "viewPublic": "読者として見る",
+      "revisions": "改訂履歴",
+      "auditLog": "このノートの作業記録",
+      "conflict": "別の管理者が先に保存しました。入力した内容はそのまま残しています。",
+      "openLatest": "最新の内容を開く",
+      "fromRevision": "改訂 {{no}}の内容で埋めました。保存すると新しい改訂になります。",
+      "done": {
+        "save": "保存しました。",
+        "publish": "公開しました。",
+        "unpublish": "公開を停止しました。"
+      }
+    },
+    "revisions": {
+      "title": "改訂履歴: {{version}}",
+      "list": "改訂一覧",
+      "empty": "改訂がありません。",
+      "columns": {
+        "no": "番号",
+        "editedBy": "編集した管理者",
+        "editedAt": "日時",
+        "status": "当時の状態"
+      },
+      "back": "編集画面へ"
+    },
+    "revision": {
+      "title": "改訂 {{no}}: {{version}}",
+      "readOnly": "過去の内容なので読み取り専用です。",
+      "fill": "この内容で編集画面を埋める",
+      "back": "改訂一覧へ",
+      "editedBy": "{{nickname}} · {{time}}"
+    }
   },
   "spam": {
     "title": "スパム対策設定",

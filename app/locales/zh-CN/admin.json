@@ -11,7 +11,21 @@
     "hiddenPosts": "已隐藏的文章",
     "pending_one": "待处理 {{count}} 条",
     "pending_other": "待处理 {{count}} 条",
-    "spam": "反垃圾设置"
+    "menu": "菜单",
+    "dashboard": "仪表板",
+    "contents": "内容管理",
+    "externalBlogs": "外部博客管理",
+    "spam": "反垃圾设置",
+    "reservedHandles": "保留名称",
+    "serviceSettings": "服务设置",
+    "admins": "管理员权限",
+    "auditLog": "操作记录",
+    "releaseNotes": "发布说明",
+    "groups": {
+      "operations": "运营",
+      "portal": "门户",
+      "service": "服务"
+    }
   },
   "timeZone": "时间以 {{timeZone}} 为准。",
   "fields": {
@@ -49,13 +63,30 @@
     "targetId": "编号",
     "maxBlogs": "上限",
     "decision": "处理",
+    "role": "权限",
+    "userId": "会员编号",
+    "confirm": "确认",
+    "version": "版本",
+    "releaseDate": "发布日期",
+    "baseRevisionNo": "修订号",
+    "from": "开始日期",
+    "to": "结束日期",
+    "adminId": "管理员",
+    "action": "操作类型",
+    "q": "搜索词",
+    "handle": "博客地址",
+    "authorId": "作者会员编号",
+    "status": "状态",
+    "visibility": "公开范围",
+    "page": "页码",
+    "size": "每页数量",
+    "lang": "语言",
     "duplicate": {
       "windowMinutes": "时间窗口（分钟）",
       "maxCount": "允许次数"
     },
     "word": "违禁词",
-    "scope": "适用范围",
-    "action": "处理方式"
+    "scope": "适用范围"
   },
   "lookup": {
     "submit": "查看文章",
@@ -358,6 +389,234 @@
     "COPYRIGHT": "侵犯著作权",
     "DEFAMATION": "诽谤",
     "OTHER": "其他"
+  },
+  "format": {
+    "days_one": "{{count}} 天",
+    "days_other": "{{count}} 天",
+    "hours_one": "{{count}} 小时",
+    "hours_other": "{{count}} 小时",
+    "minutes_one": "{{count}} 分钟",
+    "minutes_other": "{{count}} 分钟",
+    "seconds_one": "{{count}} 秒",
+    "seconds_other": "{{count}} 秒"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "today": "今天",
+    "totals": "全部",
+    "cards": {
+      "signups": "注册",
+      "publishedPosts": "发布的文章",
+      "comments": "评论",
+      "members": "会员",
+      "blogs": "博客",
+      "publicPosts": "公开文章",
+      "pendingReports": "待处理举报"
+    },
+    "trend": "最近 7 天",
+    "trendCaption_one": "最近 {{count}} 天的注册与发布",
+    "trendCaption_other": "最近 {{count}} 天的注册与发布",
+    "date": "日期",
+    "signups": "注册",
+    "publishedPosts": "发布",
+    "generatedAt": "截至{{time}}",
+    "timeZone": "日期以 {{timeZone}} 为准。"
+  },
+  "contents": {
+    "title": "内容管理",
+    "tabs": {
+      "label": "内容类型",
+      "posts": "文章",
+      "comments": "评论",
+      "guestbook": "留言板"
+    },
+    "search": {
+      "legend": "搜索",
+      "qPosts": "标题",
+      "q": "内容",
+      "handle": "博客地址",
+      "authorId": "作者会员编号",
+      "postId": "文章编号",
+      "status": "状态",
+      "visibility": "公开范围",
+      "all": "全部",
+      "submit": "搜索",
+      "scopeHint": "按内容搜索时，还需指定博客、文章或作者之一。"
+    },
+    "scopeRequired": "请先指定博客、文章或作者之一。",
+    "list": "内容列表",
+    "empty": "没有符合条件的内容。",
+    "columns": {
+      "title": "标题",
+      "blog": "博客",
+      "author": "作者",
+      "status": "状态",
+      "visibility": "公开范围",
+      "publishedAt": "发布",
+      "commentCount": "评论",
+      "content": "内容",
+      "post": "文章",
+      "createdAt": "撰写",
+      "actions": "管理"
+    },
+    "secret": "私密评论",
+    "guest": "访客 {{name}}",
+    "deletedBlog": "已删除的博客",
+    "notPublished": "未发布",
+    "status": {
+      "ACTIVE": "显示中",
+      "DELETED": "已删除",
+      "HIDDEN": "已隐藏"
+    },
+    "hide": "隐藏",
+    "unhide": "取消隐藏",
+    "done": {
+      "hide": "已隐藏。",
+      "unhide": "已取消隐藏。"
+    }
+  },
+  "reservedHandles": {
+    "title": "保留名称",
+    "hint": "这些名称不能用作博客地址，以代码常量管理(博客地址规则 001 FR-002)。",
+    "list": "保留名称列表",
+    "count_one": "共 {{count}} 个",
+    "count_other": "共 {{count}} 个"
+  },
+  "serviceSettings": {
+    "title": "服务设置",
+    "hint": "只读。要更改，请修改服务器属性后重新启动。",
+    "list": "服务设置值",
+    "columns": {
+      "item": "项目",
+      "value": "值",
+      "property": "属性"
+    },
+    "items": {
+      "termsVersion": "条款版本",
+      "defaultMaxPerMember": "每位会员的默认博客数",
+      "maxFileSize": "附件最大大小",
+      "maxPixels": "图片最大像素数",
+      "tempQuota": "临时附件上限(每位会员)",
+      "tempTtl": "临时附件保留期限",
+      "allowedTypes": "允许的文件类型",
+      "auditRetention": "操作记录保留期限",
+      "dashboardCacheTtl": "仪表板刷新间隔"
+    },
+    "cacheOff": "关闭(每次请求都计算)"
+  },
+  "admins": {
+    "title": "管理员权限",
+    "hint": "只有超级管理员可以更改权限。自己的权限需由另一位超级管理员更改，建议保留两位以上超级管理员。",
+    "readOnly": "只有超级管理员可以更改权限。",
+    "list": "管理员列表",
+    "empty": "没有管理员。",
+    "columns": {
+      "nickname": "昵称",
+      "role": "权限",
+      "status": "状态",
+      "createdAt": "注册日期",
+      "change": "更改权限"
+    },
+    "grant": {
+      "legend": "按会员编号指定管理员",
+      "hint": "会员编号可在会员管理页面的地址(/admin/users/编号)中查看。",
+      "submit": "指定"
+    },
+    "roleForm": {
+      "label": "更改{{nickname}}的权限",
+      "role": "新权限",
+      "confirm": "我确认更改权限",
+      "submit": "更改",
+      "self": "自己的权限"
+    },
+    "done": "已将{{nickname}}的权限更改为{{role}}。"
+  },
+  "releaseNotes": {
+    "title": "发布说明",
+    "list": "发布说明列表",
+    "new": "新建说明",
+    "empty": "没有发布说明。",
+    "tabs": {
+      "label": "状态",
+      "all": "全部",
+      "DRAFT": "草稿",
+      "PUBLISHED": "已发布"
+    },
+    "status": {
+      "DRAFT": "草稿",
+      "PUBLISHED": "已发布"
+    },
+    "columns": {
+      "version": "版本",
+      "status": "状态",
+      "releaseDate": "发布日期",
+      "langs": "语言版本",
+      "revisionNo": "修订",
+      "publishedAt": "发布时间"
+    },
+    "notPublished": "未发布",
+    "editor": {
+      "newTitle": "新建发布说明",
+      "editTitle": "发布说明 {{version}}",
+      "version": "版本",
+      "versionHint": "例如 1.4.0。首次发布后不能更改。",
+      "versionLocked": "首次发布后不能更改版本。",
+      "releaseDate": "发布日期",
+      "languages": "语言版本",
+      "required": "必填",
+      "include": "包含此语言版本",
+      "noteTitle": "标题",
+      "body": "正文(Markdown)",
+      "preview": "预览",
+      "previewOf": "预览: {{language}}",
+      "toc": "目录",
+      "saveDraft": "保存草稿",
+      "save": "保存",
+      "actions": "发布管理",
+      "publish": "发布",
+      "unpublish": "停止发布",
+      "delete": "删除",
+      "confirmPublish": "我确认发布",
+      "confirmUnpublish": "我确认停止发布",
+      "confirmDelete": "我确认删除此草稿",
+      "deleteHint": "只能删除从未发布过的草稿。",
+      "info": "说明信息",
+      "statusLabel": "状态",
+      "revision": "修订 {{no}}",
+      "createdBy": "创建的管理员: {{nickname}} · {{time}}",
+      "updatedBy": "修改的管理员: {{nickname}} · {{time}}",
+      "firstPublishedAt": "首次发布: {{time}}",
+      "viewPublic": "以读者身份查看",
+      "revisions": "修订记录",
+      "auditLog": "此说明的操作记录",
+      "conflict": "另一位管理员已先保存。您输入的内容已保留。",
+      "openLatest": "打开最新内容",
+      "fromRevision": "已用修订 {{no}}的内容填充。保存后将成为新的修订。",
+      "done": {
+        "save": "已保存。",
+        "publish": "已发布。",
+        "unpublish": "已停止发布。"
+      }
+    },
+    "revisions": {
+      "title": "修订记录: {{version}}",
+      "list": "修订列表",
+      "empty": "没有修订。",
+      "columns": {
+        "no": "编号",
+        "editedBy": "修改的管理员",
+        "editedAt": "时间",
+        "status": "当时状态"
+      },
+      "back": "返回编辑页面"
+    },
+    "revision": {
+      "title": "修订 {{no}}: {{version}}",
+      "readOnly": "这是过去的内容，只能阅读。",
+      "fill": "用此内容填充编辑器",
+      "back": "返回修订列表",
+      "editedBy": "{{nickname}} · {{time}}"
+    }
   },
   "spam": {
     "title": "反垃圾设置",

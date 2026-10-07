@@ -11,7 +11,21 @@
     "hiddenPosts": "Hidden posts",
     "pending_one": "{{count}} pending",
     "pending_other": "{{count}} pending",
-    "spam": "Spam protection"
+    "menu": "Menu",
+    "dashboard": "Dashboard",
+    "contents": "Content",
+    "externalBlogs": "External blogs",
+    "spam": "Spam protection",
+    "reservedHandles": "Reserved names",
+    "serviceSettings": "Service settings",
+    "admins": "Administrators",
+    "auditLog": "Audit log",
+    "releaseNotes": "Release notes",
+    "groups": {
+      "operations": "Operations",
+      "portal": "Portal",
+      "service": "Service"
+    }
   },
   "timeZone": "Times are in {{timeZone}}.",
   "fields": {
@@ -49,13 +63,30 @@
     "targetId": "Number",
     "maxBlogs": "Limit",
     "decision": "Decision",
+    "role": "Role",
+    "userId": "Member number",
+    "confirm": "Confirmation",
+    "version": "Version",
+    "releaseDate": "Release date",
+    "baseRevisionNo": "Revision number",
+    "from": "From",
+    "to": "To",
+    "adminId": "Administrator",
+    "action": "Action",
+    "q": "Search term",
+    "handle": "Blog address",
+    "authorId": "Author member number",
+    "status": "Status",
+    "visibility": "Visibility",
+    "page": "Page",
+    "size": "Page size",
+    "lang": "Language",
     "duplicate": {
       "windowMinutes": "Window (minutes)",
       "maxCount": "Allowed count"
     },
     "word": "Banned word",
-    "scope": "Scope",
-    "action": "Action"
+    "scope": "Scope"
   },
   "lookup": {
     "submit": "Check post",
@@ -358,6 +389,234 @@
     "COPYRIGHT": "Copyright infringement",
     "DEFAMATION": "Defamation",
     "OTHER": "Other"
+  },
+  "format": {
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "seconds_one": "{{count}} second",
+    "seconds_other": "{{count}} seconds"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "today": "Today",
+    "totals": "All time",
+    "cards": {
+      "signups": "Sign-ups",
+      "publishedPosts": "Published posts",
+      "comments": "Comments",
+      "members": "Members",
+      "blogs": "Blogs",
+      "publicPosts": "Public posts",
+      "pendingReports": "Pending reports"
+    },
+    "trend": "Last 7 days",
+    "trendCaption_one": "Sign-ups and published posts, last {{count}} day",
+    "trendCaption_other": "Sign-ups and published posts, last {{count}} days",
+    "date": "Date",
+    "signups": "Sign-ups",
+    "publishedPosts": "Published",
+    "generatedAt": "As of {{time}}",
+    "timeZone": "Dates are in {{timeZone}}."
+  },
+  "contents": {
+    "title": "Content",
+    "tabs": {
+      "label": "Content type",
+      "posts": "Posts",
+      "comments": "Comments",
+      "guestbook": "Guestbook"
+    },
+    "search": {
+      "legend": "Search",
+      "qPosts": "Title",
+      "q": "Text",
+      "handle": "Blog address",
+      "authorId": "Author member number",
+      "postId": "Post number",
+      "status": "Status",
+      "visibility": "Visibility",
+      "all": "All",
+      "submit": "Search",
+      "scopeHint": "To search text, also set a blog, post or author."
+    },
+    "scopeRequired": "Set a blog, post or author first.",
+    "list": "Content list",
+    "empty": "No content matches these conditions.",
+    "columns": {
+      "title": "Title",
+      "blog": "Blog",
+      "author": "Author",
+      "status": "Status",
+      "visibility": "Visibility",
+      "publishedAt": "Published",
+      "commentCount": "Comments",
+      "content": "Text",
+      "post": "Post",
+      "createdAt": "Written",
+      "actions": "Manage"
+    },
+    "secret": "Secret comment",
+    "guest": "Guest {{name}}",
+    "deletedBlog": "Deleted blog",
+    "notPublished": "Not published",
+    "status": {
+      "ACTIVE": "Visible",
+      "DELETED": "Deleted",
+      "HIDDEN": "Hidden"
+    },
+    "hide": "Hide",
+    "unhide": "Unhide",
+    "done": {
+      "hide": "Hidden.",
+      "unhide": "Unhidden."
+    }
+  },
+  "reservedHandles": {
+    "title": "Reserved names",
+    "hint": "These names can't be used as blog addresses. They are managed as code constants (blog address rules, 001 FR-002).",
+    "list": "Reserved names",
+    "count_one": "{{count}} name",
+    "count_other": "{{count}} names"
+  },
+  "serviceSettings": {
+    "title": "Service settings",
+    "hint": "Read only. To change a value, edit the server property and restart.",
+    "list": "Service setting values",
+    "columns": {
+      "item": "Item",
+      "value": "Value",
+      "property": "Property"
+    },
+    "items": {
+      "termsVersion": "Terms version",
+      "defaultMaxPerMember": "Default blogs per member",
+      "maxFileSize": "Maximum attachment size",
+      "maxPixels": "Maximum image pixels",
+      "tempQuota": "Temporary attachment quota (per member)",
+      "tempTtl": "Temporary attachment retention",
+      "allowedTypes": "Allowed file types",
+      "auditRetention": "Audit log retention",
+      "dashboardCacheTtl": "Dashboard refresh interval"
+    },
+    "cacheOff": "Off (computed on every request)"
+  },
+  "admins": {
+    "title": "Administrators",
+    "hint": "Only super administrators can change roles. Your own role must be changed by another super administrator; keeping at least two super administrators is recommended.",
+    "readOnly": "Only super administrators can change roles.",
+    "list": "Administrators",
+    "empty": "There are no administrators.",
+    "columns": {
+      "nickname": "Nickname",
+      "role": "Role",
+      "status": "Status",
+      "createdAt": "Joined",
+      "change": "Change role"
+    },
+    "grant": {
+      "legend": "Appoint an administrator by member number",
+      "hint": "Find the member number in the member page address (/admin/users/number).",
+      "submit": "Appoint"
+    },
+    "roleForm": {
+      "label": "Change role of {{nickname}}",
+      "role": "New role",
+      "confirm": "I confirm this role change",
+      "submit": "Change",
+      "self": "Your own role"
+    },
+    "done": "Changed the role of {{nickname}} to {{role}}."
+  },
+  "releaseNotes": {
+    "title": "Release notes",
+    "list": "Release notes",
+    "new": "New note",
+    "empty": "There are no release notes.",
+    "tabs": {
+      "label": "Status",
+      "all": "All",
+      "DRAFT": "Drafts",
+      "PUBLISHED": "Published"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published"
+    },
+    "columns": {
+      "version": "Version",
+      "status": "Status",
+      "releaseDate": "Release date",
+      "langs": "Languages",
+      "revisionNo": "Revision",
+      "publishedAt": "Published at"
+    },
+    "notPublished": "Not published",
+    "editor": {
+      "newTitle": "New release note",
+      "editTitle": "Release note {{version}}",
+      "version": "Version",
+      "versionHint": "For example 1.4.0. It can't be changed after the first publication.",
+      "versionLocked": "The version can't be changed after the first publication.",
+      "releaseDate": "Release date",
+      "languages": "Languages",
+      "required": "Required",
+      "include": "Include this language",
+      "noteTitle": "Title",
+      "body": "Body (Markdown)",
+      "preview": "Preview",
+      "previewOf": "Preview: {{language}}",
+      "toc": "Contents",
+      "saveDraft": "Save draft",
+      "save": "Save",
+      "actions": "Publishing",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "delete": "Delete",
+      "confirmPublish": "I confirm publishing",
+      "confirmUnpublish": "I confirm unpublishing",
+      "confirmDelete": "I confirm deleting this draft",
+      "deleteHint": "Only drafts that were never published can be deleted.",
+      "info": "Note details",
+      "statusLabel": "Status",
+      "revision": "Revision {{no}}",
+      "createdBy": "Created by {{nickname}} · {{time}}",
+      "updatedBy": "Last edited by {{nickname}} · {{time}}",
+      "firstPublishedAt": "First published {{time}}",
+      "viewPublic": "View as a reader",
+      "revisions": "Revisions",
+      "auditLog": "Audit log for this note",
+      "conflict": "Another administrator saved first. Your input has been kept.",
+      "openLatest": "Open the latest version",
+      "fromRevision": "Filled with revision {{no}}. Saving creates a new revision.",
+      "done": {
+        "save": "Saved.",
+        "publish": "Published.",
+        "unpublish": "Unpublished."
+      }
+    },
+    "revisions": {
+      "title": "Revisions: {{version}}",
+      "list": "Revisions",
+      "empty": "There are no revisions.",
+      "columns": {
+        "no": "Number",
+        "editedBy": "Edited by",
+        "editedAt": "Time",
+        "status": "Status then"
+      },
+      "back": "Back to the editor"
+    },
+    "revision": {
+      "title": "Revision {{no}}: {{version}}",
+      "readOnly": "This is a past version and is read only.",
+      "fill": "Fill the editor with this content",
+      "back": "Back to revisions",
+      "editedBy": "{{nickname}} · {{time}}"
+    }
   },
   "spam": {
     "title": "Spam protection",

@@ -93,14 +93,15 @@
   "CONTENT_NOT_FOUND": "The content could not be found or has been deleted.",
   "POST_HIDDEN": "A post hidden by an administrator cannot be published or have its publish settings changed.",
   "BLOG_RESTRICTED": "This blog is restricted.",
-  "USER_NOT_ACTIVE": "A withdrawn member cannot be suspended.",
+  "USER_NOT_ACTIVE": "This can't be done for a suspended or withdrawn member.",
   "CANNOT_SUSPEND_SELF": "You cannot suspend yourself.",
-  "LAST_SUPER_ADMIN": "The last remaining super administrator cannot be suspended.",
+  "LAST_SUPER_ADMIN": "This can't be done to the last remaining super administrator. Appoint another super administrator first.",
   "CAPTCHA_FAILED": "The spam protection check failed. Please try again.",
   "CAPTCHA_REQUIRED": "Too many failed sign-in attempts. Complete the spam protection check and sign in again.",
   "DUPLICATE_CONTENT_SPAM": "You cannot post the same text several times in a short time.",
   "BANNED_WORD_EXISTS": "This banned word already exists.",
   "BANNED_WORD_NOT_FOUND": "The banned word could not be found.",
   "TRACKBACK_NOT_FOUND": "The trackback could not be found.",
-  "TRACKBACK_NOT_ALLOWED": "Trackbacks can be sent only from public posts."
+  "TRACKBACK_NOT_ALLOWED": "Trackbacks can be sent only from public posts.",
+  "CANNOT_CHANGE_OWN_ROLE": "You can't change your own role. Another super administrator must change it."
 }

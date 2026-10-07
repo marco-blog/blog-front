@@ -21,7 +21,8 @@
     "notifications": "通知",
     "unreadNotifications": "{{count}} 条未读通知",
     "search": "搜索",
-    "searchLabel": "搜索词"
+    "searchLabel": "搜索词",
+    "admin": "系统管理"
   },
   "footer": {
     "label": "网站信息",

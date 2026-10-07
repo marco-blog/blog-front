@@ -13,7 +13,10 @@
     "design": "Design",
     "stats": "Statistics",
     "backup": "Backup",
-    "blocks": "Blocked members"
+    "blocks": "Blocked members",
+    "menu": "Menu",
+    "trackbacks": "Received trackbacks",
+    "externalBlogs": "External blogs"
   },
   "switcher": {
     "label": "Switch blog"

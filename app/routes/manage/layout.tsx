@@ -4,28 +4,16 @@ import { Link, NavLink, Outlet, useLoaderData, useLocation } from "react-router"
 import { rememberLastBlog } from "~/auth/lastBlog.server";
 import { metaT } from "~/i18n/meta";
 import { requireOwnedBlog } from "~/manage/access.server";
+import { MANAGE_MENU } from "~/manage/links";
 import { privatePageMeta } from "~/seo/meta";
+import consoleStyles from "~/styles/console.css?url";
 
 import type { Route } from "./+types/layout";
 
-/**
- * 블로그 관리 메뉴(006 FR-099의 001 범위).
- * 002가 "피드 설정"을, 004가 "방명록"·"꾸미기"·"통계"·"백업"·"차단 목록"을, 005가 "받은 트랙백"을 더했다. 나머지는 해당 스펙이 더한다.
- */
-export const MANAGE_MENU = [
-  { key: "dashboard", path: "", available: true },
-  { key: "posts", path: "/posts", available: true },
-  { key: "categories", path: "/categories", available: true },
-  { key: "comments", path: "/comments", available: true },
-  { key: "trackbacks", path: "/trackbacks", available: true },
-  { key: "guestbook", path: "/guestbook", available: true },
-  { key: "design", path: "/design", available: true },
-  { key: "stats", path: "/stats", available: true },
-  { key: "backup", path: "/backup", available: true },
-  { key: "blocks", path: "/blocks", available: true },
-  { key: "settings", path: "/settings", available: true },
-  { key: "feed", path: "/feed", available: true },
-] as const;
+export const links: Route.LinksFunction = () => [{ rel: "stylesheet", href: consoleStyles }];
+
+/** 메뉴 정의는 `~/manage/links`(006 T013). 기존 import 경로를 위해 다시 내보낸다. */
+export { MANAGE_MENU };
 
 export function meta({ matches }: Route.MetaArgs) {
   const t = metaT(matches);
@@ -77,17 +65,21 @@ export default function ManageLayout() {
           </nav>
         )}
       </header>
-      <nav aria-label={t("manage:nav.label")} className="manage-menu">
-        <ul>
-          {MANAGE_MENU.filter((item) => item.available).map((item) => (
-            <li key={item.key}>
-              <NavLink to={`${base}${item.path}`} end>
-                {t(`manage:nav.${item.key}`)}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {/* 좁은 화면에서는 접을 수 있는 메뉴(JS 없이 동작, 006 T019). 넓은 화면은 접기 제목을 CSS로 감춘다. */}
+      <details className="console-menu" open>
+        <summary>{t("manage:nav.menu")}</summary>
+        <nav aria-label={t("manage:nav.label")} className="manage-menu">
+          <ul>
+            {MANAGE_MENU.filter((item) => item.available).map((item) => (
+              <li key={item.key}>
+                <NavLink to={`${base}${item.path}`} end>
+                  {t(`manage:nav.${item.key}`)}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </details>
       <Outlet />
     </div>
   );
