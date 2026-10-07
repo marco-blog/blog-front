@@ -92,57 +92,59 @@ export function ClassificationStats({ stats, topics }: { stats: Stats; topics: T
         {stats.distribution.length === 0 ? (
           <p>{t("external:admin.stats.noData")}</p>
         ) : (
-          <table className="admin-table" aria-label={t("external:admin.stats.chart")}>
-            <thead>
-              <tr>
-                <th>{t("external:common.topic")}</th>
-                <th>{t("external:admin.stats.total")}</th>
-                {EXTERNAL_TOPIC_SOURCES.map((source) => (
-                  <th key={source}>{t(`external:topicSource.${source}`)}</th>
-                ))}
-                <th aria-hidden="true" />
-              </tr>
-            </thead>
-            <tbody>
-              {stats.distribution.map((row) => {
-                let x = 0;
-                return (
-                  <tr key={row.topicId}>
-                    <td>{topicLabel(topics, row.topicId, i18n.language)}</td>
-                    <td>{format.number(row.total)}</td>
-                    {EXTERNAL_TOPIC_SOURCES.map((source) => (
-                      <td key={source}>{format.number(row.bySource[source] ?? 0)}</td>
-                    ))}
-                    <td aria-hidden="true">
-                      <svg
-                        width={BAR_WIDTH}
-                        height={BAR_HEIGHT}
-                        viewBox={`0 0 ${BAR_WIDTH} ${BAR_HEIGHT}`}
-                        className="stats-bar"
-                      >
-                        {EXTERNAL_TOPIC_SOURCES.map((source) => {
-                          const width = ((row.bySource[source] ?? 0) / max) * BAR_WIDTH;
-                          const rect = (
-                            <rect
-                              key={source}
-                              x={x}
-                              y={0}
-                              width={width}
-                              height={BAR_HEIGHT}
-                              fill={SOURCE_FILL[source]}
-                              className={`stats-bar-${source.toLowerCase()}`}
-                            />
-                          );
-                          x += width;
-                          return rect;
-                        })}
-                      </svg>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="admin-table" aria-label={t("external:admin.stats.chart")}>
+              <thead>
+                <tr>
+                  <th>{t("external:common.topic")}</th>
+                  <th>{t("external:admin.stats.total")}</th>
+                  {EXTERNAL_TOPIC_SOURCES.map((source) => (
+                    <th key={source}>{t(`external:topicSource.${source}`)}</th>
+                  ))}
+                  <th aria-hidden="true" />
+                </tr>
+              </thead>
+              <tbody>
+                {stats.distribution.map((row) => {
+                  let x = 0;
+                  return (
+                    <tr key={row.topicId}>
+                      <td>{topicLabel(topics, row.topicId, i18n.language)}</td>
+                      <td>{format.number(row.total)}</td>
+                      {EXTERNAL_TOPIC_SOURCES.map((source) => (
+                        <td key={source}>{format.number(row.bySource[source] ?? 0)}</td>
+                      ))}
+                      <td aria-hidden="true">
+                        <svg
+                          width={BAR_WIDTH}
+                          height={BAR_HEIGHT}
+                          viewBox={`0 0 ${BAR_WIDTH} ${BAR_HEIGHT}`}
+                          className="stats-bar"
+                        >
+                          {EXTERNAL_TOPIC_SOURCES.map((source) => {
+                            const width = ((row.bySource[source] ?? 0) / max) * BAR_WIDTH;
+                            const rect = (
+                              <rect
+                                key={source}
+                                x={x}
+                                y={0}
+                                width={width}
+                                height={BAR_HEIGHT}
+                                fill={SOURCE_FILL[source]}
+                                className={`stats-bar-${source.toLowerCase()}`}
+                              />
+                            );
+                            x += width;
+                            return rect;
+                          })}
+                        </svg>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </>

@@ -127,52 +127,54 @@ export default function AdminExternalBlogs() {
       {blogs.length === 0 ? (
         <p>{t("external:admin.list.empty")}</p>
       ) : (
-        <table className="admin-table" aria-label={t("external:admin.list.title")}>
-          <thead>
-            <tr>
-              <th>{t("external:common.name")}</th>
-              <th>{t("external:common.feedUrl")}</th>
-              <th>{t("external:common.registrationType")}</th>
-              <th>{t("external:common.member")}</th>
-              <th>{t("external:common.verified")}</th>
-              <th>{t("external:common.status")}</th>
-              <th>{t("external:common.lastFetch")}</th>
-              <th>{t("external:admin.list.failures")}</th>
-              <th>{t("external:admin.list.pendingReviews")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {blogs.map((blog) => (
-              <tr key={blog.id}>
-                <td>
-                  <Link to={`${PATH}/${blog.id}`}>
-                    {blog.title ?? t("external:common.untitled")}
-                  </Link>
-                </td>
-                <td>
-                  <code>{blog.feedUrl}</code>
-                </td>
-                <td>{t(`external:registrationType.${blog.registrationType}`)}</td>
-                <td>{blog.member?.nickname ?? "-"}</td>
-                <td>
-                  {blog.ownershipVerified
-                    ? t("external:common.verified")
-                    : t("external:common.notVerified")}
-                </td>
-                <td>
-                  <ExternalBlogStatusBadge blog={blog} />
-                </td>
-                <td>
-                  {blog.lastFetchedAt
-                    ? `${format.dateTime(blog.lastFetchedAt)} · ${fetchResultLabel(t, blog.lastFetchResult)}`
-                    : t("external:common.never")}
-                </td>
-                <td>{blog.consecutiveFailures}</td>
-                <td>{blog.pendingReviewCount}</td>
+        <div className="table-scroll">
+          <table className="admin-table" aria-label={t("external:admin.list.title")}>
+            <thead>
+              <tr>
+                <th>{t("external:common.name")}</th>
+                <th>{t("external:common.feedUrl")}</th>
+                <th>{t("external:common.registrationType")}</th>
+                <th>{t("external:common.member")}</th>
+                <th>{t("external:common.verified")}</th>
+                <th>{t("external:common.status")}</th>
+                <th>{t("external:common.lastFetch")}</th>
+                <th>{t("external:admin.list.failures")}</th>
+                <th>{t("external:admin.list.pendingReviews")}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {blogs.map((blog) => (
+                <tr key={blog.id}>
+                  <td>
+                    <Link to={`${PATH}/${blog.id}`}>
+                      {blog.title ?? t("external:common.untitled")}
+                    </Link>
+                  </td>
+                  <td>
+                    <code>{blog.feedUrl}</code>
+                  </td>
+                  <td>{t(`external:registrationType.${blog.registrationType}`)}</td>
+                  <td>{blog.member?.nickname ?? "-"}</td>
+                  <td>
+                    {blog.ownershipVerified
+                      ? t("external:common.verified")
+                      : t("external:common.notVerified")}
+                  </td>
+                  <td>
+                    <ExternalBlogStatusBadge blog={blog} />
+                  </td>
+                  <td>
+                    {blog.lastFetchedAt
+                      ? `${format.dateTime(blog.lastFetchedAt)} · ${fetchResultLabel(t, blog.lastFetchResult)}`
+                      : t("external:common.never")}
+                  </td>
+                  <td>{blog.consecutiveFailures}</td>
+                  <td>{blog.pendingReviewCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
       <Pagination
         page={page}

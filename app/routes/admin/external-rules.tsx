@@ -147,57 +147,59 @@ export default function AdminExternalRules() {
       {rules.length === 0 ? (
         <p>{t("external:admin.rules.empty")}</p>
       ) : (
-        <table className="admin-table" aria-label={t("external:admin.rules.title")}>
-          <thead>
-            <tr>
-              <th>{t("external:admin.rules.keyword")}</th>
-              <th>{t("external:common.topic")}</th>
-              <th>{t("external:admin.rules.priority")}</th>
-              <th>{t("external:admin.rules.createdBy")}</th>
-              <th>{t("external:common.actions")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rules.map((rule) => {
-              const mine = own("update", rule.id) || own("delete", rule.id);
-              return (
-                <tr key={rule.id}>
-                  <td>
-                    <code>{rule.keyword}</code>
-                  </td>
-                  <td>{topicLabel(topics, rule.topicId, i18n.language)}</td>
-                  <td>{rule.priority}</td>
-                  <td>
-                    {rule.createdBy.nickname} · {format.dateTime(rule.createdAt)}
-                  </td>
-                  <td>
-                    {mine && <FormAlert message={message} />}
-                    <details>
-                      <summary>{t("external:admin.rules.update")}</summary>
-                      <RuleForm
-                        key={`${rule.id}-${rule.updatedAt}`}
-                        topics={topics}
-                        rule={rule}
-                        action={formAction}
-                        fields={own("update", rule.id) ? fields : {}}
-                      />
-                    </details>
-                    <Form method="post" action={formAction}>
-                      <input type="hidden" name="intent" value="delete" />
-                      <input type="hidden" name="id" value={rule.id} />
-                      <button
-                        type="submit"
-                        aria-label={`${t("external:admin.rules.delete")} ${rule.keyword}`}
-                      >
-                        {t("external:admin.rules.delete")}
-                      </button>
-                    </Form>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="admin-table" aria-label={t("external:admin.rules.title")}>
+            <thead>
+              <tr>
+                <th>{t("external:admin.rules.keyword")}</th>
+                <th>{t("external:common.topic")}</th>
+                <th>{t("external:admin.rules.priority")}</th>
+                <th>{t("external:admin.rules.createdBy")}</th>
+                <th>{t("external:common.actions")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rules.map((rule) => {
+                const mine = own("update", rule.id) || own("delete", rule.id);
+                return (
+                  <tr key={rule.id}>
+                    <td>
+                      <code>{rule.keyword}</code>
+                    </td>
+                    <td>{topicLabel(topics, rule.topicId, i18n.language)}</td>
+                    <td>{rule.priority}</td>
+                    <td>
+                      {rule.createdBy.nickname} · {format.dateTime(rule.createdAt)}
+                    </td>
+                    <td>
+                      {mine && <FormAlert message={message} />}
+                      <details>
+                        <summary>{t("external:admin.rules.update")}</summary>
+                        <RuleForm
+                          key={`${rule.id}-${rule.updatedAt}`}
+                          topics={topics}
+                          rule={rule}
+                          action={formAction}
+                          fields={own("update", rule.id) ? fields : {}}
+                        />
+                      </details>
+                      <Form method="post" action={formAction}>
+                        <input type="hidden" name="intent" value="delete" />
+                        <input type="hidden" name="id" value={rule.id} />
+                        <button
+                          type="submit"
+                          aria-label={`${t("external:admin.rules.delete")} ${rule.keyword}`}
+                        >
+                          {t("external:admin.rules.delete")}
+                        </button>
+                      </Form>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
       <Pagination
         page={page}

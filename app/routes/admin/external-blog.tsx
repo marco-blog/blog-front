@@ -385,99 +385,101 @@ export default function AdminExternalBlog() {
         {posts.length === 0 ? (
           <p>{t("external:manage.detail.noPosts")}</p>
         ) : (
-          <table className="admin-table" aria-label={t("external:admin.detail.posts")}>
-            <thead>
-              <tr>
-                <th>{t("external:common.title")}</th>
-                <th>{t("external:common.publishedAt")}</th>
-                <th>{t("external:common.topic")}</th>
-                <th>{t("external:admin.detail.confidence")}</th>
-                <th>{t("external:common.status")}</th>
-                <th>{t("external:common.clicks")}</th>
-                <th>{t("external:admin.detail.actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {posts.map((post) => (
-                <tr key={post.id}>
-                  <td>
-                    <a
-                      href={post.link}
-                      target="_blank"
-                      rel="noopener nofollow noreferrer"
-                      title={t("external:common.newTab")}
-                    >
-                      {post.title}
-                    </a>
-                  </td>
-                  <td>{dateTime(post.publishedAt)}</td>
-                  <td>
-                    {topicLabel(topics, post.topicId, i18n.language)} (
-                    {t(`external:topicSource.${post.topicSource}`)})
-                  </td>
-                  <td>
-                    {post.classifierConfidence === null
-                      ? "-"
-                      : format.number(Math.round(post.classifierConfidence * 100) / 100)}
-                  </td>
-                  <td>
-                    {t(`external:postStatus.${post.status}`)}
-                    {post.removedReason &&
-                      ` · ${t(`external:removedReason.${post.removedReason}`)}`}
-                    {post.excluded && (
-                      <p className="field-hint">
-                        {t("external:admin.detail.excluded", { reason: post.excluded.reason })}
-                      </p>
-                    )}
-                  </td>
-                  <td>{format.number(post.clickCount)}</td>
-                  <td>
-                    {post.status === "ACTIVE" && (
-                      <>
-                        {post.excluded ? (
-                          <Form method="post">
-                            <input type="hidden" name="intent" value="unexclude" />
-                            <input type="hidden" name="postId" value={post.id} />
-                            <FormAlert message={postErrorFor("unexclude", post.id)} />
-                            <button type="submit">{t("external:admin.detail.unexclude")}</button>
-                          </Form>
-                        ) : (
-                          <Form method="post">
-                            <input type="hidden" name="intent" value="exclude" />
+          <div className="table-scroll">
+            <table className="admin-table" aria-label={t("external:admin.detail.posts")}>
+              <thead>
+                <tr>
+                  <th>{t("external:common.title")}</th>
+                  <th>{t("external:common.publishedAt")}</th>
+                  <th>{t("external:common.topic")}</th>
+                  <th>{t("external:admin.detail.confidence")}</th>
+                  <th>{t("external:common.status")}</th>
+                  <th>{t("external:common.clicks")}</th>
+                  <th>{t("external:admin.detail.actions")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {posts.map((post) => (
+                  <tr key={post.id}>
+                    <td>
+                      <a
+                        href={post.link}
+                        target="_blank"
+                        rel="noopener nofollow noreferrer"
+                        title={t("external:common.newTab")}
+                      >
+                        {post.title}
+                      </a>
+                    </td>
+                    <td>{dateTime(post.publishedAt)}</td>
+                    <td>
+                      {topicLabel(topics, post.topicId, i18n.language)} (
+                      {t(`external:topicSource.${post.topicSource}`)})
+                    </td>
+                    <td>
+                      {post.classifierConfidence === null
+                        ? "-"
+                        : format.number(Math.round(post.classifierConfidence * 100) / 100)}
+                    </td>
+                    <td>
+                      {t(`external:postStatus.${post.status}`)}
+                      {post.removedReason &&
+                        ` · ${t(`external:removedReason.${post.removedReason}`)}`}
+                      {post.excluded && (
+                        <p className="field-hint">
+                          {t("external:admin.detail.excluded", { reason: post.excluded.reason })}
+                        </p>
+                      )}
+                    </td>
+                    <td>{format.number(post.clickCount)}</td>
+                    <td>
+                      {post.status === "ACTIVE" && (
+                        <>
+                          {post.excluded ? (
+                            <Form method="post">
+                              <input type="hidden" name="intent" value="unexclude" />
+                              <input type="hidden" name="postId" value={post.id} />
+                              <FormAlert message={postErrorFor("unexclude", post.id)} />
+                              <button type="submit">{t("external:admin.detail.unexclude")}</button>
+                            </Form>
+                          ) : (
+                            <Form method="post">
+                              <input type="hidden" name="intent" value="exclude" />
+                              <input type="hidden" name="postId" value={post.id} />
+                              <input
+                                name="reason"
+                                required
+                                maxLength={500}
+                                aria-label={t("external:admin.detail.excludeReason", {
+                                  title: post.title,
+                                })}
+                              />
+                              <FormAlert message={postErrorFor("exclude", post.id)} />
+                              <button type="submit">{t("external:admin.detail.exclude")}</button>
+                            </Form>
+                          )}
+                          <Form method="post" onSubmit={confirmRemove}>
+                            <input type="hidden" name="intent" value="remove" />
                             <input type="hidden" name="postId" value={post.id} />
                             <input
                               name="reason"
                               required
                               maxLength={500}
-                              aria-label={t("external:admin.detail.excludeReason", {
+                              aria-label={t("external:admin.detail.removeReason", {
                                 title: post.title,
                               })}
                             />
-                            <FormAlert message={postErrorFor("exclude", post.id)} />
-                            <button type="submit">{t("external:admin.detail.exclude")}</button>
+                            <FormAlert message={postErrorFor("remove", post.id)} />
+                            <button type="submit">{t("external:admin.detail.remove")}</button>
                           </Form>
-                        )}
-                        <Form method="post" onSubmit={confirmRemove}>
-                          <input type="hidden" name="intent" value="remove" />
-                          <input type="hidden" name="postId" value={post.id} />
-                          <input
-                            name="reason"
-                            required
-                            maxLength={500}
-                            aria-label={t("external:admin.detail.removeReason", {
-                              title: post.title,
-                            })}
-                          />
-                          <FormAlert message={postErrorFor("remove", post.id)} />
-                          <button type="submit">{t("external:admin.detail.remove")}</button>
-                        </Form>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
         <Pagination
           page={page}

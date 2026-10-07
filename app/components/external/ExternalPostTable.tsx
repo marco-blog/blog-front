@@ -24,57 +24,59 @@ export function ExternalPostTable({ posts, topics, editable, action }: ExternalP
   const { t, i18n } = useTranslation();
   const format = useDateFormat();
   return (
-    <table className="manage-table" aria-label={t("external:manage.detail.posts")}>
-      <thead>
-        <tr>
-          <th>{t("external:common.title")}</th>
-          <th>{t("external:common.publishedAt")}</th>
-          <th>{t("external:common.topic")}</th>
-          <th>{t("external:common.status")}</th>
-          <th>{t("external:common.clicks")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {posts.map((post) => (
-          <tr key={post.id}>
-            <td>
-              <a
-                href={post.link}
-                target="_blank"
-                rel="noopener nofollow noreferrer"
-                title={t("external:common.newTab")}
-              >
-                {post.title}
-              </a>
-            </td>
-            <td>{post.publishedAt ? format.dateTime(post.publishedAt) : "-"}</td>
-            <td>
-              {topicLabel(topics, post.topicId, i18n.language)}{" "}
-              <span className={`topic-source topic-source-${post.topicSource.toLowerCase()}`}>
-                {t(`external:topicSource.${post.topicSource}`)}
-              </span>
-              {editable && post.status === "ACTIVE" && (
-                <Form method="post" action={action} className="external-post-topic-form">
-                  <input type="hidden" name="intent" value="post-topic" />
-                  <input type="hidden" name="postId" value={post.id} />
-                  <TopicSelect
-                    topics={topics}
-                    name="topicId"
-                    defaultValue={post.topicId}
-                    label={t("external:manage.detail.postTopicFor", { title: post.title })}
-                  />
-                  <button type="submit">{t("external:common.change")}</button>
-                </Form>
-              )}
-            </td>
-            <td>
-              {t(`external:postStatus.${post.status}`)}
-              {post.removedReason && ` · ${t(`external:removedReason.${post.removedReason}`)}`}
-            </td>
-            <td>{format.number(post.clickCount)}</td>
+    <div className="table-scroll">
+      <table className="manage-table" aria-label={t("external:manage.detail.posts")}>
+        <thead>
+          <tr>
+            <th>{t("external:common.title")}</th>
+            <th>{t("external:common.publishedAt")}</th>
+            <th>{t("external:common.topic")}</th>
+            <th>{t("external:common.status")}</th>
+            <th>{t("external:common.clicks")}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {posts.map((post) => (
+            <tr key={post.id}>
+              <td>
+                <a
+                  href={post.link}
+                  target="_blank"
+                  rel="noopener nofollow noreferrer"
+                  title={t("external:common.newTab")}
+                >
+                  {post.title}
+                </a>
+              </td>
+              <td>{post.publishedAt ? format.dateTime(post.publishedAt) : "-"}</td>
+              <td>
+                {topicLabel(topics, post.topicId, i18n.language)}{" "}
+                <span className={`topic-source topic-source-${post.topicSource.toLowerCase()}`}>
+                  {t(`external:topicSource.${post.topicSource}`)}
+                </span>
+                {editable && post.status === "ACTIVE" && (
+                  <Form method="post" action={action} className="external-post-topic-form">
+                    <input type="hidden" name="intent" value="post-topic" />
+                    <input type="hidden" name="postId" value={post.id} />
+                    <TopicSelect
+                      topics={topics}
+                      name="topicId"
+                      defaultValue={post.topicId}
+                      label={t("external:manage.detail.postTopicFor", { title: post.title })}
+                    />
+                    <button type="submit">{t("external:common.change")}</button>
+                  </Form>
+                )}
+              </td>
+              <td>
+                {t(`external:postStatus.${post.status}`)}
+                {post.removedReason && ` · ${t(`external:removedReason.${post.removedReason}`)}`}
+              </td>
+              <td>{format.number(post.clickCount)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
