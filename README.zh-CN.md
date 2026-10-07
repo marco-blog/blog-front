@@ -98,7 +98,7 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<管理员邮箱> E2E_ADMIN_PASSWORD=<密码> npm run e2e
 ```
 
-004 博客功能场景（`tests/e2e/blog-*`）使用 backend local 配置的默认值运行。非会员写入场景会从同一 IP（localhost）多次写入，因此需放宽写入频率限制启动 backend，并设置 `E2E_GUEST_TEST_SETTINGS=1`（004 的 `BLOG_GUEST_*_PER_MINUTE` 已改为 005 的 `BLOG_RATELIMIT_*`，见下面的 005 设置）。备份场景中 backend 会把 zip 写到 `BLOG_EXPORT_DIR`（local 默认 `./data/exports`）。定时发布和备份场景需要等待批处理周期（30 秒），因此需要 1～2 分钟。
+004 博客功能场景（`tests/e2e/blog-*`）使用 backend local 配置的默认值运行。非会员写入场景会从同一 IP（localhost）多次写入，因此需放宽写入频率限制启动 backend，并设置 `E2E_GUEST_TEST_SETTINGS=1`（004 的 `BLOG_GUEST_*_PER_MINUTE` 已改为 005 的 `BLOG_RATELIMIT_*`，见下面的 005 设置）。备份场景中 backend 会把 zip 写到 `BLOG_DATA_DIR`/exports（local 默认 `./data/exports`）。定时发布和备份场景需要等待批处理周期（30 秒），因此需要 1～2 分钟。
 
 门户场景查看全站唯一的画面（首页"最新文章"、推荐、门户设置），因此作为 Playwright 项目 `portal` 在其余场景（`e2e`）结束后一次一个文件地运行。CI（`ci.yml` 的 e2e-backend、`e2e.yml`）以上述测试设置启动 backend，并用 `scripts/e2e-provision-admin.sh` 在一次性数据库中创建管理员账号（注册 API → 将 `role` 改为 SUPER_ADMIN）。
 

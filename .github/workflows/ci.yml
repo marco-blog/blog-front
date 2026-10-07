@@ -152,8 +152,8 @@ jobs:
           BLOG_TRACKBACK_RECEIVE_LIMIT: "100000"
           BLOG_REPORTS_MEMBER_PER_HOUR: "100000"
           BLOG_REPORTS_RIGHTS_REQUEST_PER_IP_PER_HOUR: "100000"
-          # 004 블로그 백업 zip 디렉터리(blog-us4-backup E2E). 실행마다 비는 러너 임시 디렉터리
-          BLOG_EXPORT_DIR: ${{ runner.temp }}/blog-exports
+          # 파일 보관 루트(이미지 media/*, 004 블로그 백업 zip exports). 실행마다 비는 러너 임시 디렉터리
+          BLOG_DATA_DIR: ${{ runner.temp }}/blog-data
           # 006 대시보드 수치를 바로 확인(E2E_ADMIN_TEST_SETTINGS=1과 짝): 대시보드 캐시 끔
           BLOG_ADMIN_DASHBOARD_CACHE_TTL: 0s
           # 007 외부 블로그 시험용 설정(E2E_EXTERNAL_TEST_SETTINGS=1과 짝). E2E 피드 스텁이 127.0.0.1:4610, 시험 전용:
