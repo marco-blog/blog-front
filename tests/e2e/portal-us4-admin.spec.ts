@@ -17,7 +17,7 @@ import {
 } from "./support/backend.js";
 
 /**
- * 003 US4 관리자 콘솔(quickstart #22~30, T093): 일반 회원은 `/admin`이 404, 관리자는 주제 관리로. 추천 3편을 순서대로
+ * 003 US4 관리자 콘솔(quickstart #22~30, T093): 일반 회원은 `/admin`이 404, 관리자는 대시보드(006)에서 메뉴로 주제 관리. 추천 3편을 순서대로
  * 지정하면 메인 맨 위에 그 순서로, 기간을 과거로 고치면 사라진다. 기간이 겹치는 6번째 추천은 409. 포털 제외는 포털에서만
  * 빠지고 해제하면 돌아온다. 주제 이름·숨김은 글쓰기 주제 목록과 주제 주소에 바로 반영된다. 설정 "기본값으로".
  * 공용 DB를 쓰므로 만든 추천·제외·설정·주제 변경은 끝에서 되돌린다.
@@ -92,7 +92,9 @@ test.describe("003 US4 관리자 콘솔", () => {
     await page.close();
   });
 
-  test("일반 회원은 /admin 404·API 404 NOT_FOUND, 관리자는 주제 관리로(#22)", async ({ page }) => {
+  test("일반 회원은 /admin 404·API 404 NOT_FOUND, 관리자는 대시보드와 메뉴의 주제 관리로(#22)", async ({
+    page,
+  }) => {
     test.setTimeout(90_000);
     await signUp(page, member);
     const denied = await page.goto("/admin");
@@ -119,21 +121,31 @@ test.describe("003 US4 관리자 콘솔", () => {
     ids.push(third);
 
     await asAdmin(page);
+    // 006: `/admin`은 대시보드이고, 메뉴의 주제 관리 → `/admin/topics`
     await page.goto("/admin");
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole("heading", { level: 1, name: "대시보드" })).toBeVisible();
+    const menu = page.getByRole("navigation", { name: "관리자 메뉴" });
+    await menu.getByRole("link", { name: "주제", exact: true }).click();
     await expect(page).toHaveURL(/\/admin\/topics$/);
     await expect(page.getByRole("heading", { level: 1, name: "주제 관리" })).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
-    await expect(
-      page.getByRole("navigation", { name: "관리자 메뉴" }).getByRole("link"),
-    ).toHaveText([
+    await expect(menu.getByRole("link")).toHaveText([
+      "대시보드",
       "주제",
       "포털 추천",
       "포털 제외",
       "포털 설정",
-      // 005: 회원·신고·숨긴 글. 신고 관리에는 처리 대기 배지가 붙을 수 있다.
+      // 005: 회원·숨긴 글·신고(신고 관리에는 처리 대기 배지가 붙을 수 있다). 006: 콘텐츠 관리와 서비스 메뉴
       "회원 관리",
-      /^신고 관리/,
+      "콘텐츠 관리",
       "숨긴 글",
+      /^신고 관리/,
+      "예약어",
+      "서비스 설정",
+      "관리자 권한",
+      "작업 기록",
+      "릴리스 노트",
     ]);
   });
 

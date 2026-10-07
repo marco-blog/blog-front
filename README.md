@@ -71,14 +71,15 @@ npm run e2e                          # = npx playwright test
 
 `playwright.config.ts`가 `npm run build && npm start`로 front 서버를 띄워(`E2E_PORT`, 기본 5173) 검사한다. 환경 변수에 따라 도는 시나리오가 다르다.
 
-| 환경 변수                               | 예                      | 없으면                                                                                                                            |
-| --------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| (없음)                                  |                         | 첫 화면·404·보안 헤더 같은 smoke 시나리오만 돈다                                                                                  |
-| `E2E_BACKEND_URL`                       | `http://localhost:8080` | 가입·글·카테고리·댓글·이미지·언어 시나리오(`tests/e2e/us*`)를 건너뛴다. 있으면 front 서버도 이 backend를 본다(`BLOG_BACKEND_URL`) |
-| `MAILPIT_URL`                           | `http://localhost:8025` | 비밀번호 재설정 메일을 읽는 시나리오를 건너뛴다(backend가 같은 Mailpit으로 메일을 보내야 한다)                                    |
-| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | 포털(003) 시나리오(`tests/e2e/portal-*`)를 건너뛴다. backend를 아래 포털 시험용 설정으로 띄웠다는 표시다                          |
-| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 비회원 댓글·방명록(004) 시나리오를 건너뛴다. backend를 아래 비회원 시험용 설정으로 띄웠다는 표시다                                |
-| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 관리자 계정             | 관리자 콘솔·릴리스 노트 시나리오를 건너뛴다. backend의 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL`과 같은 이메일로 가입한 계정이다   |
+| 환경 변수                               | 예                      | 없으면                                                                                                                                     |
+| --------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| (없음)                                  |                         | 첫 화면·404·보안 헤더 같은 smoke 시나리오만 돈다                                                                                           |
+| `E2E_BACKEND_URL`                       | `http://localhost:8080` | 가입·글·카테고리·댓글·이미지·언어 시나리오(`tests/e2e/us*`)를 건너뛴다. 있으면 front 서버도 이 backend를 본다(`BLOG_BACKEND_URL`)          |
+| `MAILPIT_URL`                           | `http://localhost:8025` | 비밀번호 재설정 메일을 읽는 시나리오를 건너뛴다(backend가 같은 Mailpit으로 메일을 보내야 한다)                                             |
+| `E2E_PORTAL_TEST_SETTINGS`              | `1`                     | 포털(003) 시나리오(`tests/e2e/portal-*`)를 건너뛴다. backend를 아래 포털 시험용 설정으로 띄웠다는 표시다                                   |
+| `E2E_GUEST_TEST_SETTINGS`               | `1`                     | 비회원 댓글·방명록(004) 시나리오를 건너뛴다. backend를 아래 비회원 시험용 설정으로 띄웠다는 표시다                                         |
+| `E2E_ADMIN_EMAIL`, `E2E_ADMIN_PASSWORD` | 관리자 계정             | 관리자 콘솔·릴리스 노트 시나리오를 건너뛴다. backend의 `BLOG_ADMIN_BOOTSTRAP_SUPER_ADMIN_EMAIL`과 같은 이메일로 가입한 계정이다            |
+| `E2E_ADMIN_TEST_SETTINGS`               | `1`                     | 관리 콘솔(006) 시나리오(`tests/e2e/admin-*`)를 건너뛴다. backend를 `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`(대시보드 캐시 끔)로 띄웠다는 표시다 |
 
 backend까지 포함해 모두 돌리려면 backend README대로 MySQL(스키마 적용)·Mailpit·backend(local 프로필)를 띄운 뒤:
 
@@ -96,6 +97,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
 004 블로그 기능 시나리오(`tests/e2e/blog-*`)는 backend local 프로필 기본값으로 돈다. 비회원 글 시나리오는 같은 IP(localhost)에서 여러 번 쓰므로 비회원 쓰기 속도 제한을 넉넉히 띄우고 `E2E_GUEST_TEST_SETTINGS=1`을 준다: `BLOG_GUEST_COMMENT_PER_MINUTE=1000`, `BLOG_GUEST_GUESTBOOK_PER_MINUTE=1000`. 백업 시나리오는 backend가 `BLOG_EXPORT_DIR`(local 기본 `./data/exports`)에 zip을 쓴다. 예약 발행·백업 시나리오는 배치 작업 주기(30초)를 기다리므로 1~2분 걸린다.
 
 포털 시나리오는 메인 "최신 글"·추천·포털 설정처럼 사이트에 하나뿐인 화면을 보므로, Playwright 프로젝트 `portal`로 나머지(`e2e`)가 끝난 뒤 한 번에 한 파일씩 돈다. CI(`ci.yml` e2e-backend, `e2e.yml`)는 위 시험용 설정으로 backend를 띄우고 `scripts/e2e-provision-admin.sh`로 일회용 DB에 관리자 계정을 만든다(가입 API → `role` SUPER_ADMIN).
+
+관리 콘솔(006) 시나리오(`tests/e2e/admin-*`)는 권한 부여·회수, 릴리스 노트 게시처럼 사이트 전체에 걸리는 상태를 바꾸므로 Playwright 프로젝트 `admin`으로 `portal`·`moderation`이 끝난 뒤 한 번에 한 파일씩 돈다. 대시보드 수치가 바로 바뀌어야 하므로 backend를 `BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s`로 띄우고 `E2E_ADMIN_TEST_SETTINGS=1`을 준다. 관리자 계정은 최고 관리자여야 하며, 시나리오는 그 계정 자신의 권한은 바꾸지 않는다.
 
 `CI`가 없으면 이미 떠 있는 front 서버(같은 포트)를 다시 쓴다. 시나리오는 실행마다 새 계정을 만들므로 같은 DB에서 여러 번 돌려도 된다.
 

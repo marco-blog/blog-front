@@ -318,3 +318,38 @@ export function uniqueText(seed = "본문") {
   const suffix = `${Date.now().toString(36)}${Math.floor(Math.random() * 46656).toString(36)}`;
   return `${seed} ${suffix}`;
 }
+
+/**
+ * 006 관리 콘솔 시나리오(admin 프로젝트)는 backend 대시보드 캐시를 끄고(BLOG_ADMIN_DASHBOARD_CACHE_TTL=0s) 띄웠을 때만 돈다.
+ * 그렇게 띄웠다는 표시로 E2E_ADMIN_TEST_SETTINGS=1을 준다(.github/workflows/ci.yml "Start backend").
+ */
+export function requireAdminTestSettings() {
+  test.skip(
+    process.env.E2E_ADMIN_TEST_SETTINGS !== "1",
+    "E2E_ADMIN_TEST_SETTINGS=1(006 시험용 backend 설정)이 아니면 관리 콘솔 시나리오는 건너뛴다.",
+  );
+}
+
+/** 회원 권한을 바꾼다(PUT /admin/users/{id}/role, 최고 관리자로 로그인한 request). CI 관리자 자신에게는 쓰지 않는다. */
+export async function setRole(
+  request: APIRequestContext,
+  userId: number,
+  role: "USER" | "ADMIN" | "SUPER_ADMIN",
+) {
+  return callApi<{ userId: number; role: string }>(request, "PUT", `/admin/users/${userId}/role`, {
+    role,
+  });
+}
+
+/** 로그인한 회원의 번호(GET /me) */
+export async function myUserId(request: APIRequestContext): Promise<number> {
+  const me = await callApi<{ userId: number }>(request, "GET", "/me");
+  expect(me.status, "GET /me").toBe(200);
+  return me.body.result.userId;
+}
+
+/** 실행마다 겹치지 않는 릴리스 노트 버전 `900.{분}.{난수}`(실제 버전과 섞이지 않게 큰 주 번호) */
+export function uniqueVersion() {
+  const minutes = Math.floor(Date.now() / 60_000) % 1_000_000;
+  return `900.${minutes}.${Math.floor(Math.random() * 1_000_000)}`;
+}

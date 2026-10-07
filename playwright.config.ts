@@ -18,12 +18,23 @@ export default defineConfig({
   // 005 신고·스팸 방어·트랙백 시나리오(moderation-*)는 금칙어·운영 설정처럼 사이트 전체에 걸리는 값을 바꾸므로 역시 나머지 뒤에
   // 한 번에 한 파일씩 돈다. 포털 시나리오가 보는 "최신 글"을 흔들지 않도록 portal 다음에 돈다.
   projects: [
-    { name: "e2e", testIgnore: [/portal-.*\.spec\.ts$/, /moderation-.*\.spec\.ts$/] },
+    {
+      name: "e2e",
+      testIgnore: [/portal-.*\.spec\.ts$/, /moderation-.*\.spec\.ts$/, /admin-.*\.spec\.ts$/],
+    },
     { name: "portal", testMatch: /portal-.*\.spec\.ts$/, dependencies: ["e2e"], workers: 1 },
     {
       name: "moderation",
       testMatch: /moderation-.*\.spec\.ts$/,
       dependencies: ["e2e", "portal"],
+      workers: 1,
+    },
+    // 006 관리 콘솔 시나리오(admin-*)는 권한 부여·회수, 릴리스 노트 게시처럼 사이트 전체에 걸리는 상태를 바꾸므로 맨 마지막에
+    // 한 번에 한 파일씩 돈다.
+    {
+      name: "admin",
+      testMatch: /admin-.*\.spec\.ts$/,
+      dependencies: ["portal", "moderation"],
       workers: 1,
     },
   ],
