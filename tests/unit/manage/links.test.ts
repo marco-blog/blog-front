@@ -30,14 +30,12 @@ describe("MANAGE_MENU", () => {
     ]);
   });
 
-  it("보이는 항목의 경로는 routes.ts의 manage 자식에 있고, 외부 블로그는 숨김(받은 트랙백은 005가 켰다)", () => {
+  it("보이는 항목의 경로는 routes.ts의 manage 자식에 있고, 외부 블로그는 007이 켰다(숨긴 항목 없음)", () => {
     const paths = managePaths();
     for (const item of MANAGE_MENU) {
       expect(paths.includes(item.path), item.key).toBe(item.available);
     }
-    expect(MANAGE_MENU.filter((item) => !item.available).map((item) => item.key)).toEqual([
-      "externalBlogs",
-    ]);
+    expect(MANAGE_MENU.filter((item) => !item.available).map((item) => item.key)).toEqual([]);
   });
 
   it("글 주소: 발행한 글은 글 화면, 나머지는 작성 화면(SC-016)", () => {

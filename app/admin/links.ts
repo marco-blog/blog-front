@@ -51,7 +51,7 @@ export const ADMIN_MENU: readonly AdminMenuItem[] = [
     path: "/admin/external-blogs",
     group: "portal",
     spec: "007",
-    available: false,
+    available: true,
   },
   { key: "spam", path: "/admin/spam", group: "operations", spec: "005", available: true },
   {

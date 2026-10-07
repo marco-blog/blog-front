@@ -59,6 +59,29 @@ export function fail(
   );
 }
 
+/** 오류 상세 값(`header.params`, 007)을 실은 실패 응답 */
+export function failWithParams(
+  status: number,
+  resultCode: string,
+  params: Record<string, unknown>,
+  fieldErrors: ApiFieldError[] = [],
+): Response {
+  return new Response(
+    JSON.stringify({
+      header: {
+        isSuccessful: false,
+        resultCode,
+        resultMessage: "debug message that must not be shown",
+        ...(fieldErrors.length > 0 ? { fieldErrors } : {}),
+        params,
+        traceId: "trace-0000",
+      },
+      result: null,
+    }),
+    { status, headers: { "content-type": "application/json" } },
+  );
+}
+
 function toUrl(input: RequestInfo | URL): URL {
   if (input instanceof URL) return input;
   if (typeof input === "string") return new URL(input, "http://front.test");

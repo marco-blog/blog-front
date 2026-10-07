@@ -615,6 +615,7 @@ describe("블로그 관리 화면", () => {
       "받은 트랙백",
       "백업",
       "차단 목록",
+      "외부 블로그",
     ]);
     expect(within(menu).getByRole("link", { name: "카테고리" })).toHaveAttribute(
       "href",
@@ -624,7 +625,7 @@ describe("블로그 관리 화면", () => {
       "href",
       "/marco/manage/posts",
     );
-    // 006 FR-099 표 순서(005가 받은 트랙백을 켰다. 외부 블로그는 007이 켤 때까지 숨김)
+    // 006 FR-099 표 순서(005가 받은 트랙백, 007이 외부 블로그를 켰다)
     expect(MANAGE_MENU.filter((item) => item.available).map((item) => item.key)).toEqual([
       "dashboard",
       "posts",
@@ -638,6 +639,7 @@ describe("블로그 관리 화면", () => {
       "trackbacks",
       "backup",
       "blocks",
+      "externalBlogs",
     ]);
     expect(within(menu).getByRole("link", { name: "글 관리" })).toHaveAttribute(
       "aria-current",

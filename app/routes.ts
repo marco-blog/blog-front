@@ -18,6 +18,11 @@ export default [
   route("locale", "routes/locale.ts"),
   route("write", "routes/write-entry.ts"),
   route("manage", "routes/manage-entry.ts"),
+  // 007 알림 링크용(최근 블로그의 외부 블로그 관리로)
+  route("manage/external-blogs", "routes/manage-external-entry.ts", { id: "manage-external-list" }),
+  route("manage/external-blogs/:id", "routes/manage-external-entry.ts", {
+    id: "manage-external-detail",
+  }),
   route("settings", "routes/settings.tsx", [
     index("routes/settings._index.ts"),
     route("profile", "routes/settings.profile.tsx"),
@@ -76,6 +81,10 @@ export default [
     }),
     route("release-notes/:id/revisions", "routes/admin/release-note-revisions.tsx"),
     route("release-notes/:id/revisions/:revisionNo", "routes/admin/release-note-revision.tsx"),
+    // 007 외부 블로그 관리
+    route("external-blogs", "routes/admin/external-blogs.tsx"),
+    route("external-blogs/new", "routes/admin/external-blog-new.tsx"),
+    route("external-blogs/:id", "routes/admin/external-blog.tsx"),
   ]),
 
   // 블로그 주소 아래. `:postId`가 숫자인지는 loader가 검사한다(React Router는 정규식 경로가 없다).
@@ -94,6 +103,10 @@ export default [
     route("blocks", "routes/manage/blocks.tsx"),
     route("settings", "routes/manage/settings.tsx"),
     route("feed", "routes/manage/feed.tsx"),
+    // 007 외부 블로그
+    route("external-blogs", "routes/manage/external-blogs.tsx"),
+    route("external-blogs/new", "routes/manage/external-blog-new.tsx"),
+    route("external-blogs/:id", "routes/manage/external-blog.tsx"),
   ]),
   // 004 공개 블로그 레이아웃(경로 없음): 블로그 메뉴·사이드바. 고정 이름 경로를 `:handle/:postId`보다 앞에 둔다.
   layout("routes/blog/layout.tsx", [

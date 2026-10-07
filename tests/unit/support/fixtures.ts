@@ -1,4 +1,13 @@
-import type { Blog, PortalCard, PostDetail, PostSummary, TopicNode } from "~/api/models";
+import type {
+  AdminExternalBlog,
+  Blog,
+  MyExternalBlog,
+  MyExternalPost,
+  PortalCard,
+  PostDetail,
+  PostSummary,
+  TopicNode,
+} from "~/api/models";
 
 /** contracts/api.md 형식의 예시 데이터 */
 export const blog: Blog = {
@@ -102,4 +111,81 @@ export function portalCard(id: number, overrides: Partial<PortalCard> = {}): Por
     commentCount: 2,
     ...overrides,
   };
+}
+
+/** 007 내 외부 블로그 */
+export function myExternalBlog(
+  id: number,
+  overrides: Partial<MyExternalBlog> = {},
+): MyExternalBlog {
+  return {
+    id,
+    title: `Remote ${id}`,
+    siteUrl: `https://remote${id}.example/`,
+    feedUrl: `https://remote${id}.example/feed.xml`,
+    feedFormat: "RSS",
+    status: "ACTIVE",
+    registrationType: "MEMBER_REQUEST",
+    ownershipVerified: false,
+    defaultTopicId: 11,
+    rejectReason: null,
+    lastFetchedAt: "2026-10-07T00:00:00Z",
+    lastSuccessAt: "2026-10-07T00:00:00Z",
+    lastFetchResult: "OK",
+    postCount: 2,
+    createdAt: "2026-10-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+/** 007 관리자용 외부 블로그 */
+export function adminExternalBlog(
+  id: number,
+  overrides: Partial<AdminExternalBlog> = {},
+): AdminExternalBlog {
+  return {
+    ...myExternalBlog(id),
+    member: { userId: 7, nickname: "회원", status: "ACTIVE" },
+    registrationBasis: null,
+    reviewedBy: null,
+    reviewedAt: null,
+    ownershipVerifiedAt: null,
+    nextFetchAt: null,
+    lastHttpStatus: 200,
+    consecutiveFailures: 0,
+    firstFailedAt: null,
+    pendingReviewCount: 0,
+    ...overrides,
+  };
+}
+
+/** 007 수집된 외부 글 */
+export function myExternalPost(
+  id: number,
+  overrides: Partial<MyExternalPost> = {},
+): MyExternalPost {
+  return {
+    id,
+    title: `External ${id}`,
+    summary: "summary",
+    link: `https://remote.example/posts/${id}`,
+    thumbnailUrl: null,
+    publishedAt: "2026-10-06T00:00:00Z",
+    topicId: 11,
+    topicSource: "DEFAULT",
+    status: "ACTIVE",
+    removedReason: null,
+    clickCount: 3,
+    ...overrides,
+  };
+}
+
+/** 주제 트리: 대분류 1(knowledge) 아래 소분류 11(it), 12(science) */
+export function externalTopics(): TopicNode[] {
+  return [
+    topicNode(1, "knowledge", {}, [
+      topicNode(11, "it", { parentId: 1 }),
+      topicNode(12, "science", { parentId: 1 }),
+    ]),
+  ];
 }

@@ -138,7 +138,7 @@ describe("/admin 화면", () => {
       within(menu)
         .getAllByRole("heading")
         .map((heading) => heading.textContent),
-    ).toEqual(["운영", "포털", "운영", "서비스"]);
+    ).toEqual(["운영", "포털", "운영", "포털", "운영", "서비스"]);
     const links = within(menu).getAllByRole("link");
     expect(links.map((link) => link.textContent)).toEqual([
       "대시보드",
@@ -149,6 +149,7 @@ describe("/admin 화면", () => {
       "회원 관리",
       "콘텐츠 관리",
       "신고 관리 처리 대기 3건",
+      "외부 블로그 관리",
       "스팸 방어 설정",
       "예약어",
       "서비스 설정",
@@ -167,7 +168,10 @@ describe("/admin 화면", () => {
       "aria-current",
       "page",
     );
-    expect(within(menu).queryByRole("link", { name: "외부 블로그 관리" })).toBeNull();
+    expect(within(menu).getByRole("link", { name: "외부 블로그 관리" })).toHaveAttribute(
+      "href",
+      "/admin/external-blogs",
+    );
     expect(menu.closest("details")).toHaveAttribute("open");
     expect(screen.getByText("운영자")).toBeInTheDocument();
     expect(screen.getByText("최고 관리자")).toBeInTheDocument();
@@ -217,6 +221,9 @@ describe("/admin 화면", () => {
       "release-notes/:id",
       "release-notes/:id/revisions",
       "release-notes/:id/revisions/:revisionNo",
+      "external-blogs",
+      "external-blogs/new",
+      "external-blogs/:id",
     ]);
   });
 });
