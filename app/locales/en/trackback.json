@@ -15,7 +15,8 @@
   "send": {
     "label": "Send trackbacks",
     "hint": "Enter the trackback URLs of the posts to ping, one per line, up to {{max}}.",
-    "publicOnly": "Trackbacks can only be sent from public posts."
+    "publicOnly": "Trackbacks can only be sent from public posts.",
+    "tooMany": "You can send up to {{max}} trackbacks at a time."
   },
   "pings": {
     "title": "Sent trackbacks",

@@ -1039,3 +1039,151 @@ describe("post detail 신고·숨김(005 T047)", () => {
     );
   });
 });
+
+describe("post detail 트랙백·CAPTCHA(005 T093·T073)", () => {
+  const TRACKBACKS = "GET /api/v1/posts/123/trackbacks";
+  const CONFIG = "GET /api/v1/captcha/config";
+  const trackback = (id: number) => ({
+    id,
+    title: `트랙백 ${id}`,
+    excerpt: `요약 ${id}`,
+    blogName: "다른 블로그",
+    url: `https://other.example/${id}`,
+    receivedAt: "2026-10-06T05:00:00Z",
+    internal: false,
+  });
+
+  it("loader: 트랙백 한 쪽(?tbPage=, 10개, 0부터)과 전체 수", async () => {
+    const backend = mockBackend({
+      [POST]: ok(postDetail),
+      [VIEWS]: ok(null),
+      [TRACKBACKS]: ok([trackback(2), trackback(1)], { totalCount: 12 }),
+    });
+
+    const result = await loader(
+      routeArgs<LoaderArgs>(getRequest("/marco/123?tbPage=2"), { handle: "marco", postId: "123" }),
+    );
+
+    expect(result).toMatchObject({
+      trackbacks: [trackback(2), trackback(1)],
+      trackbackTotal: 12,
+      tbPage: 2,
+    });
+    const query = backend.callsTo(TRACKBACKS)[0].url.searchParams;
+    expect([query.get("page"), query.get("size")]).toEqual(["1", "10"]);
+    expect(backend.callsTo(CONFIG)).toHaveLength(0);
+  });
+
+  it("loader: 트랙백을 읽지 못하면 null, 비회원 쓰기 블로그면 CAPTCHA 정보", async () => {
+    mockBackend({
+      [POST]: ok(postDetail),
+      [VIEWS]: ok(null),
+      [TRACKBACKS]: fail(500, "INTERNAL_ERROR"),
+      [BLOG]: ok({ handle: "marco", title: "마르코의 블로그", guestWriteEnabled: true }),
+      [CONFIG]: ok({ provider: "test", siteKey: null }),
+    });
+
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({
+      trackbacks: null,
+      trackbackTotal: 0,
+      captcha: { provider: "test", testToken: "e2e-pass" },
+    });
+  });
+
+  it("loader: 열지 않은 보호 글은 트랙백·CAPTCHA를 읽지 않는다", async () => {
+    const backend = mockBackend({
+      [POST]: ok({ ...postDetail, locked: true }),
+      [BLOG]: ok({ handle: "marco", title: "t", guestWriteEnabled: true }),
+    });
+
+    await expect(callLoader("marco", "123")).resolves.toMatchObject({
+      trackbacks: null,
+      captcha: null,
+    });
+    expect(backend.callsTo(TRACKBACKS)).toHaveLength(0);
+    expect(backend.callsTo(CONFIG)).toHaveLength(0);
+  });
+
+  function renderPost(
+    overrides: Partial<LoaderData> = {},
+    user: { userId: number; nickname: string; role: string } | null = null,
+    entry = "/marco/123",
+  ) {
+    const data: LoaderData = {
+      post: {
+        ...postWithoutMarkdown(),
+        trackbackUrl: "https://blog.java21.net/marco/123/trackback",
+        trackbackCount: 2,
+      },
+      isOwner: false,
+      origin: "https://blog.java21.net",
+      comments: [],
+      related: [],
+      blogTitle: "마르코의 블로그",
+      topic: null,
+      guestWriteEnabled: false,
+      captcha: null,
+      trackbacks: [trackback(2), trackback(1)],
+      trackbackTotal: 12,
+      tbPage: 1,
+      ...overrides,
+    };
+    renderRoutes([{ path: ":handle/:postId", loader: () => data, Component: PostDetailRoute }], {
+      initialEntries: [entry],
+      user,
+    });
+  }
+
+  it("글 아래 댓글 위에 트랙백 영역: 주소, 목록, 더 보기(?tbPage=2)", async () => {
+    renderPost();
+
+    const section = (await screen.findByRole("heading", { name: "트랙백 12" })).closest("section")!;
+    expect(within(section).getByLabelText("트랙백 주소")).toHaveValue(
+      "https://blog.java21.net/marco/123/trackback",
+    );
+    expect(within(section).getAllByRole("listitem")).toHaveLength(2);
+    expect(within(section).getByRole("link", { name: "더 보기" })).toHaveAttribute(
+      "href",
+      "/marco/123?tbPage=2#trackbacks",
+    );
+    const comments = screen.getByRole("heading", { name: /댓글/ });
+    expect(section.compareDocumentPosition(comments)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("트랙백 RDF(주석)는 trackbackUrl이 있을 때만", async () => {
+    renderPost();
+    await screen.findByRole("heading", { name: "트랙백 12" });
+    const rdf = document.querySelector(".trackback-rdf")!;
+    expect(rdf.innerHTML).toContain('trackback:ping="https://blog.java21.net/marco/123/trackback"');
+    expect(rdf.innerHTML).toContain('dc:identifier="https://blog.java21.net/marco/123"');
+  });
+
+  it("trackbackUrl이 null이면 트랙백을 받지 않는 글, RDF 없음", async () => {
+    renderPost({ post: { ...postWithoutMarkdown(), trackbackUrl: null } });
+    expect(await screen.findByText("트랙백을 받지 않는 글입니다.")).toBeInTheDocument();
+    expect(document.querySelector(".trackback-rdf")).toBeNull();
+  });
+
+  it("발행 전 글(주인 미리보기)에는 트랙백 영역이 없다", async () => {
+    renderPost({ post: { ...postWithoutMarkdown(), status: "DRAFT" }, isOwner: true });
+    await screen.findByRole("article");
+    expect(screen.queryByRole("heading", { name: /^트랙백/ })).toBeNull();
+  });
+
+  it("로그인 회원에게 각 트랙백 신고 버튼", async () => {
+    renderPost({}, { userId: 2, nickname: "독자", role: "USER" });
+    const section = (await screen.findByRole("heading", { name: "트랙백 12" })).closest("section")!;
+    expect(within(section).getAllByRole("form", { name: "트랙백 신고" })).toHaveLength(2);
+  });
+
+  it("비회원 댓글 폼에 CAPTCHA(시험 모드면 숨은 토큰)", async () => {
+    renderPost({
+      guestWriteEnabled: true,
+      captcha: { provider: "test", siteKey: null, testToken: "e2e-pass", nonce: null },
+    });
+
+    const group = await screen.findByRole("group", { name: "자동 등록 방지" });
+    expect(group.querySelector('input[name="captchaToken"]')).toHaveValue("e2e-pass");
+    expect(group.closest("form")!.querySelector('input[name="guestName"]')).not.toBeNull();
+  });
+});

@@ -172,9 +172,7 @@ export function PublishSettingsDialog({
     const trackbackUrls = visibility === "PUBLIC" ? parseTrackbackTargets(trackbackText) : [];
     const tooManyTargets = trackbackUrls.length > TRACKBACK_TARGETS_MAX;
     setTrackbackError(
-      tooManyTargets
-        ? fieldErrorMessage(t, { code: "TOO_LONG", params: { max: TRACKBACK_TARGETS_MAX } })
-        : null,
+      tooManyTargets ? t("trackback:send.tooMany", { max: TRACKBACK_TARGETS_MAX }) : null,
     );
     if (passwordCode || (scheduling && scheduledAt === null) || tooManyTargets) {
       return;

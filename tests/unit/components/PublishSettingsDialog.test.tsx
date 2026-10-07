@@ -158,3 +158,48 @@ describe("발행 설정: 예약 발행(004 FR-064)", () => {
     expect(screen.getByText("올바르지 않은 값입니다.")).toBeInTheDocument();
   });
 });
+
+describe("발행 설정: 트랙백 보내기(005 T094)", () => {
+  it("줄마다 주소(빈 줄·앞뒤 공백 제거, 같은 주소는 하나)를 trackbackUrls로", () => {
+    const onPublish = renderWith();
+    fireEvent.change(screen.getByLabelText("트랙백 보내기"), {
+      target: { value: " https://a.example/tb \n\nhttps://b.example/tb\nhttps://a.example/tb\n" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(onPublish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trackbackUrls: ["https://a.example/tb", "https://b.example/tb"],
+      }),
+    );
+  });
+
+  it("입력이 없으면 trackbackUrls를 보내지 않는다", () => {
+    const onPublish = renderWith();
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+    expect(onPublish.mock.calls[0][0]).not.toHaveProperty("trackbackUrls");
+  });
+
+  it("공개가 아니면 입력란이 꺼지고 안내, 써 둔 주소도 보내지 않는다", () => {
+    const onPublish = renderWith();
+    const field = screen.getByLabelText("트랙백 보내기");
+    fireEvent.change(field, { target: { value: "https://a.example/tb" } });
+    fireEvent.click(screen.getByRole("radio", { name: "비공개(나만 보기)" }));
+
+    expect(field).toBeDisabled();
+    expect(screen.getByText("공개 글에서만 트랙백을 보낼 수 있습니다.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "비공개 저장" }));
+    expect(onPublish.mock.calls[0][0]).not.toHaveProperty("trackbackUrls");
+  });
+
+  it("10개를 넘으면 보내지 않고 입력란에 알린다", () => {
+    const onPublish = renderWith();
+    const urls = Array.from({ length: 11 }, (_, i) => `https://a.example/${i}`).join("\n");
+    fireEvent.change(screen.getByLabelText("트랙백 보내기"), { target: { value: urls } });
+    fireEvent.click(screen.getByRole("button", { name: "공개 발행" }));
+
+    expect(onPublish).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("트랙백 보내기")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("트랙백은 한 번에 10개까지 보낼 수 있습니다.")).toBeInTheDocument();
+  });
+});

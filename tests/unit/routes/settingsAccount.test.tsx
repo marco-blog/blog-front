@@ -309,6 +309,19 @@ describe("/settings/profile", () => {
     expect(await screen.findByText("300자 이하로 입력해 주세요.")).toBeInTheDocument();
   });
 
+  it("닉네임 금칙어(BANNED_WORD, 005)는 닉네임 입력란에", async () => {
+    renderSettings("/settings/profile", route, {
+      "PATCH /api/v1/me": fail(400, "VALIDATION_FAILED", [
+        { field: "nickname", code: "BANNED_WORD" },
+      ]),
+    });
+
+    fireEvent.click(await screen.findByRole("button", { name: "저장" }));
+
+    expect(await screen.findByText("사용할 수 없는 단어가 있습니다.")).toBeInTheDocument();
+    expect(screen.getByLabelText("닉네임")).toHaveAttribute("aria-invalid", "true");
+  });
+
   it("탈퇴: 확인 대화상자에서 비밀번호 확인 후 DELETE /me, 첫 화면으로", async () => {
     const backend = renderSettings("/settings/profile", route, {
       "DELETE /api/v1/me": ok(null, {

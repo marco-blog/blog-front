@@ -432,7 +432,11 @@ function Writer({
       return error.fieldErrors
         .map((fieldError) => {
           const label = fieldLabel(fieldError.field);
-          const message = fieldErrorMessage(t, fieldError);
+          // 005: 트랙백 주소 개수 초과는 글자 수가 아니라 개수로 알린다
+          const message =
+            fieldError.field === "trackbackUrls" && fieldError.code === "TOO_LONG"
+              ? t("trackback:send.tooMany", { max: fieldError.params?.max ?? "" })
+              : fieldErrorMessage(t, fieldError);
           return label ? `${label}: ${message}` : message;
         })
         .join(" ");
