@@ -54,16 +54,15 @@ test.describe("003 US2 주제 페이지", () => {
     });
     await logOut(page);
 
-    // 발행 때 주제 지정(003 US3)이 아직 없으면 글에 주제가 붙지 않는다. 그때는 목록 확인을 건너뛴다.
+    // 발행 API가 topicId를 받아 글에 주제가 붙는다(003 US3).
     const listed = await callApi<Array<{ title: string }>>(
       page.request,
       "GET",
       "/topics/it-internet/posts?size=50",
     );
     expect(listed.status).toBe(200);
-    test.skip(
-      !listed.body.result.some((card) => card.title === itTitle(1)),
-      "발행 API가 topicId를 아직 받지 않는다(003 US3 T068~ 이후 다시 확인).",
+    expect(listed.body.result.map((card) => card.title)).toEqual(
+      expect.arrayContaining([itTitle(1), itTitle(2), itTitle(3)]),
     );
 
     await page.goto("/topics/knowledge/it-internet");
