@@ -44,7 +44,7 @@ export function reviewsHref(
 ): string {
   const params = new URLSearchParams();
   if (status !== "PENDING") params.set("status", status);
-  if (blogId !== null) params.set("blogId", String(blogId));
+  if (blogId !== null) params.set("externalBlogId", String(blogId));
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `${PATH}?${query}` : PATH;
@@ -65,21 +65,21 @@ function parseBlogId(value: string | null): number | null {
 }
 
 /**
- * 분류 검수(`/admin/external-blogs/reviews?status=&blogId=&page=`, 007 T071, FR-121): 오래된 순 검수 대기 목록, 줄마다 확정 주제
+ * 분류 검수(`/admin/external-blogs/reviews?status=&externalBlogId=&page=`, 007 T071, FR-121): 오래된 순 검수 대기 목록, 줄마다 확정 주제
  * (처음 값은 예측, 예측이 없으면 지금 노출 주제)와 확정, 고른 글 일괄 확정(최대 50건). 이미 처리된 검수는 409 문구로 알린다.
  */
 export async function loader({ request }: Route.LoaderArgs) {
   await requireAdmin(request);
   const search = new URL(request.url).searchParams;
   const status = parseStatus(search.get("status"));
-  const blogId = parseBlogId(search.get("blogId"));
+  const blogId = parseBlogId(search.get("externalBlogId"));
   const page = parsePage(search.get("page"));
   const api = createApiClient(request);
   const [list, topics] = await Promise.all([
     api.send<ClassificationReview[]>("/admin/classification-reviews", {
       query: {
         status,
-        ...(blogId !== null ? { blogId } : {}),
+        ...(blogId !== null ? { externalBlogId: blogId } : {}),
         page: page - 1,
         size: REVIEWS_PAGE_SIZE,
       },

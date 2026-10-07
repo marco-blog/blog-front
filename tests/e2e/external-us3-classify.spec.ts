@@ -162,7 +162,7 @@ test.describe("007 US3 분류 검수와 주제 고치기", () => {
       .getByRole("link", { name: "분류 검수" })
       .click();
     await expect(page).toHaveURL(/\/admin\/external-blogs\/reviews$/);
-    await page.goto(`/admin/external-blogs/reviews?blogId=${blogCId}`);
+    await page.goto(`/admin/external-blogs/reviews?externalBlogId=${blogCId}`);
     const row = page
       .getByRole("table", { name: "분류 검수" })
       .getByRole("row")
@@ -184,9 +184,16 @@ test.describe("007 US3 분류 검수와 주제 고치기", () => {
     const confirmed = await waitForPost(admin, blogCId, (post) => post.title === reviewTitle);
     expect(confirmed.topicId).toBe(science.id);
     expect(confirmed.topicSource).toBe("REVIEW");
+    // 앞선 spec이 등록한 피드를 스케줄러가 계속 수집해 전체 대기 수·표본은 동시에 늘 수 있으므로, 이 검수는 상태로 보고
+    // 전체 수는 최소 증가만 본다
+    const reviews = await callApi<{ status: string; post: { title: string } }[]>(
+      admin,
+      "GET",
+      `/admin/classification-reviews?status=CONFIRMED&externalBlogId=${blogCId}`,
+    );
+    expect(reviews.body.result.map((review) => review.post.title)).toContain(reviewTitle);
     const after = await stats(admin);
-    expect(after.finalAccuracy.sample).toBe(before.finalAccuracy.sample + 1);
-    expect(after.pendingReviews).toBe(before.pendingReviews - 1);
+    expect(after.finalAccuracy.sample).toBeGreaterThanOrEqual(before.finalAccuracy.sample + 1);
 
     await page.goto("/admin/external-blogs/stats");
     await expect(page.getByRole("heading", { name: "분류 현황", level: 1 })).toBeVisible();

@@ -141,22 +141,22 @@ describe("분류 검수", () => {
     });
     const data = await reviewsLoader(
       routeArgs<ReviewsArgs>(
-        getRequest("/admin/external-blogs/reviews?status=NOPE&blogId=3&page=2", loggedIn),
+        getRequest("/admin/external-blogs/reviews?status=NOPE&externalBlogId=3&page=2", loggedIn),
       ),
     );
     expect(data).toMatchObject({ status: "PENDING", blogId: 3, page: 2, totalCount: 41 });
     const query = backend.callsTo(REVIEWS)[0].url.searchParams;
     expect(query.get("status")).toBe("PENDING");
-    expect(query.get("blogId")).toBe("3");
+    expect(query.get("externalBlogId")).toBe("3");
     expect(query.get("page")).toBe("1");
 
     await reviewsLoader(
       routeArgs<ReviewsArgs>(
-        getRequest("/admin/external-blogs/reviews?status=CONFIRMED&blogId=x", loggedIn),
+        getRequest("/admin/external-blogs/reviews?status=CONFIRMED&externalBlogId=x", loggedIn),
       ),
     );
     expect(backend.callsTo(REVIEWS)[1].url.searchParams.get("status")).toBe("CONFIRMED");
-    expect(backend.callsTo(REVIEWS)[1].url.searchParams.has("blogId")).toBe(false);
+    expect(backend.callsTo(REVIEWS)[1].url.searchParams.has("externalBlogId")).toBe(false);
 
     mockBackend({ [ME]: ok(member("USER")) });
     expect(
@@ -173,7 +173,7 @@ describe("분류 검수", () => {
   it("주소 도우미·meta·처음 확정 주제(예측, 없으면 지금 주제)", () => {
     expect(reviewsHref("PENDING", null)).toBe("/admin/external-blogs/reviews");
     expect(reviewsHref("SKIPPED", 3, 2)).toBe(
-      "/admin/external-blogs/reviews?status=SKIPPED&blogId=3&page=2",
+      "/admin/external-blogs/reviews?status=SKIPPED&externalBlogId=3&page=2",
     );
     expect(reviewsMeta(metaArgs())).toContainEqual({ name: "robots", content: "noindex" });
     expect(initialTopicId(review(1))).toBe(12);
@@ -312,7 +312,7 @@ describe("분류 검수", () => {
   });
 
   it("빈 선택 안내, 처리된 목록은 확정 주제·검수자, 블로그 필터", async () => {
-    renderReviews("/admin/external-blogs/reviews?status=CONFIRMED&blogId=3", {
+    renderReviews("/admin/external-blogs/reviews?status=CONFIRMED&externalBlogId=3", {
       [REVIEWS]: ok(
         [
           review(7, {

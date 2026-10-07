@@ -82,7 +82,7 @@ test.describe("007 US2 포털 외부 글", () => {
   const feedV = uniqueStubName("xv");
   const blogX: StubBlog = {
     title: `X 블로그 ${run}`,
-    items: [{ n: 1, title: `외부 첫 글 ${run}`, publishedAt: minutesAgo(30), image: true }],
+    items: [{ n: 1, title: `외부 첫 글 ${run}`, publishedAt: minutesAgo(1), image: true }],
   };
   const blogV: StubBlog = { title: `V 블로그 ${run}`, items: [] };
   let admin: APIRequestContext;
@@ -143,7 +143,8 @@ test.describe("007 US2 포털 외부 글", () => {
     for (let i = 0; i < 4; i++) {
       await addItem(feedX, {
         title: `외부 새 글 ${i + 1} ${run}`,
-        publishedAt: minutesAgo(10 - i),
+        // 긴 전체 실행에서 앞선 spec의 새 글에 밀려 메인 최신 첫 화면에서 빠지지 않도록 방금 쓴 글로
+        publishedAt: new Date(Date.now() - (4 - i) * 1_000).toISOString(),
       });
     }
     await waitForPosts(admin, blogXId, 5);
@@ -198,7 +199,7 @@ test.describe("007 US2 포털 외부 글", () => {
     await stubFeed(feedV, {
       ...blogV,
       verifyCode: issued.body.result.code,
-      items: [{ n: 1, title: `인증 블로그 글 ${run}`, publishedAt: minutesAgo(5), image: true }],
+      items: [{ n: 1, title: `인증 블로그 글 ${run}`, publishedAt: minutesAgo(1), image: true }],
     });
     const checked = await callApi<{ verifiedAt: string | null }>(
       api,
