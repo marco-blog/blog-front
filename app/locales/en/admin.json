@@ -236,7 +236,9 @@
     "untargeted": "No target yet",
     "action": {
       "HIDE_CONTENT": "Hidden",
-      "SUSPEND_USER": "Author suspended"
+      "SUSPEND_USER": "Author suspended",
+      "REMOVE_FROM_PORTAL": "Removed from portal",
+      "BLOCK_EXTERNAL_BLOG": "External blog blocked"
     },
     "targetTypes": {
       "POST": "Post",
@@ -288,7 +290,11 @@
       "suspend": "Suspend author",
       "suspendReason": "Reason for suspension",
       "dismiss": "Dismiss",
-      "confirmSuspend": "Suspend the author? All of their sessions will end."
+      "confirmSuspend": "Suspend the author? All of their sessions will end.",
+      "removeFromPortal": "Remove from portal",
+      "blockExternal": "Block external blog",
+      "confirmRemove": "Remove this external post from the portal? This cannot be undone.",
+      "confirmBlock": "Block this external blog? All of its posts leave the portal and this cannot be undone."
     },
     "result": {
       "title": "Result",

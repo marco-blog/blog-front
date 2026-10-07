@@ -236,7 +236,9 @@
     "untargeted": "未指定对象",
     "action": {
       "HIDE_CONTENT": "已隐藏",
-      "SUSPEND_USER": "已停用作者"
+      "SUSPEND_USER": "已停用作者",
+      "REMOVE_FROM_PORTAL": "从门户撤下",
+      "BLOCK_EXTERNAL_BLOG": "屏蔽外部博客"
     },
     "targetTypes": {
       "POST": "文章",
@@ -288,7 +290,11 @@
       "suspend": "停用作者",
       "suspendReason": "停用理由",
       "dismiss": "驳回",
-      "confirmSuspend": "要停用作者吗？其所有登录都会被注销。"
+      "confirmSuspend": "要停用作者吗？其所有登录都会被注销。",
+      "removeFromPortal": "从门户撤下",
+      "blockExternal": "屏蔽外部博客",
+      "confirmRemove": "要将这篇外部文章从门户撤下吗？此操作无法撤销。",
+      "confirmBlock": "要屏蔽这个外部博客吗？其所有文章都会从门户撤下，且无法撤销。"
     },
     "result": {
       "title": "处理结果",

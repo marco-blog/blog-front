@@ -8,7 +8,7 @@ import type { Language } from "~/i18n/config";
 import { DEFAULT_CARD_COLOR } from "~/portal/cardColor";
 
 import { portalCard, topicNode } from "../support/fixtures";
-import { renderRoutes } from "../support/render";
+import { renderRoutes, type RenderRoutesOptions } from "../support/render";
 
 const NOW = "2026-10-06T07:24:19Z";
 const topics = [
@@ -17,12 +17,26 @@ const topics = [
   ]),
 ];
 
-function renderCard(card: PortalCardData, language: Language = "ko") {
+function renderCard(
+  card: PortalCardData,
+  language: Language = "ko",
+  user: RenderRoutesOptions["user"] = null,
+) {
   return renderRoutes(
     [{ index: true, Component: () => <PortalCard card={card} topics={topics} now={NOW} /> }],
-    { language },
+    { language, user },
   );
 }
+
+const externalCard = (id: number) =>
+  portalCard(id, {
+    source: "EXTERNAL",
+    title: `External ${id}`,
+    blog: { handle: null, title: "Dev Log" },
+    author: null,
+    externalBlog: { id: 3, title: "Dev Log", siteHost: "dev.example.com" },
+    visitUrl: `/api/v1/external-posts/${id}/visit`,
+  });
 
 /** 포털 카드(003 T042, FR-085) */
 describe("PortalCard", () => {
@@ -149,6 +163,35 @@ describe("PortalCard", () => {
       "/api/v1/external-posts/78/visit",
     );
     expect(within(article).queryByRole("link", { name: "Dev Log" })).toBeNull();
+  });
+
+  it("외부 카드 '삭제 요청'(007 T086): 비로그인은 이동 주소를 채운 권리 침해 신고로", async () => {
+    renderCard(externalCard(77));
+    const article = await screen.findByRole("article");
+    expect(within(article).getByRole("link", { name: "삭제 요청" })).toHaveAttribute(
+      "href",
+      "/rights-request?url=%2Fapi%2Fv1%2Fexternal-posts%2F77%2Fvisit",
+    );
+    expect(article.querySelector("details")).toBeNull();
+  });
+
+  it("외부 카드 '삭제 요청': 로그인 회원은 신고 레이어(EXTERNAL_POST), 레이어의 권리 침해 링크도 이동 주소", async () => {
+    renderCard(externalCard(78), "ko", { userId: 1, nickname: "마르코", role: "USER" });
+    const article = await screen.findByRole("article");
+    const details = article.querySelector("details.report");
+    expect(details?.querySelector("summary")).toHaveTextContent("삭제 요청");
+    const form = within(article).getByRole("form", { name: "외부 글 신고" });
+    expect(form.querySelector('input[name="targetType"]')).toHaveValue("EXTERNAL_POST");
+    expect(form.querySelector('input[name="targetId"]')).toHaveValue("78");
+    expect(
+      within(article).getByRole("link", { name: "회원이 아니신가요? 권리 침해 신고" }),
+    ).toHaveAttribute("href", "/rights-request?url=%2Fapi%2Fv1%2Fexternal-posts%2F78%2Fvisit");
+  });
+
+  it("내부 카드에는 '삭제 요청'이 없다", async () => {
+    renderCard(portalCard(6), "ko", { userId: 1, nickname: "마르코", role: "USER" });
+    const article = await screen.findByRole("article");
+    expect(within(article).queryByText("삭제 요청")).toBeNull();
   });
 
   it("내부 카드는 기존과 같다(외부 배지·새 탭 없음)", async () => {

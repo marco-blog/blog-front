@@ -46,6 +46,7 @@ const POSTS_3 = "GET /api/v1/me/external-blogs/3/posts";
 const CLAIM_3 = "POST /api/v1/external-blogs/3/claim";
 const PATCH_MINE_3 = "PATCH /api/v1/me/external-blogs/3";
 const POST_TOPIC_31 = "PUT /api/v1/me/external-blogs/3/posts/31/topic";
+const RELEASE_3 = "POST /api/v1/me/external-blogs/3/release";
 const FEED = "https://remote.example/feed.xml";
 const loggedIn = { cookie: "access_token=a" };
 const me = {
@@ -695,6 +696,127 @@ describe("상세", () => {
       ),
     );
     expect(asData(result).init?.status).toBe(400);
+  });
+});
+
+describe("등록 해제(US4 T077)", () => {
+  const detailRoute = [
+    {
+      path: ":handle/manage/external-blogs/:id",
+      loader: withCookie(detailLoader as never) as never,
+      action: withCookie(detailAction as never) as never,
+      Component: ManageExternalBlog,
+    },
+  ];
+
+  it("라디오 두 개는 기본 선택 없음, 고르지 않고 해제하면 '골라 주세요', 고른 쪽의 확인 문구 뒤 해제", async () => {
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [DETAIL_3]: ok(myExternalBlog(3)),
+      [POSTS_3]: ok([myExternalPost(31)], { totalCount: 1 }),
+      [TOPICS]: ok(externalTopics()),
+      [RELEASE_3]: ok(myExternalBlog(3, { status: "RELEASED", postCount: 0 })),
+    });
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValue(true);
+    renderRoutes(detailRoute, { initialEntries: ["/marco/manage/external-blogs/3"] });
+    const keep = await screen.findByRole("radio", { name: /수집된 글 남기기/ });
+    const remove = screen.getByRole("radio", { name: /수집된 글 삭제/ });
+    expect(keep).not.toBeChecked();
+    expect(remove).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole("button", { name: "해제" }));
+    expect(await screen.findByText("남길지 삭제할지 골라 주세요.")).toBeInTheDocument();
+    expect(backend.callsTo(RELEASE_3)).toHaveLength(0);
+
+    fireEvent.click(remove);
+    fireEvent.click(screen.getByRole("button", { name: "해제" }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.stringContaining("되돌릴 수 없습니다"));
+    expect(backend.callsTo(RELEASE_3)).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole("radio", { name: /수집된 글 남기기/ }));
+    fireEvent.click(screen.getByRole("button", { name: "해제" }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.stringContaining("새 글은 더 가져오지"));
+    await vi.waitFor(() => expect(backend.callsTo(RELEASE_3)).toHaveLength(1));
+    expect(backend.callsTo(RELEASE_3)[0].body).toEqual({ deletePosts: false });
+    expect(await screen.findByText("등록을 해제했습니다.")).toBeInTheDocument();
+  });
+
+  it("해제된 등록: 남긴 글이 있으면 '남긴 글 삭제'(확인), 없으면 숨김, 주제 바꾸기 없음", async () => {
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [DETAIL_3]: ok(
+        myExternalBlog(3, { status: "RELEASED", ownershipVerified: true, postCount: 2 }),
+      ),
+      [POSTS_3]: ok([myExternalPost(31)], { totalCount: 1 }),
+      [TOPICS]: ok(externalTopics()),
+      [RELEASE_3]: ok(myExternalBlog(3, { status: "RELEASED", postCount: 0 })),
+    });
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderRoutes(detailRoute, { initialEntries: ["/marco/manage/external-blogs/3"] });
+    expect(await screen.findByText("해제됨 · 남긴 글 2편이 포털에 보이는 중")).toBeInTheDocument();
+    expect(screen.queryByRole("radio")).toBeNull();
+    expect(screen.queryByLabelText("기본 주제")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "남긴 글 삭제" }));
+    await vi.waitFor(() => expect(backend.callsTo(RELEASE_3)).toHaveLength(1));
+    expect(backend.callsTo(RELEASE_3)[0].body).toEqual({ deletePosts: true });
+  });
+
+  it("해제된 등록에 남긴 글이 없거나 차단·거절이면 해제 폼이 없다, 자동 중지면 운영자 재개 안내", async () => {
+    for (const blog of [
+      myExternalBlog(3, { status: "RELEASED", postCount: 0 }),
+      myExternalBlog(3, { status: "BLOCKED" }),
+      myExternalBlog(3, { status: "REJECTED", rejectReason: "x" }),
+    ]) {
+      mockBackend({
+        [ME]: ok(me),
+        [DETAIL_3]: ok(blog),
+        [POSTS_3]: ok([], { totalCount: 0 }),
+        [TOPICS]: ok(externalTopics()),
+      });
+      const { unmount } = renderRoutes(detailRoute, {
+        initialEntries: ["/marco/manage/external-blogs/3"],
+      });
+      expect(await screen.findByRole("heading", { name: "Remote 3" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "해제" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "남긴 글 삭제" })).toBeNull();
+      unmount();
+      vi.restoreAllMocks();
+    }
+    mockBackend({
+      [ME]: ok(me),
+      [DETAIL_3]: ok(myExternalBlog(3, { status: "STOPPED", lastFetchResult: "HTTP_ERROR" })),
+      [POSTS_3]: ok([], { totalCount: 0 }),
+      [TOPICS]: ok(externalTopics()),
+    });
+    renderRoutes(detailRoute, { initialEntries: ["/marco/manage/external-blogs/3"] });
+    expect(await screen.findByText(/피드가 다시 열리면 운영자가 재개합니다/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "해제" })).toBeInTheDocument();
+  });
+
+  it("action: 선택이 없으면 400(deletePosts), 409는 오류로", async () => {
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [RELEASE_3]: failWithParams(409, "EXTERNAL_BLOG_STATE_CONFLICT", {
+        status: "BLOCKED",
+        action: "release",
+      }),
+    });
+    const call = (fields: Record<string, string>) =>
+      detailAction(
+        routeArgs<DetailActionArgs>(
+          formRequest("/marco/manage/external-blogs/3", fields, loggedIn),
+          { handle: "marco", id: "3" },
+        ),
+      );
+    const missing = asData<{ error: { fieldErrors: { field: string }[] } }>(
+      await call({ intent: "release", deletePosts: "maybe" }),
+    );
+    expect(missing.init?.status).toBe(400);
+    expect(missing.data.error.fieldErrors[0].field).toBe("deletePosts");
+    expect(backend.callsTo(RELEASE_3)).toHaveLength(0);
+    const conflict = asData(await call({ intent: "release", deletePosts: "true" }));
+    expect(conflict.init?.status).toBe(409);
+    expect(backend.callsTo(RELEASE_3)[0].body).toEqual({ deletePosts: true });
   });
 });
 

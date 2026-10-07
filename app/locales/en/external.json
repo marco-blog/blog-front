@@ -222,7 +222,12 @@
       "unexclude": "Include again",
       "excluded": "Excluded: {{reason}}",
       "remove": "Remove",
-      "removeHint": "Removing cannot be undone. Use exclusion if you may want it back."
+      "removeHint": "Removing cannot be undone. Use exclusion if you may want it back.",
+      "actions": "Actions",
+      "excludeReason": "Reason to exclude {{title}} from the portal",
+      "removeReason": "Reason to remove {{title}}",
+      "pauseReason": "Pause reason (optional)",
+      "blockReason": "Block reason"
     },
     "reviews": {
       "title": "Classification review",

@@ -65,7 +65,8 @@ export function ReportTargetPreview({
             <>
               <dt>{t("admin:report.blog")}</dt>
               <dd>
-                {target.blog.title} (@{target.blog.handle})
+                {target.blog.title}
+                {target.blog.handle && ` (@${target.blog.handle})`}
               </dd>
             </>
           )}

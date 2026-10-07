@@ -2,7 +2,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import Report, { action, loader, meta } from "~/routes/admin/report";
+import Report, { action, loader, meta, operationsFor } from "~/routes/admin/report";
 
 import { ME, loggedIn, member, metaArgs, stub } from "../support/admin";
 import { fail, mockBackend, ok, type BackendHandler } from "../support/backend";
@@ -238,5 +238,67 @@ describe("admin report 화면", () => {
     renderReport(reportDetail(), { [RESOLVE]: fail(409, "REPORT_ALREADY_RESOLVED") });
     fireEvent.click(await screen.findByRole("button", { name: "기각" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("이미 처리된 신고입니다.");
+  });
+
+  it("007 외부 글: 숨김 대신 '포털에서 내림'(확인), 외부 블로그는 '외부 블로그 차단', 블로그 주소 없음", async () => {
+    expect(operationsFor("EXTERNAL_POST")).toEqual(["REMOVE", "SUSPEND"]);
+    expect(operationsFor("EXTERNAL_BLOG")).toEqual(["BLOCK", "SUSPEND"]);
+    expect(operationsFor(undefined)).toEqual(["HIDE", "SUSPEND"]);
+    const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValue(true);
+    const backend = renderReport(
+      reportDetail({
+        target: preview({
+          type: "EXTERNAL_POST",
+          id: 31,
+          title: "외부 글 제목",
+          url: "https://remote.example/1",
+          blog: { handle: null, title: "Remote Blog" },
+        }),
+      }),
+      {
+        [RESOLVE]: ok({
+          resolvedCount: 1,
+          decision: "ACTIONED",
+          action: "REMOVE_FROM_PORTAL",
+        }),
+      },
+    );
+    expect(await screen.findByText("Remote Blog")).toBeInTheDocument();
+    expect(screen.queryByText(/@null/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "숨김" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "포털에서 내림" }));
+    expect(confirm).toHaveBeenCalledWith("이 외부 글을 포털에서 내립니다. 되돌릴 수 없습니다.");
+    expect(backend.callsTo(RESOLVE)).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "포털에서 내림" }));
+    await waitFor(() => expect(backend.callsTo(RESOLVE)).toHaveLength(1));
+    expect(backend.callsTo(RESOLVE)[0].body).toEqual({
+      decision: "ACTION",
+      action: "REMOVE_FROM_PORTAL",
+    });
+  });
+
+  it("처리된 외부 블로그 신고는 조치 이름 '외부 블로그 차단'", async () => {
+    renderReport(
+      reportDetail({
+        status: "ACTIONED",
+        action: "BLOCK_EXTERNAL_BLOG",
+        target: preview({ type: "EXTERNAL_BLOG", id: 3, state: "DELETED", blog: null }),
+      }),
+    );
+    const result = await screen.findByRole("region", { name: "처리 결과" });
+    expect(result).toHaveTextContent("외부 블로그 차단");
+  });
+
+  it("action: BLOCK은 BLOCK_EXTERNAL_BLOG", async () => {
+    const backend = mockBackend({
+      [ME]: ok(member()),
+      [RESOLVE]: ok({ resolvedCount: 1, decision: "ACTIONED", action: "BLOCK_EXTERNAL_BLOG" }),
+    });
+    await post({ intent: "resolve", op: "BLOCK", note: "피싱" });
+    expect(backend.callsTo(RESOLVE)[0].body).toEqual({
+      decision: "ACTION",
+      action: "BLOCK_EXTERNAL_BLOG",
+      note: "피싱",
+    });
   });
 });

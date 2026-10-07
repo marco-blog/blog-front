@@ -222,7 +222,12 @@
       "unexclude": "除外を解除",
       "excluded": "除外中: {{reason}}",
       "remove": "非表示にする",
-      "removeHint": "非表示は元に戻せません。戻す可能性があるなら除外を使ってください。"
+      "removeHint": "非表示は元に戻せません。戻す可能性があるなら除外を使ってください。",
+      "actions": "操作",
+      "excludeReason": "{{title}} のポータル除外理由",
+      "removeReason": "{{title}} の削除理由",
+      "pauseReason": "一時停止の理由(任意)",
+      "blockReason": "ブロックの理由"
     },
     "reviews": {
       "title": "分類レビュー",

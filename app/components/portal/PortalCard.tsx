@@ -1,13 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, useRouteLoaderData } from "react-router";
 
 import type { PortalCard as PortalCardData, TopicNode } from "~/api/models";
 import { Avatar } from "~/components/media/Avatar";
+import { ReportButton } from "~/components/report/ReportButton";
 import { visitHref } from "~/external/visit";
 import { useDateFormat, useRelativeTime } from "~/i18n/format";
+import { rightsRequestHref } from "~/moderation/reportTarget";
 import { thumbnailImage } from "~/media/thumbnail";
 import { cardColor } from "~/portal/cardColor";
 import { findTopicById, topicName } from "~/portal/topics";
+import type { RootData } from "~/root";
 
 export interface PortalCardProps {
   card: PortalCardData;
@@ -36,6 +39,7 @@ export function PortalCard({ card, topics, now }: PortalCardProps) {
   const topic = findTopicById(topics, card.topicId);
   const name = topic ? topicName(topic.topic.names, i18n.language) : t("portal:card.noTopic");
   const external = card.source === "EXTERNAL";
+  const loggedIn = Boolean(useRouteLoaderData<RootData>("root")?.user);
   const body = (
     <>
       {card.thumbnailUrl ? (
@@ -77,10 +81,13 @@ export function PortalCard({ card, topics, now }: PortalCardProps) {
   );
   if (external) {
     // 007: 외부 글은 원래 블로그로(클릭 수를 세는 visit 경로, 새 탭). 외부 블로그 이름·호스트는 일반 텍스트로만.
+    // "삭제 요청"(T086): 로그인 회원은 신고 레이어(EXTERNAL_POST), 비로그인은 이 글의 이동 주소를 채운 권리 침해 신고.
+    // backend는 이동 주소(visit)와 원문 주소 둘 다 이 외부 글로 해석한다.
+    const visit = visitHref(card);
     return (
       <article className="portal-card portal-card-external" data-source="EXTERNAL">
         <a
-          href={visitHref(card)}
+          href={visit}
           target="_blank"
           rel="noopener nofollow"
           className="portal-card-link"
@@ -98,6 +105,20 @@ export function PortalCard({ card, topics, now }: PortalCardProps) {
           )}{" "}
           {time}
         </p>
+        <div className="portal-card-removal">
+          {loggedIn ? (
+            <ReportButton
+              type="EXTERNAL_POST"
+              id={card.id}
+              label={t("portal:card.removalRequest")}
+              rightsPath={visit}
+            />
+          ) : (
+            <Link to={rightsRequestHref(visit)} rel="nofollow">
+              {t("portal:card.removalRequest")}
+            </Link>
+          )}
+        </div>
       </article>
     );
   }

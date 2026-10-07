@@ -738,7 +738,7 @@ export interface BlockedUser {
 
 // ---- 005 신고·스팸 방어·트랙백(005 contracts/api.md) ----
 
-/** 신고 대상 종류. `EXTERNAL_*`은 007이 처리기를 더할 때까지 접수하지 않는다 */
+/** 신고 대상 종류. `EXTERNAL_*`은 007 처리기(외부 글은 회원 신고·권리 침해 신고, 외부 블로그는 관리자 화면) */
 export const REPORT_TARGET_TYPES = [
   "POST",
   "COMMENT",
@@ -764,7 +764,9 @@ export type ReportReason = (typeof REPORT_REASONS)[number];
 /** 권리 침해 신고가 받는 사유 */
 export const RIGHTS_REQUEST_REASONS = ["COPYRIGHT", "PRIVACY", "DEFAMATION", "OTHER"] as const;
 
-export type ReportAction = "HIDE_CONTENT" | "SUSPEND_USER";
+/** 조치. `REMOVE_FROM_PORTAL`(외부 글)·`BLOCK_EXTERNAL_BLOG`(외부 블로그)는 007 */
+export type ReportAction =
+  "HIDE_CONTENT" | "SUSPEND_USER" | "REMOVE_FROM_PORTAL" | "BLOCK_EXTERNAL_BLOG";
 export type ReportStatus = "PENDING" | "ACTIONED" | "DISMISSED";
 export type ReportChannel = "MEMBER" | "RIGHTS_REQUEST";
 
@@ -777,7 +779,8 @@ export interface ReportTargetPreview {
   text: string | null;
   url: string | null;
   author: { userId: number | null; nickname: string | null; guest: boolean } | null;
-  blog: { handle: string; title: string } | null;
+  /** 007 외부 대상은 서비스 블로그가 아니라 `handle`이 null */
+  blog: { handle: string | null; title: string } | null;
 }
 
 /** GET /admin/reports 한 줄(대상별 묶음) */

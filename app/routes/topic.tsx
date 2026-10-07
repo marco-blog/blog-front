@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { data, useLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
+import { runReportAction } from "~/components/report/actions.server";
 import { isApiError, throwApiErrorResponse } from "~/api/errors";
 import type { PortalCard, TopicNode } from "~/api/models";
 import { parsePage, POST_PAGE_SIZE } from "~/blog/listing";
@@ -97,6 +98,13 @@ function languageOf(matches: Route.MetaArgs["matches"]): string {
 }
 
 /** `{주제} - 서비스명`, 설명, og, canonical(정렬·출처 제외, 2쪽부터 `?page=`). 인기순·출처 필터는 noindex. */
+/** 포털 외부 카드의 "삭제 요청"(007 T086, `intent=report` → `POST /reports`, 대상 `EXTERNAL_POST`). 로그인이 필요하면 돌아올 주소 */
+export async function action({ request }: Route.ActionArgs) {
+  const url = new URL(request.url);
+  url.searchParams.delete("index");
+  return runReportAction(request, { returnTo: `${url.pathname}${url.search}` });
+}
+
 export function meta({ loaderData, matches }: Route.MetaArgs) {
   const t = metaT(matches);
   if (!loaderData) {

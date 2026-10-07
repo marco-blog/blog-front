@@ -222,7 +222,12 @@
       "unexclude": "제외 해제",
       "excluded": "제외됨: {{reason}}",
       "remove": "내림",
-      "removeHint": "내린 글은 되돌릴 수 없습니다. 되돌릴 수 있게 하려면 포털 제외를 쓰세요."
+      "removeHint": "내린 글은 되돌릴 수 없습니다. 되돌릴 수 있게 하려면 포털 제외를 쓰세요.",
+      "actions": "조치",
+      "excludeReason": "{{title}} 포털 제외 사유",
+      "removeReason": "{{title}} 내림 사유",
+      "pauseReason": "일시 중지 사유(선택)",
+      "blockReason": "차단 사유"
     },
     "reviews": {
       "title": "분류 검수",

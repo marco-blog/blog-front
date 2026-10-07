@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useLoaderData, useRouteLoaderData } from "react-router";
 
 import { createApiClient } from "~/api/client.server";
+import { runReportAction } from "~/components/report/actions.server";
 import { throwApiErrorResponse } from "~/api/errors";
 import type { PortalCard, PortalHome, ReleaseNoteList, TopicNode } from "~/api/models";
 import { CurationSection } from "~/components/portal/CurationSection";
@@ -62,6 +63,13 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 /** 서비스명, 설명, og, canonical `/`. 커서 묶음·출처 필터 주소는 noindex(contracts/routes.md). */
+/** 포털 외부 카드의 "삭제 요청"(007 T086, `intent=report` → `POST /reports`, 대상 `EXTERNAL_POST`). 로그인이 필요하면 돌아올 주소 */
+export async function action({ request }: Route.ActionArgs) {
+  const url = new URL(request.url);
+  url.searchParams.delete("index");
+  return runReportAction(request, { returnTo: `${url.pathname}${url.search}` });
+}
+
 export function meta({ loaderData, matches }: Route.MetaArgs) {
   const t = metaT(matches);
   const origin = loaderData?.origin ?? null;

@@ -6,6 +6,7 @@ import type { MyExternalBlog, MyExternalPost, TopicNode, Verification } from "~/
 import { parsePage, withPage } from "~/blog/listing";
 import { ExternalBlogStatusBadge } from "~/components/external/ExternalBlogStatusBadge";
 import { ExternalPostTable } from "~/components/external/ExternalPostTable";
+import { ReleaseForm } from "~/components/external/ReleaseForm";
 import { TopicSelect } from "~/components/external/TopicSelect";
 import { VerificationPanel } from "~/components/external/VerificationPanel";
 import { FormAlert } from "~/components/form/FormField";
@@ -67,7 +68,8 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 }
 
 /**
- * `intent=issue-code|check|default-topic|post-topic`. 확인에 성공하면 같은 요청에서 넘겨받기(`POST /external-blogs/{id}/claim`)로
+ * `intent=issue-code|check|default-topic|post-topic|release`. 해제는 `deletePosts`(`true`·`false`) 필수(결정 표 24번).
+ * 확인에 성공하면 같은 요청에서 넘겨받기(`POST /external-blogs/{id}/claim`)로
  * 이 등록에 인증을 붙인다(내 등록이면 한도를 세지 않는다). 주제 변경은 인증된 주인만(아니면 backend 403).
  */
 export async function action({ request, params }: Route.ActionArgs) {
@@ -132,6 +134,20 @@ export async function action({ request, params }: Route.ActionArgs) {
         return externalActionError(intent, error, { verification: null, postId });
       }
     }
+    case "release": {
+      const choice = formText(form, "deletePosts");
+      try {
+        if (choice !== "true" && choice !== "false") {
+          throw invalidField("deletePosts", "REQUIRED");
+        }
+        await api.post<MyExternalBlog>(`/me/external-blogs/${id}/release`, {
+          body: { deletePosts: choice === "true" },
+        });
+        return { intent, ok: true as const, verification: null };
+      } catch (error) {
+        return externalActionError(intent, error, { verification: null });
+      }
+    }
     default:
       return externalActionError(intent, invalidField("intent"), { verification: null });
   }
@@ -149,6 +165,10 @@ export default function ManageExternalBlog() {
   const detailPath = `${base}/${blog.id}`;
   const editable = blog.ownershipVerified && blog.status !== "RELEASED";
   const topicIntent = result?.intent === "default-topic" || result?.intent === "post-topic";
+  const releaseIntent = result?.intent === "release";
+  const choiceMissing = Boolean(
+    releaseIntent && error?.fieldErrors?.some((field) => field.field === "deletePosts"),
+  );
   const title = blog.title ?? t("external:common.untitled");
   const guide =
     blog.status === "RELEASED"
@@ -238,6 +258,14 @@ export default function ManageExternalBlog() {
         ) : (
           <FormAlert message={message} />
         ))}
+
+      {releaseIntent && result?.ok && <p role="status">{t("external:manage.detail.released")}</p>}
+      <ReleaseForm
+        blog={blog}
+        action={detailPath}
+        choiceError={choiceMissing ? t("external:manage.detail.choose") : null}
+        error={releaseIntent && !choiceMissing ? message : null}
+      />
 
       <section className="external-posts">
         <h2>{t("external:manage.detail.posts")}</h2>

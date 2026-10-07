@@ -222,7 +222,12 @@
       "unexclude": "取消排除",
       "excluded": "已排除：{{reason}}",
       "remove": "下架",
-      "removeHint": "下架无法恢复。如需可恢复，请使用排除。"
+      "removeHint": "下架无法恢复。如需可恢复，请使用排除。",
+      "actions": "操作",
+      "excludeReason": "{{title}} 的门户排除原因",
+      "removeReason": "{{title}} 的撤下原因",
+      "pauseReason": "暂停原因(可选)",
+      "blockReason": "屏蔽原因"
     },
     "reviews": {
       "title": "分类审核",

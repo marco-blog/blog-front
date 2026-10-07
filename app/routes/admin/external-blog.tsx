@@ -1,3 +1,4 @@
+import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Form, Link, useActionData, useLoaderData } from "react-router";
 
@@ -51,7 +52,8 @@ export function postsHref(id: number, status: ExternalPostStatus | null, page = 
 
 /**
  * 외부 블로그 상세(`/admin/external-blogs/:id`, 007 T041): 등록 정보·수집 상태, 상태에 맞는 버튼(승인 대기면 승인·거절), 기본 주제 변경,
- * 수집된 글 표(상태 필터, 원문 링크, 주제·출처·신뢰도, 클릭 수, 포털 제외 여부). 일시 중지·차단·내림 등은 US4가 더한다.
+ * 수집된 글 표(상태 필터, 원문 링크, 주제·출처·신뢰도, 클릭 수, 포털 제외 여부와 "포털 제외"·"제외 해제"·"내림"). US4(T085)가
+ * 일시 중지·재개·차단(확인 문구, 같은 피드의 다른 활성 등록이면 그 등록 링크)과 글 조치를 더했다.
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   await requireAdmin(request);
@@ -84,7 +86,29 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
-/** `intent=approve|reject|default-topic`. 성공하면 loader가 다시 읽는다. */
+/** 차단 버튼을 숨기는 상태(이미 차단, 거절은 수집·노출이 없다) */
+const NO_BLOCK = new Set(["BLOCKED", "REJECTED"]);
+
+function requiredReason(form: FormData): string {
+  const reason = formText(form, "reason");
+  if (!reason) {
+    throw invalidField("reason", "REQUIRED");
+  }
+  return reason;
+}
+
+function requiredPostId(form: FormData): number {
+  const postId = formId(form, "postId");
+  if (postId === null) {
+    throw invalidField("postId");
+  }
+  return postId;
+}
+
+/**
+ * `intent=approve|reject|pause|resume|block|default-topic|remove|exclude|unexclude`. 거절·차단·내림·포털 제외는 사유 필수,
+ * 일시 중지 사유는 선택. 성공하면 loader가 다시 읽는다.
+ */
 export async function action({ request, params }: Route.ActionArgs) {
   await requireAdmin(request);
   const id = parseId(params.id);
@@ -96,13 +120,44 @@ export async function action({ request, params }: Route.ActionArgs) {
       case "approve":
         await api.post(`/admin/external-blogs/${id}/approve`);
         break;
-      case "reject": {
-        const reason = formText(form, "reason");
-        if (!reason) {
-          throw invalidField("reason", "REQUIRED");
-        }
-        await api.post(`/admin/external-blogs/${id}/reject`, { body: { reason } });
+      case "reject":
+        await api.post(`/admin/external-blogs/${id}/reject`, {
+          body: { reason: requiredReason(form) },
+        });
         break;
+      case "pause": {
+        const reason = formText(form, "reason");
+        await api.post(`/admin/external-blogs/${id}/pause`, {
+          body: reason ? { reason } : {},
+        });
+        break;
+      }
+      case "resume":
+        await api.post(`/admin/external-blogs/${id}/resume`);
+        break;
+      case "block":
+        await api.post(`/admin/external-blogs/${id}/block`, {
+          body: { reason: requiredReason(form) },
+        });
+        break;
+      case "remove": {
+        const postId = requiredPostId(form);
+        await api.post(`/admin/external-posts/${postId}/remove`, {
+          body: { reason: requiredReason(form) },
+        });
+        return { intent, ok: true as const, postId };
+      }
+      case "exclude": {
+        const postId = requiredPostId(form);
+        await api.put(`/admin/portal/external-exclusions/${postId}`, {
+          body: { reason: requiredReason(form) },
+        });
+        return { intent, ok: true as const, postId };
+      }
+      case "unexclude": {
+        const postId = requiredPostId(form);
+        await api.delete(`/admin/portal/external-exclusions/${postId}`);
+        return { intent, ok: true as const, postId };
       }
       case "default-topic":
         await api.patch(`/admin/external-blogs/${id}`, {
@@ -117,7 +172,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     if (isAdminDenied(error)) {
       throw adminNotFound();
     }
-    return externalActionError(intent, error);
+    return externalActionError(intent, error, { postId: formId(form, "postId") });
   }
 }
 
@@ -130,6 +185,25 @@ export default function AdminExternalBlog() {
   const fields = error ? fieldErrorMessages(t, error.fieldErrors) : {};
   const message = error && Object.keys(fields).length === 0 ? externalErrorMessage(t, error) : null;
   const errorFor = (intent: string) => (result?.intent === intent ? message : null);
+  const resultPostId = (result as { postId?: number | null } | undefined)?.postId ?? null;
+  const postErrorFor = (intent: string, postId: number) =>
+    result?.intent === intent && resultPostId === postId
+      ? (message ?? fields.reason ?? null)
+      : null;
+  const activeOther =
+    result?.intent === "block" && error?.params?.activeExternalBlogId
+      ? Number(error.params.activeExternalBlogId)
+      : null;
+  const confirmBlock = (event: FormEvent<HTMLFormElement>) => {
+    if (!window.confirm(t("external:admin.detail.blockConfirm"))) {
+      event.preventDefault();
+    }
+  };
+  const confirmRemove = (event: FormEvent<HTMLFormElement>) => {
+    if (!window.confirm(t("external:admin.detail.removeHint"))) {
+      event.preventDefault();
+    }
+  };
   const dateTime = (value: string | null) => (value ? format.dateTime(value) : "-");
 
   return (
@@ -236,6 +310,48 @@ export default function AdminExternalBlog() {
         </section>
       )}
 
+      {!NO_BLOCK.has(blog.status) && (
+        <section className="external-admin-actions" aria-label={t("external:common.status")}>
+          {blog.status === "ACTIVE" && (
+            <Form method="post">
+              <input type="hidden" name="intent" value="pause" />
+              <label htmlFor="pause-reason">{t("external:admin.detail.pauseReason")}</label>
+              <input id="pause-reason" name="reason" maxLength={500} />
+              <FormAlert message={errorFor("pause")} />
+              <button type="submit">{t("external:admin.detail.pause")}</button>
+            </Form>
+          )}
+          {(blog.status === "PAUSED" || blog.status === "STOPPED") && (
+            <Form method="post">
+              <input type="hidden" name="intent" value="resume" />
+              <FormAlert message={errorFor("resume")} />
+              <button type="submit">{t("external:admin.detail.resume")}</button>
+            </Form>
+          )}
+          {!NO_BLOCK.has(blog.status) && (
+            <Form method="post" onSubmit={confirmBlock}>
+              <input type="hidden" name="intent" value="block" />
+              <p className="field-hint">{t("external:admin.detail.blockConfirm")}</p>
+              <label htmlFor="block-reason">{t("external:admin.detail.blockReason")}</label>
+              <textarea id="block-reason" name="reason" required maxLength={500} />
+              {result?.intent === "block" && fields.reason && (
+                <p className="field-error" role="alert">
+                  {fields.reason}
+                </p>
+              )}
+              <FormAlert message={errorFor("block")} />
+              {activeOther !== null && (
+                <p>
+                  {t("external:errors.activeOther")}
+                  <Link to={`/admin/external-blogs/${activeOther}`}>#{activeOther}</Link>
+                </p>
+              )}
+              <button type="submit">{t("external:admin.detail.block")}</button>
+            </Form>
+          )}
+        </section>
+      )}
+
       {blog.status !== "REJECTED" && blog.status !== "RELEASED" && (
         <Form method="post" className="external-default-topic" key={blog.defaultTopicId}>
           <input type="hidden" name="intent" value="default-topic" />
@@ -278,6 +394,7 @@ export default function AdminExternalBlog() {
                 <th>{t("external:admin.detail.confidence")}</th>
                 <th>{t("external:common.status")}</th>
                 <th>{t("external:common.clicks")}</th>
+                <th>{t("external:admin.detail.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -314,6 +431,49 @@ export default function AdminExternalBlog() {
                     )}
                   </td>
                   <td>{format.number(post.clickCount)}</td>
+                  <td>
+                    {post.status === "ACTIVE" && (
+                      <>
+                        {post.excluded ? (
+                          <Form method="post">
+                            <input type="hidden" name="intent" value="unexclude" />
+                            <input type="hidden" name="postId" value={post.id} />
+                            <FormAlert message={postErrorFor("unexclude", post.id)} />
+                            <button type="submit">{t("external:admin.detail.unexclude")}</button>
+                          </Form>
+                        ) : (
+                          <Form method="post">
+                            <input type="hidden" name="intent" value="exclude" />
+                            <input type="hidden" name="postId" value={post.id} />
+                            <input
+                              name="reason"
+                              required
+                              maxLength={500}
+                              aria-label={t("external:admin.detail.excludeReason", {
+                                title: post.title,
+                              })}
+                            />
+                            <FormAlert message={postErrorFor("exclude", post.id)} />
+                            <button type="submit">{t("external:admin.detail.exclude")}</button>
+                          </Form>
+                        )}
+                        <Form method="post" onSubmit={confirmRemove}>
+                          <input type="hidden" name="intent" value="remove" />
+                          <input type="hidden" name="postId" value={post.id} />
+                          <input
+                            name="reason"
+                            required
+                            maxLength={500}
+                            aria-label={t("external:admin.detail.removeReason", {
+                              title: post.title,
+                            })}
+                          />
+                          <FormAlert message={postErrorFor("remove", post.id)} />
+                          <button type="submit">{t("external:admin.detail.remove")}</button>
+                        </Form>
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

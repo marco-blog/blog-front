@@ -6,7 +6,7 @@ import { VALIDATION_FAILED, toFormError } from "~/api/formErrors";
 import type { ApiFieldError } from "~/api/types";
 import { loginPath } from "~/auth/paths";
 import { reportFieldErrors } from "~/moderation/reasons";
-import { isReportableType, reportKey } from "~/moderation/reportTarget";
+import { isReportFormType, reportKey } from "~/moderation/reportTarget";
 
 import { REPORT_INTENT, type ReportActionData } from "./actions";
 
@@ -19,7 +19,7 @@ export async function runReportAction(request: Request, options: { returnTo: str
   const form = await request.formData();
   const targetType = String(form.get("targetType") ?? "");
   const targetId = Number(form.get("targetId") ?? "");
-  if (!isReportableType(targetType) || !Number.isSafeInteger(targetId) || targetId <= 0) {
+  if (!isReportFormType(targetType) || !Number.isSafeInteger(targetId) || targetId <= 0) {
     return invalid("", [{ field: "targetType", code: "INVALID" }]);
   }
   const key = reportKey(targetType, targetId);
