@@ -92,6 +92,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<관리자 이메일> E2E_ADMIN_PASSWORD=<비밀번호> npm run e2e
 ```
 
+포털 시나리오는 메인 "최신 글"·추천·포털 설정처럼 사이트에 하나뿐인 화면을 보므로, Playwright 프로젝트 `portal`로 나머지(`e2e`)가 끝난 뒤 한 번에 한 파일씩 돈다. CI(`ci.yml` e2e-backend, `e2e.yml`)는 위 시험용 설정으로 backend를 띄우고 `scripts/e2e-provision-admin.sh`로 일회용 DB에 관리자 계정을 만든다(가입 API → `role` SUPER_ADMIN).
+
 `CI`가 없으면 이미 떠 있는 front 서버(같은 포트)를 다시 쓴다. 시나리오는 실행마다 새 계정을 만들므로 같은 DB에서 여러 번 돌려도 된다.
 
 ## 구조

@@ -92,6 +92,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<admin email> E2E_ADMIN_PASSWORD=<password> npm run e2e
 ```
 
+Portal scenarios look at site-wide screens (the main "latest" list, featured posts, portal settings), so they run in the Playwright project `portal`, one file at a time, after the rest (`e2e`) finish. CI (`ci.yml` e2e-backend, `e2e.yml`) starts the backend with the test settings above and creates an admin account in the throwaway DB with `scripts/e2e-provision-admin.sh` (signup API, then `role` SUPER_ADMIN).
+
 Without `CI`, an already running front server on the same port is reused. Each run creates new accounts, so you can run it repeatedly against the same DB.
 
 ## Layout

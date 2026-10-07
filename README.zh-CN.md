@@ -92,6 +92,8 @@ E2E_BACKEND_URL=http://localhost:8080 E2E_PORTAL_TEST_SETTINGS=1 \
   E2E_ADMIN_EMAIL=<管理员邮箱> E2E_ADMIN_PASSWORD=<密码> npm run e2e
 ```
 
+门户场景查看全站唯一的画面（首页"最新文章"、推荐、门户设置），因此作为 Playwright 项目 `portal` 在其余场景（`e2e`）结束后一次一个文件地运行。CI（`ci.yml` 的 e2e-backend、`e2e.yml`）以上述测试设置启动 backend，并用 `scripts/e2e-provision-admin.sh` 在一次性数据库中创建管理员账号（注册 API → 将 `role` 改为 SUPER_ADMIN）。
+
 未设置 `CI` 时，会复用同一端口上已在运行的 front 服务器。每次运行都会创建新账号，因此可以在同一个数据库上反复运行。
 
 ## 目录结构

@@ -13,6 +13,12 @@ export default defineConfig({
     // 시나리오는 한국어 화면 문구로 요소를 찾는다. 브라우저 언어(Accept-Language)를 한국어로 고정한다.
     locale: "ko-KR",
   },
+  // 포털 시나리오(portal-*)는 메인 "최신 글"·추천·포털 설정처럼 사이트 전체에 하나뿐인 화면을 본다. 다른 시나리오가 같은 DB에
+  // 글을 동시에 발행하면 목록이 밀리므로, 나머지를 모두 돌린 뒤 한 번에 한 파일씩(workers 1) 돈다.
+  projects: [
+    { name: "e2e", testIgnore: /portal-.*\.spec\.ts$/ },
+    { name: "portal", testMatch: /portal-.*\.spec\.ts$/, dependencies: ["e2e"], workers: 1 },
+  ],
   webServer: {
     command: "npm run build && npm start",
     // 첫 화면(/)은 포털(003)이라 backend가 있어야 200이다. 준비 확인은 backend 없이 뜨는 /login으로 한다.
