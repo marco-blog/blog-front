@@ -31,3 +31,11 @@ export function publicOrigin(request: Request, env: NodeJS.ProcessEnv = process.
 export function kakaoJsKey(env: NodeJS.ProcessEnv = process.env): string | null {
   return env.BLOG_KAKAO_JS_KEY?.trim() || null;
 }
+
+/**
+ * 화면 서버가 CSP에 Turnstile 출처를 더할지(005 FR-141). backend `blog.captcha.provider`와 같은 값을 환경 변수
+ * BLOG_CAPTCHA_PROVIDER로 받는다(`turnstile`일 때만 true). 화면의 위젯 여부는 backend `GET /captcha/config`가 정한다.
+ */
+export function captchaTurnstile(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env.BLOG_CAPTCHA_PROVIDER?.trim().toLowerCase() === "turnstile";
+}

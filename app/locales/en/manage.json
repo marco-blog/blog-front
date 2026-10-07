@@ -45,7 +45,8 @@
     "DRAFT": "Draft",
     "PUBLISHED": "Published",
     "DELETED": "Trash",
-    "SCHEDULED": "Scheduled"
+    "SCHEDULED": "Scheduled",
+    "HIDDEN": "Hidden"
   },
   "visibility": {
     "PUBLIC": "Public",
@@ -87,7 +88,9 @@
       "moveTarget": "Target category",
       "moveSubmit": "Move",
       "notice": "Pin as notice",
-      "unnotice": "Unpin notice"
+      "unnotice": "Unpin notice",
+      "skipped_one": "Skipped {{count}} post hidden by an administrator.",
+      "skipped_other": "Skipped {{count}} posts hidden by an administrator."
     },
     "edit": "Edit",
     "continue": "Continue writing",
@@ -102,7 +105,8 @@
     "noticeBadge": "Notice",
     "scheduledAt": "Scheduled for {{date}}",
     "unschedule": "Cancel schedule",
-    "unscheduled": "The schedule was cancelled. The post is a draft again."
+    "unscheduled": "The schedule was cancelled. The post is a draft again.",
+    "hiddenHint": "An administrator hid this post. Its publish settings and visibility cannot be changed."
   },
   "settings": {
     "title": "Blog settings",

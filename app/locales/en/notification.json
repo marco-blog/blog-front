@@ -10,6 +10,9 @@
     "NEW_COMMENT": "{{actor}} commented on \"{{postTitle}}\".",
     "NEW_SUBSCRIBER": "{{actor}} subscribed to {{blogTitle}}.",
     "UNKNOWN": "You have a new notification.",
-    "BACKUP_READY": "The backup of {{blogTitle}} is ready. You can download it until {{expiresAt}}."
+    "BACKUP_READY": "The backup of {{blogTitle}} is ready. You can download it until {{expiresAt}}.",
+    "REPORT_RESOLVED": "We have finished reviewing the content you reported.",
+    "REPORT_RESOLVED_ACTIONED": "We reviewed the content you reported and took action.",
+    "REPORT_RESOLVED_DISMISSED": "We reviewed the content you reported but took no action."
   }
 }

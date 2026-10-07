@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_BACKEND_URL, backendUrl, kakaoJsKey } from "~/config.server";
+import { DEFAULT_BACKEND_URL, backendUrl, captchaTurnstile, kakaoJsKey } from "~/config.server";
 
 describe("backendUrl", () => {
   it("값이 없으면 기본값", () => {
@@ -22,5 +22,14 @@ describe("kakaoJsKey", () => {
 
   it("앞뒤 공백을 뺀 값", () => {
     expect(kakaoJsKey({ BLOG_KAKAO_JS_KEY: " abc123 " })).toBe("abc123");
+  });
+});
+
+describe("captchaTurnstile (005)", () => {
+  it("BLOG_CAPTCHA_PROVIDER가 turnstile일 때만 true", () => {
+    expect(captchaTurnstile({})).toBe(false);
+    expect(captchaTurnstile({ BLOG_CAPTCHA_PROVIDER: "test" })).toBe(false);
+    expect(captchaTurnstile({ BLOG_CAPTCHA_PROVIDER: "none" })).toBe(false);
+    expect(captchaTurnstile({ BLOG_CAPTCHA_PROVIDER: " Turnstile " })).toBe(true);
   });
 });

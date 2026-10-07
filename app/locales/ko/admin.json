@@ -5,7 +5,12 @@
     "topics": "주제",
     "curations": "포털 추천",
     "exclusions": "포털 제외",
-    "settings": "포털 설정"
+    "settings": "포털 설정",
+    "users": "회원 관리",
+    "reports": "신고 관리",
+    "hiddenPosts": "숨긴 글",
+    "pending_one": "처리 대기 {{count}}건",
+    "pending_other": "처리 대기 {{count}}건"
   },
   "timeZone": "시각은 {{timeZone}} 기준입니다.",
   "fields": {
@@ -161,5 +166,182 @@
         }
       }
     }
+  },
+  "reports": {
+    "title": "신고 관리",
+    "list": "신고 목록",
+    "empty": "신고가 없습니다.",
+    "statusTabs": "처리 상태",
+    "status": {
+      "PENDING": "대기",
+      "ACTIONED": "조치",
+      "DISMISSED": "기각"
+    },
+    "targetType": "대상 종류",
+    "allTypes": "전체",
+    "filter": "거르기",
+    "channel": {
+      "MEMBER": "회원 신고",
+      "RIGHTS_REQUEST": "권리 침해",
+      "MIXED": "회원 신고·권리 침해"
+    },
+    "count_one": "신고 {{count}}건",
+    "count_other": "신고 {{count}}건",
+    "firstReportedAt": "첫 접수 {{time}}",
+    "untargeted": "대상 미정",
+    "action": {
+      "HIDE_CONTENT": "숨김",
+      "SUSPEND_USER": "작성자 정지"
+    },
+    "targetTypes": {
+      "POST": "글",
+      "COMMENT": "댓글",
+      "GUESTBOOK": "방명록 글",
+      "TRACKBACK": "트랙백",
+      "EXTERNAL_POST": "외부 글",
+      "EXTERNAL_BLOG": "외부 블로그"
+    }
+  },
+  "report": {
+    "title": "신고 상세",
+    "target": "신고 대상",
+    "openOriginal": "원래 화면 열기",
+    "noTarget": "대상이 아직 정해지지 않았습니다.",
+    "state": {
+      "ACTIVE": "게시 중",
+      "HIDDEN": "숨김",
+      "DELETED": "삭제됨",
+      "MISSING": "없음"
+    },
+    "author": "작성자",
+    "guestAuthor": "비회원 {{nickname}}",
+    "blog": "블로그",
+    "reports": "같은 대상의 신고",
+    "reporter": "신고자",
+    "rightsReporter": "권리 침해 신고(비회원)",
+    "rights": {
+      "title": "권리 침해 정보",
+      "targetUrl": "신고한 주소",
+      "rightsBasis": "권리 근거",
+      "contactEmail": "연락 이메일",
+      "purged": "파기됨"
+    },
+    "targetUserReportCount_one": "작성 회원이 받은 신고 {{count}}건",
+    "targetUserReportCount_other": "작성 회원이 받은 신고 {{count}}건",
+    "assign": {
+      "legend": "대상 지정",
+      "hint": "서비스 안 주소(글 주소, #comment-번호, #guestbook-번호, #trackback-번호)나 종류와 번호로 지정합니다.",
+      "url": "주소",
+      "type": "종류",
+      "id": "번호",
+      "submit": "대상 지정"
+    },
+    "resolve": {
+      "legend": "처리",
+      "note": "메모",
+      "hide": "숨김",
+      "suspend": "작성자 정지",
+      "suspendReason": "정지 사유",
+      "dismiss": "기각",
+      "confirmSuspend": "작성 회원을 정지할까요? 로그인이 모두 끊깁니다."
+    },
+    "result": {
+      "title": "처리 결과",
+      "handledBy": "{{nickname}} · {{time}}",
+      "note": "메모"
+    },
+    "unhide": "숨김 해제",
+    "done": {
+      "target": "대상을 지정했습니다.",
+      "resolve_one": "신고 {{count}}건을 처리했습니다.",
+      "resolve_other": "신고 {{count}}건을 처리했습니다.",
+      "unhide": "숨김을 해제했습니다."
+    }
+  },
+  "users": {
+    "title": "회원 관리",
+    "search": {
+      "legend": "회원 찾기",
+      "by": "찾는 방법",
+      "byNickname": "닉네임(앞부분)",
+      "byEmail": "이메일(정확히)",
+      "byHandle": "블로그 주소(정확히)",
+      "q": "검색어",
+      "submit": "찾기",
+      "hint": "2자 이상 입력하세요."
+    },
+    "list": "회원 목록",
+    "empty": "조건에 맞는 회원이 없습니다.",
+    "columns": {
+      "nickname": "닉네임",
+      "status": "상태",
+      "role": "권한",
+      "createdAt": "가입일",
+      "blogCount": "블로그 수"
+    },
+    "status": {
+      "ACTIVE": "정상",
+      "SUSPENDED": "정지",
+      "WITHDRAWN": "탈퇴"
+    },
+    "role": {
+      "USER": "회원",
+      "ADMIN": "관리자",
+      "SUPER_ADMIN": "최고 관리자"
+    }
+  },
+  "user": {
+    "title": "회원 상세",
+    "createdAt": "가입일",
+    "status": "상태",
+    "role": "권한",
+    "postCount": "글 수",
+    "receivedReportCount": "받은 신고",
+    "lastLoginAt": "최근 로그인",
+    "never": "없음",
+    "blogs": "블로그",
+    "noBlogs": "블로그가 없습니다.",
+    "blogLimit": {
+      "legend": "블로그 수 한도",
+      "current": "블로그 {{current}}개 / 한도 {{limit}}개",
+      "custom": "회원별 한도",
+      "default": "기본 한도",
+      "limit": "한도",
+      "reset": "기본값으로",
+      "submit": "저장"
+    },
+    "suspend": {
+      "legend": "정지",
+      "reason": "정지 사유",
+      "submit": "정지",
+      "confirm": "이 회원을 정지할까요? 로그인이 모두 끊깁니다."
+    },
+    "unsuspend": {
+      "legend": "정지 해제",
+      "reason": "메모",
+      "submit": "정지 해제"
+    },
+    "done": {
+      "suspend": "회원을 정지했습니다.",
+      "unsuspend": "정지를 해제했습니다.",
+      "blogLimit": "블로그 수 한도를 저장했습니다."
+    }
+  },
+  "hiddenPosts": {
+    "title": "숨긴 글",
+    "list": "숨긴 글 목록",
+    "empty": "숨긴 글이 없습니다.",
+    "unhide": "숨김 해제",
+    "done": "숨김을 해제했습니다."
+  },
+  "reportReasons": {
+    "SPAM": "스팸·광고",
+    "ABUSE": "욕설·괴롭힘",
+    "ADULT": "음란물",
+    "ILLEGAL": "불법 정보",
+    "PRIVACY": "개인정보 노출",
+    "COPYRIGHT": "저작권 침해",
+    "DEFAMATION": "명예훼손",
+    "OTHER": "기타"
   }
 }

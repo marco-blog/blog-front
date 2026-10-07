@@ -1,0 +1,43 @@
+{
+  "button": "Report",
+  "dialog": {
+    "title": "Report {{target}}",
+    "reason": "Reason",
+    "detail": "Details",
+    "detailHint": "Details are required when you choose Other. Up to 1000 characters.",
+    "submit": "Submit report",
+    "cancel": "Cancel"
+  },
+  "done": "Your report has been received.",
+  "rightsLink": "Not a member? Report a rights violation",
+  "rights": {
+    "title": "Report a rights violation",
+    "intro": "Tell us about content that violates copyright, privacy, reputation or other rights. You do not need an account.",
+    "targetUrl": "Address to report",
+    "reason": "Type of violation",
+    "rightsBasis": "Basis of your rights",
+    "rightsBasisHint": "Describe which right is violated and how (up to 2000 characters).",
+    "contactEmail": "Contact email",
+    "privacy": "We use your contact email and report only to tell you the result, keep them for one year after receipt, and then delete them.",
+    "submit": "Submit",
+    "submitted": "Your report has been received. We will email you the result."
+  },
+  "reasons": {
+    "SPAM": "Spam or advertising",
+    "ABUSE": "Abuse or harassment",
+    "ADULT": "Sexual content",
+    "ILLEGAL": "Illegal content",
+    "PRIVACY": "Personal information exposed",
+    "COPYRIGHT": "Copyright infringement",
+    "DEFAMATION": "Defamation",
+    "OTHER": "Other"
+  },
+  "targets": {
+    "POST": "Post",
+    "COMMENT": "Comment",
+    "GUESTBOOK": "Guestbook entry",
+    "TRACKBACK": "Trackback",
+    "EXTERNAL_POST": "External post",
+    "EXTERNAL_BLOG": "External blog"
+  }
+}

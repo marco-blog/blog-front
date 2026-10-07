@@ -45,7 +45,8 @@
     "DRAFT": "下書き",
     "PUBLISHED": "公開済み",
     "DELETED": "ゴミ箱",
-    "SCHEDULED": "予約"
+    "SCHEDULED": "予約",
+    "HIDDEN": "非表示"
   },
   "visibility": {
     "PUBLIC": "公開",
@@ -87,7 +88,9 @@
       "moveTarget": "移動先カテゴリ",
       "moveSubmit": "移動",
       "notice": "お知らせに",
-      "unnotice": "お知らせ解除"
+      "unnotice": "お知らせ解除",
+      "skipped_one": "管理者が非表示にした記事{{count}}件はスキップしました。",
+      "skipped_other": "管理者が非表示にした記事{{count}}件はスキップしました。"
     },
     "edit": "編集",
     "continue": "続きを書く",
@@ -102,7 +105,8 @@
     "noticeBadge": "お知らせ",
     "scheduledAt": "{{date}} に公開予約",
     "unschedule": "予約を取り消す",
-    "unscheduled": "予約を取り消しました。記事は下書きに戻りました。"
+    "unscheduled": "予約を取り消しました。記事は下書きに戻りました。",
+    "hiddenHint": "管理者が非表示にした記事です。公開設定と公開範囲は変更できません。"
   },
   "settings": {
     "title": "ブログ設定",

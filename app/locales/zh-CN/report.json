@@ -1,0 +1,43 @@
+{
+  "button": "举报",
+  "dialog": {
+    "title": "举报{{target}}",
+    "reason": "举报理由",
+    "detail": "说明",
+    "detailHint": "选择“其他”时必须填写说明，最多 1000 个字符。",
+    "submit": "提交举报",
+    "cancel": "取消"
+  },
+  "done": "举报已受理。",
+  "rightsLink": "不是会员？举报侵权内容",
+  "rights": {
+    "title": "侵权举报",
+    "intro": "请告诉我们侵犯著作权、隐私、名誉等权利的内容。无需注册即可举报。",
+    "targetUrl": "要举报的地址",
+    "reason": "侵权类型",
+    "rightsBasis": "权利依据",
+    "rightsBasisHint": "请说明哪项权利受到何种侵害（最多 2000 个字符）。",
+    "contactEmail": "联系邮箱",
+    "privacy": "联系邮箱和举报内容仅用于告知处理结果，受理后保存一年，然后删除。",
+    "submit": "提交",
+    "submitted": "已受理。处理结果将通过电子邮件通知您。"
+  },
+  "reasons": {
+    "SPAM": "垃圾信息或广告",
+    "ABUSE": "辱骂或骚扰",
+    "ADULT": "色情内容",
+    "ILLEGAL": "违法信息",
+    "PRIVACY": "泄露个人信息",
+    "COPYRIGHT": "侵犯著作权",
+    "DEFAMATION": "诽谤",
+    "OTHER": "其他"
+  },
+  "targets": {
+    "POST": "文章",
+    "COMMENT": "评论",
+    "GUESTBOOK": "留言",
+    "TRACKBACK": "引用通告",
+    "EXTERNAL_POST": "外部文章",
+    "EXTERNAL_BLOG": "外部博客"
+  }
+}

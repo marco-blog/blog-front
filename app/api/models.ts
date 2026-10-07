@@ -5,7 +5,8 @@
 
 /** 004가 보호 글(`PROTECTED`, FR-062)과 예약 글(`SCHEDULED`, FR-064)을 더했다. */
 export type Visibility = "PUBLIC" | "PRIVATE" | "PROTECTED";
-export type PostStatus = "DRAFT" | "PUBLISHED" | "DELETED" | "SCHEDULED";
+/** `HIDDEN`은 관리자가 숨긴 글(005 FR-041). 주인에게만 보인다 */
+export type PostStatus = "DRAFT" | "PUBLISHED" | "DELETED" | "SCHEDULED" | "HIDDEN";
 
 export interface BlogRef {
   handle: string;
@@ -74,6 +75,8 @@ export interface Blog {
   guestbookEnabled?: boolean;
   /** 비회원 댓글·방명록 허용(004 FR-066, 기본 false) */
   guestWriteEnabled?: boolean;
+  /** 트랙백 받기(005 FR-053, 기본 true) */
+  trackbackEnabled?: boolean;
 }
 
 /** GET /me/blogs */
@@ -150,6 +153,12 @@ export interface PostDetail {
   notice?: boolean;
   /** 예약 시각(004 FR-064). 주인에게만 값 */
   scheduledAt?: string | null;
+  /** 관리자가 숨긴 글(005 FR-041). 주인에게만 true일 수 있다(다른 사람에게는 404) */
+  hidden?: boolean;
+  /** 이 글의 트랙백 주소(005). 본문 노출 가능 + 블로그 트랙백 받기일 때만 */
+  trackbackUrl?: string | null;
+  /** 받은 트랙백 수(005) */
+  trackbackCount?: number;
 }
 
 /** 작성 화면의 내용(DraftWrite). 카테고리·태그는 US2에서 채운다. */
@@ -195,6 +204,8 @@ export interface PublishSettings {
   scheduledAt?: string | null;
   /** 공지(004). null·생략이면 지금 값 유지 */
   notice?: boolean | null;
+  /** 트랙백 보내기(005 FR-052): 최대 10개, http/https */
+  trackbackUrls?: string[];
 }
 
 /** GET /me/login-history 한 줄(IP는 backend가 일부 가림) */
@@ -227,6 +238,11 @@ export interface Comment {
   deleted: boolean;
   /** 비밀 댓글(004 FR-065). 볼 수 없으면 content가 null */
   secret?: boolean;
+  /**
+   * 관리자가 숨긴 댓글(005). 작성 회원에게는 내용과 true, 다른 사람에게는 보이는 답글이 있을 때만
+   * `{ hidden: true, content: null, author: null }` 자리
+   */
+  hidden?: boolean;
   createdAt: string;
   updatedAt: string;
   replies: Comment[];
@@ -283,6 +299,8 @@ export interface BulkPostRequest {
 }
 export interface BulkPostResult {
   updated: number;
+  /** 관리자가 숨겨서 건너뛴 글 수(005, 공개 범위 변경·공지) */
+  skipped?: number;
 }
 
 /** GET /tags/{name}/posts: 서비스 전체 태그별 글(PostSummary + 블로그 주소) */
@@ -349,11 +367,14 @@ export type SearchPost = PostSummary & { blog: BlogRef };
  * 마지막 시각을 넣고, 누르면 그 블로그의 백업 화면(`/{handle}/manage/backup`)으로 간다.
  */
 export const BACKUP_READY_NOTIFICATION = "BACKUP_READY";
+/** 005 신고 처리 알림(target `REPORT`, params `{ targetType, decision: "ACTIONED" | "DISMISSED" }`). 링크 없음 */
+export const REPORT_RESOLVED_NOTIFICATION = "REPORT_RESOLVED";
 /** 아는 알림 종류(002 댓글·구독, 004 백업). 이후 스펙이 더하므로 응답의 `type`은 string으로 받는다(모르는 값은 공통 문구). */
 export const NOTIFICATION_TYPES = [
   "NEW_COMMENT",
   "NEW_SUBSCRIBER",
   BACKUP_READY_NOTIFICATION,
+  REPORT_RESOLVED_NOTIFICATION,
 ] as const;
 export type KnownNotificationType = (typeof NOTIFICATION_TYPES)[number];
 
@@ -580,6 +601,8 @@ export interface GuestbookEntry {
   content: string | null;
   secret: boolean;
   deleted: boolean;
+  /** 관리자가 숨긴 방명록 글(005). 표시 규칙은 Comment.hidden과 같다 */
+  hidden?: boolean;
   author: CommentAuthor | null;
   createdAt: string;
   updatedAt: string;
@@ -686,4 +709,159 @@ export interface BlogExport {
 export interface BlockedUser {
   user: { userId: number; nickname: string; profileImageUrl: string | null };
   blockedAt: string;
+}
+
+// ---- 005 신고·스팸 방어·트랙백(005 contracts/api.md) ----
+
+/** 신고 대상 종류. `EXTERNAL_*`은 007이 처리기를 더할 때까지 접수하지 않는다 */
+export const REPORT_TARGET_TYPES = [
+  "POST",
+  "COMMENT",
+  "GUESTBOOK",
+  "TRACKBACK",
+  "EXTERNAL_POST",
+  "EXTERNAL_BLOG",
+] as const;
+export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
+
+/** 신고 사유(화면 순서) */
+export const REPORT_REASONS = [
+  "SPAM",
+  "ABUSE",
+  "ADULT",
+  "ILLEGAL",
+  "PRIVACY",
+  "COPYRIGHT",
+  "DEFAMATION",
+  "OTHER",
+] as const;
+export type ReportReason = (typeof REPORT_REASONS)[number];
+/** 권리 침해 신고가 받는 사유 */
+export const RIGHTS_REQUEST_REASONS = ["COPYRIGHT", "PRIVACY", "DEFAMATION", "OTHER"] as const;
+
+export type ReportAction = "HIDE_CONTENT" | "SUSPEND_USER";
+export type ReportStatus = "PENDING" | "ACTIONED" | "DISMISSED";
+export type ReportChannel = "MEMBER" | "RIGHTS_REQUEST";
+
+/** 관리자 화면의 신고 대상 미리보기 */
+export interface ReportTargetPreview {
+  type: ReportTargetType;
+  id: number;
+  state: "ACTIVE" | "HIDDEN" | "DELETED" | "MISSING";
+  title: string | null;
+  text: string | null;
+  url: string | null;
+  author: { userId: number | null; nickname: string | null; guest: boolean } | null;
+  blog: { handle: string; title: string } | null;
+}
+
+/** GET /admin/reports 한 줄(대상별 묶음) */
+export interface ReportGroup {
+  representativeId: number;
+  targetType: ReportTargetType | null;
+  targetId: number | null;
+  channel: ReportChannel | "MIXED";
+  reportCount: number;
+  reasons: { reason: ReportReason; count: number }[];
+  firstReportedAt: string;
+  lastReportedAt: string;
+  status: ReportStatus;
+  action: ReportAction | null;
+  target: ReportTargetPreview | null;
+}
+
+/** GET /admin/reports/{id} */
+export interface ReportDetail {
+  id: number;
+  channel: ReportChannel;
+  status: ReportStatus;
+  action: ReportAction | null;
+  resolutionNote: string | null;
+  handledBy: { id: number; nickname: string } | null;
+  handledAt: string | null;
+  targetUrl: string | null;
+  rightsBasis: string | null;
+  contactEmail: string | null;
+  target: ReportTargetPreview | null;
+  reports: {
+    id: number;
+    channel: ReportChannel;
+    reporter: { id: number; nickname: string } | null;
+    reason: ReportReason;
+    detail: string | null;
+    createdAt: string;
+  }[];
+  targetUserReportCount: number | null;
+}
+
+/** POST /admin/reports/{id}/resolve 결과 */
+export interface ResolveReportResult {
+  resolvedCount: number;
+  decision: ReportStatus;
+  action: ReportAction | null;
+}
+
+export type UserStatus = "ACTIVE" | "SUSPENDED" | "WITHDRAWN";
+export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
+
+/** GET /admin/users 한 줄(이메일은 주지 않는다) */
+export interface AdminUserSummary {
+  id: number;
+  nickname: string;
+  status: UserStatus;
+  role: UserRole;
+  createdAt: string;
+  blogCount: number;
+}
+
+/** GET /admin/users/{id} */
+export interface AdminUserDetail extends AdminUserSummary {
+  postCount: number;
+  receivedReportCount: number;
+  lastLoginAt: string | null;
+  blogs: { handle: string; title: string; status: "ACTIVE" | "DELETED" }[];
+  blogLimit: { current: number; limit: number; custom: boolean };
+}
+
+/** 금칙어(관리자) */
+export interface BannedWord {
+  id: number;
+  word: string;
+  scope: "NAME" | "CONTENT" | "ALL";
+  action: "REJECT" | "MASK";
+  createdBy: { id: number; nickname: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** GET /captcha/config */
+export interface CaptchaConfig {
+  provider: "turnstile" | "test" | "none";
+  siteKey: string | null;
+}
+
+/** GET /posts/{id}/trackbacks 한 줄. 모든 값은 텍스트로만 출력한다 */
+export interface Trackback {
+  id: number;
+  title: string;
+  excerpt: string | null;
+  blogName: string | null;
+  url: string;
+  receivedAt: string;
+  /** 서비스 안 글이 보낸 것 */
+  internal: boolean;
+}
+
+/** GET /blogs/{handle}/manage/trackbacks 한 줄 */
+export type ManagedTrackback = Trackback & { hidden: boolean; post: { id: number; title: string } };
+
+/** GET /posts/{id}/trackback-pings 한 줄 */
+export interface TrackbackPing {
+  id: number;
+  targetUrl: string;
+  status: "PENDING" | "SUCCESS" | "FAILED";
+  errorCode: "INVALID_URL" | "BLOCKED_ADDRESS" | "TIMEOUT" | "HTTP_ERROR" | "REMOTE_ERROR" | null;
+  errorMessage: string | null;
+  attemptedAt: string | null;
+  createdAt: string;
 }

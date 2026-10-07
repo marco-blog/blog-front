@@ -1,0 +1,17 @@
+{
+  "captcha": {
+    "label": "Spam protection",
+    "testMode": "Test mode: the spam protection check passes automatically.",
+    "noscript": "Turn on JavaScript to complete the spam protection check."
+  },
+  "restricted": {
+    "title": "Restricted blog",
+    "body": "This blog is restricted. It cannot be viewed right now under our operating policy."
+  },
+  "hidden": {
+    "post": "An administrator hid this post. Others cannot see it and it cannot be published again.",
+    "mine": "An administrator hid this. Only you can see it.",
+    "placeholder": "Hidden under our operating policy.",
+    "badge": "Hidden"
+  }
+}

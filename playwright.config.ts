@@ -15,9 +15,17 @@ export default defineConfig({
   },
   // 포털 시나리오(portal-*)는 메인 "최신 글"·추천·포털 설정처럼 사이트 전체에 하나뿐인 화면을 본다. 다른 시나리오가 같은 DB에
   // 글을 동시에 발행하면 목록이 밀리므로, 나머지를 모두 돌린 뒤 한 번에 한 파일씩(workers 1) 돈다.
+  // 005 신고·스팸 방어·트랙백 시나리오(moderation-*)는 금칙어·운영 설정처럼 사이트 전체에 걸리는 값을 바꾸므로 역시 나머지 뒤에
+  // 한 번에 한 파일씩 돈다. 포털 시나리오가 보는 "최신 글"을 흔들지 않도록 portal 다음에 돈다.
   projects: [
-    { name: "e2e", testIgnore: /portal-.*\.spec\.ts$/ },
+    { name: "e2e", testIgnore: [/portal-.*\.spec\.ts$/, /moderation-.*\.spec\.ts$/] },
     { name: "portal", testMatch: /portal-.*\.spec\.ts$/, dependencies: ["e2e"], workers: 1 },
+    {
+      name: "moderation",
+      testMatch: /moderation-.*\.spec\.ts$/,
+      dependencies: ["e2e", "portal"],
+      workers: 1,
+    },
   ],
   webServer: {
     command: "npm run build && npm start",

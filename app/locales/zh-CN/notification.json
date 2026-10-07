@@ -10,6 +10,9 @@
     "NEW_COMMENT": "{{actor}} 评论了“{{postTitle}}”。",
     "NEW_SUBSCRIBER": "{{actor}} 订阅了 {{blogTitle}}。",
     "UNKNOWN": "你有一条新通知。",
-    "BACKUP_READY": "{{blogTitle}} 的备份已准备好。可在 {{expiresAt}} 之前下载。"
+    "BACKUP_READY": "{{blogTitle}} 的备份已准备好。可在 {{expiresAt}} 之前下载。",
+    "REPORT_RESOLVED": "你举报的内容已审核完毕。",
+    "REPORT_RESOLVED_ACTIONED": "我们已审核你举报的内容并采取了措施。",
+    "REPORT_RESOLVED_DISMISSED": "我们已审核你举报的内容，但未采取措施。"
   }
 }

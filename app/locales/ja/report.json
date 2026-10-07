@@ -1,0 +1,43 @@
+{
+  "button": "通報",
+  "dialog": {
+    "title": "{{target}}を通報",
+    "reason": "通報の理由",
+    "detail": "説明",
+    "detailHint": "「その他」を選んだ場合は説明を入力してください。1000文字まで入力できます。",
+    "submit": "通報する",
+    "cancel": "キャンセル"
+  },
+  "done": "通報を受け付けました。",
+  "rightsLink": "会員でない方は権利侵害の申告へ",
+  "rights": {
+    "title": "権利侵害の申告",
+    "intro": "著作権・個人情報・名誉などの権利を侵害する内容をお知らせください。会員でなくても申告できます。",
+    "targetUrl": "申告するアドレス",
+    "reason": "侵害の種類",
+    "rightsBasis": "権利の根拠",
+    "rightsBasisHint": "どの権利がどのように侵害されたかを入力してください(2000文字まで)。",
+    "contactEmail": "連絡先メールアドレス",
+    "privacy": "連絡先メールアドレスと申告内容は処理結果のご案内にのみ使い、受付から1年間保管した後に破棄します。",
+    "submit": "申告する",
+    "submitted": "受け付けました。処理結果はメールでお知らせします。"
+  },
+  "reasons": {
+    "SPAM": "スパム・広告",
+    "ABUSE": "暴言・嫌がらせ",
+    "ADULT": "わいせつな内容",
+    "ILLEGAL": "違法な情報",
+    "PRIVACY": "個人情報の公開",
+    "COPYRIGHT": "著作権侵害",
+    "DEFAMATION": "名誉毀損",
+    "OTHER": "その他"
+  },
+  "targets": {
+    "POST": "記事",
+    "COMMENT": "コメント",
+    "GUESTBOOK": "ゲストブック",
+    "TRACKBACK": "トラックバック",
+    "EXTERNAL_POST": "外部の記事",
+    "EXTERNAL_BLOG": "外部のブログ"
+  }
+}
