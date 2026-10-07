@@ -252,6 +252,8 @@ export interface ManageComment {
   content: string | null;
   author: CommentAuthor | null;
   deleted: boolean;
+  /** 비밀 댓글(004). 주인에게는 내용이 온다 */
+  secret?: boolean;
   createdAt: string;
   updatedAt: string;
   postId: number;
@@ -342,13 +344,17 @@ export type FeedPost = PostSummary & {
 /** GET /search/posts 한 줄: PostSummary + 블로그 */
 export type SearchPost = PostSummary & { blog: BlogRef };
 
-/** 002가 만드는 알림 종류. 이후 스펙이 더하므로 응답의 `type`은 string으로 받는다(모르는 값은 공통 문구). */
-export const NOTIFICATION_TYPES = ["NEW_COMMENT", "NEW_SUBSCRIBER"] as const;
 /**
- * 004 백업 준비 알림(target `BLOG_EXPORT`, params `{ blogTitle, handle, expiresAt }`). 문구·링크(`/{handle}/manage/backup`)를
- * 만드는 004 백업 작업(US7)이 NOTIFICATION_TYPES에 더한다. 그 전에는 공통 문구로 보인다.
+ * 004 백업 준비 알림(target `BLOG_EXPORT`, params `{ blogTitle, handle, expiresAt }`). 문구에 블로그 제목과 내려받을 수 있는
+ * 마지막 시각을 넣고, 누르면 그 블로그의 백업 화면(`/{handle}/manage/backup`)으로 간다.
  */
 export const BACKUP_READY_NOTIFICATION = "BACKUP_READY";
+/** 아는 알림 종류(002 댓글·구독, 004 백업). 이후 스펙이 더하므로 응답의 `type`은 string으로 받는다(모르는 값은 공통 문구). */
+export const NOTIFICATION_TYPES = [
+  "NEW_COMMENT",
+  "NEW_SUBSCRIBER",
+  BACKUP_READY_NOTIFICATION,
+] as const;
 export type KnownNotificationType = (typeof NOTIFICATION_TYPES)[number];
 
 /** GET /me/notifications 한 줄(contracts/api.md `Notification`) */
@@ -365,7 +371,10 @@ export interface Notification {
   blog: BlogRef | null;
   targetType: string | null;
   targetId: number | null;
-  /** 만들 때 저장한 값(번역하지 않음). NEW_COMMENT { postId, postTitle }, NEW_SUBSCRIBER { blogTitle } */
+  /**
+   * 만들 때 저장한 값(번역하지 않음). NEW_COMMENT { postId, postTitle }, NEW_SUBSCRIBER { blogTitle },
+   * BACKUP_READY { blogTitle, handle, expiresAt }
+   */
   params: Record<string, unknown>;
   read: boolean;
   createdAt: string;

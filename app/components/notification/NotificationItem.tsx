@@ -33,6 +33,8 @@ export function NotificationItem({ notification }: { notification: Notification 
     actor,
     postTitle: text(notification.params.postTitle),
     blogTitle: text(notification.params.blogTitle) || notification.blog?.title || "",
+    // BACKUP_READY(004): 내려받을 수 있는 마지막 시각을 화면 언어·회원 시간대로
+    expiresAt: format.dateTime(text(notification.params.expiresAt) || null),
   });
 
   return (

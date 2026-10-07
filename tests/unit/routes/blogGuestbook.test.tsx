@@ -301,6 +301,14 @@ describe("방명록 action", () => {
     expect(result.data).toMatchObject({ ok: false, resultCode: "TOO_MANY_REQUESTS" });
   });
 
+  it("차단된 회원(403 FORBIDDEN)은 차단 사실을 드러내지 않는 일반 오류(004 FR-146)", async () => {
+    mockBackend({ [WRITE]: fail(403, "FORBIDDEN") });
+    const result = asData(await callAction({ intent: "create", content: "또" }));
+    expect(result.init?.status).toBe(403);
+    expect(result.data).toMatchObject({ ok: false, resultCode: "FORBIDDEN" });
+    expect(JSON.stringify(result.data)).not.toMatch(/block/i);
+  });
+
   it("로그인이 풀렸으면(401) 방명록으로 돌아오는 로그인 화면으로", async () => {
     mockBackend({ [WRITE]: fail(401, "UNAUTHENTICATED") });
     const location = expectRedirect(await caught(callAction({ intent: "create", content: "글" })));

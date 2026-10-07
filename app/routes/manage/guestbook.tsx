@@ -8,8 +8,13 @@ import { Pagination } from "~/components/Pagination";
 import type { GuestbookActionData } from "~/components/guestbook/actions";
 import { runGuestbookAction } from "~/components/guestbook/actions.server";
 import { GuestbookList } from "~/components/guestbook/GuestbookList";
+import { errorMessage } from "~/api/errorMessage";
+import { FormAlert } from "~/components/form/FormField";
+import { formIntent } from "~/discovery/actions";
 import { metaT } from "~/i18n/meta";
 import { requireOwnedBlog, throwManageError } from "~/manage/access.server";
+import { isBlockIntent, type BlockActionData } from "~/manage/blocks";
+import { runBlockAction } from "~/manage/blocks.server";
 import { privatePageMeta } from "~/seo/meta";
 
 import type { Route } from "./+types/guestbook";
@@ -21,7 +26,7 @@ export function meta({ matches }: Route.MetaArgs) {
 
 /**
  * 방명록 관리(`/:handle/manage/guestbook`, SSR, 004 FR-057·058): 주인은 비밀글을 포함한 모든 글을 보고 답글을 달거나 지운다.
- * 방명록이 꺼져 있어도 주인은 볼 수 있고, 켜는 곳(블로그 설정)을 안내한다. 회원 차단은 004 US5가 더한다.
+ * 방명록이 꺼져 있어도 주인은 볼 수 있고, 켜는 곳(블로그 설정)을 안내한다. 회원 작성자는 "차단"할 수 있다(004 US5).
  */
 export async function loader({ request, params }: Route.LoaderArgs) {
   const { user, handle } = await requireOwnedBlog(request, params.handle);
@@ -41,9 +46,12 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   };
 }
 
-/** 답글·지우기(`intent=reply|delete`). 성공하면 같은 쪽으로 리다이렉트한다. */
+/** 답글·지우기(`intent=reply|delete`), 회원 차단(`intent=block`). 답글·지우기는 성공하면 같은 쪽으로 리다이렉트한다. */
 export async function action({ request, params }: Route.ActionArgs) {
   const { handle } = await requireOwnedBlog(request, params.handle);
+  if (isBlockIntent(await formIntent(request))) {
+    return runBlockAction(request, handle);
+  }
   const page = parsePage(new URL(request.url).searchParams.get("page"));
   return runGuestbookAction(request, {
     handle,
@@ -56,7 +64,10 @@ export default function ManageGuestbook() {
   const { t } = useTranslation();
   const { handle, viewerId, guestbookEnabled, entries, totalCount, page } =
     useLoaderData<typeof loader>();
-  const result = useActionData<GuestbookActionData>();
+  const actionData = useActionData<GuestbookActionData | BlockActionData>();
+  const blockResult =
+    actionData && isBlockIntent(actionData.intent) ? (actionData as BlockActionData) : null;
+  const result = blockResult ? undefined : (actionData as GuestbookActionData | undefined);
 
   return (
     <main className="manage-guestbook">
@@ -70,7 +81,11 @@ export default function ManageGuestbook() {
       <p>
         <Link to={`/${handle}/guestbook`}>{t("manage:guestbook.viewPublic")}</Link>
       </p>
-      <GuestbookList entries={entries} viewerId={viewerId} isOwner result={result} />
+      {blockResult?.ok && (
+        <p role="status">{t("manage:blocks.blocked", { nickname: blockResult.nickname ?? "" })}</p>
+      )}
+      <FormAlert message={blockResult && !blockResult.ok ? errorMessage(t, blockResult) : null} />
+      <GuestbookList entries={entries} viewerId={viewerId} isOwner showBlock result={result} />
       <Pagination
         page={page}
         totalCount={totalCount}

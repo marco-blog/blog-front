@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { GuestbookEntry } from "~/api/models";
 import Guestbook, { action, loader, meta } from "~/routes/manage/guestbook";
@@ -178,5 +178,73 @@ describe("방명록 관리 화면", () => {
       "href",
       "/marco/manage/settings",
     );
+  });
+});
+
+describe("방명록 관리 — 회원 차단(004 US5)", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("회원 작성자(답글 포함, 주인 자신 제외)에게 차단 버튼, 차단하면 안내", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const backend = mockBackend({
+      [ME]: ok(me),
+      [BLOG]: ok(blog),
+      [LIST]: ok(
+        [
+          entry(2, {
+            replies: [
+              entry(5, {
+                author: { userId: 1, nickname: "마르코", profileImageUrl: null, guest: false },
+              }),
+            ],
+          }),
+          entry(3, {
+            author: { userId: null, nickname: "나그네", profileImageUrl: null, guest: true },
+          }),
+        ],
+        { totalCount: 2 },
+      ),
+      "PUT /api/v1/blogs/marco/blocks/42": ok(null),
+    });
+    renderRoutes(
+      [
+        {
+          path: ":handle/manage/guestbook",
+          loader: withCookie(loader as never) as never,
+          action: withCookie(action as never) as never,
+          Component: Guestbook,
+        },
+      ],
+      { initialEntries: ["/marco/manage/guestbook"] },
+    );
+
+    const buttons = await screen.findAllByRole("button", { name: /님 차단$/ });
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0]).toHaveAccessibleName("리더 님 차단");
+    fireEvent.click(buttons[0]);
+    expect(await screen.findByRole("status")).toHaveTextContent("리더 님을 차단했습니다.");
+    expect(backend.callsTo("PUT /api/v1/blogs/marco/blocks/42")).toHaveLength(1);
+  });
+
+  it("차단 action 실패는 오류 응답", async () => {
+    mockBackend({ [ME]: ok(me), "PUT /api/v1/blogs/marco/blocks/43": fail(404, "USER_NOT_FOUND") });
+    const result = asData<Record<string, unknown>>(
+      await action(
+        routeArgs<ActionArgs>(
+          formRequest(
+            "/marco/manage/guestbook",
+            { intent: "block", userId: "43", nickname: "x" },
+            loggedIn,
+          ),
+          { handle: "marco" },
+        ),
+      ),
+    );
+    expect(result.data).toMatchObject({ intent: "block", ok: false, resultCode: "USER_NOT_FOUND" });
   });
 });

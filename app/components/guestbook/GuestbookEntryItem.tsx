@@ -9,8 +9,10 @@ import { isGuestAuthor, isOwnEntry } from "~/blog/guestAuthor";
 import { GuestPasswordPrompt } from "~/components/comment/GuestPasswordPrompt";
 import { SecretToggle } from "~/components/comment/SecretToggle";
 import { FormAlert } from "~/components/form/FormField";
+import { BlockButton } from "~/components/manage/BlockButton";
 import { Avatar } from "~/components/media/Avatar";
 import { useDateFormat } from "~/i18n/format";
+import { blockableUserId } from "~/manage/blocks";
 
 import { errorFor, type GuestbookActionData } from "./actions";
 
@@ -21,6 +23,8 @@ export interface GuestbookEntryItemProps {
   /** 블로그 주인인지(답글·모든 글 삭제) */
   isOwner: boolean;
   isReply?: boolean;
+  /** 블로그 관리: 회원 작성자에게 "차단" 버튼(004 US5) */
+  showBlock?: boolean;
   result?: GuestbookActionData;
 }
 
@@ -35,6 +39,7 @@ export function GuestbookEntryItem({
   viewerId,
   isOwner,
   isReply = false,
+  showBlock = false,
   result,
 }: GuestbookEntryItemProps) {
   const { t } = useTranslation();
@@ -44,6 +49,7 @@ export function GuestbookEntryItem({
   const guestControls = guest && viewerId === null;
   const deleteError = errorFor(result, `delete-${entry.id}`);
   const name = entry.author?.nickname ?? t("guestbook:entry.unknownAuthor");
+  const blockable = showBlock && isOwner ? blockableUserId(entry.author, viewerId) : null;
   /** 결과(오류·내용 열기)가 이 글의 폼이면 펼쳐 둔다(JS 없이 새로 그린 화면에서도 보이게) */
   const openFor = (...targets: string[]) =>
     (result !== undefined && targets.includes(result.target)) || undefined;
@@ -105,6 +111,7 @@ export function GuestbookEntryItem({
               </details>
             )}
             {(own || isOwner) && <DeleteEntryButton entryId={entry.id} />}
+            {blockable !== null && <BlockButton userId={blockable} nickname={name} />}
             {guestControls && !isOwner && (
               <details open={openFor(`delete-${entry.id}`)}>
                 <summary>{t("guestbook:entry.delete")}</summary>
@@ -127,6 +134,7 @@ export function GuestbookEntryItem({
               viewerId={viewerId}
               isOwner={isOwner}
               isReply
+              showBlock={showBlock}
               result={result}
             />
           ))}

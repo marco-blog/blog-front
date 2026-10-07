@@ -9,6 +9,7 @@
   "types": {
     "NEW_COMMENT": "{{actor}}님이 「{{postTitle}}」에 댓글을 남겼습니다.",
     "NEW_SUBSCRIBER": "{{actor}}님이 {{blogTitle}} 블로그를 구독했습니다.",
-    "UNKNOWN": "새 알림이 있습니다."
+    "UNKNOWN": "새 알림이 있습니다.",
+    "BACKUP_READY": "{{blogTitle}} 백업이 준비되었습니다. {{expiresAt}}까지 내려받을 수 있습니다."
   }
 }

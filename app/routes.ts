@@ -61,6 +61,8 @@ export default [
     route("guestbook", "routes/manage/guestbook.tsx"),
     route("design", "routes/manage/design.tsx"),
     route("stats", "routes/manage/stats.tsx"),
+    route("backup", "routes/manage/backup.tsx"),
+    route("blocks", "routes/manage/blocks.tsx"),
     route("settings", "routes/manage/settings.tsx"),
     route("feed", "routes/manage/feed.tsx"),
   ]),

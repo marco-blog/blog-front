@@ -1,4 +1,9 @@
-import { NOTIFICATION_TYPES, type KnownNotificationType, type Notification } from "~/api/models";
+import {
+  BACKUP_READY_NOTIFICATION,
+  NOTIFICATION_TYPES,
+  type KnownNotificationType,
+  type Notification,
+} from "~/api/models";
 import { isValidHandle } from "~/blog/ids";
 
 /** 알림 목록 주소 */
@@ -16,11 +21,17 @@ function idOf(value: unknown): number | null {
 
 /**
  * 알림이 가리키는 화면(002 contracts/api.md): NEW_COMMENT → `/{handle}/{postId}#comment-{targetId}`,
- * NEW_SUBSCRIBER → `/{handle}`. 갈 곳을 알 수 없으면(모르는 종류, 값이 빠짐) 알림 목록.
+ * NEW_SUBSCRIBER → `/{handle}`, BACKUP_READY(004) → `/{handle}/manage/backup`.
+ * 갈 곳을 알 수 없으면(모르는 종류, 값이 빠짐) 알림 목록.
  */
 export function notificationHref(
   notification: Pick<Notification, "type" | "blog" | "params" | "targetId">,
 ): string {
+  if (notification.type === BACKUP_READY_NOTIFICATION) {
+    const raw = notification.blog?.handle ?? notification.params.handle;
+    const handle = typeof raw === "string" ? raw : null;
+    return isValidHandle(handle) ? `/${handle}/manage/backup` : NOTIFICATIONS_PATH;
+  }
   const handle = notification.blog?.handle;
   if (!isValidHandle(handle)) {
     return NOTIFICATIONS_PATH;
