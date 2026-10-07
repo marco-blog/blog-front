@@ -320,7 +320,7 @@ body > :is(.manage, .admin) {
   vertical-align: middle;
 }
 
-tbody th[scope="row"] {
+.table-scroll tbody th[scope="row"] {
   font-weight: var(--weight-medium);
   white-space: nowrap;
 }

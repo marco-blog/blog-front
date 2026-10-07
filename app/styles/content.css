@@ -261,19 +261,7 @@
   }
 }
 
-/* 인기 글: 넓은 화면에서 첫 카드를 크게, 순위 번호 */
-.portal-popular .portal-cards {
-  counter-reset: rank;
-}
-
-.portal-popular .portal-card h3::before {
-  counter-increment: rank;
-  content: counter(rank);
-  margin-right: var(--space-2);
-  color: var(--color-accent-strong);
-  font-weight: var(--weight-heavy);
-}
-
+/* 인기 글: 넓은 화면에서 첫 카드를 크게 */
 @media (min-width: 64rem) {
   .portal-popular .portal-cards {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -834,15 +822,6 @@ dl.post-meta dd .avatar {
   min-height: 2.5rem;
   padding-inline: var(--space-5);
   border-radius: var(--radius-pill);
-}
-
-.like button::before {
-  content: "♡";
-  font-size: 1.1em;
-}
-
-.like button[aria-pressed="true"]::before {
-  content: "♥";
 }
 
 .like a,
