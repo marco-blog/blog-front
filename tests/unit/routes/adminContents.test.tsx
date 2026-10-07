@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { fireEvent, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   contentHref,
@@ -9,9 +9,9 @@ import {
   needsScope,
   parseContentFilters,
 } from "~/admin/contentSearch";
-import { ADMIN_FEATURES } from "~/admin/links";
 import type { AdminCommentRow, AdminGuestbookRow, AdminPostRow } from "~/api/models";
 import { loader as redirectLoader } from "~/routes/admin/contents";
+import { loader as hiddenPostsLoader } from "~/routes/admin/hidden-posts";
 import Comments, {
   action as commentsAction,
   loader as commentsLoader,
@@ -73,10 +73,6 @@ const commentRow = (id: number, overrides: Partial<AdminCommentRow> = {}): Admin
 
 const call = (fn: (args: LoaderArgs) => unknown, path: string) =>
   fn(routeArgs<LoaderArgs>(getRequest(path, loggedIn)));
-
-afterEach(() => {
-  ADMIN_FEATURES.contentHide = false;
-});
 
 /** 콘텐츠 관리 검색 조건(006 T027) */
 describe("contentSearch", () => {
@@ -143,7 +139,6 @@ describe("admin contents loader·action", () => {
       rows: [postRow(1)],
       totalCount: 41,
       scopeRequired: false,
-      canHide: false,
     });
     expect(Object.fromEntries(backend.callsTo(POSTS)[0].url.searchParams)).toEqual({
       q: "자바",
@@ -197,7 +192,7 @@ describe("admin contents loader·action", () => {
     expect(meta(metaArgs())).toContainEqual({ name: "robots", content: "noindex" });
   });
 
-  it("숨김 action: contentHide가 꺼져 있으면 400, 켜지면 005 PUT·DELETE, 오류는 폼 문구", async () => {
+  it("숨김 action: 사유 필수(500자) → 005 PUT { reason }, 해제는 DELETE, 오류는 폼 문구 (T039)", async () => {
     const HIDE = "PUT /api/v1/admin/contents/comments/5/hidden";
     const UNHIDE = "DELETE /api/v1/admin/contents/comments/5/hidden";
     const backend = mockBackend({ [ME]: ok(member()), [HIDE]: ok(null), [UNHIDE]: ok(null) });
@@ -206,28 +201,44 @@ describe("admin contents loader·action", () => {
         routeArgs<ActionArgs>(formRequest("/admin/contents/comments", fields, loggedIn)) as never,
       );
 
-    expect(asData(await post({ intent: "hide", id: "5" })).init?.status).toBe(400);
+    expect(asData(await post({ intent: "hide", id: "5", reason: " " })).data).toMatchObject({
+      ok: false,
+      fieldErrors: [{ field: "reason", code: "REQUIRED" }],
+    });
+    expect(
+      asData(await post({ intent: "hide", id: "5", reason: "가".repeat(501) })).data,
+    ).toMatchObject({ fieldErrors: [{ field: "reason", code: "TOO_LONG", params: { max: 500 } }] });
     expect(backend.callsTo(HIDE)).toHaveLength(0);
 
-    ADMIN_FEATURES.contentHide = true;
-    expect(asData(await post({ intent: "hide", id: "5" })).data).toEqual({
+    expect(asData(await post({ intent: "hide", id: "5", reason: " 광고 " })).data).toEqual({
       intent: "hide",
       ok: true,
     });
-    expect(backend.callsTo(HIDE)).toHaveLength(1);
+    expect(backend.callsTo(HIDE).map((request) => request.body)).toEqual([{ reason: "광고" }]);
     expect(asData(await post({ intent: "unhide", id: "5" })).data).toEqual({
       intent: "unhide",
       ok: true,
     });
     expect(backend.callsTo(UNHIDE)).toHaveLength(1);
-    expect(asData(await post({ intent: "hide", id: "x" })).init?.status).toBe(400);
+    expect(asData(await post({ intent: "hide", id: "x", reason: "a" })).init?.status).toBe(400);
     expect(asData(await post({ intent: "remove", id: "5" })).init?.status).toBe(400);
 
     mockBackend({ [ME]: ok(member()), [HIDE]: fail(404, "CONTENT_NOT_FOUND") });
-    expect(asData(await post({ intent: "hide", id: "5" })).data).toMatchObject({
+    expect(asData(await post({ intent: "hide", id: "5", reason: "a" })).data).toMatchObject({
       ok: false,
       resultCode: "CONTENT_NOT_FOUND",
     });
+  });
+
+  it("숨긴 글 옛 주소(005)는 글 탭 숨김 목록으로, 관리자가 아니면 404 (T039)", async () => {
+    mockBackend({ [ME]: ok(member()) });
+    expect(
+      expectRedirect(await call(hiddenPostsLoader as never, "/admin/contents/hidden-posts?page=2")),
+    ).toBe("/admin/contents/posts?status=HIDDEN");
+    mockBackend({ [ME]: ok(member("USER")) });
+    expect(
+      statusOf(await caught(call(hiddenPostsLoader as never, "/admin/contents/hidden-posts"))),
+    ).toBe(404);
   });
 });
 
@@ -247,7 +258,7 @@ describe("admin contents 화면", () => {
     );
   }
 
-  it("탭 3개, 검색 폼 값, 글 표(글 주소·블로그·작성자 → 회원 상세·상태·공개 범위·댓글 수), 숨김 버튼 없음", async () => {
+  it("탭 3개, 검색 폼 값, 글 표(글 주소·블로그·작성자 → 회원 상세·상태·공개 범위·댓글 수·숨김)", async () => {
     renderPosts("/admin/contents/posts?q=자바&status=DRAFT", [
       postRow(1),
       postRow(2, {
@@ -280,15 +291,14 @@ describe("admin contents 화면", () => {
     expect(rows[2]).toHaveTextContent("삭제된 블로그");
     expect(rows[2]).toHaveTextContent("임시저장");
     expect(rows[2]).toHaveTextContent("발행 전");
-    expect(screen.queryByRole("button", { name: /숨김/ })).toBeNull();
+    expect(within(rows[1]).getByRole("button", { name: "숨김: 글 1" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "2" })).toHaveAttribute(
       "href",
       "/admin/contents/posts?q=%EC%9E%90%EB%B0%94&status=DRAFT&page=2",
     );
   });
 
-  it("contentHide가 켜지면 행마다 숨김·숨김 해제(삭제된 글은 없음)", async () => {
-    ADMIN_FEATURES.contentHide = true;
+  it("행마다 숨김(사유 입력)·숨김 해제, 삭제된 글은 없음 (T039)", async () => {
     const backend = mockBackend({
       [ME]: ok(member()),
       [POSTS]: ok(
@@ -313,9 +323,16 @@ describe("admin contents 화면", () => {
 
     expect(await screen.findByRole("button", { name: "숨김 해제: 글 2" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /글 3/ })).toBeNull();
+    expect(screen.queryByRole("textbox", { name: "숨김 사유: 글 2" })).toBeNull();
+    const reason = screen.getByRole("textbox", { name: "숨김 사유: 글 1" });
+    expect(reason).toBeRequired();
+    expect(reason).toHaveAttribute("maxlength", "500");
+    fireEvent.change(reason, { target: { value: "광고" } });
     fireEvent.click(screen.getByRole("button", { name: "숨김: 글 1" }));
     expect(await screen.findByText("숨겼습니다.")).toBeInTheDocument();
-    expect(backend.callsTo("PUT /api/v1/admin/contents/posts/1/hidden")).toHaveLength(1);
+    expect(backend.callsTo("PUT /api/v1/admin/contents/posts/1/hidden")[0].body).toEqual({
+      reason: "광고",
+    });
   });
 
   it("댓글: 원래 자리 앵커, 비밀 댓글, 비회원 이름, 범위 안내", async () => {

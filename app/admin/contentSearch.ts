@@ -22,6 +22,9 @@ export const CONTENT_API: Record<ContentKind, string> = {
   guestbook: "/admin/contents/guestbook-entries",
 };
 
+/** 숨김 사유 최대 길이(005 `PUT …/hidden { reason }` 1~500자, backend `SuspensionService.REASON_MAX`) */
+export const HIDE_REASON_MAX = 500;
+
 /** 005 숨김 API의 대상 종류(`PUT·DELETE /admin/contents/{segment}/{id}/hidden`) */
 export const CONTENT_HIDE_TYPE: Record<ContentKind, ReportableType> = {
   posts: "POST",

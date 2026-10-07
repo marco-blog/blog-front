@@ -76,6 +76,7 @@
     "USER_UNSUSPEND": "Lift suspension",
     "REPORT_ACTION": "Act on report",
     "REPORT_DISMISS": "Dismiss report",
+    "REPORT_TARGET_ASSIGN": "Assign report target",
     "CONTENT_HIDE": "Hide content",
     "CONTENT_UNHIDE": "Unhide content",
     "BANNED_WORD_CREATE": "Add banned word",

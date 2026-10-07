@@ -1,13 +1,14 @@
 import { useTranslation } from "react-i18next";
-import { Link, data, useActionData, useLoaderData } from "react-router";
+import { Link, useActionData, useLoaderData } from "react-router";
 
 import { requireAdmin, throwAdminError } from "~/admin/access.server";
-import { adminActionError, adminInvalid, type AdminActionData } from "~/admin/actions.server";
+import { adminInvalid } from "~/admin/actions.server";
+import { roleChangeAction } from "~/admin/roleChange.server";
 import { isSuperAdmin } from "~/admin/roles";
 import { createApiClient } from "~/api/client.server";
-import type { AdminMember, UserRole } from "~/api/models";
+import type { AdminMember } from "~/api/models";
 import { AdminFormErrors } from "~/components/admin/AdminFormErrors";
-import { ROLE_CHOICES, RoleForm } from "~/components/admin/RoleForm";
+import { RoleForm } from "~/components/admin/RoleForm";
 import { useDateFormat } from "~/i18n/format";
 import { metaT } from "~/i18n/meta";
 import { privatePageMeta } from "~/seo/meta";
@@ -36,31 +37,10 @@ export async function action({ request }: Route.ActionArgs) {
   await requireAdmin(request);
   const form = await request.formData();
   const intent = String(form.get("intent") ?? "");
-  const userId = String(form.get("userId") ?? "").trim();
-  const role = String(form.get("role") ?? "");
   if (intent !== "role") {
     return adminInvalid(intent);
   }
-  const errors = [
-    ...(/^\d{1,18}$/.test(userId)
-      ? []
-      : [{ field: "userId", code: userId ? "INVALID" : "REQUIRED" }]),
-    ...((ROLE_CHOICES as readonly string[]).includes(role)
-      ? []
-      : [{ field: "role", code: "INVALID" }]),
-    ...(form.get("confirm") ? [] : [{ field: "confirm", code: "REQUIRED" }]),
-  ];
-  if (errors.length > 0) {
-    return adminInvalid(intent, errors);
-  }
-  try {
-    const member = await createApiClient(request).put<AdminMember>(`/admin/users/${userId}/role`, {
-      body: { role: role as UserRole },
-    });
-    return data<AdminActionData<{ member: AdminMember }>>({ intent, ok: true, member });
-  } catch (error) {
-    return adminActionError(intent, error);
-  }
+  return roleChangeAction(request, intent, form);
 }
 
 export default function AdminAdmins() {

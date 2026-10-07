@@ -19,16 +19,14 @@ export function entryHref(kind: ContentKind, row: EntryRow): string {
 
 /**
  * 콘텐츠 관리 — 댓글·방명록 표(006 T037): 내용 앞 200자(비밀 댓글은 "비밀 댓글"), 원래 자리 링크, 작성자(회원 → 회원 상세,
- * 비회원 → "비회원 {이름}"), 상태, 작성 시각, 숨김 버튼(`canHide`).
+ * 비회원 → "비회원 {이름}"), 상태, 작성 시각, 숨김·해제(005 숨김 API).
  */
 export function ContentEntryTable({
   kind,
   rows,
-  canHide,
 }: {
   kind: "comments" | "guestbook";
   rows: readonly EntryRow[];
-  canHide: boolean;
 }) {
   const { t } = useTranslation();
   const format = useDateFormat();
@@ -47,7 +45,7 @@ export function ContentEntryTable({
             <th>{t("admin:contents.columns.author")}</th>
             <th>{t("admin:contents.columns.status")}</th>
             <th>{t("admin:contents.columns.createdAt")}</th>
-            {canHide && <th>{t("admin:contents.columns.actions")}</th>}
+            <th>{t("admin:contents.columns.actions")}</th>
           </tr>
         </thead>
         <tbody>
@@ -69,11 +67,9 @@ export function ContentEntryTable({
                 </td>
                 <td>{status(row.status)}</td>
                 <td>{format.dateTime(row.createdAt)}</td>
-                {canHide && (
-                  <td>
-                    <ContentHideButton id={row.id} status={row.status} label={content} />
-                  </td>
-                )}
+                <td>
+                  <ContentHideButton id={row.id} status={row.status} label={content} />
+                </td>
               </tr>
             );
           })}

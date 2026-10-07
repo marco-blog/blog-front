@@ -32,6 +32,7 @@ export const AUDIT_ACTION_GROUPS = [
     actions: [
       "REPORT_ACTION",
       "REPORT_DISMISS",
+      "REPORT_TARGET_ASSIGN",
       "CONTENT_HIDE",
       "CONTENT_UNHIDE",
       "BANNED_WORD_CREATE",
