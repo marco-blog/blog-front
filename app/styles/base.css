@@ -159,10 +159,8 @@ a.active {
 }
 
 /* ---------- 버튼 ---------- */
-button,
-input,
-select,
-textarea {
+/* 특이도 0: 아래 버튼·입력 규칙(글자 크기·줄 높이)이 이 초기화에 덮이지 않게 */
+:where(button, input, select, textarea) {
   font: inherit;
   color: inherit;
   letter-spacing: inherit;

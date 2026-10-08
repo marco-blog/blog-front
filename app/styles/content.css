@@ -543,10 +543,26 @@ article.post > header h1 {
   line-height: 1.25;
 }
 
+/* 제목·상태는 한 줄씩, 작성 정보와 조회 수는 같은 줄에 */
+article.post > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-3);
+}
+
+article.post > header > :is(h1, .post-status, .scheduled-notice, .moderation-hidden) {
+  flex-basis: 100%;
+}
+
+article.post > header > dl.post-meta {
+  margin: 0;
+}
+
 article.post > header > p:not([class], [role]) {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
 }
 
 .post-status {
@@ -692,9 +708,14 @@ dl.post-meta dd .avatar {
 :is(.post-content, .release-note-content) table {
   display: block;
   width: max-content;
+  min-width: min(100%, 24rem);
   max-width: 100%;
   overflow-x: auto;
   font-size: 0.9375rem;
+}
+
+:is(.post-content, .release-note-content) :is(th, td) {
+  padding: 0.5em 1em;
 }
 
 :is(.post-content, .release-note-content) th {
@@ -921,8 +942,8 @@ dl.post-meta dd .avatar {
 /* ---------- 댓글 ---------- */
 .comments {
   margin-top: var(--space-10);
-  padding-top: var(--space-6);
-  border-top: 2px solid var(--color-text);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
 }
 
 .comment-list,
@@ -1065,6 +1086,10 @@ dl.post-meta dd .avatar {
   background: var(--color-surface);
 }
 
+.guestbook-form {
+  margin-bottom: var(--space-6);
+}
+
 :is(.comment-form, .guestbook-form) > label {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
@@ -1107,9 +1132,33 @@ dl.post-meta dd .avatar {
 }
 
 /* ---------- 트랙백 ---------- */
+/* 본문 아래 보조 정보라 옅은 상자에 작게 */
 .trackbacks {
   margin-bottom: var(--space-10);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-subtle);
   font-size: var(--text-sm);
+}
+
+.trackbacks h2 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.trackback-url label {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.trackback-url input {
+  min-height: 2.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.trackbacks > :last-child {
+  margin-bottom: 0;
 }
 
 .trackback-list {
@@ -1128,7 +1177,8 @@ dl.post-meta dd .avatar {
 }
 
 .trackback-empty {
-  padding: var(--space-3) 0;
+  margin: var(--space-2) 0 0;
+  padding: 0;
   color: var(--color-text-muted);
 }
 
@@ -1146,7 +1196,20 @@ dl.post-meta dd .avatar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1) var(--space-2);
+}
+
+.trackback-url label {
+  flex-basis: 100%;
+}
+
+.trackback-url input {
+  flex: 1 1 12rem;
+  width: auto;
+}
+
+.trackback-url .form-hint:empty {
+  display: none;
 }
 
 /* ---------- 신고 ---------- */
