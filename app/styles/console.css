@@ -479,3 +479,158 @@ body > :is(.manage, .admin) {
 .dashboard-card > a {
   color: var(--color-text-secondary);
 }
+
+/* 콘솔의 입력·선택은 버튼과 같은 높이·글자 크기로 맞춘다 */
+:is(.manage, .admin)
+  :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), select) {
+  min-height: 2.25rem;
+  padding-block: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+:is(.manage, .admin-content) main > form[role="search"] > button {
+  font-size: var(--text-sm);
+}
+
+/* 화면 안 보기 전환(모든 글·휴지통 등): 알약 탭 */
+:is(.manage, .admin-content) main > nav:not([class]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+}
+
+:is(.manage, .admin-content) main > nav:not([class]) a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+:is(.manage, .admin-content) main > nav:not([class]) a:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+:is(.manage, .admin-content) main > nav:not([class]) a[aria-current] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* 찾기 폼: 항목 이름은 위에 작게, 입력과 버튼은 한 줄로 */
+:is(.manage, .admin-content) main > form[role="search"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+:is(.manage, .admin-content) main > form[role="search"] > label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+:is(.manage, .admin-content) main > form[role="search"] > label > :is(select, input) {
+  color: var(--color-text);
+}
+
+/* 선택한 글 일괄 처리: 옅은 상자에 작은 버튼 */
+.bulk-form fieldset {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-subtle);
+}
+
+.bulk-form legend {
+  float: left;
+  width: 100%;
+  margin-bottom: var(--space-1);
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
+.bulk-form fieldset button {
+  min-height: 2rem;
+  padding-inline: var(--space-3);
+  font-size: var(--text-xs);
+}
+
+.bulk-move {
+  gap: var(--space-2);
+  margin-left: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.bulk-move label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.bulk-move select {
+  min-height: 2rem;
+  padding-block: 0;
+  font-size: var(--text-xs);
+}
+
+.bulk-form > label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* 글 관리 목록: 제목은 굵게, "수정"은 작은 알약 */
+.manage-post-list > li > a:first-of-type {
+  font-weight: var(--weight-bold);
+}
+
+.manage-post-list > li > a + a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  vertical-align: 0.1em;
+}
+
+.manage-post-list > li > a + a:hover {
+  border-color: var(--color-text);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.manage-post-list > li > .post-meta {
+  margin: var(--space-1) 0 0 1.6rem;
+}
+
+.manage-post-list details {
+  margin: var(--space-1) 0 0 1.6rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}

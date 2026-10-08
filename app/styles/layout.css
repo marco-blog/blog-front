@@ -39,34 +39,64 @@ body > header > a:first-child::after {
   background: var(--color-accent);
 }
 
+/* 검색창: 입력칸과 돋보기 버튼을 한 알약 안에. 버튼 글자는 화면 읽기용으로 남기고 아이콘만 보인다. */
 .header-search {
   display: flex;
   flex: 1 1 10rem;
+  align-items: center;
   min-width: 0;
   max-width: 22rem;
   margin: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-subtle);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
+}
+
+.header-search:focus-within {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
 }
 
 .header-search input[type="search"] {
   flex: 1;
   min-width: 0;
   min-height: 2.25rem;
-  padding-inline: var(--space-4);
-  border-color: transparent;
+  padding: 0 0 0 var(--space-4);
+  border: 0;
   border-radius: var(--radius-pill) 0 0 var(--radius-pill);
-  background: var(--color-subtle);
+  background: transparent;
   font-size: var(--text-sm);
 }
 
+.header-search input[type="search"]:focus-visible {
+  box-shadow: none;
+}
+
 .header-search button {
-  border-color: transparent;
+  flex: none;
+  width: 2.5rem;
+  min-height: 2.25rem;
+  padding: 0;
+  border: 0;
   border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
-  background: var(--color-subtle);
-  color: var(--color-text-secondary);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0;
+}
+
+.header-search button::before {
+  content: "";
+  width: 1.05rem;
+  height: 1.05rem;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E")
+    center / contain no-repeat;
 }
 
 .header-search button:hover {
-  border-color: transparent;
   color: var(--color-text);
 }
 
@@ -135,19 +165,40 @@ body > header .badge {
   color: var(--color-on-accent);
 }
 
-/* 좁은 화면: 첫 줄 이름·검색, 둘째 줄 메뉴(줄바꿈) */
+/* 좁은 화면: 첫 줄 이름·검색, 둘째 줄 메뉴 한 줄(넘치면 옆으로 밀어 본다) */
 @media (max-width: 47.99rem) {
   body > header {
-    padding-block: var(--space-2) var(--space-3);
+    padding-block: var(--space-2) 0;
+    row-gap: 0;
+  }
+
+  .header-search {
+    max-width: none;
   }
 
   body > header > nav {
     flex-basis: 100%;
     margin-left: 0;
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  body > header > nav::-webkit-scrollbar {
+    display: none;
   }
 
   body > header > nav ul {
-    gap: var(--space-2) var(--space-4);
+    flex-wrap: nowrap;
+    gap: var(--space-4);
+    min-height: 2.75rem;
+    white-space: nowrap;
+  }
+
+  body > header > nav a:is([href="/write"], [href="/signup"]) {
+    min-height: 1.875rem;
+    padding: 0 var(--space-3);
   }
 }
 

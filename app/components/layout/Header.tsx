@@ -43,6 +43,7 @@ export function HeaderSearch() {
         defaultValue={q}
         maxLength={100}
         aria-label={t("nav.searchLabel")}
+        placeholder={t("nav.searchLabel")}
       />
       <button type="submit">{t("nav.search")}</button>
     </form>
